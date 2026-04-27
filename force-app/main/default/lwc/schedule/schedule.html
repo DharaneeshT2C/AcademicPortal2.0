@@ -9,9 +9,8 @@
         </div>
 
         <div class="schedule-wrap">
-            <!-- Time ruler + events -->
-            <div class="schedule-inner">
-                <!-- Time labels column -->
+            <div class="schedule-grid" style={gridRowsStyle}>
+                <!-- Time labels: spans the full grid height as a single column -->
                 <div class="time-col">
                     <template for:each={timeSlots} for:item="slot">
                         <div key={slot.key} class="time-cell">
@@ -19,15 +18,23 @@
                         </div>
                     </template>
                 </div>
-                <!-- Events column -->
+
+                <!-- Events column hosts a nested CSS grid: rows = 30 min slots,
+                     columns = lanes (computed in JS via --lane-count). -->
                 <div class="events-col">
-                    <!-- Current time indicator -->
-                    <div class="current-time-bar" style={currentTimeStyle}>
-                        <span class="current-time-dot"></span>
+                    <!-- Hour gridlines (decorative). Each line aligns to a top-of-hour row. -->
+                    <template for:each={timeSlots} for:item="slot">
+                        <div key={slot.key} class="hour-line"></div>
+                    </template>
+
+                    <!-- Current-time bar. Positioned via grid row using --now-row. -->
+                    <div class="now-bar" style={currentTimeStyle}>
+                        <span class="now-dot"></span>
                     </div>
-                    <!-- Event blocks -->
+
+                    <!-- Event blocks — sized & placed entirely via CSS Grid. -->
                     <template for:each={formattedEvents} for:item="event">
-                        <div key={event.id} class={event.blockClass} style={event.blockStyle}>
+                        <div key={event.key} class={event.blockClass} style={event.blockStyle}>
                             <div class="event-inner">
                                 <div class="event-title">{event.title}</div>
                                 <template lwc:if={event.instructor}>

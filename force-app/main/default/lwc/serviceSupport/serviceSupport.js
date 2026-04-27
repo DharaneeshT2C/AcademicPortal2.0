@@ -110,7 +110,18 @@ export default class ServiceSupport extends LightningElement {
         this.showToast = true;
     }
 
-    handleViewAll() { this.navigateTo('faqs'); }
+    /**
+     * The "View All" button on the requests/tickets row was previously
+     * (mis)wired to /faqs. The page already renders the full list inline,
+     * so this is now a no-op that just confirms with a toast.
+     */
+    handleViewAll() {
+        this.toastMessage = this.activeRequestTab === 'ticket'
+            ? 'All your support tickets are shown above.'
+            : 'All your service requests are shown above.';
+        this.toastVariant = 'info';
+        this.showToast = true;
+    }
 
     handleRaiseTicket(event) {
         const req = (event && event.detail) || {};

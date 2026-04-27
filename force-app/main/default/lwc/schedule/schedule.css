@@ -1,11 +1,13 @@
 :host { font-family: var(--font-family, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif); }
-.page { width: 100%; }
+.page { width: 100%; min-width: 0; }
 
 .page-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 .page-header-left { display: flex; flex-direction: column; gap: 2px; }
 .page-title { font-size: 22px; font-weight: 600; letter-spacing: -0.01em; color: var(--text-primary); }
@@ -20,22 +22,27 @@
     overflow: hidden;
 }
 
-.schedule-inner {
-    display: flex;
-    overflow-y: auto;
+/* ── Outer grid: time-rail | events-area ────────────────────────────── */
+.schedule-grid {
+    display: grid;
+    grid-template-columns: 80px minmax(0, 1fr);
+    overflow: auto;
     max-height: 680px;
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
 }
 
-/* Time labels column */
+/* ── Time rail ──────────────────────────────────────────────────────── */
 .time-col {
-    width: 80px;
-    flex-shrink: 0;
+    display: grid;
+    grid-template-rows: repeat(var(--rows, 20), 30px);
+    /* Two grid rows per hour-label, so the label sits on the hour line */
+    align-content: start;
     padding-top: 8px;
+    border-right: 1px solid var(--border-light);
 }
 .time-cell {
-    height: 60px;
+    grid-row: span 2; /* one label per hour = 2 × 30-min rows */
     display: flex;
     align-items: flex-start;
     justify-content: flex-end;
@@ -50,72 +57,85 @@
     line-height: 14px;
 }
 
-/* Events column — the timeline */
+/* ── Events area: nested CSS Grid ───────────────────────────────────── */
 .events-col {
-    flex: 1;
     position: relative;
-    /* Grid lines via background-image (no pseudo-elements needed) */
-    background-image: repeating-linear-gradient(
-        to bottom,
-        transparent 0px,
-        transparent 59px,
-        #F1F5F9 59px,
-        #F1F5F9 60px
-    );
-    background-size: 100% 60px;
-    background-position-y: 8px;
-    padding-top: 8px;
+    display: grid;
+    grid-template-columns: 1fr;            /* events use grid-row only; lane split is handled inside .event-block */
+    grid-template-rows: repeat(var(--rows, 20), 30px);
+    padding: 8px 8px 8px 0;
+    box-sizing: border-box;
 }
 
-/* Current time indicator */
-.current-time-bar {
-    position: absolute;
-    left: 0;
-    right: 16px;
-    height: 2px;
-    background: #EF4444;
-    z-index: 10;
-    display: flex;
-    align-items: center;
+/* Hour gridlines (decorative). Each .hour-line aligns to the top of an hour. */
+.hour-line {
+    grid-column: 1 / -1;
+    grid-row: span 2;
+    border-top: 1px solid #F1F5F9;
 }
-.current-time-dot {
+.hour-line:first-child { border-top: none; }
+
+/* Current-time bar: positioned via fractional grid row using --now-row. */
+.now-bar {
+    grid-column: 1 / -1;
+    grid-row: 1; /* placeholder — overridden by transform below */
+    transform: translateY(calc((var(--now-row, 1) - 1) * 30px));
+    height: 0;
+    border-top: 2px solid #EF4444;
+    position: relative;
+    z-index: 4;
+    pointer-events: none;
+}
+.now-dot {
+    position: absolute;
+    left: -4px;
+    top: -5px;
     width: 8px;
     height: 8px;
     border-radius: 50%;
     background: #EF4444;
-    margin-left: -4px;
-    flex-shrink: 0;
 }
 
-/* Event blocks */
+/* ── Event block: fully grid-positioned, no absolute positioning ────── */
 .event-block {
-    position: absolute;
-    left: 8px;
-    right: 20px;
+    grid-column: 1 / -1;
+    grid-row: var(--row-start) / span var(--row-span);
+    /* Lane split: each block sits inside its own slice of the column.
+       Using a flex inner so we can offset by lane index (1-based). */
+    display: flex;
+    align-self: stretch;
+    /* lane offset: (lane - 1) / lane-count ; width: 1 / lane-count */
+    margin-left: calc((var(--lane, 1) - 1) * (100% / var(--lane-count, 1)) + 4px);
+    width: calc((100% / var(--lane-count, 1)) - 8px);
     border-radius: 10px;
     overflow: hidden;
     z-index: 2;
     cursor: pointer;
     transition: transform 200ms ease-out, box-shadow 200ms ease-out;
-    min-height: 48px;
+    box-sizing: border-box;
+    min-height: 0;
 }
 .event-block:hover {
-    transform: translateX(2px);
+    transform: translateY(-1px);
     box-shadow: var(--shadow-md);
     z-index: 5;
 }
 
 .event-inner {
-    height: 100%;
-    padding: 10px 14px;
+    flex: 1;
+    padding: 8px 12px;
     border-left: 3px solid transparent;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
 }
-.event-blue .event-inner  { border-left-color: #4F46E5; }
-.event-green .event-inner { border-left-color: #059669; }
-.event-amber .event-inner { border-left-color: #D97706; }
-.event-violet .event-inner{ border-left-color: #7C3AED; }
-.event-sky .event-inner   { border-left-color: #0284C7; }
-.event-rose .event-inner  { border-left-color: #E11D48; }
+.event-blue   .event-inner { border-left-color: #4F46E5; }
+.event-green  .event-inner { border-left-color: #059669; }
+.event-amber  .event-inner { border-left-color: #D97706; }
+.event-violet .event-inner { border-left-color: #7C3AED; }
+.event-sky    .event-inner { border-left-color: #0284C7; }
+.event-rose   .event-inner { border-left-color: #E11D48; }
 
 .event-title {
     font-size: 13px;
@@ -125,18 +145,16 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-bottom: 2px;
 }
 .event-sub {
-    font-size: 12px;
+    font-size: 11.5px;
     color: var(--text-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-bottom: 2px;
 }
 .event-meta {
-    font-size: 11px;
+    font-size: 10.5px;
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;
 }
@@ -144,21 +162,23 @@
     display: flex;
     align-items: center;
     gap: 3px;
-    font-size: 11px;
+    font-size: 10.5px;
     color: var(--text-muted);
-    margin-top: 2px;
+    margin-top: 1px;
 }
 .event-loc c-icon { flex-shrink: 0; }
 
 /* Event color variants */
-.event-blue  { background: #EEF2FF; border-color: #4F46E5; }
-.event-green { background: #D1FAE5; border-color: #059669; }
-.event-amber { background: #FEF3C7; border-color: #D97706; }
-.event-violet{ background: #EDE9FE; border-color: #7C3AED; }
-.event-sky   { background: #E0F2FE; border-color: #0284C7; }
-.event-rose  { background: #FFE4E6; border-color: #E11D48; }
+.event-blue   { background: #EEF2FF; }
+.event-green  { background: #D1FAE5; }
+.event-amber  { background: #FEF3C7; }
+.event-violet { background: #EDE9FE; }
+.event-sky    { background: #E0F2FE; }
+.event-rose   { background: #FFE4E6; }
 
 @media (max-width: 768px) {
-    .time-col { width: 60px; }
+    .schedule-grid { grid-template-columns: 60px minmax(0, 1fr); }
     .time-cell { padding: 4px 8px 0 0; }
+    .event-title { font-size: 12px; }
+    .event-sub { font-size: 11px; }
 }

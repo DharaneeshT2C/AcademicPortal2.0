@@ -116,7 +116,8 @@ const KNOWN_ROUTES = new Set([
     'campus-life','clubs','events','hostel-details','mess-menu','gate-pass',
     'create-gate-pass','schedule','fee-payment','fee-payment-detail','fee-plan',
     'invoices','transactions','transaction-history','refunds','service-support',
-    'faqs','feedback','notifications','chat','settings','placements','mentors'
+    'faqs','feedback','notifications','chat','settings','placements','mentors',
+    'service-request'
 ]);
 
 function routeFromPath() {
@@ -249,6 +250,7 @@ export default class App extends LightningElement {
     get isHostelDetails() { return this.currentRoute === 'hostel-details'; }
     get isMessMenu() { return this.currentRoute === 'mess-menu'; }
     get isServiceSupport() { return this.currentRoute === 'service-support'; }
+    get isServiceRequest() { return this.currentRoute === 'service-request'; }
     get isFaqs() { return this.currentRoute === 'faqs'; }
     get isFeedback() { return this.currentRoute === 'feedback'; }
     get isSchedule() { return this.currentRoute === 'schedule'; }

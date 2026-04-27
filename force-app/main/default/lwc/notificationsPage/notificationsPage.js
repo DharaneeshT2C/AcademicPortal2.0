@@ -25,23 +25,35 @@ export default class NotificationsPage extends LightningElement {
         }
     }
 
+    /**
+     * Apex DTO: { id, title, body, category, timeAgo, isRead, iconUrl, route }
+     * Mock data: { id, title, subtitle, time, read, actions: [...], decision }
+     * Normalise both into a single shape the template can render.
+     */
     get formattedNotifications() {
         const source = (this._apex && this._apex.length) ? this._apex : seedNotifications;
         return source.map(n => {
             const overlay = this._localOverlay[n.id] || {};
-            const decision = overlay.decision;
-            const isRead = overlay.read || n.read;
+            const decision = overlay.decision || n.decision;
+            const isRead = overlay.read || n.read || n.isRead;
+            const subtitle = n.subtitle || n.body || '';
+            const time = n.time || n.timeAgo || '';
+            const actions = n.actions || [];
             return {
-                ...n,
-                hasActions: !decision && n.actions && n.actions.length > 0,
+                id: n.id,
+                title: n.title,
+                subtitle,
+                time,
+                category: n.category,
+                hasActions: !decision && actions.length > 0,
                 decisionLabel: decision ? `${decision} ✓` : '',
                 hasDecision: !!decision,
-                formattedActions: n.actions ? n.actions.map(a => ({
+                formattedActions: actions.map(a => ({
                     label: a,
                     actionKey: a,
                     notifId: n.id,
                     btnClass: (a === 'Accept' || a === 'Approve') ? 'btn-action accept' : 'btn-action decline'
-                })) : [],
+                })),
                 rowClass: isRead ? 'notif-item read' : 'notif-item'
             };
         });

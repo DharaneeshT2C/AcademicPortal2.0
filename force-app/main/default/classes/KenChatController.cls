@@ -40,7 +40,7 @@ public with sharing class KenChatController {
             Id contactId = KenRunningStudentHelper.optionalContactId();
             if (contactId == null) {
                 return new List<ChatMessageDTO>{
-                    msg('CM001', 'assistant', 'Hi! I\'m KAI. Ask me anything about your classes, campus, or fees.', '10:00 AM')
+                    msg('CM001', 'assistant', 'Say hi to start the conversation.', '10:00 AM')
                 };
             }
             // Find or hint a conversation; if none, fall back to greeting
@@ -55,7 +55,7 @@ public with sharing class KenChatController {
             }
             if (convId == null) {
                 return new List<ChatMessageDTO>{
-                    msg('CM001', 'assistant', 'Hi! I\'m KAI. Ask me anything about your classes, campus, or fees.', '')
+                    msg('CM001', 'assistant', 'Say hi to start the conversation.', '')
                 };
             }
             List<ChatMessageDTO> out = new List<ChatMessageDTO>();
@@ -75,7 +75,7 @@ public with sharing class KenChatController {
                 out.add(d);
             }
             if (out.isEmpty()) {
-                out.add(msg('CM001', 'assistant', 'Hi! I\'m KAI. Ask me anything about your classes, campus, or fees.', ''));
+                out.add(msg('CM001', 'assistant', 'Say hi to start the conversation.', ''));
             }
             return out;
         } catch (Exception e) {

@@ -1,14 +1,37 @@
 <template>
     <div class="page">
-        <div class="page-header"><button class="back-btn" onclick={handleBack}><c-icon name="arrow_back" size="20"></c-icon></button><div><h2 class="page-title">FAQs</h2></div></div>
-        <div class="search-bar"><c-icon name="search" size="20"></c-icon><input type="text" placeholder="Search FAQs..." class="search-input" /></div>
+        <div class="page-header">
+            <button class="back-btn" onclick={handleBack}><c-icon name="arrow_back" size="20"></c-icon></button>
+            <div><h2 class="page-title">FAQs</h2></div>
+        </div>
+        <div class="search-bar">
+            <c-icon name="search" size="20"></c-icon>
+            <input type="text" placeholder="Search FAQs..." class="search-input" oninput={handleSearchChange} />
+        </div>
         <div class="card">
             <template for:each={faqs} for:item="faq">
                 <div key={faq.category} class="faq-group">
-                    <div class="faq-category"><c-icon name="help_outline" size="20"></c-icon><span>{faq.category}</span><c-icon name="expand_more" size="18"></c-icon></div>
-                    <template lwc:if={faq.hasQuestions}>
-                        <template for:each={faq.questions} for:item="q">
-                            <div key={q.q} class="faq-item"><div class="faq-question"><span>{q.q}</span><c-icon name="expand_more" size="20"></c-icon></div><template lwc:if={q.a}><p class="faq-answer">{q.a}</p></template></div>
+                    <div class={faq.categoryClass} data-key={faq.category} onclick={handleCategoryToggle}>
+                        <c-icon name="help_outline" size="20"></c-icon>
+                        <span class="faq-cat-text">{faq.category}</span>
+                        <c-icon name={faq.expandIconName} size="18"></c-icon>
+                    </div>
+                    <template lwc:if={faq.isOpen}>
+                        <template for:each={faq.formattedQuestions} for:item="q">
+                            <div key={q.key} class={q.questionClass} data-qkey={q.key} onclick={handleQuestionToggle}>
+                                <div class="faq-question-row">
+                                    <span class="faq-plus">{q.plusMinus}</span>
+                                    <span class="faq-question">{q.q}</span>
+                                </div>
+                                <template lwc:if={q.isQOpen}>
+                                    <template lwc:if={q.hasAnswer}>
+                                        <p class="faq-answer">{q.a}</p>
+                                    </template>
+                                    <template lwc:else>
+                                        <p class="faq-answer faq-answer-empty">Answer coming soon.</p>
+                                    </template>
+                                </template>
+                            </div>
                         </template>
                     </template>
                 </div>

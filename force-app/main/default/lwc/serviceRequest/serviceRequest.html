@@ -1,0 +1,54 @@
+<template>
+    <template lwc:if={hasToast}>
+        <c-toast message={toastMessage} variant={toastVariant} onclose={handleToastClose}></c-toast>
+    </template>
+    <div class="page">
+        <div class="page-header">
+            <button class="back-btn" onclick={handleBack}><c-icon name="arrow_back" size="20"></c-icon></button>
+            <div>
+                <h2 class="page-title">Raise a Service Request</h2>
+                <p class="page-sub">Tell us what you need help with — we'll route it to the right team.</p>
+            </div>
+        </div>
+
+        <template lwc:if={hasSuccess}>
+            <div class="card success-card">
+                <div class="success-icon">✓</div>
+                <h3 class="success-title">Request submitted</h3>
+                <p class="success-sub">Your request has been logged and assigned to the right team. You'll get an email once an agent picks it up. Reference: <strong>{successCaseId}</strong></p>
+                <div class="success-actions">
+                    <button class="btn-outline" onclick={handleAnother}>Raise another</button>
+                    <button class="btn-primary" onclick={handleBack}>Back to Support</button>
+                </div>
+            </div>
+        </template>
+
+        <template lwc:else>
+            <div class="card">
+                <p class="section-label">Category</p>
+                <div class="cat-grid">
+                    <template for:each={formattedCategories} for:item="c">
+                        <div key={c.id} class={c.cardClass} data-id={c.id} onclick={handleCategoryClick}>
+                            <div class="cat-name">{c.label}</div>
+                            <div class="cat-hint">{c.hint}</div>
+                        </div>
+                    </template>
+                </div>
+
+                <p class="section-label">Title</p>
+                <input type="text" class="field-input" placeholder="A short summary of your request"
+                       value={title} oninput={handleTitleChange} maxlength="120" />
+
+                <p class="section-label">Describe the issue</p>
+                <textarea class="field-textarea" rows="5"
+                          placeholder="Provide details — when it started, what you've tried, who is impacted."
+                          value={description} oninput={handleDescriptionChange}></textarea>
+
+                <div class="actions">
+                    <button class="btn-outline" onclick={handleBack}>Cancel</button>
+                    <button class="btn-primary" disabled={isSubmitDisabled} onclick={handleSubmit}>{submitLabel}</button>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

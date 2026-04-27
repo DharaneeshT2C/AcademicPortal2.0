@@ -417,29 +417,70 @@ export const scheduleData = [
   { id: 'SD006', title: 'Electromagnetic Theory', instructor: 'Dr Raymond Charles', startTime: '2:00 PM', endTime: '3:00 PM', location: 'Lab 1', color: 'blue' }
 ];
 
+/* ── Peer-to-peer chat data ─────────────────────────────────────────────
+ * Each contact has their own message thread. Messages mix formal English
+ * with casual Hinglish to reflect realistic Indian university culture.
+ * Sent messages from "self" carry a `status` field used to render WhatsApp-
+ * style read receipts: 'sent' (✓), 'delivered' (✓✓ grey), 'read' (✓✓ blue).
+ */
 export const chatData = {
   contacts: [
-    { id: 'CT001', name: 'Rohit Sharma', lastMessage: 'Hii..', time: 'Just now', type: 'Alumni', online: true, avatar: IMG('images/avatars/avatar3.jpg') },
-    { id: 'CT002', name: 'Florencio Dorrance', lastMessage: 'Thank you!', time: '10m', type: 'Primary', avatar: IMG('images/avatars/avatar4.jpg') },
-    { id: 'CT003', name: 'Priya Mehta', lastMessage: 'Welcome', time: '1 day ago', type: 'Primary', avatar: IMG('images/avatars/avatar2.jpg') },
-    { id: 'CT004', name: 'Arjun Singh', lastMessage: 'Shall we connect now?', time: '2 day ago', type: 'Alumni', avatar: IMG('images/avatars/avatar5.jpg') },
-    { id: 'CT005', name: 'Neha Patel', lastMessage: 'Thank you so much', time: '1 week ago', type: 'Primary', avatar: IMG('images/avatars/avatar6.jpg') },
-    { id: 'CT006', name: 'Raj Kumar', lastMessage: 'Will be back in 20 mins!', time: '2 weeks ago', type: 'Alumni', avatar: IMG('images/avatars/avatar7.jpg') }
+    { id: 'CT001', name: 'Rohan Sharma',  lastMessage: 'Bro, OS lab notes bhej dena 🙏',         time: 'Just now',   type: 'Classmate · CSE-6',    online: true,  unread: 2, avatar: IMG('images/avatars/avatar3.jpg') },
+    { id: 'CT002', name: 'Priya Iyer',    lastMessage: 'Library at 6? Need to finish DS assgn', time: '8m',         type: 'Classmate · CSE-6',    online: true,  unread: 1, avatar: IMG('images/avatars/avatar2.jpg') },
+    { id: 'CT003', name: 'Aditya Verma',  lastMessage: 'Goa trip plan after exams confirmed?',  time: '1h',         type: 'Hostel · Block B',     online: false, unread: 0, avatar: IMG('images/avatars/avatar5.jpg') },
+    { id: 'CT004', name: 'Ananya Iyer (Mentor)', lastMessage: 'Sent you the internship list. Have a look.', time: 'Yesterday', type: 'Mentor · Alumni',     online: false, unread: 0, avatar: IMG('images/avatars/avatar4.jpg') },
+    { id: 'CT005', name: 'Karthik Reddy', lastMessage: 'Coding club practice tomorrow at 5',     time: 'Tue',        type: 'Coding Club',          online: false, unread: 0, avatar: IMG('images/avatars/avatar7.jpg') },
+    { id: 'CT006', name: 'Sneha Kapoor',  lastMessage: 'Maths-III ke notes mil gaye?',           time: 'Mon',        type: 'Classmate · CSE-6',    online: true,  unread: 0, avatar: IMG('images/avatars/avatar6.jpg') },
+    { id: 'CT007', name: 'Dr. Raghav Iyer', lastMessage: 'Office hours moved to 4 PM tomorrow.', time: 'Sun',        type: 'Faculty · Eng. Physics', online: false, unread: 0, avatar: IMG('images/avatars/avatar4.jpg') }
   ],
-  messages: [
-    { id: 'MSG001', text: 'omg, this is amazing', time: '3:00 am', sender: 'other' },
-    { id: 'MSG002', text: 'perfect!', time: '3:00 am', sender: 'other' },
-    { id: 'MSG003', text: 'Wow, this is really epic.', time: '3:00 am', sender: 'other' },
-    { id: 'MSG004', text: 'How are you?', time: '3:16 am', sender: 'self' },
-    { id: 'MSG005', text: 'just ideas for next time', time: '7:03 am', sender: 'other' },
-    { id: 'MSG006', text: "I'll be there in 2 mins", time: '7:03 am', sender: 'other' },
-    { id: 'MSG007', text: 'woohoooo', time: '8:05 am', sender: 'self', isToday: true },
-    { id: 'MSG008', text: 'Haha oh man', time: '8:05 am', sender: 'self', isToday: true },
-    { id: 'MSG009', text: "Haha that's terrifying", time: '8:05 am', sender: 'self', isToday: true },
-    { id: 'MSG010', text: '@ww', time: '7:02 am', sender: 'other', isToday: true },
-    { id: 'MSG011', text: 'omg, this is amazing', time: '7:02 am', sender: 'other', isToday: true },
-    { id: 'MSG012', text: 'woohoooo', time: '7:02 am', sender: 'other', isToday: true }
-  ]
+
+  /* Per-contact thread map. Keys match contacts[].id.
+     status: only relevant for sender:'self' messages. */
+  threads: {
+    CT001: [
+      { id: 'M1-1', sender: 'other', text: 'Yo Arjun! Kya scene hai?',                                 time: '9:42 AM' },
+      { id: 'M1-2', sender: 'self',  text: 'Bas yaar, OS lab ke liye padh raha hoon. Tu?',              time: '9:43 AM', status: 'read' },
+      { id: 'M1-3', sender: 'other', text: 'Same. Sharma sir ne assignment de diya, deadline Friday 😩', time: '9:43 AM' },
+      { id: 'M1-4', sender: 'other', text: 'Bro, OS lab notes bhej dena 🙏',                            time: '9:55 AM' },
+      { id: 'M1-5', sender: 'self',  text: 'Haan rukh, scan karke bhejta hoon shaam tak',               time: '9:56 AM', status: 'delivered' }
+    ],
+    CT002: [
+      { id: 'M2-1', sender: 'self',  text: 'Hey Priya, DS assignment kahan tak pohncha?',                time: '8:15 AM', status: 'read' },
+      { id: 'M2-2', sender: 'other', text: 'Tree traversal pe atki hoon. In-order recursion samajh nahi aa raha 🤯', time: '8:18 AM' },
+      { id: 'M2-3', sender: 'self',  text: 'Lol same situation. Library aa, sath karte hain',           time: '8:19 AM', status: 'read' },
+      { id: 'M2-4', sender: 'other', text: 'Library at 6? Need to finish DS assgn',                      time: '5:46 PM' }
+    ],
+    CT003: [
+      { id: 'M3-1', sender: 'other', text: 'Bhai, exam ke baad Goa chalein? 4 din ka plan sochaa hai',   time: 'Tuesday' },
+      { id: 'M3-2', sender: 'self',  text: 'Bas bhai, count me in 🌊. Budget kya soch raha hai?',        time: 'Tuesday', status: 'read' },
+      { id: 'M3-3', sender: 'other', text: 'Around 8-10k per head. Hostel + scooty + food',              time: 'Tuesday' },
+      { id: 'M3-4', sender: 'self',  text: 'Sounds fair. Karthik aur Rohan ko bhi pakad lete hain',      time: 'Tuesday', status: 'read' },
+      { id: 'M3-5', sender: 'other', text: 'Goa trip plan after exams confirmed?',                       time: '1h ago' }
+    ],
+    CT004: [
+      { id: 'M4-1', sender: 'other', text: 'Hi Arjun — based on your profile I have a few internship leads.', time: 'Mon, 4:00 PM' },
+      { id: 'M4-2', sender: 'self',  text: 'Thank you ma\'am! That would be amazing.',                   time: 'Mon, 4:02 PM', status: 'read' },
+      { id: 'M4-3', sender: 'other', text: 'I\'ve shortlisted 3 firms — fintech, ed-tech, and a product startup. Frontend roles.', time: 'Mon, 4:05 PM' },
+      { id: 'M4-4', sender: 'self',  text: 'Sounds great. Should I update my resume first?',             time: 'Mon, 4:07 PM', status: 'read' },
+      { id: 'M4-5', sender: 'other', text: 'Yes, polish the projects section. Send me a draft by Wed.',  time: 'Mon, 4:10 PM' },
+      { id: 'M4-6', sender: 'other', text: 'Sent you the internship list. Have a look.',                  time: 'Yesterday' }
+    ],
+    CT005: [
+      { id: 'M5-1', sender: 'other', text: 'Coding club practice tomorrow at 5',                         time: 'Tuesday' },
+      { id: 'M5-2', sender: 'self',  text: 'Pakka aaunga. Topic kya hai?',                               time: 'Tuesday', status: 'read' },
+      { id: 'M5-3', sender: 'other', text: 'Dynamic programming. Bring your laptop.',                    time: 'Tuesday' }
+    ],
+    CT006: [
+      { id: 'M6-1', sender: 'other', text: 'Hey, Maths-III ke notes mil gaye? Class miss ki thi maine.', time: 'Monday' },
+      { id: 'M6-2', sender: 'self',  text: 'Haan Sneha, mere paas hain. Drive link bhejta hoon.',        time: 'Monday', status: 'read' },
+      { id: 'M6-3', sender: 'self',  text: 'Iyer sir ne 2 chapters cover kiye — Laplace + Fourier basics', time: 'Monday', status: 'read' }
+    ],
+    CT007: [
+      { id: 'M7-1', sender: 'other', text: 'Arjun, your last lab report was solid. Keep it up.',         time: 'Sunday' },
+      { id: 'M7-2', sender: 'self',  text: 'Thank you sir!',                                              time: 'Sunday', status: 'read' },
+      { id: 'M7-3', sender: 'other', text: 'Office hours moved to 4 PM tomorrow.',                       time: 'Sunday' }
+    ]
+  }
 };
 
 export const notifications = [

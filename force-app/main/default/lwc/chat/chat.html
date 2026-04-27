@@ -1,9 +1,23 @@
 <template>
-    <div class="page">
-        <h2 class="page-title">Messages</h2>
-        <div class="chat-layout card">
-            <div class="contacts-panel">
-                <div class="contacts-header"><input type="text" placeholder="Search messages..." class="search-input" /></div>
+    <div class="page chat-page">
+        <div class="page-header">
+            <h2 class="page-title">Messages</h2>
+            <p class="page-sub">Direct messages with classmates, mentors, and faculty.</p>
+        </div>
+
+        <template lwc:if={hasChatError}>
+            <div class="chat-error">
+                <span>{chatErrorMessage}</span>
+                <button class="chat-error-close" onclick={handleDismissChatError}>&#x2715;</button>
+            </div>
+        </template>
+
+        <div class="chat-shell">
+            <!-- ── Contacts rail ──────────────────────────────────────── -->
+            <aside class="contacts-panel">
+                <div class="contacts-header">
+                    <input type="text" placeholder="Search messages..." class="search-input" />
+                </div>
                 <div class="contacts-list">
                     <template for:each={formattedContacts} for:item="contact">
                         <div key={contact.id} class={contact.contactClass} data-id={contact.id} onclick={handleContactSelect}>
@@ -12,31 +26,70 @@
                                 <template lwc:if={contact.online}><span class="online-dot"></span></template>
                             </div>
                             <div class="contact-info">
-                                <div class="contact-header"><h4 class="contact-name">{contact.name}</h4><span class="contact-time">{contact.time}</span></div>
-                                <p class="contact-last">{contact.lastMessage}</p>
+                                <div class="contact-row-top">
+                                    <h4 class="contact-name">{contact.name}</h4>
+                                    <span class="contact-time">{contact.time}</span>
+                                </div>
+                                <div class="contact-row-bottom">
+                                    <p class="contact-last">{contact.lastMessage}</p>
+                                    <template lwc:if={contact.hasUnread}>
+                                        <span class="contact-unread">{contact.unreadLabel}</span>
+                                    </template>
+                                </div>
                             </div>
                         </div>
                     </template>
                 </div>
-            </div>
-            <div class="messages-panel">
+            </aside>
+
+            <!-- ── Active conversation ────────────────────────────────── -->
+            <section class="messages-panel">
                 <div class="messages-header">
-                    <img src={selectedContact.avatar} alt={selectedContact.name} class="chat-header-avatar" />
-                    <div><h4 class="chat-name">{selectedContact.name}</h4><span class="chat-type">{selectedContact.type}</span></div>
+                    <div class="chat-header-avatar-wrap">
+                        <img src={selectedContact.avatar} alt={selectedContact.name} class="chat-header-avatar" />
+                        <template lwc:if={selectedContact.online}><span class="online-dot small"></span></template>
+                    </div>
+                    <div class="chat-header-text">
+                        <h4 class="chat-name">{selectedContact.name}</h4>
+                        <span class={headerStatusClass}>{headerStatus}</span>
+                    </div>
                 </div>
+
                 <div class="messages-list">
                     <template for:each={formattedMessages} for:item="msg">
                         <div key={msg.id} class={msg.msgClass}>
-                            <p class="msg-text">{msg.text}</p>
-                            <span class="msg-time">{msg.time}</span>
+                            <div class={msg.bubbleClass}>
+                                <p class="bubble-text">{msg.text}</p>
+                                <div class="bubble-meta">
+                                    <span class="bubble-time">{msg.time}</span>
+                                    <template lwc:if={msg.showSent}>
+                                        <span class="ticks ticks-sent" title="Sent">✓</span>
+                                    </template>
+                                    <template lwc:if={msg.showDelivered}>
+                                        <span class="ticks ticks-delivered" title="Delivered">✓✓</span>
+                                    </template>
+                                    <template lwc:if={msg.showRead}>
+                                        <span class="ticks ticks-read" title="Read">✓✓</span>
+                                    </template>
+                                </div>
+                            </div>
                         </div>
                     </template>
                 </div>
-                <div class="message-input">
-                    <input type="text" placeholder="Type a message..." class="msg-input" value={newMessage} onchange={handleMessageChange} />
-                    <button class="send-btn" onclick={handleSend}><c-icon name="send" size="20"></c-icon></button>
+
+                <div class="composer">
+                    <button class="composer-icon-btn" title="Attach"><c-icon name="attach_file" size="20"></c-icon></button>
+                    <input type="text"
+                           class="composer-input"
+                           placeholder="Type a message..."
+                           value={newMessage}
+                           oninput={handleMessageChange}
+                           onkeydown={handleKeyDown} />
+                    <button class="composer-send" onclick={handleSend} title="Send">
+                        <c-icon name="send" size="18"></c-icon>
+                    </button>
                 </div>
-            </div>
+            </section>
         </div>
     </div>
 </template>

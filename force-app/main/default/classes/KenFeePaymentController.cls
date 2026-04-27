@@ -214,6 +214,38 @@ public with sharing class KenFeePaymentController {
         }
     }
 
+    /**
+     * Finalises a payment after the user completes the (mock) Razorpay flow.
+     * Marks the Payment__c as Success or Failed, records the chosen mode and
+     * optionally a real gateway reference. Returns the payment Id so the LWC
+     * can show a transaction receipt.
+     */
+    @AuraEnabled
+    public static Id confirmPayment(Id paymentId, Boolean success, String mode, String gatewayRef) {
+        try {
+            KenAuraExceptionHelper.rejectIf(paymentId == null, 'Payment id is required.');
+            List<Payment__c> rows = [
+                SELECT Id, Status__c, Mode__c, Gateway_Ref__c, Installment__c, Amount__c
+                FROM Payment__c
+                WHERE Id = :paymentId
+                WITH USER_MODE
+                LIMIT 1
+            ];
+            KenAuraExceptionHelper.rejectIf(rows.isEmpty(), 'Payment not found.');
+            Payment__c p = rows[0];
+            p.Status__c = (success == true) ? 'Success' : 'Failed';
+            if (String.isNotBlank(mode)) p.Mode__c = mode;
+            if (String.isNotBlank(gatewayRef)) p.Gateway_Ref__c = gatewayRef;
+            p.Transaction_Date__c = Datetime.now();
+            update p;
+            return p.Id;
+        } catch (Exception e) {
+            KenAuraExceptionHelper.throwAuraHandled('KenFeePaymentController.confirmPayment',
+                'Could not finalise payment.', e);
+            return null;
+        }
+    }
+
     private static List<FeeLineDTO> seedInstallments() {
         List<FeeLineDTO> out = new List<FeeLineDTO>();
         out.add(line(null, 'Tuition Q3',  24000, 'Apr 30',    'Due',      null,         'INV-2026-03'));
