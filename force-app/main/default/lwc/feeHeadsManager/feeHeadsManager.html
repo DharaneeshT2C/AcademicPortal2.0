@@ -1,0 +1,380 @@
+<template>
+    <div class="page">
+        <template if:true={notification}>
+            <section class={notification.containerClass} role="alert" aria-live="assertive">
+                <div class="noticeContent">
+                    <div class="noticeIconWrap">
+                        <lightning-icon icon-name={notification.iconName} size="x-small"></lightning-icon>
+                    </div>
+                    <div class="noticeCopy">
+                        <div class="noticeTitle">{notification.title}</div>
+                        <p class="noticeMessage">{notification.message}</p>
+                    </div>
+                </div>
+                <button type="button" class="noticeDismiss" onclick={dismissNotification} aria-label="Dismiss message">
+                    <lightning-icon icon-name="utility:close" size="x-small"></lightning-icon>
+                </button>
+            </section>
+        </template>
+
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="javascript:void(0)" class="crumbLink" onclick={navigateToMasterData}>Master Data</a>
+            <span class="sep">&gt;</span>
+            <template if:true={isListView}>
+                <span class="crumbCurrent">Fee Heads</span>
+            </template>
+            <template if:true={isFormView}>
+                <a href="javascript:void(0)" class="crumbLink" onclick={handleFormCancel}>Fee Heads</a>
+                <span class="sep">&gt;</span>
+                <span class="crumbCurrent">{formPageTitle}</span>
+            </template>
+            <template if:true={isFeeHeadDetailView}>
+                <a href="javascript:void(0)" class="crumbLink" onclick={handleBackToFeeHeadList}>Fee Heads</a>
+                <span class="sep">&gt;</span>
+                <span class="crumbCurrent">{selectedFeeHead.feeHeadName}</span>
+            </template>
+        </nav>
+
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+        </template>
+
+        <template if:false={isLoading}>
+            <template if:true={isListView}>
+                <section class="viewSection">
+                    <div class="listHeader">
+                        <div class="titleBlock">
+                            <h1 class="pageTitle">Fee Heads</h1>
+                            <p class="pageMeta">{feeHeadCountText}</p>
+                        </div>
+                        <lightning-button
+                            class="primaryActionBtn"
+                            variant="brand"
+                            label="New"
+                            onclick={openNewFeeHeadModal}>
+                        </lightning-button>
+                    </div>
+
+                    <div class="toolbar">
+                        <lightning-input
+                            class="searchInput"
+                            type="search"
+                            variant="label-hidden"
+                            value={searchText}
+                            onchange={handleSearchChange}
+                            placeholder="Search fee heads..."
+                            aria-label="Search fee heads">
+                        </lightning-input>
+                        <button type="button" class="filterBtn" aria-label="Open filters" disabled>
+                            <lightning-icon icon-name="utility:filterList" size="x-small"></lightning-icon>
+                            <span>Filters</span>
+                        </button>
+                    </div>
+
+                    <template if:true={hasFeeHeads}>
+                        <div class="tableCard">
+                            <div class="tableHeader feeHeadGrid">
+                                <div>Fee Head Name</div>
+                                <div>Head Category</div>
+                                <div>Refundable</div>
+                                <div>Taxable</div>
+                                <div>Default Remittance</div>
+                                <div>Active</div>
+                                <div>Used in Active Plans</div>
+                                <div class="actionsHeader">Actions</div>
+                            </div>
+
+                            <template for:each={filteredFeeHeads} for:item="row">
+                                <div key={row.id} class="feeHeadGrid dataRow">
+                                    <div class="nameCell">
+                                        <button
+                                            class="nameLink"
+                                            data-fee-head-id={row.id}
+                                            onclick={handleOpenFeeHeadDetails}>
+                                            {row.feeHeadName}
+                                        </button>
+                                    </div>
+                                    <div class="bodyText">{row.feeHeadType}</div>
+                                    <div>
+                                        <span class={row.refundableClass}>{row.refundableLabel}</span>
+                                    </div>
+                                    <div>
+                                        <span class={row.taxableClass}>{row.taxableLabel}</span>
+                                    </div>
+                                    <div class="bodyText">{row.defaultRemittanceListDisplay}</div>
+                                    <div>
+                                        <span class={row.activePillClass}>{row.activeLabel}</span>
+                                    </div>
+                                    <div>
+                                        <span class="usageBadge">{row.usedInFeePlans}</span>
+                                    </div>
+                                    <div class="actionsCell">
+                                        <lightning-button-icon
+                                            class="threeDotBtn"
+                                            icon-name="utility:threedots_vertical"
+                                            variant="bare"
+                                            alternative-text="Actions"
+                                            title="Actions"
+                                            data-id={row.id}
+                                            data-fee-head-id={row.id}
+                                            onclick={handleToggleActionMenu}>
+                                        </lightning-button-icon>
+                                        <template if:true={row.isActionMenuOpen}>
+                                            <div class="actionPopover">
+                                                <button class="actionItem" type="button" data-action="view" data-id={row.id} data-fee-head-id={row.id} onclick={handleActionClick}>View</button>
+                                                <button class="actionItem" type="button" data-action="edit" data-id={row.id} data-fee-head-id={row.id} onclick={handleActionClick}>Edit</button>
+                                                <button class="actionItem actionItemDisabled" type="button" disabled aria-disabled="true">Clone</button>
+                                                <button class="actionItem actionItemDanger" type="button" data-action="delete" data-id={row.id} data-fee-head-id={row.id} onclick={handleActionClick}>Delete</button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <template if:false={hasFeeHeads}>
+                        <div class="emptyState">No fee heads found.</div>
+                    </template>
+                </section>
+            </template>
+
+            <template if:true={isFormView}>
+                <section class="viewSection formViewSection">
+                    <div class="builderHeader">
+                        <div class="titleBlock">
+                            <h1 class="pageTitle">{formPageTitle}</h1>
+                            <p class="pageMeta">Configure fee head details</p>
+                        </div>
+                        <div class="builderActions">
+                            <lightning-button class="actionBtnNeutral" label="Cancel" onclick={handleFormCancel} disabled={formIsSaving}></lightning-button>
+                            <lightning-button class="actionBtnOutline" variant="neutral" label="Save Draft" onclick={handleSaveDraft} disabled={formIsSaving}></lightning-button>
+                            <lightning-button class="actionBtnPrimary" variant="brand" label="Activate" onclick={handleActivate} disabled={isActivateDisabled}></lightning-button>
+                        </div>
+                    </div>
+
+                    <div class="builderSection formCard">
+                        <div class="sectionLabel">Basic Configuration</div>
+                        <div class="builderSectionBody">
+                            <div class="builderGrid">
+                                <lightning-input
+                                    name="feeHeadName"
+                                    label="Fee Head Name"
+                                    value={formFeeHeadName}
+                                    required
+                                    onchange={handleFormFieldChange}>
+                                </lightning-input>
+
+                                <lightning-combobox
+                                    name="feeHeadType"
+                                    label="Head Category"
+                                    value={formFeeHeadType}
+                                    placeholder="Select category"
+                                    options={feeHeadTypeOptions}
+                                    required
+                                    onchange={handleFormFieldChange}>
+                                </lightning-combobox>
+
+                                <lightning-record-picker
+                                    name="defaultRemittanceAccountId"
+                                    label="Default Remittance (Optional)"
+                                    object-api-name="Ken_Bank_Account_Master__c"
+                                    value={formDefaultRemittanceAccountId}
+                                    placeholder="Search remittance account"
+                                    onchange={handleRecordPickerChange}>
+                                </lightning-record-picker>
+
+                                <lightning-record-picker
+                                    name="taxDefinitionId"
+                                    label="Tax Definition (Optional)"
+                                    object-api-name="Ken_Tax_Definition__c"
+                                    value={formTaxDefinitionId}
+                                    placeholder="Search tax definition"
+                                    onchange={handleRecordPickerChange}>
+                                </lightning-record-picker>
+
+                                <lightning-input
+                                    name="taxPercentage"
+                                    label="Tax Percentage"
+                                    value={formTaxPercentage}
+                                    read-only>
+                                </lightning-input>
+                            </div>
+
+                            <div class="formToggleRow">
+                                <lightning-input
+                                    type="checkbox"
+                                    name="isActive"
+                                    label="Active"
+                                    checked={formIsActive}
+                                    onchange={handleFormFieldChange}>
+                                </lightning-input>
+                                <lightning-input
+                                    type="checkbox"
+                                    name="refundable"
+                                    label="Refundable"
+                                    checked={formRefundable}
+                                    onchange={handleFormFieldChange}>
+                                </lightning-input>
+                                <lightning-input
+                                    type="checkbox"
+                                    name="taxable"
+                                    label="Taxable"
+                                    checked={formTaxable}
+                                    onchange={handleFormFieldChange}>
+                                </lightning-input>
+                            </div>
+
+                            <div class="sectionGapSmall">
+                                <lightning-textarea
+                                    class="formFieldTextarea"
+                                    name="description"
+                                    label="Description"
+                                    value={formDescription}
+                                    onchange={handleFormFieldChange}>
+                                </lightning-textarea>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </template>
+
+            <template if:true={isFeeHeadDetailView}>
+                <template if:true={selectedFeeHead}>
+                    <section class="viewSection">
+                        <div class="detailHeader">
+                            <div>
+                                <div class="detailTitleRow">
+                                    <h1 class="pageTitle detailTitle">{selectedFeeHead.feeHeadName}</h1>
+                                    <span class={selectedFeeHead.activePillClass}>{selectedFeeHead.activeLabel}</span>
+                                </div>
+                                <div class="detailMetaRow">
+                                    <span class="mutedText">Created by {selectedFeeHead.createdByName}</span>
+                                    <span class="mutedText">Last modified {selectedFeeHead.lastModifiedRelative}</span>
+                                </div>
+                            </div>
+                            <div class="detailHeaderActions">
+                                <lightning-button label="Edit" icon-name="utility:edit" onclick={handleDetailEdit}></lightning-button>
+                            </div>
+                        </div>
+
+                        <template if:true={selectedFeeHead.usedInFeePlans}>
+                            <div class="warningBanner">
+                                <div class="warningBannerTitle">Used in Active Fee Plans</div>
+                                <p class="warningBannerText">
+                                    This Fee Head is used in {selectedFeeHead.usedInFeePlans} active fee plans.
+                                    Modifications may affect existing configurations.
+                                </p>
+                            </div>
+                        </template>
+
+                        <div class="tabCard">
+                            <div class="tabRow">
+                                <button type="button" class={detailsTabClass} data-tab="details" onclick={handleDetailTabClick}>Details</button>
+                                <button type="button" class={usageTabClass} data-tab="usage" onclick={handleDetailTabClick}>Usage</button>
+                            </div>
+                        </div>
+
+                        <template if:true={isDetailsTabActive}>
+                            <div class="detailCardGrid">
+                                <section class="detailCard">
+                                    <div class="sectionLabel">Fee Head Information</div>
+                                    <div class="detailGrid">
+                                        <div class="fieldItem">
+                                            <div class="fieldLabel">Name</div>
+                                            <div class="fieldValue">{selectedFeeHead.feeHeadName}</div>
+                                        </div>
+                                        <div class="fieldItem">
+                                            <div class="fieldLabel">Head Category</div>
+                                            <div class="fieldValue">{selectedFeeHead.feeHeadType}</div>
+                                        </div>
+                                        <div class="fieldItem">
+                                            <div class="fieldLabel">Refundable</div>
+                                            <div class="fieldValue">
+                                                <span class={selectedFeeHead.refundableClass}>{selectedFeeHead.refundableLabel}</span>
+                                            </div>
+                                        </div>
+                                        <div class="fieldItem">
+                                            <div class="fieldLabel">Taxable</div>
+                                            <div class="fieldValue">
+                                                <span class={selectedFeeHead.taxableClass}>{selectedFeeHead.taxableLabel}</span>
+                                            </div>
+                                        </div>
+                                        <div class="fieldItem">
+                                            <div class="fieldLabel">Default Remittance</div>
+                                            <div class="fieldValue">{selectedFeeHead.defaultRemittanceDisplay}</div>
+                                        </div>
+                                        <div class="fieldItem">
+                                            <div class="fieldLabel">Active</div>
+                                            <div class="fieldValue">
+                                                <span class={selectedFeeHead.activePillClass}>{selectedFeeHead.activeLabel}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="detailCard">
+                                    <div class="sectionLabel">Metadata</div>
+                                    <div class="detailGrid">
+                                        <div class="fieldItem">
+                                            <div class="fieldLabel">Created By</div>
+                                            <div class="fieldValue">{selectedFeeHead.createdByName}</div>
+                                        </div>
+                                        <div class="fieldItem">
+                                            <div class="fieldLabel">Created Date</div>
+                                            <div class="fieldValue">{selectedFeeHead.createdDateOnly}</div>
+                                        </div>
+                                        <div class="fieldItem">
+                                            <div class="fieldLabel">Last Modified</div>
+                                            <div class="fieldValue">{selectedFeeHead.lastModifiedRelative}</div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </template>
+
+                        <template if:true={isUsageTabActive}>
+                            <section class="detailCard">
+                                <div class="sectionLabel">Usage Summary</div>
+                                <div class="usageMetrics">
+                                    <div class="usageMetricCard">
+                                        <div class="usageMetricLabel">Fee Plans Using</div>
+                                        <div class="usageMetricValue">{selectedFeeHead.usedInFeePlans}</div>
+                                    </div>
+                                    <div class="usageMetricCard">
+                                        <div class="usageMetricLabel">Programme Fees</div>
+                                        <div class="usageMetricValue">{selectedFeeHead.usedInProgrammeFees}</div>
+                                    </div>
+                                    <div class="usageMetricCard">
+                                        <div class="usageMetricLabel">Manual Assignments</div>
+                                        <div class="usageMetricValue">{selectedFeeHead.manualAssignments}</div>
+                                    </div>
+                                </div>
+                            </section>
+                        </template>
+                    </section>
+                </template>
+            </template>
+        </template>
+
+        <template if:true={confirmDialog}>
+            <section class="dialogBackdrop" role="presentation">
+                <div class="dialogCard" role="dialog" aria-modal="true" aria-labelledby="fee-head-confirm-title">
+                    <div class="dialogHeader">
+                        <div class="dialogIconWrap">
+                            <lightning-icon icon-name="utility:warning" size="small"></lightning-icon>
+                        </div>
+                        <div>
+                            <h2 id="fee-head-confirm-title" class="dialogTitle">{confirmDialog.title}</h2>
+                            <p class="dialogMessage">{confirmDialog.message}</p>
+                        </div>
+                    </div>
+                    <div class="dialogFooter">
+                        <button type="button" class="dialogBtn dialogBtnNeutral" onclick={closeConfirmDialog}>Cancel</button>
+                        <button type="button" class="dialogBtn dialogBtnDanger" onclick={handleConfirmDelete}>Delete Fee Head</button>
+                    </div>
+                </div>
+            </section>
+        </template>
+    </div>
+</template>

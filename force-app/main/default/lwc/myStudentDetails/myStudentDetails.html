@@ -1,0 +1,753 @@
+<template>
+    <section class="student-details-page">
+        <article class="profile-card">
+            <div class="profile-main">
+                <div class="avatar-wrap">
+                    <template lwc:if={hasStudentPhoto}>
+                        <img class="avatar-image" src={studentPhotoUrl} alt="David Anderson" />
+                    </template>
+                    <template lwc:else>
+                        <div class="avatar"></div>
+                    </template>
+                    <span class="online-dot"></span>
+                </div>
+                <div class="profile-meta">
+                    <h2 class="student-name">David Anderson</h2>
+                    <p class="student-id">URK17MT023</p>
+                    <p class="student-programs">UG, Psychology 2025 &nbsp; | &nbsp; MBA, Marketing 2025</p>
+                    <div class="tags-row">
+                        <span class="tag">Semester II</span>
+                        <span class="tag">Faculty In-Charge: Dr Smitha Beryl</span>
+                        <span class="tag tag-active">Active</span>
+                    </div>
+                </div>
+                <template lwc:if={isStudentRole}>
+                    <button type="button" class="view-id-card-btn" onclick={handleViewIdCard}>View ID Card</button>
+                </template>
+            </div>
+<template lwc:if={isFacultyRole}>
+            <div class="kpi-row" >
+                <div class="kpi-card">
+                    <p>CGPA</p>
+                    <strong>9.2</strong>
+                </div>
+                <div class="kpi-card">
+                    <p>Sessions Attended</p>
+                    <strong>20<span>/24</span></strong>
+                </div>
+                <div class="kpi-card attendance">
+                    <p>Attendance %</p>
+                    <strong>73</strong>
+                </div>
+            </div>
+            </template>
+        </article>
+
+        <nav class="tabs-bar" aria-label="Student detail tabs">
+            <template lwc:if={isStudentRole}>
+                <button type="button" class={academicsTabClass} data-tab="academics" onclick={handleTabChange}>My Path</button>
+                <button type="button" class={extraCurricularsTabClass} data-tab="extra" onclick={handleTabChange}>Extra Curriculars</button>
+                <button type="button" class={conductTabClass} data-tab="conduct" onclick={handleTabChange}>Conduct</button>
+                <button type="button" class={educationalTabClass} data-tab="educational" onclick={handleTabChange}>Educational Background</button>
+            </template>
+            <template lwc:else>
+                <button type="button" class={academicsTabClass} data-tab="academics" onclick={handleTabChange}>Academics</button>
+                <button type="button" class={educationalTabClass} data-tab="educational" onclick={handleTabChange}>Educational Background</button>
+                <button type="button" class={clubsTabClass} data-tab="clubs" onclick={handleTabChange}>Clubs</button>
+                <button type="button" class={extraCurricularsTabClass} data-tab="extra" onclick={handleTabChange}>Extra Curriculars</button>
+                <button type="button" class={conductTabClass} data-tab="conduct" onclick={handleTabChange}>Conduct</button>
+            </template>
+        </nav>
+
+        <template lwc:if={isEducationalTab}>
+            <article class="education-panel">
+                <h3 class="education-title">Educational Background</h3>
+                <div class="education-divider"></div>
+
+                <div class="education-list">
+                    <template for:each={educationItems} for:item="item">
+                        <article class="education-item" key={item.id}>
+                            <div class="education-main">
+                                <p class="program-title">{item.title}</p>
+                                <p class="institute-name">{item.institute}</p>
+                                <p class="timeline">{item.timeline}</p>
+                            </div>
+
+                            <template lwc:if={item.showActions}>
+                                <div class="item-actions">
+                                    <span class="past-pill">Past Program</span>
+                                    <button type="button" class="view-details-btn">View Details</button>
+                                </div>
+                            </template>
+                        </article>
+                    </template>
+                </div>
+            </article>
+        </template>
+
+        <template lwc:if={isAcademicsTab}>
+            <article class="education-panel">
+                <h3 class="education-title">Academics</h3>
+                <div class="education-divider"></div>
+                <div class="content-grid">
+                    <aside class="semester-panel">
+                        <div class="program-select">
+                            <span>B Tech., CSE</span>
+                            <span class="caret">⌄</span>
+                        </div>
+
+                        <div class="semester-list">
+                            <template for:each={semesters} for:item="semester">
+                                <div class="semester-item" key={semester.id}>
+                                    <span class="semester-badge">{semester.badge}</span>
+                                    <article class={semester.cardClass}>{semester.label}</article>
+                                </div>
+                            </template>
+                        </div>
+                    </aside>
+
+                    <article class="marks-panel">
+                        <table class="marks-table" aria-label="Student marks details">
+                            <thead>
+                                <tr class="main-head">
+                                    <th>Course code</th>
+                                    <th>Course</th>
+                                    <th>Credit</th>
+                                    <th>Grade</th>
+                                    <th colspan="3">Marks obtained</th>
+                                </tr>
+                                <tr class="sub-head">
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th>I term</th>
+                                    <th>II term</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr class="section-row"><td colspan="7">Theory Exams</td></tr>
+                                <template for:each={theoryRows} for:item="row">
+                                    <tr key={row.id}>
+                                        <td>{row.code}</td>
+                                        <td>{row.course}</td>
+                                        <td>{row.credit}</td>
+                                        <td class="grade-cell"><span>{row.grade}</span><span class="info-icon">i</span></td>
+                                        <td class={row.t1Class}>{row.t1}</td>
+                                        <td class={row.t2Class}>{row.t2}</td>
+                                        <td class={row.totalClass}>{row.total}</td>
+                                    </tr>
+                                </template>
+
+                                <tr class="section-row"><td colspan="7">Practical Exams</td></tr>
+                                <template for:each={practicalRows} for:item="row">
+                                    <tr key={row.id}>
+                                        <td>{row.code}</td>
+                                        <td>{row.course}</td>
+                                        <td>{row.credit}</td>
+                                        <td class="grade-cell"><span>{row.grade}</span><span class="info-icon">i</span></td>
+                                        <td class={row.t1Class}>{row.t1}</td>
+                                        <td class={row.t2Class}>{row.t2}</td>
+                                        <td class={row.totalClass}>{row.total}</td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+
+                        <footer class="marks-footer">
+                            <div class="summary-pill">Grand Total: <strong>342/500</strong></div>
+                            <div class="summary-pill">CGPA: <strong>7.1</strong></div>
+                            <button type="button" class="download-btn" onclick={handleDownloadGradeCard}>Download Grade Card</button>
+                        </footer>
+                    </article>
+                </div>
+            </article>
+        </template>
+
+        <template lwc:if={isClubsTab}>
+            <article class="education-panel">
+
+                <div class="clubs-wrap">
+                    <h4 class="clubs-title">Clubs Joined</h4>
+                    <div class="education-divider"></div>
+
+                    <div class="clubs-grid">
+                        <template for:each={clubs} for:item="club">
+                            <article class="club-card" key={club.id}>
+                                <div class={club.imageClass}>
+                                    <span class="private-badge">Private</span>
+                                </div>
+                                <p class="club-name">{club.name}</p>
+                                <p class="club-role">{club.role}</p>
+                            </article>
+                        </template>
+                    </div>
+                </div>
+            </article>
+        </template>
+
+        <template lwc:if={isExtraTab}>
+            <article class="education-panel">
+                <h3 class="education-title">Achievements</h3>
+                <div class="education-divider"></div>
+
+                <div class="extra-wrap">
+                    <div class="extra-actions">
+                        <button type="button" class="add-new-btn" onclick={handleOpenExtraCurricularModal}>+&nbsp; Add New</button>
+                    </div>
+
+                    <div class="extra-list">
+                        <template for:each={extraCurricularItems} for:item="item">
+                            <article class="extra-card" key={item.id}>
+                                <div class="extra-card-header">
+                                    <p class="extra-category">{item.category}</p>
+                                    <template lwc:if={item.showActions}>
+                                        <div class="extra-card-actions">
+                                            <button type="button" class="extra-icon-btn" aria-label="Delete item">
+                                                <lightning-icon icon-name="utility:delete" size="x-small"></lightning-icon>
+                                            </button>
+                                            <button type="button" class="extra-icon-btn" aria-label="Edit item">
+                                                <lightning-icon icon-name="utility:edit" size="x-small"></lightning-icon>
+                                            </button>
+                                        </div>
+                                    </template>
+                                </div>
+                                <h4 class="extra-title">{item.title}</h4>
+                                <p class="extra-meta">{item.meta}</p>
+                            </article>
+                        </template>
+                    </div>
+                </div>
+            </article>
+        </template>
+
+        <template lwc:if={isConductTab}>
+            <article class="education-panel">
+                <h3 class="education-title">Conduct</h3>
+                <div class="education-divider"></div>
+
+                <div class="conduct-wrap">
+                    <div class="conduct-list">
+                        <template for:each={conductItems} for:item="item">
+                            <article class="conduct-card" key={item.id}>
+                                <div class="conduct-left">
+                                    <p class="conduct-reference">{item.reference}</p>
+                                    <h4 class="conduct-title">{item.title}</h4>
+                                    <p class="conduct-type">Type: {item.type}</p>
+                                    <template lwc:if={item.description}>
+                                        <p class="conduct-description">{item.description}</p>
+                                    </template>
+                                </div>
+
+                                <div class="conduct-right">
+                                    <p class="conduct-due-date">Due Date: <strong>{item.dueDate}</strong></p>
+                                    <span class={item.statusClass}>{item.status}</span>
+                                    <button
+                                        type="button"
+                                        class="view-details-btn"
+                                        onclick={handleConductViewDetails}
+                                    >
+                                        View Details
+                                    </button>
+                                </div>
+                            </article>
+                        </template>
+                    </div>
+                </div>
+            </article>
+        </template>
+    </section>
+
+    <template lwc:if={isExtraCurricularModalOpen}>
+        <section class="modal-backdrop" role="presentation">
+            <article class="extra-modal" role="dialog" aria-modal="true" aria-label="Add Extra Curriculars">
+                <header class="extra-modal-header">
+                    <h3 class="extra-modal-title">Add Extra Curriculars</h3>
+                </header>
+                <div class="education-divider"></div>
+
+                <div class="extra-modal-body">
+                    <div class="modal-field">
+                        <label class="modal-label">Type</label>
+                        <div class="modal-select-wrap">
+                            <select class="modal-input modal-select" onchange={handleExtraTypeChange}>
+                                <template for:each={extraTypeOptions} for:item="typeOption">
+                                    <option key={typeOption.value} value={typeOption.value}>{typeOption.label}</option>
+                                </template>
+                            </select>
+                        </div>
+                    </div>
+
+                    <template lwc:if={isSportsTypeSelected}>
+                        <div class="modal-grid-two">
+                            <div class="modal-field">
+                                <label class="modal-label">Sport Name<span class="required-star">*</span></label>
+                                <input class="modal-input" type="text" placeholder="Enter name of the sports" />
+                            </div>
+                            <div class="modal-field">
+                                <label class="modal-label">Level<span class="required-star">*</span></label>
+                                <div class="modal-select-wrap">
+                                    <select class="modal-input modal-select">
+                                        <template for:each={sportsLevelOptions} for:item="level">
+                                            <option key={level.value} value={level.value}>{level.label}</option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-grid-two">
+                            <div class="modal-field">
+                                <label class="modal-label">Achievement<span class="required-star">*</span></label>
+                                <div class="modal-select-wrap">
+                                    <select class="modal-input modal-select">
+                                        <template for:each={sportsAchievementOptions} for:item="achievement">
+                                            <option key={achievement.value} value={achievement.value}>{achievement.label}</option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-field">
+                                <label class="modal-label">Year<span class="required-star">*</span></label>
+                                <div class="modal-select-wrap">
+                                    <select class="modal-input modal-select">
+                                        <template for:each={yearOptions} for:item="year">
+                                            <option key={year.value} value={year.value}>{year.label}</option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template lwc:else>
+                        <template lwc:if={isCulturalArtsTypeSelected}>
+                            <div class="modal-grid-two">
+                                <div class="modal-field">
+                                    <label class="modal-label">Activity / Art Form<span class="required-star">*</span></label>
+                                    <div class="modal-select-wrap">
+                                        <select class="modal-input modal-select">
+                                            <template for:each={culturalActivityOptions} for:item="activity">
+                                                <option key={activity.value} value={activity.value}>{activity.label}</option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="modal-field">
+                                    <label class="modal-label">Event / Platform Name<span class="required-star">*</span></label>
+                                    <input class="modal-input" type="text" placeholder="Enter name of the event / platform" />
+                                </div>
+                            </div>
+
+                            <div class="modal-grid-two">
+                                <div class="modal-field">
+                                    <label class="modal-label">Level<span class="required-star">*</span></label>
+                                    <div class="modal-select-wrap">
+                                        <select class="modal-input modal-select">
+                                            <template for:each={culturalLevelOptions} for:item="level">
+                                                <option key={level.value} value={level.value}>{level.label}</option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="modal-field">
+                                    <label class="modal-label">Year<span class="required-star">*</span></label>
+                                    <div class="modal-select-wrap">
+                                        <select class="modal-input modal-select">
+                                            <template for:each={yearOptions} for:item="year">
+                                                <option key={year.value} value={year.value}>{year.label}</option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-grid-two">
+                                <div class="modal-field">
+                                    <label class="modal-label">Achievement (optional)</label>
+                                    <input class="modal-input" type="text" placeholder="Enter name of the achievement" />
+                                </div>
+                            </div>
+                        </template>
+
+                        <template lwc:else>
+                            <template lwc:if={isSocialWorkTypeSelected}>
+                                <div class="modal-grid-two">
+                                    <div class="modal-field">
+                                        <label class="modal-label">Organisation / Initiative Name<span class="required-star">*</span></label>
+                                        <input class="modal-input" type="text" placeholder="Name of organisation / initiative" />
+                                    </div>
+                                    <div class="modal-field">
+                                        <label class="modal-label">Role<span class="required-star">*</span></label>
+                                        <input class="modal-input" type="text" placeholder="Role at the Organisation" />
+                                    </div>
+                                </div>
+
+                                <div class="modal-grid-two">
+                                    <div class="modal-field">
+                                        <label class="modal-label">Start Date<span class="required-star">*</span></label>
+                                        <div class="modal-date-grid">
+                                            <div class="modal-select-wrap">
+                                                <select class="modal-input modal-select">
+                                                    <template for:each={monthOptions} for:item="month">
+                                                        <option key={month.value} value={month.value}>{month.label}</option>
+                                                    </template>
+                                                </select>
+                                            </div>
+                                            <div class="modal-select-wrap">
+                                                <select class="modal-input modal-select">
+                                                    <template for:each={yearOptions} for:item="year">
+                                                        <option key={year.value} value={year.value}>{year.label}</option>
+                                                    </template>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-field">
+                                        <label class="modal-label">End Date<span class="required-star">*</span></label>
+                                        <div class="modal-date-grid">
+                                            <div class="modal-select-wrap">
+                                                <select class="modal-input modal-select">
+                                                    <template for:each={monthOptions} for:item="month">
+                                                        <option key={month.value} value={month.value}>{month.label}</option>
+                                                    </template>
+                                                </select>
+                                            </div>
+                                            <div class="modal-select-wrap">
+                                                <select class="modal-input modal-select">
+                                                    <template for:each={yearOptions} for:item="year">
+                                                        <option key={year.value} value={year.value}>{year.label}</option>
+                                                    </template>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </template>
+
+                            <template lwc:else>
+                                <template lwc:if={isCertificationTypeSelected}>
+                                    <div class="modal-grid-two">
+                                        <div class="modal-field">
+                                            <label class="modal-label">Certification Name<span class="required-star">*</span></label>
+                                            <input class="modal-input" type="text" placeholder="Certification name" />
+                                        </div>
+                                        <div class="modal-field">
+                                            <label class="modal-label">Issuing Organisation<span class="required-star">*</span></label>
+                                            <input class="modal-input" type="text" placeholder="Issuing organisation" />
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-grid-two">
+                                        <div class="modal-field">
+                                            <label class="modal-label">Completion Date<span class="required-star">*</span></label>
+                                            <div class="modal-date-grid">
+                                                <div class="modal-select-wrap">
+                                                    <select class="modal-input modal-select">
+                                                        <template for:each={monthOptions} for:item="month">
+                                                            <option key={month.value} value={month.value}>{month.label}</option>
+                                                        </template>
+                                                    </select>
+                                                </div>
+                                                <div class="modal-select-wrap">
+                                                    <select class="modal-input modal-select">
+                                                        <template for:each={yearOptions} for:item="year">
+                                                            <option key={year.value} value={year.value}>{year.label}</option>
+                                                        </template>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-field">
+                                            <label class="modal-label">Credential ID / Link (optional)</label>
+                                            <input class="modal-input" type="text" placeholder="Credential ID / Link" />
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <template lwc:else>
+                                    <template lwc:if={isCompetitionsHackathonsTypeSelected}>
+                                        <div class="modal-grid-two">
+                                            <div class="modal-field">
+                                                <label class="modal-label">Completion Name<span class="required-star">*</span></label>
+                                                <input class="modal-input" type="text" placeholder="Completion name" />
+                                            </div>
+                                            <div class="modal-field">
+                                                <label class="modal-label">Organiser<span class="required-star">*</span></label>
+                                                <input class="modal-input" type="text" placeholder="Organiser name" />
+                                            </div>
+                                        </div>
+
+                                        <div class="modal-grid-two">
+                                            <div class="modal-field">
+                                                <label class="modal-label">Level<span class="required-star">*</span></label>
+                                                <div class="modal-select-wrap">
+                                                    <select class="modal-input modal-select">
+                                                        <template for:each={sportsLevelOptions} for:item="level">
+                                                            <option key={level.value} value={level.value}>{level.label}</option>
+                                                        </template>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="modal-field">
+                                                <label class="modal-label">Result<span class="required-star">*</span></label>
+                                                <div class="modal-select-wrap">
+                                                    <select class="modal-input modal-select">
+                                                        <template for:each={hackathonResultOptions} for:item="result">
+                                                            <option key={result.value} value={result.value}>{result.label}</option>
+                                                        </template>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="modal-grid-two">
+                                            <div class="modal-field">
+                                                <label class="modal-label">Year<span class="required-star">*</span></label>
+                                                <div class="modal-select-wrap">
+                                                    <select class="modal-input modal-select">
+                                                        <template for:each={yearOptions} for:item="year">
+                                                            <option key={year.value} value={year.value}>{year.label}</option>
+                                                        </template>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <template lwc:else>
+                                        <template lwc:if={isInternshipsTypeSelected}>
+                                            <div class="modal-grid-two">
+                                                <div class="modal-field">
+                                                    <label class="modal-label">Organisation Name<span class="required-star">*</span></label>
+                                                    <input class="modal-input" type="text" placeholder="Organisation name" />
+                                                </div>
+                                                <div class="modal-field">
+                                                    <label class="modal-label">Role / Title<span class="required-star">*</span></label>
+                                                    <input class="modal-input" type="text" placeholder="Role/title at the organisation" />
+                                                </div>
+                                            </div>
+
+                                            <div class="modal-grid-two">
+                                                <div class="modal-field">
+                                                    <label class="modal-label">Start Date<span class="required-star">*</span></label>
+                                                    <div class="modal-date-grid">
+                                                        <div class="modal-select-wrap">
+                                                            <select class="modal-input modal-select">
+                                                                <template for:each={monthOptions} for:item="month">
+                                                                    <option key={month.value} value={month.value}>{month.label}</option>
+                                                                </template>
+                                                            </select>
+                                                        </div>
+                                                        <div class="modal-select-wrap">
+                                                            <select class="modal-input modal-select">
+                                                                <template for:each={yearOptions} for:item="year">
+                                                                    <option key={year.value} value={year.value}>{year.label}</option>
+                                                                </template>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="modal-field">
+                                                    <label class="modal-label">End Date<span class="required-star">*</span></label>
+                                                    <div class="modal-date-grid">
+                                                        <div class="modal-select-wrap">
+                                                            <select class="modal-input modal-select">
+                                                                <template for:each={monthOptions} for:item="month">
+                                                                    <option key={month.value} value={month.value}>{month.label}</option>
+                                                                </template>
+                                                            </select>
+                                                        </div>
+                                                        <div class="modal-select-wrap">
+                                                            <select class="modal-input modal-select">
+                                                                <template for:each={yearOptions} for:item="year">
+                                                                    <option key={year.value} value={year.value}>{year.label}</option>
+                                                                </template>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="modal-grid-two">
+                                                <div class="modal-field">
+                                                    <label class="modal-label">Location (optional)</label>
+                                                    <div class="modal-select-wrap">
+                                                        <select class="modal-input modal-select">
+                                                            <template for:each={internshipLocationOptions} for:item="location">
+                                                                <option key={location.value} value={location.value}>{location.label}</option>
+                                                            </template>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <template lwc:else>
+                                            <div class="modal-grid-two">
+                                                <div class="modal-field">
+                                                    <label class="modal-label">Organization / Club Name<span class="required-star">*</span></label>
+                                                    <input class="modal-input" type="text" placeholder="Organization/club you were a part of" />
+                                                </div>
+                                                <div class="modal-field">
+                                                    <label class="modal-label">Role / Position<span class="required-star">*</span></label>
+                                                    <input class="modal-input" type="text" placeholder="e.g., Captain, Forward" />
+                                                </div>
+                                            </div>
+
+                                            <div class="modal-grid-two">
+                                                <div class="modal-field">
+                                                    <label class="modal-label">Start Date<span class="required-star">*</span></label>
+                                                    <div class="modal-date-grid">
+                                                        <div class="modal-select-wrap">
+                                                            <select class="modal-input modal-select">
+                                                                <template for:each={monthOptions} for:item="month">
+                                                                    <option key={month.value} value={month.value}>{month.label}</option>
+                                                                </template>
+                                                            </select>
+                                                        </div>
+                                                        <div class="modal-select-wrap">
+                                                            <select class="modal-input modal-select">
+                                                                <template for:each={yearOptions} for:item="year">
+                                                                    <option key={year.value} value={year.value}>{year.label}</option>
+                                                                </template>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="modal-field">
+                                                    <label class="modal-label">End Date<span class="required-star">*</span></label>
+                                                    <div class="modal-date-grid">
+                                                        <div class="modal-select-wrap">
+                                                            <select class="modal-input modal-select">
+                                                                <template for:each={monthOptions} for:item="month">
+                                                                    <option key={month.value} value={month.value}>{month.label}</option>
+                                                                </template>
+                                                            </select>
+                                                        </div>
+                                                        <div class="modal-select-wrap">
+                                                            <select class="modal-input modal-select">
+                                                                <template for:each={yearOptions} for:item="year">
+                                                                    <option key={year.value} value={year.value}>{year.label}</option>
+                                                                </template>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <label class="modal-checkbox-row">
+                                                <input type="checkbox" />
+                                                <span>Currently involved in this activity</span>
+                                            </label>
+                                        </template>
+                                    </template>
+                                </template>
+                            </template>
+                        </template>
+                    </template>
+
+                    <div class="modal-field">
+                        <label class="modal-label">Description (Optional)</label>
+                        <div class="modal-editor">
+                            <textarea class="modal-textarea" placeholder={descriptionPlaceholder}></textarea>
+                            <div class="modal-editor-footer">
+                                <div class="modal-editor-tools">
+                                    <button type="button" class="editor-tool-btn">B</button>
+                                    <button type="button" class="editor-tool-btn">I</button>
+                                    <button type="button" class="editor-tool-btn">=</button>
+                                    <button type="button" class="editor-tool-btn">=</button>
+                                </div>
+                                <button type="button" class="ai-help-btn">+ Continue writing with AI</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="extra-modal-footer">
+                    <button type="button" class="modal-back-btn" onclick={handleCloseExtraCurricularModal}>Back</button>
+                    <button type="button" class="modal-save-btn" onclick={handleExtraCurricularSave}>Save</button>
+                </footer>
+            </article>
+        </section>
+    </template>
+
+    <template lwc:if={isDownloadSuccessOpen}>
+        <section class="modal-backdrop" role="presentation">
+            <article class="download-success-modal" role="status" aria-live="polite">
+                <div class="dl-icon-wrap">
+                    <div class="dl-icon-inner">
+                        <span class="dl-check">&#10003;</span>
+                    </div>
+                </div>
+                <h3 class="dl-title">Downloaded Successfully</h3>
+                <p class="dl-subtitle">Your Grade card has been downloaded successfully!</p>
+            </article>
+        </section>
+    </template>
+
+    <template lwc:if={isIdCardModalOpen}>
+        <section
+            class="modal-backdrop id-card-backdrop"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Student ID Card"
+            onclick={closeIdCardModal}
+        >
+            <article class="id-card-modal" onclick={stopIdCardModalClose}>
+                <header class="id-card-header">
+                    <div class="id-card-logo-box">Logo</div>
+                    <div class="id-card-institute">
+                        <p class="id-card-institute-name">Name of the Institute</p>
+                        <p class="id-card-institute-meta">Institute Meta Data</p>
+                    </div>
+                </header>
+
+                <div class="id-card-body">
+                    <div class="id-card-photo-wrap">
+                        <template lwc:if={hasStudentPhoto}>
+                            <img class="id-card-photo" src={studentPhotoUrl} alt="Student Photo" />
+                        </template>
+                        <template lwc:else>
+                            <div class="id-card-photo id-card-photo-placeholder"></div>
+                        </template>
+                    </div>
+
+                    <h3 class="id-card-name">David Anderson</h3>
+                    <p class="id-card-program">B Tech., CSE | URK17MT023</p>
+
+                    <div class="id-card-signature-wrap">
+                        <svg class="id-card-signature" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 30 C20 10, 30 35, 40 20 C50 5, 55 30, 65 25 C75 20, 80 30, 90 22 C100 14, 105 28, 110 24" stroke="#1a7a6e" stroke-width="2" stroke-linecap="round" fill="none"/>
+                        </svg>
+                        <p class="id-card-signature-label">Principal</p>
+                    </div>
+                </div>
+
+                <footer class="id-card-footer">
+                    <button type="button" class="id-card-close-btn" onclick={closeIdCardModal}>Close</button>
+                    <button type="button" class="id-card-download-btn" onclick={handleIdCardDownload}>Download</button>
+                </footer>
+            </article>
+        </section>
+    </template>
+
+    <template lwc:if={isExtraCurricularSuccessOpen}>
+        <section class="modal-backdrop success-backdrop" role="presentation" onclick={handleCloseExtraCurricularSuccess}>
+            <article class="extra-success-modal" role="status" aria-live="polite">
+                <div class="success-icon-wrap">
+                    <div class="success-icon-inner">
+                        <lightning-icon icon-name="utility:success" size="small" variant="inverse"></lightning-icon>
+                    </div>
+                </div>
+                <p class="success-message">Extra Curriculars Added!</p>
+            </article>
+        </section>
+    </template>
+</template>

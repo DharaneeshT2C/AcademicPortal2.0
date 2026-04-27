@@ -1,0 +1,252 @@
+<template>
+    <template if:true={isLoading}>
+        <aside class="side-nav side-nav-skeleton" aria-busy="true" aria-live="polite">
+            <section class="profile-panel skeleton-profile">
+                <div class="skeleton-circle"></div>
+                <div class="skeleton-line skeleton-name"></div>
+                <div class="skeleton-line skeleton-id"></div>
+            </section>
+            <section class="menu-section skeleton-menu">
+                <div class="skeleton-line skeleton-menu-row"></div>
+                <div class="skeleton-line skeleton-menu-row"></div>
+                <div class="skeleton-line skeleton-menu-row"></div>
+                <div class="skeleton-line skeleton-menu-row"></div>
+                <div class="skeleton-line skeleton-menu-row"></div>
+            </section>
+            <section class="footer-panel skeleton-footer">
+                <div class="skeleton-line skeleton-button"></div>
+                <div class="skeleton-line skeleton-logout"></div>
+            </section>
+        </aside>
+    </template>
+
+    <template if:false={isLoading}>
+        <aside class={sideNavClass}>
+            <section class="profile-panel">
+                <button type="button" class="avatar-wrap avatar-wrap-btn" onclick={handleProfileClick} aria-label="Open profile">
+                    <template if:true={hasUserPhoto}>
+                        <img class="avatar" src={userPhotoUrl} alt={currentUserName} />
+                    </template>
+                    <template if:false={hasUserPhoto}>
+                        <div class="avatar avatar-fallback">{userInitials}</div>
+                    </template>
+                </button>
+                <h2 class="student-name">{currentUserName}</h2>
+            </section>
+
+            <template if:true={isStudentRole}>
+                <nav class="menu-section" aria-label="Primary">
+                    <ul class="menu-list">
+                        <li class="menu-item">
+                            <button class="menu-button" type="button" onclick={handleHomeClick}>
+                                <lightning-icon icon-name="utility:home" size="x-small"></lightning-icon>
+                                <span>Home</span>
+                            </button>
+                        </li>
+                        <li class="menu-item menu-item-group">
+                            <button class="menu-button menu-group-header" type="button" onclick={toggleAcademics}>
+                                <div class="menu-group-title">
+                                    <lightning-icon icon-name="utility:education" size="x-small"></lightning-icon>
+                                    <span class="group-label">Academics</span>
+                                </div>
+                                <lightning-icon icon-name={academicsChevron} size="xx-small" class="chevron"></lightning-icon>
+                            </button>
+                        </li>
+                    </ul>
+
+                    <template if:true={isAcademicsOpen}>
+                        <ul class="submenu-list">
+                            <li class={courseEnrollmentItemClass}>
+                                <button class="menu-button submenu-button" type="button"
+                                    onclick={handleCourseEnrollmentClick}>
+                                    <lightning-icon icon-name="utility:apps" size="x-small"></lightning-icon>
+                                    <span>Course Enrollment</span>
+                                </button>
+                            </li>
+                            <li class="submenu-item">
+                                <button class="menu-button submenu-button" type="button" onclick={handleLearnClick}>
+                                    <lightning-icon icon-name="utility:open_folder" size="x-small"></lightning-icon>
+                                    <span>Learn</span>
+                                </button>
+                            </li>
+                            <li class={studentAttendanceItemClass}>
+                                <button class="menu-button submenu-button" type="button" onclick={handleAttendanceClick}>
+                                    <lightning-icon icon-name="utility:date_input" size="x-small"></lightning-icon>
+                                    <span>Attendance</span>
+                                </button>
+                            </li>
+                            <li class="submenu-item">
+                                <button class="menu-button submenu-button" type="button">
+                                    <lightning-icon icon-name="utility:note" size="x-small"></lightning-icon>
+                                    <span>Thesis Management</span>
+                                </button>
+                            </li>
+                            <li class="submenu-item">
+                                <button class="menu-button submenu-button" type="button">
+                                    <lightning-icon icon-name="utility:knowledge_base" size="x-small"></lightning-icon>
+                                    <span>Research</span>
+                                </button>
+                            </li>
+                        </ul>
+                    </template>
+
+                    <ul class="menu-list menu-list-secondary">
+                        <li class="menu-item">
+                            <button class="menu-button" type="button">
+                                <lightning-icon icon-name="utility:user" size="x-small"></lightning-icon>
+                                <span>Mentors</span>
+                            </button>
+                        </li>
+                        <li class={feePaymentItemClass}>
+                            <button class="menu-button" type="button" onclick={handleFeePayment}>
+                                <lightning-icon icon-name="utility:moneybag" size="x-small"></lightning-icon>
+                                <span>Fee Payment</span>
+                            </button>
+                        </li>
+
+                        <li class="menu-item menu-item-group">
+                            <button class="menu-button menu-group-header" type="button" onclick={toggleExams}>
+                                <div class="menu-group-title">
+                                    <lightning-icon icon-name="utility:description" size="x-small"></lightning-icon>
+                                    <span>Examinations</span>
+                                </div>
+                                <lightning-icon icon-name={examsChevron} size="xx-small" class="chevron"></lightning-icon>
+                            </button>
+
+                            <template if:true={isExamsOpen}>
+                                <ul class="submenu-list exams-submenu-list">
+                                    <li class={myExamsItemClass}>
+                                        <button class="menu-button submenu-button" type="button"
+                                            onclick={handleMyExamsClick}>
+                                            <lightning-icon icon-name="utility:checkin" size="x-small"></lightning-icon>
+                                            <span>My Exams</span>
+                                        </button>
+                                    </li>
+                                    <li class={examResultsItemClass}>
+                                        <button class="menu-button submenu-button" type="button"
+                                            onclick={handleExamResultsClick}>
+                                            <lightning-icon icon-name="utility:table" size="x-small"></lightning-icon>
+                                            <span>Results</span>
+                                        </button>
+                                    </li>
+                                </ul>
+                            </template>
+                        </li>
+
+                        <li class={placementsItemClass}>
+                            <button class="menu-button" type="button" onclick={handlePlacementsClick}>
+                                <lightning-icon icon-name="utility:case" size="x-small"></lightning-icon>
+                                <span>Placements</span>
+                            </button>
+                        </li>
+
+                        <li class={campusLifeItemClass}>
+                            <button class="menu-button" type="button" onclick={handleCampusLifeClick}>
+                                <lightning-icon icon-name="utility:world" size="x-small"></lightning-icon>
+                                <span>Campus Life</span>
+                            </button>
+                        </li>
+                        <li class="menu-item">
+                            <button class="menu-button" type="button" onclick={handleServiceSupportClick}>
+                                <lightning-icon icon-name="utility:chat" size="x-small"></lightning-icon>
+                                <span>Service &amp; Support</span>
+                            </button>
+                        </li>
+                        <li class="menu-item">
+                            <button class="menu-button" type="button" onclick={handleFeedbackClick}>
+                                <lightning-icon icon-name="utility:question_post" size="x-small"></lightning-icon>
+                                <span>Feedback</span>
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+            </template>
+
+            <template if:false={isStudentRole}>
+                <nav class="menu-section" aria-label="Primary">
+                    <ul class="menu-list">
+                        <li class="menu-item">
+                            <button class="menu-button" type="button" onclick={handleHomeClick}>
+                                <lightning-icon icon-name="utility:home" size="x-small"></lightning-icon>
+                                <span>Home</span>
+                            </button>
+                        </li>
+                        <li class="menu-item menu-item-group faculty-academics-title">
+                            <button class="menu-button" type="button" onclick={handleFacultyAcademicsClick}>
+                                <lightning-icon icon-name="utility:list" size="x-small"></lightning-icon>
+                                <span class="group-label">Academics</span>
+                            </button>
+                        </li>
+                    </ul>
+
+                    <ul class="submenu-list faculty-academics-submenu">
+                        <li class={facultyThesisItemClass}>
+                            <button class="menu-button submenu-button" type="button" onclick={handleFacultyThesisClick}>
+                                <lightning-icon icon-name="utility:note" size="x-small"></lightning-icon>
+                                <span>Thesis Management</span>
+                            </button>
+                        </li>
+                        <li class={facultyAttendanceItemClass}>
+                            <button class="menu-button submenu-button" type="button" onclick={handleFacultyAttendanceClick}>
+                                <lightning-icon icon-name="utility:event" size="x-small"></lightning-icon>
+                                <span>Attendance</span>
+                            </button>
+                        </li>
+                        <li class={facultyExamsItemClass}>
+                            <button class="menu-button submenu-button" type="button" onclick={handleFacultyExamsClick}>
+                                <lightning-icon icon-name="utility:description" size="x-small"></lightning-icon>
+                                <span>Exams</span>
+                            </button>
+                        </li>
+                        <li class={facultyMyStudentsItemClass}>
+                            <button class="menu-button submenu-button" type="button" onclick={handleMyStudentsClick}>
+                                <lightning-icon icon-name="utility:user" size="x-small"></lightning-icon>
+                                <span>My Students</span>
+                            </button>
+                        </li>
+                        <li class={facultyPayrollItemClass}>
+                            <button class="menu-button submenu-button" type="button" onclick={handlePayrollClick}>
+                                <lightning-icon icon-name="utility:moneybag" size="x-small"></lightning-icon>
+                                <span>Payroll</span>
+                            </button>
+                        </li>
+                        <li class={facultyInterviewItemClass}>
+                            <button class="menu-button submenu-button" type="button" onclick={handleInterviewClick}>
+                                <lightning-icon icon-name="utility:chat" size="x-small"></lightning-icon>
+                                <span>Interview</span>
+                            </button>
+                        </li>
+                        <li class={facultyEventsItemClass}>
+                            <button class="menu-button submenu-button" type="button" onclick={handleEventsClick}>
+                                <lightning-icon icon-name="utility:world" size="x-small"></lightning-icon>
+                                <span>Events</span>
+                            </button>
+                        </li>
+                        <li class={facultyServiceSupportItemClass}>
+                            <button class="menu-button submenu-button" type="button" onclick={handleServiceSupportClick}>
+                                <lightning-icon icon-name="utility:question_post" size="x-small"></lightning-icon>
+                                <span>Service &amp; Support</span>
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+            </template>
+
+            <section class="footer-panel">
+                <button class="powered-by" type="button">
+                    <span>Powered by</span>
+                    <strong>ken42</strong>
+                </button>
+
+                <!-- <button class="role-toggle" type="button" onclick={handleRoleToggle}>
+                    <span>{roleToggleLabel}</span>
+                </button> -->
+
+                <button class="menu-button logout-button" type="button" onclick={handleLogout}>
+                    <lightning-icon icon-name="utility:logout" size="x-small"></lightning-icon>
+                    <span>Logout</span>
+                </button>
+            </section>
+        </aside>
+    </template>
+</template>

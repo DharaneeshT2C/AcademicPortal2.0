@@ -1,0 +1,51 @@
+<template>
+    <div class="layout">
+        <div class="left">
+            <c-navigation-menu
+                student-name={studentName}
+                active-menu={activeScreen}
+                onmenuselect={handleMenuSelect}>
+            </c-navigation-menu>
+        </div>
+
+        <div class="right">
+    <div class="content">
+            <template if:true={showHome}>
+              Home Screen
+            </template>
+
+            <template if:true={showCourseEnrollment}>
+                <c-course-enrollment onenroll={handleEnroll}></c-course-enrollment>
+            </template>
+
+            <template if:true={showCourseSelection}>
+                <c-course-selection-screen
+                    selected-semester={selectedSemester}
+                    academic-session-id={selectedAcademicSessionId}
+                    oncoursesselected={handleCoursesSelected}>
+                </c-course-selection-screen>
+            </template>
+
+            <template if:true={showSummary}>
+                <c-selected-courses-summary
+                    mandatory-courses={mandatoryCourses}
+                    elective-courses={electiveCourses}
+                    selected-semester={selectedSemester}>
+                </c-selected-courses-summary>
+            </template>
+
+            <template if:true={showProgramPath}>
+                <c-program-path
+                   >
+                </c-program-path>
+            </template>
+
+            <template if:true={showSchedule}>
+                <c-student-home-schedule
+                   >
+                </c-student-home-schedule>
+            </template>
+            </div>
+        </div>
+    </div>
+</template>

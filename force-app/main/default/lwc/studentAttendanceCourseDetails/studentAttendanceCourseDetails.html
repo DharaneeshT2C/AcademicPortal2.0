@@ -1,0 +1,142 @@
+<template>
+    <section class="attendance-view-shell">
+        <div class="top-row">
+            <h2 class="course-title">{resolvedCourseName} <span>| {resolvedCourseCode}</span></h2>
+            <button type="button" class="back-btn" onclick={handleBack}>Back</button>
+        </div>
+
+        <div class="course-info-card">
+            <div class="info-row">
+                <div class="info-item">
+                    <span class="info-label">Faculty In-Charge</span>
+                    <span class="info-value">{facultyName}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Sessions Attended</span>
+                    <span class="info-value">{sessionsAttended}/{totalSessions}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Overall Percentage</span>
+                    <span class={overallPercentageClass}>{overallPercentage}%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="attendance-card">
+            <div class="attendance-head">
+                <h3 class="section-title">Attendance</h3>
+                <button type="button" class="help-btn">Get Help</button>
+            </div>
+
+            <div class="tab-row">
+                <div class="tabs">
+                    <button type="button" class={dayTabClass} data-tab="day" onclick={handleTabChange}>Day</button>
+                    <button type="button" class={weekTabClass} data-tab="week" onclick={handleTabChange}>Week</button>
+                    <button type="button" class={monthTabClass} data-tab="month" onclick={handleTabChange}>Month</button>
+                </div>
+                <div class="date-controls">
+                    <button type="button" class="date-nav-btn" onclick={handlePrevDate}>←</button>
+                    <button type="button" class="date-chip">{displayDate}</button>
+                    <button type="button" class="date-nav-btn" onclick={handleNextDate}>→</button>
+                </div>
+            </div>
+
+            <template if:true={isDayView}>
+                <div class="table-card">
+                    <div class="table-scroll">
+                        <table class="attendance-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                    <th>All Status</th>
+                                    <th>All Types</th>
+                                    <th>Absence Type</th>
+                                    <th>Reason</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={dayTableRows} for:item="row">
+                                    <tr key={row.id}>
+                                        <td>{row.date}</td>
+                                        <td>{row.startTime}</td>
+                                        <td>{row.endTime}</td>
+                                        <td><span class={row.statusClass}>{row.status}</span></td>
+                                        <td>{row.type}</td>
+                                        <td>{row.absenceType}</td>
+                                        <td>{row.reason}</td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </template>
+
+            <template if:true={isWeekView}>
+                <div class="calendar-card">
+                    <div class="week-header">
+                        <span class="week-range">{weekRange}</span>
+                    </div>
+                    <div class="week-grid">
+                        <template for:each={weekDays} for:item="day">
+                            <div class="week-day-col" key={day.date}>
+                                <div class="day-header">
+                                    <div class="day-name">{day.dayName}</div>
+                                    <div class="day-date">{day.date}</div>
+                                </div>
+                                <div class="day-sessions">
+                                    <template for:each={day.sessions} for:item="session">
+                                        <div class="session-block" key={session.id}>
+                                            <div class="session-time">{session.time}</div>
+                                            <span class={session.statusClass}>{session.status}</span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+
+            <template if:true={isMonthView}>
+                <div class="calendar-card">
+                    <div class="month-header">
+                        <span class="month-label">{monthLabel}</span>
+                    </div>
+                    <div class="calendar-grid">
+                        <div class="calendar-weekdays">
+                            <div class="weekday">Mon</div>
+                            <div class="weekday">Tue</div>
+                            <div class="weekday">Wed</div>
+                            <div class="weekday">Thu</div>
+                            <div class="weekday">Fri</div>
+                            <div class="weekday">Sat</div>
+                            <div class="weekday">Sun</div>
+                        </div>
+                        <div class="calendar-dates">
+                            <template for:each={monthDays} for:item="day">
+                                <div class="calendar-date" key={day.date}>
+                                    <template if:true={day.isCurrentMonth}>
+                                        <div class="date-number">{day.dayOfMonth}</div>
+                                        <template if:true={day.hasAttendance}>
+                                            <div class="attendance-dots">
+                                                <template for:each={day.attendance} for:item="att">
+                                                    <span class={att.dotClass} key={att.id}></span>
+                                                </template>
+                                                <template if:true={day.hasMore}>
+                                                    <span class="more-text">+{day.moreCount} more</span>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </section>
+</template>

@@ -1,0 +1,179 @@
+.course-page {
+    padding: 24px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.tabs {
+    display: flex;
+    gap: 24px;
+}
+
+.tab {
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    padding-bottom: 8px;
+    color: #5c5c5c;
+}
+
+.tab.active {
+    color: #2563eb;
+    border-bottom: 2px solid #2563eb;
+}
+
+.search {
+    width: 260px;
+}
+
+/* Grid */
+.grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 24px;
+}
+
+/* Card */
+.card {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 16px;
+}
+
+.image-wrapper {
+    position: relative;
+}
+
+.image-wrapper img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+.add-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #ffffff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.content {
+    margin-top: 16px;
+}
+
+.content h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.content p {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 4px;
+}
+
+.faculty-btn {
+    margin-top: 12px;
+    width: 100%;
+    background: #eef2ff;
+    color: #2563eb;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #777;
+    padding: 40px;
+}
+
+.footer-actions {
+    position: fixed;
+    bottom: 24px;
+    right: 32px;
+    display: flex;
+    gap: 16px;
+    z-index: 10;
+}
+
+.btn-primary {
+    background: #4f7cff;
+    color: white;
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-secondary {
+    background: white;
+    border: 2px solid #333;
+    padding: 14px 24px;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.template-section {
+    margin-bottom: 40px;
+}
+
+.template-type {
+    font-size: 12px;
+    font-weight: 500;
+    color: #6b7280;
+}
+
+.template-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 24px;
+}
+
+.accordion-content {
+    max-height: 60vh;  
+    overflow-y: auto;   
+    padding-right: 8px;
+}
+
+
+.accordion-icon {
+    font-size: 24px;
+    font-weight: 600;
+}
+.accordion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+    gap: 12px;
+}
+
+.template-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 16px;
+
+    max-width: 80%;
+    white-space: nowrap;
+    overflow-x: auto;
+}
+
+.template-title::-webkit-scrollbar {
+    height: 4px;
+}

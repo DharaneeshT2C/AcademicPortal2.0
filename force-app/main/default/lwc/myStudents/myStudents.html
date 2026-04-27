@@ -1,0 +1,70 @@
+<template>
+    <section class="my-students-page">
+        <article class="course-overview-card">
+            <div class="course-details">
+                <h2 class="course-title">Engineering Mathematics-I <span>|&nbsp;KJ9844763</span></h2>
+                <p class="course-program">B.Tech., Electronics &amp; Engineering</p>
+            </div>
+
+            <div class="overview-metrics">
+                <div class="metric-card">
+                    <p>No of Students</p>
+                    <strong>32</strong>
+                </div>
+                <div class="metric-card">
+                    <p>Total Sessions</p>
+                    <strong>20</strong>
+                </div>
+                <div class="metric-card risk-card">
+                    <p>Students at Risk</p>
+                    <strong>3</strong>
+                </div>
+            </div>
+        </article>
+
+        <article class="student-list-card">
+            <header class="student-list-head">
+                <h3>Student List</h3>
+                <button type="button" class="help-btn">Get Help</button>
+            </header>
+
+            <div class="table-shell">
+                <table class="students-table" aria-label="Student list">
+                    <thead>
+                        <tr>
+                            <th>Roll No.</th>
+                            <th>Student Name</th>
+                            <th>Attendance (%)</th>
+                            <th>PO Attainment (%)</th>
+                            <th>CO Attainment (%)</th>
+                            <th>All Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={students} for:item="student">
+                            <tr key={student.id}>
+                                <td>{student.rollNo}</td>
+                                <td>{student.name}</td>
+                                <td class={student.attendanceClass}>{student.attendance}</td>
+                                <td><span class={student.poClass}>{student.po}</span></td>
+                                <td><span class={student.coClass}>{student.co}</span></td>
+                                <td>
+                                    <span class={student.statusClass}>
+                                        <template lwc:if={student.showAlert}>
+                                            <span class="status-dot">!</span>
+                                        </template>
+                                        {student.status}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button type="button" class="view-details-btn" onclick={handleViewDetails}>View Details</button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </article>
+    </section>
+</template>

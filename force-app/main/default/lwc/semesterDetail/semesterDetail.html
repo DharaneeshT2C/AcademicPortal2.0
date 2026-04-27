@@ -1,0 +1,51 @@
+<template>
+    <div class="page">
+        <div class="page-header">
+            <div>
+                <h2 class="page-title">Semester 2</h2>
+                <p class="breadcrumb">Home &gt; Course Enrolment</p>
+            </div>
+        </div>
+
+        <div class="detail-header">
+            <h3 class="section-title">Semester 2</h3>
+            <button class="btn-outline" onclick={handleGetHelp}>Get Help</button>
+        </div>
+
+        <div class="programs-list">
+            <template for:each={programs} for:item="prog">
+                <div key={prog.id} class="program-card">
+                    <div class="program-info">
+                        <h4 class="program-name">{prog.name}</h4>
+                        <template lwc:if={prog.mandatory}>
+                            <p class="program-detail">Mandatory: {prog.mandatory}</p>
+                            <p class="program-detail">Electives: {prog.electives}</p>
+                            <span class="program-status incomplete">
+                                <c-icon name="warning" size="20"></c-icon> {prog.status}
+                            </span>
+                        </template>
+                        <template lwc:if={prog.description}>
+                            <p class="program-desc">
+                                <c-icon name="warning" size="16"></c-icon>
+                                {prog.description}
+                            </p>
+                        </template>
+                    </div>
+                    <div class="program-actions">
+                        <template lwc:if={prog.lastDate}>
+                            <span class="last-date">Last Date: {prog.lastDate}</span>
+                        </template>
+                        <template lwc:if={prog.canEnroll}>
+                            <button class="btn-primary" onclick={handleEnroll}>Enrol Now <c-icon name="arrow_forward" size="20"></c-icon></button>
+                        </template>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <div class="footer-bar">
+            <span class="footer-text">Finish pathway enrollment to start with course selection</span>
+            <button class="btn-outline-primary" onclick={handleSelectCourses}>Select Courses <c-icon name="arrow_forward" size="20"></c-icon></button>
+        </div>
+    </div>
+</template>

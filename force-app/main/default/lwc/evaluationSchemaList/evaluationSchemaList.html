@@ -1,0 +1,72 @@
+<template>
+    <div class="esl-wrap">
+        <!-- Header -->
+        <div class="esl-header">
+            <div class="esl-header-text">
+                <h2 class="esl-title">Evaluation Schema</h2>
+                <p class="esl-subtitle">Manage reusable schema templates and inspect usage.</p>
+            </div>
+            <button class="esl-btn-primary" onclick={handleCreateSchema}>+ Create Schema</button>
+        </div>
+
+        <!-- Table -->
+        <template lwc:if={hasSchemas}>
+            <div class="esl-table-wrap">
+
+                <!-- Column Headers -->
+                <div class="esl-table-head">
+                    <div class="esl-th esl-col-name">Name</div>
+                    <div class="esl-th esl-col-total">Total Marks</div>
+                    <div class="esl-th esl-col-passing">Passing</div>
+                    <div class="esl-th esl-col-courses">Courses</div>
+                    <div class="esl-th esl-col-status">Status</div>
+                    <div class="esl-th esl-col-action"></div>
+                </div>
+
+                <!-- Rows -->
+                <template for:each={schemaCards} for:item="schema">
+                    <div key={schema.id} class="esl-table-row">
+                        <div class="esl-td esl-col-name">
+                            <div class="esl-name-cell">
+                                <div class="esl-row-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+                                        <rect x="9" y="3" width="6" height="4" rx="1"/>
+                                        <line x1="9" y1="12" x2="15" y2="12"/>
+                                        <line x1="9" y1="16" x2="13" y2="16"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <span class="esl-name-text">{schema.name}</span>
+                                    <template lwc:if={schema.description}>
+                                        <span class="esl-desc-text">{schema.description}</span>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="esl-td esl-col-total">{schema.totalMarks}</div>
+                        <div class="esl-td esl-col-passing">{schema.passingMarks}</div>
+                        <div class="esl-td esl-col-courses">{schema.coursesApplied}</div>
+                        <div class="esl-td esl-col-status">
+                            <span class="esl-status-pill esl-status-active">Active</span>
+                        </div>
+                        <div class="esl-td esl-col-action">
+                            <button
+                                class="esl-view-btn"
+                                data-id={schema.id}
+                                onclick={handleSchemaClick}
+                            >View</button>
+                        </div>
+                    </div>
+                </template>
+
+            </div>
+        </template>
+
+        <template lwc:else>
+            <div class="esl-empty">
+                <p>No evaluation schemas found. Create one to get started.</p>
+            </div>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,126 @@
+<template>
+    <section class="attendance-view-shell">
+        <div class="course-summary-card">
+            <div class="course-meta">
+                <h2 class="course-title">Applied Physics <span>|&nbsp; KJ9844763</span></h2>
+                <p class="course-subtitle">B.Tech., Electronics & Engineering</p>
+            </div>
+            <div class="summary-metrics">
+                <div class="metric-box">
+                    <span class="metric-label">Total Number of Session</span>
+                    <span class="metric-value">23</span>
+                </div>
+                <div class="metric-box">
+                    <span class="metric-label">Venue</span>
+                    <span class="metric-value">ECE - I</span>
+                </div>
+                <div class="metric-box">
+                    <span class="metric-label">Type</span>
+                    <span class="metric-value">Theory</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="attendance-card">
+            <div class="attendance-head">
+                <h3 class="section-title">Attendance</h3>
+                <div class="head-controls">
+                    <span class="info-chip">Total Students 40</span>
+
+                    <div class="semester-wrap">
+                        <select class="semester-select" onchange={handleSemesterChange}>
+                            <template for:each={selectedSemesterOptions} for:item="option">
+                                <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                            </template>
+                        </select>
+                        <span class="current-pill"><span class="dot"></span>Current</span>
+                        <span class="caret">⌄</span>
+                    </div>
+
+                    <button type="button" class="help-btn">Get Help</button>
+                </div>
+            </div>
+
+            <div class="tab-row">
+                <div class="tabs">
+                    <button type="button" class={dayTabClass} data-tab="day" onclick={handleTabChange}>Day</button>
+                    <button type="button" class={weekTabClass} data-tab="week" onclick={handleTabChange}>Week</button>
+                    <button type="button" class={monthTabClass} data-tab="month" onclick={handleTabChange}>Month</button>
+                </div>
+                <button type="button" class="date-chip">
+                    February 2026
+                    <lightning-icon class="calendar-icon" icon-name="utility:event" size="x-small"></lightning-icon>
+                </button>
+            </div>
+
+            <template if:true={isWeekTab}>
+                <div class="week-range-wrap">
+                    <button type="button" class="range-nav">‹</button>
+                    <span class="range-label">Feb 12 – Feb 18, 2026</span>
+                    <button type="button" class="range-nav">›</button>
+                </div>
+            </template>
+
+            <div class="table-card">
+                <div class="table-scroll">
+                    <table class="attendance-table">
+                        <thead>
+                            <tr>
+                                <th>Date <span class="tiny-caret">⌃</span></th>
+                                <th>Day <span class="tiny-caret">⌄</span></th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Present</th>
+                                <th>Absent</th>
+                                <th>Attendance %</th>
+                                <th>All Status <span class="tiny-caret">⌄</span></th>
+                                <th>
+                                    <span class="progress-placeholder"></span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={tableRows} for:item="row">
+                                <tr key={row.id}>
+                                    <td>{row.date}</td>
+                                    <td>{row.day}</td>
+                                    <td>{row.startTime}</td>
+                                    <td>{row.endTime}</td>
+                                    <td>{row.present}</td>
+                                    <td>{row.absent}</td>
+                                    <td>{row.attendancePercent}</td>
+                                    <td><span class={row.statusClass}>{row.status}</span></td>
+                                    <td><button type="button" class="view-btn" onclick={handleViewDetails}>View Details</button></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mobile-card-list">
+                <template for:each={tableRows} for:item="row">
+                    <article class="mobile-card" key={row.id}>
+                        <div class="mobile-top">
+                            <div>
+                                <p class="mobile-date">{row.date}</p>
+                                <p class="mobile-day">{row.day}</p>
+                            </div>
+                            <span class={row.statusClass}>{row.status}</span>
+                        </div>
+
+                        <div class="mobile-grid">
+                            <p><span>Start:</span> {row.startTime}</p>
+                            <p><span>End:</span> {row.endTime}</p>
+                            <p><span>Present:</span> {row.present}</p>
+                            <p><span>Absent:</span> {row.absent}</p>
+                            <p><span>Attendance:</span> {row.attendancePercent}</p>
+                        </div>
+
+                        <button type="button" class="view-btn mobile-view-btn" onclick={handleViewDetails}>View Details</button>
+                    </article>
+                </template>
+            </div>
+        </div>
+    </section>
+</template>

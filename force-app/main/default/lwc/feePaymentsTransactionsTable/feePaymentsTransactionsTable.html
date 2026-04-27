@@ -1,0 +1,77 @@
+<template>
+    <section class="table-panel">
+	        <div class="table-shell desktop-table">
+	            <div class="table-head">
+	                <span>Transaction ID</span>
+	                <button class="sort-button" type="button" onclick={handleTransactionDateSort}>
+	                    <span>Transaction Date</span>
+	                    <img src={sortIcon} alt="Sort" class="sort-mark" />
+	                </button>
+	                <span>Payment Mode</span>
+	                <span>Currency</span>
+	                <span>Total Paid</span>
+	                <span>Status</span>
+	                <span>Receipt</span>
+	            </div>
+
+            <template for:each={filteredRows} for:item="row">
+                <div key={row.id} class="table-row">
+                    <span>{row.transactionId}</span>
+                    <span>{row.transactionDate}</span>
+                    <span>{row.paymentMode}</span>
+                    <span>{row.currency}</span>
+                    <span>{row.totalPaid}</span>
+                    <div class="status-cell">
+                        <span class={row.statusClass}>{row.status}</span>
+                        <template if:true={row.isFailed}>
+                            <button class="retry-button" type="button" data-id={row.id} onclick={handleRetry}>Retry</button>
+                        </template>
+                    </div>
+                    <template if:true={row.canDownloadReceipt}>
+                        <button class="icon-button" type="button" data-id={row.id} onclick={handleDownload}>
+                            <lightning-icon icon-name="utility:download" size="x-small" alternative-text="Download receipt"></lightning-icon>
+                        </button>
+                    </template>
+                    <template if:false={row.canDownloadReceipt}>
+                        <span></span>
+                    </template>
+                </div>
+            </template>
+
+            <template if:false={filteredRows.length}>
+                <div class="empty-state">No transactions found.</div>
+            </template>
+        </div>
+
+        <div class="mobile-list">
+            <template for:each={filteredRows} for:item="row">
+                <article key={row.id} class="mobile-card">
+                    <div class="mobile-head">
+                        <h3>{row.transactionId}</h3>
+                        <div class="mobile-head-actions">
+                            <span class={row.statusClass}>{row.status}</span>
+                            <template if:true={row.isFailed}>
+                                <button class="retry-icon-button" type="button" data-id={row.id} onclick={handleRetry}>↻</button>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="mobile-detail-list">
+                        <div class="mobile-detail-row"><span>Date:</span><strong>{row.transactionDate}</strong></div>
+                        <div class="mobile-detail-row"><span>Total Paid</span><strong>INR {row.totalPaid}</strong></div>
+                    </div>
+                    <div class="mobile-actions mobile-actions-single">
+                        <template if:true={row.isFailed}>
+                            <button class="cta-button cta-button-outline" type="button" data-id={row.id} onclick={handleRetry}>Retry</button>
+                        </template>
+                        <template if:true={row.canDownloadReceipt}>
+                            <button class="cta-button cta-button-outline" type="button" data-id={row.id} onclick={handleDownload}>
+                                <lightning-icon icon-name="utility:download" size="x-small" alternative-text="Download receipt"></lightning-icon>
+                                Download Receipt
+                            </button>
+                        </template>
+                    </div>
+                </article>
+            </template>
+        </div>
+    </section>
+</template>

@@ -1,0 +1,50 @@
+<template>
+    <div class="page">
+        <div class="page-header">
+            <div class="page-header-left">
+                <h2 class="page-title">Schedule</h2>
+                <span class="page-subtitle">Week of Apr 14 – 20, 2026</span>
+            </div>
+            <span class="current-date">{currentDate}</span>
+        </div>
+
+        <div class="schedule-wrap">
+            <!-- Time ruler + events -->
+            <div class="schedule-inner">
+                <!-- Time labels column -->
+                <div class="time-col">
+                    <template for:each={timeSlots} for:item="slot">
+                        <div key={slot.key} class="time-cell">
+                            <span class="time-label">{slot.label}</span>
+                        </div>
+                    </template>
+                </div>
+                <!-- Events column -->
+                <div class="events-col">
+                    <!-- Current time indicator -->
+                    <div class="current-time-bar" style={currentTimeStyle}>
+                        <span class="current-time-dot"></span>
+                    </div>
+                    <!-- Event blocks -->
+                    <template for:each={formattedEvents} for:item="event">
+                        <div key={event.id} class={event.blockClass} style={event.blockStyle}>
+                            <div class="event-inner">
+                                <div class="event-title">{event.title}</div>
+                                <template lwc:if={event.instructor}>
+                                    <div class="event-sub">{event.instructor}</div>
+                                </template>
+                                <div class="event-meta">{event.startTime} – {event.endTime}</div>
+                                <template lwc:if={event.location}>
+                                    <div class="event-loc">
+                                        <c-icon name="room" size="12"></c-icon>
+                                        {event.location}
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

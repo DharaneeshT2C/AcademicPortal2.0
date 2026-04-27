@@ -1,0 +1,252 @@
+<template>
+    <div class="page">
+        <div class="top-nav">
+            <template for:each={topTabs} for:item="tab">
+                <button
+                    key={tab.key}
+                    class={tab.className}
+                    type="button"
+                    data-key={tab.key}
+                    onclick={handleTopTabClick}
+                >
+                    <lightning-icon icon-name={tab.iconName} size="x-small"></lightning-icon>
+                    <span>{tab.label}</span>
+                </button>
+            </template>
+        </div>
+
+        <div class="content">
+            <template if:true={isDashboardTopTab}>
+                <c-ken-dashboard-screen onquickaction={handleDashboardQuickAction}></c-ken-dashboard-screen>
+            </template>
+
+            <template if:true={isMasterDataTopTab}>
+                <template if:true={isMasterListView}>
+                    <h1>Master Data</h1>
+                </template>
+
+                <template if:true={isBuildingDetailView}>
+                    <c-ken-building
+                        is-detail-view={isBuildingDetailView}
+                        selected-building-name={selectedBuildingName}
+                        selected-building-status={selectedBuildingStatus}
+                        selected-building-status-class={selectedBuildingStatusClass}
+                        selected-building-overview={selectedBuildingOverview}
+                        is-loading-building-floors={isLoadingBuildingFloors}
+                        building-floor-sections={buildingFloorSections}
+                        building-activity-created-by-text={buildingActivityCreatedByText}
+                        building-activity-created-by-name={buildingActivityCreatedByName}
+                        building-activity-created-date-text={buildingActivityCreatedDateText}
+                        building-activity-last-modified-text={buildingActivityLastModifiedText}
+                        building-activity-events={buildingActivityEvents}
+                        is-modal-open={isNewBuildingModalOpen}
+                        is-saving-building={isSavingBuilding}
+                        building-modal-title={buildingModalTitle}
+                        building-form={buildingForm}
+                        building-gender-options={buildingGenderOptions}
+                        building-hostel-type-options={buildingHostelTypeOptions}
+                        building-status-options={buildingStatusOptions}
+                        building-warden-options={buildingWardenOptions}
+                        create-building-button-label={createBuildingButtonLabel}
+                        is-floor-warden-modal-open={isFloorWardenModalOpen}
+                        is-saving-floor-warden={isSavingFloorWarden}
+                        floor-warden-modal-title={floorWardenModalTitle}
+                        floor-warden-form={floorWardenForm}
+                        floor-warden-assignment-type-options={floorWardenAssignmentTypeOptions}
+                        save-floor-warden-button-label={saveFloorWardenButtonLabel}
+                        onbacktolist={handleBackToBuildingList}
+                        oneditselected={handleEditSelectedBuilding}
+                        ondeactivateselected={handleDeactivateSelectedBuilding}
+                        ontogglefloor={handleKenBuildingToggleFloorSection}
+                        onopenfloorwardenmodal={handleKenBuildingOpenFloorWardenModal}
+                        onfloorwardenfieldchange={handleKenBuildingFloorWardenFieldChange}
+                        onclosefloorwarden={handleCloseFloorWardenModal}
+                        onsavefloorwarden={handleSaveFloorWarden}
+                        onaddroomforfloor={handleKenBuildingAddRoomForFloor}
+                        onviewroomfromfloor={handleKenBuildingViewRoomFromFloor}
+                        oneditroomfromfloor={handleKenBuildingEditRoomFromFloor}
+                        ondeleteroomfromfloor={handleKenBuildingDeleteRoomFromFloor}
+                        onbreadcrumbdashboard={handleBreadcrumbDashboardClick}
+                        onbreadcrumbmasterdata={handleBreadcrumbMasterDataClick}
+                        onbreadcrumbmastertab={handleKenBuildingBreadcrumbMasterTab}
+                        onclosemodal={handleCloseNewBuildingModal}
+                        onbuildingfieldchange={handleKenBuildingFieldChange}
+                        onsavebuilding={handleCreateBuilding}
+                    ></c-ken-building>
+                </template>
+
+                <template if:true={isRoomDetailView}>
+                    <c-ken-room
+                        is-detail-view={isRoomDetailView}
+                        selected-room-overview={selectedRoomOverview}
+                        selected-room-status={selectedRoomStatus}
+                        selected-room-status-class={selectedRoomStatusClass}
+                        is-building-link-disabled={isBuildingLinkDisabled}
+                        is-category-link-disabled={isCategoryLinkDisabled}
+                        selected-room-amenities-from-category={selectedRoomAmenitiesFromCategory}
+                        current-occupants-heading={currentOccupantsHeading}
+                        room-current-occupants-ui-rows={roomCurrentOccupantsUiRows}
+                        room-past-occupants-ui-rows={roomPastOccupantsUiRows}
+                        is-loading-room-occupants={isLoadingRoomOccupants}
+                        room-activity-created-by-text={roomActivityCreatedByText}
+                        room-activity-created-by-name={roomActivityCreatedByName}
+                        room-activity-created-date-text={roomActivityCreatedDateText}
+                        room-activity-last-modified-text={roomActivityLastModifiedText}
+                        room-activity-events={roomActivityEvents}
+                        is-modal-open={isNewRoomModalOpen}
+                        is-saving-room={isSavingRoom}
+                        room-modal-title={roomModalTitle}
+                        room-form={roomForm}
+                        room-building-options={roomBuildingOptions}
+                        filtered-room-floor-options={filteredRoomFloorOptions}
+                        is-room-floor-disabled={isRoomFloorDisabled}
+                        room-category-options={roomCategoryOptions}
+                        room-status-options={roomStatusOptions}
+                        create-room-button-label={createRoomButtonLabel}
+                        onbacktolist={handleBackToRoomList}
+                        oneditselected={handleEditSelectedRoom}
+                        ondeactivateselected={handleDeactivateSelectedRoom}
+                        onopenlinkedbuilding={handleOpenLinkedBuildingFromRoom}
+                        onopenlinkedcategory={handleOpenLinkedCategoryFromRoom}
+                        onbreadcrumbdashboard={handleBreadcrumbDashboardClick}
+                        onbreadcrumbmasterdata={handleBreadcrumbMasterDataClick}
+                        onbreadcrumbmastertab={handleKenRoomBreadcrumbMasterTab}
+                        onclosemodal={handleCloseNewRoomModal}
+                        onroomfieldchange={handleKenRoomFieldChange}
+                        onsaveroom={handleCreateRoom}
+                    ></c-ken-room>
+                </template>
+
+                <template if:true={isKenRoomCategoryDetailView}>
+                    <c-ken-room-category
+                        initial-detail-id={kenRoomCategoryDetailId}
+                        onnavigate={handleKenRoomCategoryNavigate}
+                        onviewmodechange={handleKenRoomCategoryViewModeChange}
+                    ></c-ken-room-category>
+                </template>
+
+                <template if:true={isMasterListView}>
+                    <section class="card">
+                        <div class="card-head">
+                            <div class="inner-tabs">
+                                <template for:each={masterTabs} for:item="tab">
+                                    <button
+                                        key={tab.key}
+                                        class={tab.className}
+                                        type="button"
+                                        data-key={tab.key}
+                                        onclick={handleMasterTabClick}
+                                    >
+                                        {tab.label}
+                                    </button>
+                                </template>
+                            </div>
+                            <template if:false={isRoomCategoryDetailView}>
+                                <template if:true={isRoomCategoriesTab}>
+                                    <button class="new-btn" type="button" onclick={handleOpenPrimaryModal}>
+                                        <lightning-icon icon-name="utility:add" size="x-small"></lightning-icon>
+                                        <span>{primaryActionLabel}</span>
+                                    </button>
+                                </template>
+                                <template if:true={isBuildingsTab}>
+                                    <button class="new-btn" type="button" onclick={handleOpenPrimaryModal}>
+                                        <lightning-icon icon-name="utility:add" size="x-small"></lightning-icon>
+                                        <span>{primaryActionLabel}</span>
+                                    </button>
+                                </template>
+                                <template if:true={isRoomsTab}>
+                                    <div class="card-head-actions">
+                                        <c-ken-room-csv-actions onroomsrefresh={handleRoomsCsvRefresh}></c-ken-room-csv-actions>
+                                        <button class="new-btn" type="button" onclick={handleOpenPrimaryModal}>
+                                            <lightning-icon icon-name="utility:add" size="x-small"></lightning-icon>
+                                            <span>{primaryActionLabel}</span>
+                                        </button>
+                                    </div>
+                                </template>
+                            </template>
+                        </div>
+
+                        <div class="table-wrap">
+                            <template if:true={isRoomCategoriesTab}>
+                                <c-ken-room-category
+                                    hide-list-head="true"
+                                    onnavigate={handleKenRoomCategoryNavigate}
+                                    onviewmodechange={handleKenRoomCategoryViewModeChange}
+                                ></c-ken-room-category>
+                            </template>
+
+                            <template if:true={isFeeTypesTab}>
+                                <c-master-data-fee-types></c-master-data-fee-types>
+                            </template>
+
+                            <template if:true={isBuildingsTab}>
+                                <c-ken-building
+                                    rows={filteredBuildingRows}
+                                    is-loading={isLoadingBuildings}
+                                    selected-status={selectedStatus}
+                                    status-options={statusOptions}
+                                    primary-action-label={primaryActionLabel}
+                                    is-modal-open={isNewBuildingModalOpen}
+                                    is-saving-building={isSavingBuilding}
+                                    building-modal-title={buildingModalTitle}
+                                    building-form={buildingForm}
+                                    building-gender-options={buildingGenderOptions}
+                                    building-hostel-type-options={buildingHostelTypeOptions}
+                                    building-status-options={buildingStatusOptions}
+                                    building-warden-options={buildingWardenOptions}
+                                    create-building-button-label={createBuildingButtonLabel}
+                                    hide-list-head="true"
+                                    onstatuschange={handleKenChildStatusChange}
+                                    onopenmodal={handleKenChildOpenModal}
+                                    onrowaction={handleKenBuildingRowAction}
+                                    onclosemodal={handleCloseNewBuildingModal}
+                                    onbuildingfieldchange={handleKenBuildingFieldChange}
+                                    onsavebuilding={handleCreateBuilding}
+                                ></c-ken-building>
+                            </template>
+
+                            <template if:true={isRoomsTab}>
+                                <c-ken-room
+                                    rows={filteredRoomRows}
+                                    is-loading={isLoadingRooms}
+                                    selected-status={selectedStatus}
+                                    status-options={statusOptions}
+                                    primary-action-label={primaryActionLabel}
+                                    is-modal-open={isNewRoomModalOpen}
+                                    is-saving-room={isSavingRoom}
+                                    room-modal-title={roomModalTitle}
+                                    room-form={roomForm}
+                                    room-building-options={roomBuildingOptions}
+                                    filtered-room-floor-options={filteredRoomFloorOptions}
+                                    is-room-floor-disabled={isRoomFloorDisabled}
+                                    room-category-options={roomCategoryOptions}
+                                    room-status-options={roomStatusOptions}
+                                    create-room-button-label={createRoomButtonLabel}
+                                    hide-list-head="true"
+                                    onstatuschange={handleKenChildStatusChange}
+                                    onopenmodal={handleKenChildOpenModal}
+                                    onrowaction={handleKenRoomRowAction}
+                                    onclosemodal={handleCloseNewRoomModal}
+                                    onroomfieldchange={handleKenRoomFieldChange}
+                                    onsaveroom={handleCreateRoom}
+                                ></c-ken-room>
+                            </template>
+                        </div>
+                    </section>
+                </template>
+            </template>
+
+            <template if:true={isHostelCycleTopTab}>
+                <c-ken-hostel-cycle-screen></c-ken-hostel-cycle-screen>
+            </template>
+
+            <template if:true={isAccommodationTopTab}>
+                <c-ken-accommodation-management-screen></c-ken-accommodation-management-screen>
+            </template>
+
+            <template if:true={isReportsTopTab}>
+                <c-ken-reports-analytics-screen></c-ken-reports-analytics-screen>
+            </template>
+        </div>
+    </div>
+</template>

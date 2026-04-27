@@ -1,0 +1,29 @@
+.section-card {
+  border: 1px solid color-mix(in srgb, var(--theme-primary, #0b5ec0) 14%, #ffffff);
+  border-radius: 14px;
+  padding: 1rem;
+  background: #fbfdff;
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--theme-secondary, #08376c) 16%, transparent);
+}
+
+.section-title {
+  font-weight: 700;
+  color: color-mix(in srgb, var(--theme-secondary, #08376c) 85%, #ffffff);
+  margin-bottom: 0.75rem;
+}
+
+.table-wrap {
+  border: 1px solid color-mix(in srgb, var(--theme-primary, #0b5ec0) 16%, #ffffff);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.empty-state {
+  color: #6b7280;
+}
+
+.error-text {
+  color: #ba0517;
+  font-weight: 600;
+}

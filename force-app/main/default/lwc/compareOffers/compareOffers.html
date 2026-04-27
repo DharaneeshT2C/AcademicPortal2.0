@@ -1,0 +1,108 @@
+<template>
+    <div class="compare-offers-page">
+        <div class="breadcrumb">
+            <button class="bc-link" onclick={handleBack}>Placements</button>
+            <span class="bc-sep">›</span>
+            <span class="bc-current">Compare Offers</span>
+        </div>
+
+        <div class="page-header">
+            <h2 class="page-title">Compare Job Offers</h2>
+            <p class="page-sub">Review and compare your received offers before making a decision.</p>
+        </div>
+
+        <!-- Offer Cards -->
+        <div class="offers-row">
+            <template for:each={offers} for:item="offer">
+                <div key={offer.id} class={offer.cardClass} data-id={offer.id} onclick={handleSelectOffer}>
+                    <div class="offer-card-top">
+                        <div class="company-logo-md" style={offer.logoStyle}>{offer.companyInitial}</div>
+                        <template lwc:if={offer.isSelected}>
+                            <div class="selected-check">✓</div>
+                        </template>
+                    </div>
+                    <div class="offer-company-name">{offer.company}</div>
+                    <div class="offer-role-title">{offer.role}</div>
+                    <span class={offer.categoryClass}>{offer.category}</span>
+                    <div class="offer-salary">{offer.salaryFormatted} / yr</div>
+                    <div class="offer-perks">
+                        <template for:each={offer.perksItems} for:item="perk">
+                            <span key={perk.key} class="perk-chip">✓ {perk.label}</span>
+                        </template>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Comparison Table -->
+        <div class="comparison-section">
+            <h3 class="section-title">Detailed Comparison</h3>
+            <div class="comparison-table-wrap">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th class="row-label-th">Criteria</th>
+                            <template for:each={offers} for:item="offer">
+                                <th key={offer.id}>{offer.company}</th>
+                            </template>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={comparisonRows} for:item="row">
+                            <tr key={row.key}>
+                                <td class="row-label-td">{row.label}</td>
+                                <template for:each={row.values} for:item="val">
+                                    <td key={val.offerId}>{val.value}</td>
+                                </template>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Action -->
+        <div class="accept-section">
+            <button class="btn-primary" onclick={handleAcceptOffer} disabled={noSelection}>
+                Accept Offer
+            </button>
+            <p class="accept-hint">Select an offer above to accept it. Acceptance is final and non-reversible.</p>
+        </div>
+    </div>
+
+    <!-- Accept Modal -->
+    <template lwc:if={showAcceptModal}>
+        <div class="modal-overlay" onclick={handleCloseModal}>
+            <div class="modal-box" onclick={stopProp}>
+                <div class="modal-header">
+                    <h3 class="modal-title">Accept Offer?</h3>
+                    <button class="modal-close" onclick={handleCloseModal}>✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="policy-reminder">
+                        <p class="policy-title">⚠ Policy Reminder</p>
+                        <ul class="policy-list">
+                            <li>Accepting this offer will close all other active applications.</li>
+                            <li>This action is non-reversible by the Placement Cell.</li>
+                        </ul>
+                    </div>
+                    <div class="offer-summary">
+                        <div class="company-logo-sm" style={selectedOfferData.logoStyle}>{selectedOfferData.companyInitial}</div>
+                        <div>
+                            <div class="offer-summary-company">{selectedOfferData.company}</div>
+                            <div class="offer-summary-role">{selectedOfferData.role}</div>
+                        </div>
+                    </div>
+                    <div class="checklist">
+                        <label class="check-label"><input type="checkbox" /> I have read and understood the placement policy.</label>
+                        <label class="check-label"><input type="checkbox" /> I commit to joining this employer.</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-outline" onclick={handleCloseModal}>Cancel</button>
+                    <button class="btn-accept" onclick={handleConfirmAccept}>Accept &amp; Confirm</button>
+                </div>
+            </div>
+        </div>
+    </template>
+</template>

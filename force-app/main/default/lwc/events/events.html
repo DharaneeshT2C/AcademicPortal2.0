@@ -1,0 +1,151 @@
+<template>
+    <template lwc:if={showToast}>
+        <c-toast message={toastMessage} variant={toastVariant} onclose={handleToastClose}></c-toast>
+    </template>
+    <div class="events-page">
+        <div class="page-header">
+            <h2 class="page-title">Events</h2>
+            <p class="breadcrumb">Home &gt; Campus Life</p>
+        </div>
+
+        <div class="events-outer">
+            <div class="events-main">
+                <div class="section-toolbar">
+                    <h3 class="section-label">Featured Events ({featuredCount})</h3>
+                    <div class="toolbar-right">
+                        <div class="search-wrap">
+                            <c-icon name="search" size="18"></c-icon>
+                            <input type="text" class="search-input" placeholder="Search" oninput={handleSearchInput} />
+                            <c-icon name="mic" size="16"></c-icon>
+                        </div>
+                        <div class="filter-wrap">
+                            <button class="filters-btn" onclick={handleToggleFilterMenu}><c-icon name="tune" size="16"></c-icon> {filterLabel}</button>
+                            <template lwc:if={showFilterMenu}>
+                                <div class="filter-menu">
+                                    <button class="filter-menu-item" data-value="all" onclick={handlePickFilter}>All</button>
+                                    <button class="filter-menu-item" data-value="online" onclick={handlePickFilter}>Online only</button>
+                                    <button class="filter-menu-item" data-value="offline" onclick={handlePickFilter}>In-person only</button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="events-grid">
+                    <template for:each={featuredEvents} for:item="ev">
+                        <div key={ev.id} class="event-card">
+                            <div class="card-img-wrap">
+                                <img src={ev.image} alt={ev.title} class="card-img" />
+                                <span class="type-badge">{ev.type}</span>
+                                <button class={ev.bookmarkClass} data-id={ev.id} onclick={handleToggleBookmark}><c-icon name={ev.bookmarkIcon} size="18"></c-icon></button>
+                            </div>
+                            <div class="card-body">
+                                <h4 class="event-title">{ev.title}</h4>
+                                <p class="event-mode"><c-icon name="location_on" size="14"></c-icon> {ev.mode}</p>
+                                <div class="event-chips">
+                                    <span class="chip"><c-icon name="calendar_today" size="13"></c-icon> {ev.date}</span>
+                                    <template lwc:if={ev.time}>
+                                        <span class="chip"><c-icon name="schedule" size="13"></c-icon> {ev.time}</span>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="section-toolbar" style="margin-top:28px">
+                    <h3 class="section-label">Upcoming Events ({upcomingCount})</h3>
+                </div>
+                <div class="events-grid">
+                    <template for:each={upcomingEvents} for:item="ev">
+                        <div key={ev.id} class="event-card">
+                            <div class="card-img-wrap">
+                                <img src={ev.image} alt={ev.title} class="card-img" />
+                                <span class="type-badge">{ev.type}</span>
+                                <button class={ev.bookmarkClass} data-id={ev.id} onclick={handleToggleBookmark}><c-icon name={ev.bookmarkIcon} size="18"></c-icon></button>
+                            </div>
+                            <div class="card-body">
+                                <h4 class="event-title">{ev.title}</h4>
+                                <p class="event-mode"><c-icon name="location_on" size="14"></c-icon> {ev.mode}</p>
+                                <div class="event-chips">
+                                    <span class="chip"><c-icon name="calendar_today" size="13"></c-icon> {ev.date}</span>
+                                    <template lwc:if={ev.time}>
+                                        <span class="chip"><c-icon name="schedule" size="13"></c-icon> {ev.time}</span>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <div class="events-sidebar">
+                <div class="sidebar-card registered-card">
+                    <h3 class="sidebar-title">Registered Events</h3>
+                    <p class="reg-date">18th December, 2026</p>
+                    <div class="reg-list">
+                        <template for:each={registeredEvents} for:item="ev">
+                            <div key={ev.id} class="reg-item">
+                                <div class="reg-info">
+                                    <p class="reg-time">{ev.startTime} - {ev.endTime}</p>
+                                    <h4 class="reg-title">{ev.title}</h4>
+                                    <p class="reg-mode"><c-icon name="location_on" size="12"></c-icon> {ev.mode}</p>
+                                </div>
+                                <img src={ev.image} alt={ev.title} class="reg-thumb" />
+                            </div>
+                        </template>
+                    </div>
+                    <button class="view-all-btn" onclick={handleToggleViewAllRegistered}>{viewAllLabel}</button>
+                </div>
+
+                <div class="sidebar-card hosted-card">
+                    <h3 class="sidebar-title">Hosted Events</h3>
+                    <div class="empty-state">
+                        <div class="empty-illus">&#128100;</div>
+                        <p class="empty-text">You haven't hosted any events yet</p>
+                    </div>
+                    <button class="host-btn" onclick={handleHostEvent}>Host an Event</button>
+                </div>
+            </div>
+        </div>
+
+        <template lwc:if={showHostModal}>
+            <div class="modal-backdrop" onclick={handleCloseHost}>
+                <div class="modal" onclick={stopProp}>
+                    <div class="modal-header">
+                        <h3>Host an Event</h3>
+                        <button class="icon-btn" onclick={handleCloseHost}>&#x2715;</button>
+                    </div>
+                    <div class="modal-body">
+                        <label class="field">
+                            <span>Title</span>
+                            <input type="text" data-field="title" value={hostFormTitle} oninput={handleHostFormChange} placeholder="e.g. Inter-college hackathon" />
+                        </label>
+                        <div class="field-row">
+                            <label class="field">
+                                <span>Date</span>
+                                <input type="date" data-field="date" value={hostFormDate} onchange={handleHostFormChange} />
+                            </label>
+                            <label class="field">
+                                <span>Time</span>
+                                <input type="text" data-field="time" value={hostFormTime} oninput={handleHostFormChange} placeholder="6:00 PM" />
+                            </label>
+                        </div>
+                        <label class="field">
+                            <span>Mode</span>
+                            <select data-field="mode" value={hostFormMode} onchange={handleHostFormChange}>
+                                <option value="Offline">In-person</option>
+                                <option value="Online">Online</option>
+                                <option value="Hybrid">Hybrid</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-outline" onclick={handleCloseHost}>Cancel</button>
+                        <button class="btn-primary" onclick={handleSubmitHost}>Submit</button>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,41 @@
+<template>
+    <section class="program-path">
+        <h2 class="title">Program Path</h2>
+
+        <div class="card-grid">
+            <template for:each={pathwayTemplates} for:item="program">
+                <div key={program.id} class="program-card">
+
+                    <div class="card-body">
+                        <h3 class="program-name">
+                            {program.name}
+                        </h3>
+
+                        <p class="meta">
+                            Pathway :
+                            <span class="highlight">{program.pathway}</span>
+                        </p>
+
+                       
+                    </div>
+
+                    <div class="card-footer">
+                        
+                        <template if:true={program.isEnrolled}>
+                            <button class="btn enrolled" disabled>
+                                Enrolled
+                            </button>
+                        </template>
+                        <template if:false={program.isEnrolled}>
+                            <button class="btn enroll" data-id={program.id}
+                                onclick={handleEnroll}>
+                                Enroll Now
+                            </button>
+                        </template>
+                    </div>
+
+                </div>
+            </template>
+        </div>
+    </section>
+</template>

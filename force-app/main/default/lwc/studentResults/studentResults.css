@@ -1,0 +1,343 @@
+:host {
+    --primary-color: #3061ff;
+    --secondary-color: #eaefff;
+}
+
+.results-page {
+    border-radius: 14px;
+    height: calc(100vh - 153px);
+    overflow-y: scroll;
+}
+
+.results-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 10px;
+}
+
+.card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-sizing: border-box;
+}
+
+.chart-card {
+    padding: 18px 22px 14px;
+}
+
+.card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.card-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 500;
+    color: #172E7D;
+}
+
+.metrics {
+    margin: 0;
+    font-size: 16px;
+    color: #3d4452;
+    white-space: nowrap;
+}
+
+.metrics strong {
+    font-weight: 700;
+}
+
+.metrics span {
+    margin: 0 10px;
+    color: #7e8594;
+}
+
+.chart-shell {
+    height: 280px;
+    margin-top: 8px;
+}
+
+.grade-card {
+    background: var(--primary-color, #3061ff);
+    color: #ffffff;
+    padding: 18px 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.grade-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.grade-visual {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.grade-illustration {
+    width: 100%;
+    max-height: 150px;
+    object-fit: contain;
+    display: block;
+}
+
+.grade-btn {
+    margin-top: auto;
+    height: 40px;
+    border: 1px solid color-mix(in srgb, var(--secondary-color, #eaefff) 72%, #ffffff);
+    border-radius: 10px;
+    background: #ffffff;
+    color: #343c4a;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.grade-arrow {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.marks-card {
+    margin-top: 10px;
+    padding: 16px 22px 20px;
+}
+
+.marks-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 14px;
+}
+
+.marks-head-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.semester-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.sem-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    background: transparent;
+}
+
+.semester-trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 12px;
+    min-height: 40px;
+    min-width: 220px;
+    border: 1px solid #cdd3dd;
+    border-radius: 10px;
+    background: #ffffff;
+    cursor: pointer;
+    font-family: inherit;
+    width: 100%;
+}
+
+.semester-label-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: #2f3644;
+}
+
+.current-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+    color: #2f3644;
+    background: #e8eaef;
+    border: 1px solid #d8dce3;
+}
+
+.dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #e25454;
+    flex-shrink: 0;
+}
+
+.semester-caret {
+    margin-left: auto;
+    color: #697182;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.semester-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 100%;
+    background: #ffffff;
+    border: 1px solid #e2e5ec;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+    z-index: 11;
+    list-style: none;
+    margin: 0;
+    padding: 6px;
+    overflow: hidden;
+}
+
+.semester-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.semester-option:hover {
+    background: #f5f7fb;
+}
+
+.option-label {
+    font-size: 14px;
+    color: #2f3644;
+    font-weight: 400;
+}
+
+.table-wrap {
+    margin-top: 14px;
+    border: 1px solid #d8dee8;
+    border-radius: 14px;
+    overflow: auto;
+}
+
+.marks-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 980px;
+}
+
+.marks-table th {
+    text-align: left;
+    font-size: 16px;
+    font-weight: 500;
+    color: #303846;
+    padding: 18px 14px;
+    border-bottom: 1px solid #d8dee8;
+    background: #ffffff;
+    white-space: nowrap;
+}
+
+.marks-table td {
+    padding: 18px 14px;
+    font-size: 14px;
+    color: #5a6271;
+}
+
+.grade-cell {
+    font-size: 16px;
+    font-weight: 600;
+    color: #515967;
+}
+
+.grade-fail {
+    color: #dd3232;
+}
+
+.eye-icon {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    display: block;
+}
+
+.marks-breakdown-btn {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+}
+
+@media (max-width: 1280px) {
+    .results-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .grade-card {
+        min-height: 200px;
+    }
+
+    .marks-head {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .marks-head-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+@media (max-width: 768px) {
+    .results-page {
+        padding: 8px;
+    }
+
+    .chart-card,
+    .marks-card {
+        padding: 12px;
+    }
+
+    .card-head,
+    .marks-head-right {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .metrics {
+        font-size: 14px;
+        white-space: normal;
+    }
+
+    .card-title,
+    .grade-title {
+        font-size: 16px;
+    }
+
+    .semester-picker {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .marks-table th {
+        font-size: 14px;
+    }
+
+    .marks-table td,
+    .grade-cell {
+        font-size: 14px;
+    }
+}

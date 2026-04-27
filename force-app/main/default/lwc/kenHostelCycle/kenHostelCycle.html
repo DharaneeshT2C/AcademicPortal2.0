@@ -1,0 +1,67 @@
+<template>
+    <div class="page">
+        <div class="top-nav">
+            <button class="top-tab" type="button">
+                <lightning-icon icon-name="utility:apps" size="x-small"></lightning-icon>
+                <span>Dashboard</span>
+            </button>
+            <button class="top-tab" type="button">
+                <lightning-icon icon-name="utility:database" size="x-small"></lightning-icon>
+                <span>Master Data</span>
+            </button>
+            <button class="top-tab active" type="button">
+                <lightning-icon icon-name="utility:event" size="x-small"></lightning-icon>
+                <span>Hostel Cycle</span>
+            </button>
+            <button class="top-tab" type="button">
+                <lightning-icon icon-name="utility:household" size="x-small"></lightning-icon>
+                <span>Accommodation</span>
+            </button>
+            <button class="top-tab" type="button">
+                <lightning-icon icon-name="utility:chart" size="x-small"></lightning-icon>
+                <span>Reports</span>
+            </button>
+        </div>
+
+        <div class="content">
+            <div class="title-row">
+                <div>
+                    <h1>Hostel Cycle</h1>
+                    <p>Manage cycle containers and their operational windows</p>
+                </div>
+                <button class="new-btn" type="button">
+                    <lightning-icon icon-name="utility:add" size="x-small"></lightning-icon>
+                    <span>New Cycle</span>
+                </button>
+            </div>
+
+            <section class="card">
+                <div class="card-head">
+                    <h2>Cycles</h2>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>CYCLE NAME</th>
+                                <th>ACADEMIC YEAR</th>
+                                <th>START DATE</th>
+                                <th>END DATE</th>
+                                <th>STATUS</th>
+                                <th>WINDOWS</th>
+                                <th>APPLICATIONS</th>
+                                <th>ACTIONS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="8" class="empty-state">No cycles to display</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+</template>

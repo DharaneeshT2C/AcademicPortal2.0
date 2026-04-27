@@ -1,0 +1,484 @@
+:host {
+  display: block;
+  width: 100%;
+  --primary-color: #3061ff;
+  --secondary-color: #eaefff;
+}
+
+.enrollment-page {
+  overflow-y: auto;
+  border-radius: 16px;
+}
+
+.skeleton-wrap {
+  padding: 0;
+}
+
+.skeleton-banner {
+  border-radius: 14px;
+  padding: 24px 22px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--primary-color, #3061ff) 18%, #f3f5f9) 0%,
+    color-mix(in srgb, var(--primary-color, #3061ff) 10%, #f3f5f9) 50%,
+    color-mix(in srgb, var(--primary-color, #3061ff) 18%, #f3f5f9) 100%
+  );
+}
+
+.skeleton-section {
+  background: #fff;
+  border-radius: 12px;
+  margin-top: 20px;
+  padding: 24px;
+  height: calc(100vh - 280px);
+}
+
+.skeleton-line {
+  height: 14px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #e7ebf2 0%, #f3f5f9 50%, #e7ebf2 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.1s ease-in-out infinite;
+}
+
+.skeleton-title {
+  width: min(340px, 70%);
+  height: 18px;
+}
+
+.skeleton-subtitle {
+  width: min(520px, 90%);
+  margin-top: 12px;
+}
+
+.skeleton-header {
+  width: min(220px, 55%);
+  height: 16px;
+  margin-bottom: 16px;
+}
+
+.skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.skeleton-card {
+  border-radius: 12px;
+  min-height: 218px;
+  background: linear-gradient(90deg, #e7ebf2 0%, #f3f5f9 50%, #e7ebf2 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.1s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.pathway-banner {
+  border-radius: 14px;
+  padding: 24px 22px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 16px 16px, rgba(255, 255, 255, 0.2) 1.6px, transparent 1.7px) 0 0 / 34px 34px,
+    linear-gradient(90deg, var(--primary-color, #3061ff) 0%, var(--primary-color, #3061ff) 100%);
+}
+
+.banner-copy h1 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.banner-copy p {
+  margin: 10px 0 0;
+  font-size: 16px;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+.banner-actions p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.choose-program-button {
+  border: 0;
+  border-radius: 10px;
+  background: #fff;
+  color: #323846;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 9px 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.choose-program-button span {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.semester-section {
+  background: #fff;
+  border-radius: 12px;
+  margin-top: 20px;
+  padding: 24px;
+  height: calc(100vh - 280px);
+  overflow-y: scroll;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.page-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  color: #363b47;
+}
+
+.page-header-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.completion-tracker {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #2e3442;
+}
+
+.page-header-note {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: right;
+}
+
+.semester-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.semester-card {
+  background: #f6f8fb;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  padding: 24px 22px 18px;
+  min-height: 246px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.semester-card-active {
+  background: #fff;
+  border: 1px solid #d1d6de;
+}
+
+.semester-card-interactive {
+  cursor: pointer;
+}
+
+.semester-card-interactive:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--primary-color, #3061ff) 28%, #d1d6de);
+  box-shadow: 0 8px 20px rgba(31, 51, 102, 0.08);
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.card-head h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  color: #363b47;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 12px;
+  border: 1px solid transparent;
+}
+
+.status-completed {
+  color: #373A45;
+  background: #EBF4EC;
+  border-color: #C1DCC3;
+}
+
+.status-ongoing {
+  color: #373a45;
+  background: #fff;
+  border-color: var(--primary-color, #3061FF);
+}
+
+.status-upcoming {
+  color: #4b5565;
+  background: #edf1f6;
+  border-color: #d5dce7;
+}
+
+.ongoing-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #dc5959;
+}
+
+.credit-line {
+  margin: 0;
+  font-size: 14px;
+  color: #626774;
+  line-height: 1.35;
+}
+
+.credit-line + .credit-line {
+  margin-top: 6px;
+}
+
+.credit-line span {
+  color: #363b47;
+  font-weight: 500;
+}
+
+.card-action {
+  margin-top: auto;
+  width: 100%;
+  border: 0;
+  border-radius: 10px;
+  min-height: 42px;
+  padding: 8px 12px;
+  font-size: 14px;
+  line-height: 1.2;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.action-muted {
+  background: #dfe4ec;
+  color: #3f4450;
+}
+
+.action-primary {
+  background: var(--primary-color, #3061ff);
+  color: #fff;
+}
+
+.action-dominant {
+  /* box-shadow: 0 8px 16px color-mix(in srgb, var(--primary-color, #3061ff) 35%, transparent); */
+}
+
+.empty {
+  color: #5c5c5c;
+}
+
+@media (max-width: 1280px) {
+  .banner-copy h1,
+  .page-header h2,
+  .card-head h3 {
+    font-size: 18px;
+  }
+
+  .credit-line {
+    font-size: 14px;
+  }
+
+  .banner-copy p {
+    font-size: 14px;
+  }
+
+  .semester-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .skeleton-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1024px) {
+  .pathway-banner,
+  .banner-actions,
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .page-header-note {
+    text-align: left;
+  }
+
+  .page-header-meta {
+    align-items: flex-start;
+  }
+
+  .semester-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .skeleton-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .enrollment-page {
+    min-height: auto;
+    max-height: none;
+    overflow-y: visible;
+    padding: 14px 12px 18px;
+    border-radius: 12px;
+  }
+
+  .pathway-banner,
+  .semester-section {
+    padding: 16px;
+  }
+
+  .semester-section {
+    height: auto;
+    margin-top: 16px;
+    background: transparent;
+    padding: 0;
+  }
+
+  .banner-actions,
+  .card-head {
+    width: 100%;
+  }
+
+  .banner-actions {
+    gap: 10px;
+  }
+
+  .banner-actions p {
+    line-height: 1.35;
+  }
+
+  .choose-program-button,
+  .card-action {
+    width: 100%;
+    min-height: 42px;
+    justify-content: center;
+  }
+
+  .status-badge {
+    flex-shrink: 0;
+  }
+
+  .semester-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .skeleton-section {
+    height: auto;
+    margin-top: 16px;
+    background: transparent;
+    padding: 0;
+  }
+
+  .skeleton-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .skeleton-card {
+    min-height: 140px;
+  }
+
+  .semester-card {
+    min-height: 0;
+    padding: 16px;
+  }
+
+  .page-header {
+    margin-bottom: 14px;
+  }
+
+  .card-head h3,
+  .credit-line,
+  .card-action,
+  .choose-program-button,
+  .banner-actions p,
+  .banner-copy p,
+  .banner-copy h1,
+  .page-header h2 {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pathway-banner {
+    padding: 12px;
+  }
+
+  .semester-section {
+    padding: 0;
+  }
+
+  .banner-copy h1,
+  .page-header h2 {
+    line-height: 1.35;
+  }
+
+  .status-badge {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  .semester-card {
+    border-radius: 10px;
+    gap: 2px;
+  }
+
+  .card-action {
+    margin-top: 10px;
+  }
+}

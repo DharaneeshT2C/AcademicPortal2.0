@@ -1,0 +1,39 @@
+<template>
+    <div class="page">
+        <h2 class="page-title">Course Enrolment</h2>
+        <div class="banner">
+            <div class="banner-content">
+                <h3 class="banner-title">Choose Program Pathways</h3>
+                <p class="banner-desc">Please select your minor programs to start course enrolment.</p>
+            </div>
+            <div class="banner-right">
+                <span class="banner-date">Last date to choose: 25th May 2024</span>
+                <button class="btn-outline-white" onclick={handleChooseProgram}>Choose Program(s) <c-icon name="arrow_forward" size="20"></c-icon></button>
+            </div>
+        </div>
+
+        <div class="credits-header">
+            <h3 class="section-title">All Semesters</h3>
+            <div class="credits-badges">
+                <span class="credit-badge">Major Credits: {majorCredits}</span>
+                <span class="credit-badge">Minor Credits: {minorCredits}</span>
+            </div>
+        </div>
+
+        <div class="semesters-grid">
+            <template for:each={formattedSemesters} for:item="sem">
+                <div key={sem.key} class="semester-card" onclick={handleSemesterClick}>
+                    <div class="sem-card-header">
+                        <h4 class="sem-name">{sem.name}</h4>
+                        <template lwc:if={sem.status}>
+                            <span class={sem.statusClass}>{sem.status}</span>
+                        </template>
+                    </div>
+                    <p class="sem-credits">Major Credits: <strong>{sem.displayMajorCredits}</strong></p>
+                    <p class="sem-credits">Minor Credits: <strong>{sem.displayMinorCredits}</strong></p>
+                    <button class={sem.btnClass} onclick={handleSemesterClick}>{sem.btnLabel}</button>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>

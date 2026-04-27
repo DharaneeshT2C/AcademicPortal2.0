@@ -1,0 +1,74 @@
+<template>
+    <table>
+        <thead>
+            <tr>
+                <th>CATEGORY NAME</th>
+                <th>DEFAULT FEE TYPES</th>
+                <th>AMENITIES</th>
+                <th>STATUS</th>
+                <th>ACTIONS</th>
+            </tr>
+        </thead>
+        <tbody>
+            <template for:each={rows} for:item="row">
+                <tr key={row.id}>
+                    <td>
+                        <button type="button" class="name-link" data-id={row.id} onclick={handleOpen}>
+                            {row.categoryName}
+                        </button>
+                    </td>
+                    <td>{row.defaultFeeType}</td>
+                    <td>
+                        <template if:true={row.hasAmenities}>
+                            <button type="button" class="amenities-link" data-id={row.id} onclick={handleOpenAmenities}>
+                                {row.amenities}
+                            </button>
+                        </template>
+                        <template if:false={row.hasAmenities}>
+                            <span class="amenities-empty">{row.amenities}</span>
+                        </template>
+                    </td>
+                    <td><span class={row.statusClass}>{row.status}</span></td>
+                    <td>
+                        <div class="actions">
+                            <button type="button" class="icon-action-btn" data-id={row.id} onclick={handleView} title="View">
+                                <lightning-icon icon-name="utility:preview" size="x-small" class="action-blue"></lightning-icon>
+                            </button>
+                            <button type="button" class="icon-action-btn" data-id={row.id} onclick={handleEdit} title="Edit">
+                                <lightning-icon icon-name="utility:edit" size="x-small" class="action-blue"></lightning-icon>
+                            </button>
+                            <button type="button" class="icon-action-btn" data-id={row.id} onclick={handleDelete} title="Delete">
+                                <lightning-icon icon-name="utility:delete" size="x-small" class="action-red"></lightning-icon>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </template>
+            <template if:true={isLoading}>
+                <tr>
+                    <td colspan="5">Loading room categories...</td>
+                </tr>
+            </template>
+        </tbody>
+    </table>
+
+    <template if:true={isAmenitiesModalOpen}>
+        <div class="modal-overlay" onclick={handleCloseAmenities}></div>
+        <section class="modal" role="dialog" aria-modal="true" aria-label="Amenities">
+            <header class="modal-header">
+                <h2>{selectedCategoryName}</h2>
+                <button type="button" class="close-btn" onclick={handleCloseAmenities} aria-label="Close">
+                    <lightning-icon icon-name="utility:close" size="x-small"></lightning-icon>
+                </button>
+            </header>
+            <div class="modal-body">
+                <div class="modal-subtitle">Amenities</div>
+                <div class="amenities-pill-wrap">
+                    <template for:each={selectedAmenities} for:item="amenity">
+                        <span key={amenity} class="amenity-pill">{amenity}</span>
+                    </template>
+                </div>
+            </div>
+        </section>
+    </template>
+</template>

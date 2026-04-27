@@ -1,0 +1,193 @@
+<template>
+    <template lwc:if={showToast}>
+        <c-toast message={toastMessage} variant={toastVariant} onclose={handleToastClose}></c-toast>
+    </template>
+
+    <template lwc:if={showScheduleModal}>
+        <div class="modal-overlay" onclick={handleCloseScheduleModal}>
+            <div class="modal-box" onclick={stopProp}>
+                <div class="modal-header">
+                    <div>
+                        <h3 class="modal-title">Schedule a Call</h3>
+                        <p class="modal-sub">Book a mentorship session</p>
+                    </div>
+                    <button class="modal-close" onclick={handleCloseScheduleModal}>&#x2715;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-field">
+                        <label class="field-label">Select Date</label>
+                        <input type="date" class="field-input" />
+                    </div>
+                    <div class="modal-field">
+                        <label class="field-label">Select Time</label>
+                        <select class="field-select">
+                            <option>09:00 AM</option>
+                            <option>10:00 AM</option>
+                            <option>11:00 AM</option>
+                            <option>02:00 PM</option>
+                            <option>03:00 PM</option>
+                            <option>04:00 PM</option>
+                        </select>
+                    </div>
+                    <div class="modal-field">
+                        <label class="field-label">Agenda / Notes</label>
+                        <textarea class="field-textarea" placeholder="Describe what you'd like to discuss..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-cancel" onclick={handleCloseScheduleModal}>Cancel</button>
+                    <button class="btn-primary-sm" onclick={handleConfirmSchedule}>Confirm Schedule</button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template lwc:if={showTaskModal}>
+        <div class="modal-overlay" onclick={handleCloseTaskModal}>
+            <div class="modal-box" onclick={stopProp}>
+                <div class="modal-header">
+                    <div>
+                        <h3 class="modal-title">Add New Task</h3>
+                        <p class="modal-sub">Track your mentorship goals</p>
+                    </div>
+                    <button class="modal-close" onclick={handleCloseTaskModal}>&#x2715;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-field">
+                        <label class="field-label">Task Title</label>
+                        <input type="text" class="field-input" placeholder="e.g. Complete resume review" onchange={handleTaskTitleChange} />
+                    </div>
+                    <div class="modal-field">
+                        <label class="field-label">Assigned Mentor</label>
+                        <select class="field-select">
+                            <option>Dr. Ananya Sharma</option>
+                            <option>Ravi Kumar</option>
+                            <option>Prof. Mehta</option>
+                            <option>Sarah Johnson</option>
+                        </select>
+                    </div>
+                    <div class="modal-field">
+                        <label class="field-label">Priority</label>
+                        <select class="field-select">
+                            <option>High</option>
+                            <option>Medium</option>
+                            <option>Low</option>
+                        </select>
+                    </div>
+                    <div class="modal-field">
+                        <label class="field-label">Due Date</label>
+                        <input type="date" class="field-input" onchange={handleTaskDeadlineChange} />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-cancel" onclick={handleCloseTaskModal}>Cancel</button>
+                    <button class="btn-primary-sm" onclick={handleConfirmTask}>Add Task</button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <div class="page">
+        <h2 class="page-title">Mentorship</h2>
+        <div class="mentor-grid">
+            <div class="main-col">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="section-title">Mentorship Connections</h3>
+                        <button class="btn-outline" onclick={handleFilters}><c-icon name="filter_list" size="16"></c-icon> Filters</button>
+                    </div>
+                    <div class="mentors-row">
+                        <template for:each={formattedMentors} for:item="mentor">
+                            <div key={mentor.id} class="mentor-card">
+                                <span class={mentor.typeClass}>{mentor.type}</span>
+                                <div class="mentor-avatar">
+                                    <img src={mentor.photo} alt={mentor.name} class="mentor-photo" />
+                                </div>
+                                <h4 class="mentor-name">{mentor.name}</h4>
+                                <p class="mentor-role">{mentor.role}</p>
+                                <template lwc:if={mentor.department}><p class="mentor-dept">{mentor.department}</p></template>
+                                <template lwc:if={mentor.location}><p class="mentor-location"><c-icon name="location_on" size="14"></c-icon> {mentor.location}</p></template>
+                                <button class="btn-connect" data-name={mentor.name} onclick={handleConnect}>Connect</button>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="schedule-section card">
+                    <div class="schedule-row">
+                        <div class="calendar-mini">
+                            <div class="cal-month">
+                                <button class="cal-nav-btn" onclick={handlePrevMonth}><c-icon name="chevron_left" size="18"></c-icon></button>
+                                <span>{monthLabel}</span>
+                                <button class="cal-nav-btn" onclick={handleNextMonth}><c-icon name="chevron_right" size="18"></c-icon></button>
+                            </div>
+                            <div class="cal-weekdays">
+                                <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+                            </div>
+                            <div class="cal-days">
+                                <template for:each={calendarDays} for:item="calDay">
+                                    <span key={calDay.key} class={calDay.dayClass} data-day={calDay.day} onclick={handleDayClick}>{calDay.day}</span>
+                                </template>
+                            </div>
+                        </div>
+
+                        <div class="sessions-list">
+                            <div class="sessions-header">
+                                <h4 class="sessions-date">{selectedDateLabel}</h4>
+                                <button class="btn-primary-sm" onclick={handleScheduleCall}>Schedule a Call</button>
+                            </div>
+                            <template for:each={formattedSessions} for:item="session">
+                                <div key={session.id} class="session-item">
+                                    <div class="session-time-label">
+                                        <template lwc:if={session.time}><span class="time-text">{session.time}</span></template>
+                                    </div>
+                                    <div class={session.colorBarClass}></div>
+                                    <div class="session-content">
+                                        <h5 class="session-title">{session.title}</h5>
+                                        <p class="session-mentor"><c-icon name="person" size="14"></c-icon> {session.mentor}</p>
+                                    </div>
+                                    <div class="session-status">
+                                        <template lwc:if={session.isLive}>
+                                            <span class="live-badge">&#11044; Happening now!</span>
+                                        </template>
+                                        <template lwc:if={session.hasActions}>
+                                            <template for:each={session.formattedActions} for:item="action">
+                                                <button key={action.key} class={action.btnClass} data-action={action.label} onclick={handleSessionAction}>{action.label}</button>
+                                            </template>
+                                        </template>
+                                        <template lwc:if={session.status}>
+                                            <span class="pending-badge">{session.status}</span>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-col">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="section-title">Tasks</h3>
+                        <button class="btn-primary-sm" onclick={handleAddTask}>+ Add Task</button>
+                    </div>
+                    <template for:each={formattedTasks} for:item="task">
+                        <div key={task.id} class="task-item">
+                            <div class="task-header">
+                                <h4 class="task-title">{task.title}</h4>
+                                <span class={task.statusClass}>{task.status}</span>
+                            </div>
+                            <p class="task-mentor"><c-icon name="person" size="14"></c-icon> {task.mentor}</p>
+                            <p class="task-desc">{task.description}</p>
+                            <div class="task-footer">
+                                <span class="task-meta">Priority: <span class={task.priorityClass}>{task.priority}</span></span>
+                                <span class="task-date">Due: {task.endDate}</span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

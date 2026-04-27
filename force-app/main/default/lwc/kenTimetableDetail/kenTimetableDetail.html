@@ -1,0 +1,298 @@
+<template>
+    <section class="detail-shell">
+        <div class="breadcrumb-row">
+            <button class="breadcrumb-link" type="button" onclick={handleBack}>Timetable Management</button>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">{timetableName}</span>
+        </div>
+
+        <div class="hero-row">
+            <div class="hero-copy">
+                <div class="title-line">
+                    <h1>{timetableName}</h1>
+                    <span class={statusClass}>{statusLabel}</span>
+                    <span class={modeClass}>{modeLabel}</span>
+                </div>
+                <p>{subtitle}</p>
+            </div>
+
+            <div class="hero-actions">
+                <button class="secondary-action" type="button" onclick={handleToggleLock} disabled={isActing}>
+                    <lightning-icon icon-name="utility:lock" size="x-small" alternative-text="Lock"></lightning-icon>
+                    <span>{lockButtonLabel}</span>
+                </button>
+                <button class="secondary-action" type="button" disabled>
+                    <lightning-icon icon-name="utility:branch_merge" size="x-small" alternative-text="Version"></lightning-icon>
+                    <span>{versionButtonLabel}</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="metric-grid">
+            <article class="metric-card">
+                <div>
+                    <p class="metric-label">Total Sessions</p>
+                    <p class="metric-value">{totalSessions}</p>
+                </div>
+                <div class="metric-icon blue">
+                    <lightning-icon icon-name="utility:event" size="small" alternative-text="Sessions"></lightning-icon>
+                </div>
+            </article>
+            <article class="metric-card">
+                <div>
+                    <p class="metric-label">Assigned Rooms</p>
+                    <p class="metric-value">{assignedRooms}</p>
+                </div>
+                <div class="metric-icon green">
+                    <lightning-icon icon-name="utility:checkin" size="small" alternative-text="Rooms"></lightning-icon>
+                </div>
+            </article>
+            <article class="metric-card">
+                <div>
+                    <p class="metric-label">Faculty Assigned</p>
+                    <p class="metric-value">{facultyAssigned}</p>
+                </div>
+                <div class="metric-icon purple">
+                    <lightning-icon icon-name="utility:people" size="small" alternative-text="Faculty"></lightning-icon>
+                </div>
+            </article>
+            <article class="metric-card">
+                <div>
+                    <p class="metric-label">Conflicts</p>
+                    <p class={conflictCountClass}>{conflictCount}</p>
+                </div>
+                <div class="metric-icon green">
+                    <lightning-icon icon-name="utility:check" size="small" alternative-text="Conflicts"></lightning-icon>
+                </div>
+            </article>
+        </div>
+
+        <div class="content-grid">
+            <div class="main-column">
+                <section class="panel">
+                    <div class="panel-header">
+                        <h2>Alerts &amp; Issues</h2>
+                    </div>
+                    <div class="panel-body">
+                        <template if:true={loadError}>
+                            <div class="alert-card">
+                                <div class="alert-copy">
+                                    <p>{loadError}</p>
+                                </div>
+                            </div>
+                        </template>
+
+                        <div class="detail-filter-row">
+                            <label class="detail-filter">
+                                <span>Program Plan</span>
+                                <select value={selectedProgramPlanId} onchange={handleProgramPlanChange}>
+                                    <template for:each={programPlanOptions} for:item="option">
+                                        <option key={option.value} value={option.value}>{option.label}</option>
+                                    </template>
+                                </select>
+                            </label>
+
+                            <label class="detail-filter">
+                                <span>Enrollment Type</span>
+                                <select value={selectedEnrollmentType} onchange={handleEnrollmentTypeChange}>
+                                    <template for:each={enrollmentTypeOptions} for:item="option">
+                                        <option key={option.value} value={option.value}>{option.label}</option>
+                                    </template>
+                                </select>
+                            </label>
+                        </div>
+
+                        <div class="alert-card">
+                            <div class="alert-copy">
+                                <p>
+                                    <template if:true={totalSessions}>
+                                        {totalSessions} schedule row(s) loaded for this course offering.
+                                    </template>
+                                    <template if:false={totalSessions}>
+                                        No schedule rows found for this course offering yet.
+                                    </template>
+                                </p>
+                                <span>{lastUpdated}</span>
+                            </div>
+                        </div>
+
+                        <template if:true={filteredProgramPlans.length}>
+                            <div class="plan-chip-group">
+                                <template for:each={filteredProgramPlans} for:item="plan">
+                                    <span key={plan.id} class="plan-chip">
+                                        {plan.name}
+                                        <template if:true={plan.enrollmentType}>
+                                            <strong>{plan.enrollmentType}</strong>
+                                        </template>
+                                    </span>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-header">
+                        <h2>Timetable Preview</h2>
+                    </div>
+                    <div class="panel-body">
+                        <div class="tab-row">
+                            <template for:each={previewModes} for:item="mode">
+                                <button
+                                    key={mode.id}
+                                    class={mode.className}
+                                    type="button"
+                                    data-mode={mode.id}
+                                    onclick={handlePreviewModeChange}>
+                                    {mode.label}
+                                </button>
+                            </template>
+                        </div>
+
+                        <template if:true={showWeeklyPreview}>
+                            <div class="panel-caption">Review this course offering in the same weekly grid style as timetable creation.</div>
+                            <div class="preview-wrap builder-preview-wrap">
+                                <table class="preview-table builder-preview-table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" class="time-col">Time</th>
+                                            <template for:each={days} for:item="day">
+                                                <th key={day} scope="col">{day}</th>
+                                            </template>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={previewRows} for:item="row">
+                                            <tr key={row.time}>
+                                                <th scope="row" class="time-col time-value">{row.time}</th>
+                                                <template for:each={row.slots} for:item="slot">
+                                                    <template if:true={slot.render}>
+                                                        <td key={slot.key} rowspan={slot.rowSpan}>
+                                                            <template if:true={slot.hasEntry}>
+                                                                <div class="grid-slot" style={slot.cellStyle}>
+                                                                    <article class={slot.tone}>
+                                                                        <div class={slot.cellClass}>
+                                                                            <strong>{slot.label}</strong>
+                                                                            <template if:true={slot.type}>
+                                                                                <span class={slot.typePillClass}>{slot.type}</span>
+                                                                            </template>
+                                                                            <template if:true={slot.faculty}>
+                                                                                <span>{slot.faculty}</span>
+                                                                            </template>
+                                                                            <span>{slot.timeLabel}</span>
+                                                                        </div>
+                                                                    </article>
+                                                                </div>
+                                                            </template>
+                                                            <template if:false={slot.hasEntry}>
+                                                                <div class="grid-slot">
+                                                                    <span class="drop-label">Drop here</span>
+                                                                </div>
+                                                            </template>
+                                                        </td>
+                                                    </template>
+                                                </template>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+
+                        <template if:true={showMonthlyPreview}>
+                            <div class="month-grid">
+                                <template for:each={monthlyPreviewDays} for:item="day">
+                                    <article key={day.key} class={day.className}>
+                                        <div class="month-cell-top">
+                                            <span class="month-day-number">{day.dayNumber}</span>
+                                            <span class="month-day-label">{day.dayLabel}</span>
+                                        </div>
+                                        <div class="month-session-list">
+                                            <template for:each={day.sessions} for:item="session">
+                                                <span key={session} class="month-session-pill">{session}</span>
+                                                                    </template>
+                                        </div>
+                                    </article>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-header">
+                        <h2>Session Snapshot</h2>
+                    </div>
+                    <div class="table-scroll">
+                        <table class="snapshot-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Course</th>
+                                    <th scope="col">Type</th>
+                                    <th scope="col">Faculty</th>
+                                    <th scope="col">Room</th>
+                                    <th scope="col">Time</th>
+                                    <th scope="col">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={sessionSnapshot} for:item="row">
+                                    <tr key={row.id}>
+                                        <td>{row.course}</td>
+                                        <td>{row.type}</td>
+                                        <td>{row.faculty}</td>
+                                        <td>{row.room}</td>
+                                        <td>{row.time}</td>
+                                        <td><span class={row.statusClass}>{row.status}</span></td>
+                                    </tr>
+                                </template>
+                                <template if:false={hasSessionSnapshot}>
+                                    <tr>
+                                        <td colspan="6">No schedules available for this course offering.</td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <div class="side-column">
+                <section class="panel">
+                    <div class="panel-header">
+                        <h2>Activity History</h2>
+                    </div>
+                    <div class="timeline">
+                        <template for:each={activityItems} for:item="item">
+                            <div key={item.id} class="timeline-item">
+                                <h3>{item.title}</h3>
+                                <p>{item.description}</p>
+                                <span>{item.meta}</span>
+                            </div>
+                        </template>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-header">
+                        <h2>Details</h2>
+                    </div>
+                    <div class="details-body">
+                        <div class="detail-item">
+                            <span>Created By</span>
+                            <strong>{createdByLabel}</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>Last Updated</span>
+                            <strong>{lastUpdatedLabel}</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>Cohorts Assigned</span>
+                            <strong>{cohortCountLabel}</strong>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </section>
+</template>

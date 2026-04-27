@@ -1,0 +1,96 @@
+<template>
+    <section class="leave-shell">
+        <div class="top-row">
+            <h2 class="title">All Leave Requests</h2>
+            <div class="top-actions">
+                <div class="semester-wrap">
+                    <select class="semester-select" onchange={handleSemesterChange}>
+                        <template for:each={selectedSemesterOptions} for:item="option">
+                            <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                        </template>
+                    </select>
+                    <span class="current-pill"><span class="dot"></span>Current</span>
+                    <span class="caret">⌄</span>
+                </div>
+                <button type="button" class="help-btn" onclick={openHelpModal}>Get Help</button>
+                <button type="button" class="filter-btn">Filters <span class="filter-icon">☰</span></button>
+            </div>
+        </div>
+
+        <div class="request-list">
+            <template for:each={leaveRequests} for:item="item">
+                <article class="request-card" key={item.id}>
+                    <div class="request-top">
+                        <div>
+                            <p class="request-id">#{item.requestNumber}</p>
+                            <button type="button" class="request-title-btn" data-id={item.id} onclick={handleOpenRequest}>
+                                <h3 class="request-title">{item.type}</h3>
+                            </button>
+                        </div>
+                        <div class="status-wrap">
+                            <p class="request-date">{item.dateLabel}: <strong>{item.dateValue}</strong></p>
+                            <span class={item.statusClass}>{item.status}</span>
+                        </div>
+                    </div>
+
+                    <p class="request-desc">{item.description}</p>
+                    <p class="leave-dates">Leave Dates: <strong>{item.leaveDates}</strong></p>
+                </article>
+            </template>
+        </div>
+    </section>
+
+    <template if:true={showHelpModal}>
+        <section class="modal-backdrop" onclick={closeHelpModal}>
+            <div class="help-modal" onclick={stopModalClose}>
+                <h3 class="help-title">Get Help</h3>
+                <div class="help-divider"></div>
+
+                <label class="field-label" for="help-description">Description of the Issue (Optional)</label>
+                <div class="description-wrap">
+                    <textarea
+                        id="help-description"
+                        class="help-textarea"
+                        placeholder="Enter description"
+                        onchange={handleDescriptionChange}
+                    ></textarea>
+                    <button type="button" class="auto-create-btn">✧ Auto-Create Form Now</button>
+                </div>
+
+                <label class="field-label required" for="help-issue-type">Choose Issue Type</label>
+                <div class="select-wrap">
+                    <select
+                        id="help-issue-type"
+                        class="help-select"
+                        onchange={handleIssueTypeChange}
+                    >
+                        <template for:each={selectedIssueTypeOptions} for:item="option">
+                            <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                        </template>
+                    </select>
+                </div>
+
+                <label class="field-label required" for="help-subject">Issue Subject</label>
+                <input
+                    id="help-subject"
+                    class="help-input"
+                    type="text"
+                    placeholder="Enter issue subject"
+                    value={helpSubject}
+                    onchange={handleSubjectChange}
+                />
+
+                <p class="field-label">Upload Supporting Document (Optional)</p>
+                <div class="upload-box">
+                    <p><span>Click to upload</span> or drag and drop</p>
+                    <p>PNG, JPG or PDF (Max 5 MB)</p>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="modal-btn modal-btn-outline" onclick={closeHelpModal}>Cancel</button>
+                    <button type="button" class="modal-btn modal-btn-primary" onclick={submitHelpRequest}>Submit</button>
+                </div>
+            </div>
+        </section>
+    </template>
+</template>

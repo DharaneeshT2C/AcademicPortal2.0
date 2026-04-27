@@ -1,0 +1,31 @@
+<template>
+    <template lwc:if={showToast}>
+        <c-toast message={toastMessage} variant={toastVariant} onclose={handleToastClose}></c-toast>
+    </template>
+    <div class="page">
+        <h2 class="page-title">Notifications</h2>
+        <div class="card">
+            <div class="notif-header"><h3 class="section-title">Today</h3><button class="btn-outline" onclick={handleMarkAllRead}>Mark all as read</button></div>
+            <template for:each={formattedNotifications} for:item="notif">
+                <div key={notif.id} class={notif.rowClass} data-id={notif.id} onclick={handleMarkOne}>
+                    <div class="notif-avatar"><c-icon name="notifications" size="20"></c-icon></div>
+                    <div class="notif-content">
+                        <p class="notif-title">{notif.title}</p>
+                        <template lwc:if={notif.subtitle}><p class="notif-subtitle">{notif.subtitle}</p></template>
+                        <span class="notif-time">{notif.time}</span>
+                        <template lwc:if={notif.hasActions}>
+                            <div class="notif-actions">
+                                <template for:each={notif.formattedActions} for:item="action">
+                                    <button key={action.label} class={action.btnClass} data-id={action.notifId} data-action={action.actionKey} onclick={handleAction}>{action.label}</button>
+                                </template>
+                            </div>
+                        </template>
+                        <template lwc:if={notif.hasDecision}>
+                            <span class="notif-decision">{notif.decisionLabel}</span>
+                        </template>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>

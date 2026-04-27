@@ -1,0 +1,384 @@
+<template>
+    <section class={enrollmentLayoutClass}>
+        <template if:true={showSkeleton}>
+            <section class="skeleton-wrap" aria-busy="true" aria-live="polite">
+                <div class="skeleton-left">
+                    <div class="skeleton-header-row">
+                        <div class="skeleton-line skeleton-title"></div>
+                        <div class="skeleton-line skeleton-button"></div>
+                    </div>
+                    <div class="skeleton-stepper"></div>
+                    <div class="skeleton-line skeleton-section-title"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-line skeleton-section-title"></div>
+                    <div class="skeleton-card"></div>
+                </div>
+                <div class="skeleton-right">
+                    <div class="skeleton-line skeleton-panel-title"></div>
+                    <div class="skeleton-row"></div>
+                    <div class="skeleton-row"></div>
+                    <div class="skeleton-row"></div>
+                </div>
+            </section>
+        </template>
+
+        <template if:false={showSkeleton}>
+        <div class="left-panel">
+            <div class="main-content">
+                <header class="semester-header">
+                    <h1>{semesterTitle}</h1>
+                    <div class="semester-header-actions">
+                        <span class="stepper-date-pill">{lastDateText}</span>
+                        <button type="button" class="live-toggle-button" onclick={toggleLiveSection}>{liveToggleLabel}</button>
+                        <button type="button" class="stepper-help-button">Get Help</button>
+                    </div>
+                </header>
+
+                <section class="stepper-card">
+                    <div class="stepper-paths">
+                        <template for:each={stepperItems} for:item="step">
+                            <div key={step.id} class="stepper-node-wrap">
+                                <div class="stepper-node-line">
+                                    <span class={step.circleClass}>{step.numberLabel}</span>
+                                    <p class={step.labelClass}>{step.label}</p>
+                                </div>
+                                <template if:true={step.showConnector}>
+                                    <span class="stepper-connector" aria-hidden="true"></span>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="stepper-progress-row">
+                        <div class="stepper-progress-track">
+                            <span class="stepper-progress-fill" style={stepperProgressStyle}></span>
+                        </div>
+                        <span class="step-counter-chip">{stepperCounterText}</span>
+                    </div>
+                </section>
+
+                <header class="program-header">
+                    <h2>{programHeaderTitle}</h2>
+                </header>
+
+                <section class="selection-section">
+                    <h2>Mandatory</h2>
+                    <div class="hint-banner">
+                        <span class="hint-icon">!</span>
+                        <span>
+                            These course(s) are mandatory for enrolment. Please select your preferred faculty.
+                        </span>
+                    </div>
+
+                    <article class={mandatoryRequirementClass}>
+                        <div class="requirement-head accordion-head" role="button" tabindex="0" onclick={toggleMandatoryAccordion}>
+                            <p>{mandatorySelectedText}</p>
+                            <div class="requirement-meta">
+                                <span class="credits-pill">12 Credits Required</span>
+                                <span class={mandatoryIndicatorClass}></span>
+                            </div>
+                        </div>
+
+                        <div class={mandatoryBodyClass}>
+                            <template for:each={computedMandatoryCourses} for:item="course">
+                                <article key={course.id} class={course.cardClass} data-course-anchor={course.id}>
+                                    <div class="course-top course-top-selectable" data-course-id={course.id} onclick={handleCourseFocus}>
+                                        <span class={course.checkClass} aria-hidden="true"></span>
+                                        <div>
+                                            <h3>{course.title}</h3>
+                                            <p>{course.subtitle}</p>
+                                        </div>
+                                    </div>
+
+                                    <template if:true={course.hasFacultySummary}>
+                                        <p class={course.facultySummaryClass}>{course.facultySummaryText}</p>
+                                    </template>
+                                    <template if:true={course.hasFacultyOptions}>
+                                        <div class={course.facultyGridClass}>
+                                            <template for:each={course.facultyOptions} for:item="faculty">
+                                                <section
+                                                    key={faculty.id}
+                                                    class={faculty.optionClass}
+                                                    data-course-id={course.id}
+                                                    data-faculty-id={faculty.facultyOptionId}
+                                                    onclick={handleFacultySelection}
+                                                >
+                                                    <template if:true={faculty.isAssigned}>
+                                                        <p class="faculty-name">
+                                                            <span class={faculty.radioClass} aria-hidden="true"></span>
+                                                            {faculty.name}
+                                                        </p>
+                                                    </template>
+                                                    <template if:true={faculty.hasSeatInfo}>
+                                                        <div class="seat-summary">
+                                                            <span class="seat-pill">{faculty.seatsRemainingText}</span>
+                                                            <span class="seat-capacity">{faculty.seatCapacityText}</span>
+                                                        </div>
+                                                    </template>
+                                                    <template if:true={faculty.scheduleLines.length}>
+                                                        <div class={faculty.scheduleCardClass}>
+                                                            <template for:each={faculty.scheduleLines} for:item="line">
+                                                                <p key={line.id} class={line.lineClass}>{line.text}</p>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+                                                </section>
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <template if:true={course.showConflict}>
+                                        <div class="conflict-alert">
+                                            <span class="conflict-alert-icon" aria-hidden="true">!</span>
+                                            <span>{course.conflictText}</span>
+                                            <button
+                                                type="button"
+                                                class="resolve-inline-button"
+                                                data-course-id={course.id}
+                                                onclick={handleResolveConflict}
+                                            >
+                                                {course.resolveActionLabel}
+                                            </button>
+                                        </div>
+                                        <template if:true={course.alternativeSuggestion}>
+                                            <p class="conflict-suggestion">{course.alternativeSuggestion}</p>
+                                        </template>
+                                    </template>
+                                </article>
+                            </template>
+                        </div>
+                    </article>
+                </section>
+
+                <section class="selection-section">
+                    <h2>Electives</h2>
+                    <article class={electivesRequirementClass}>
+                        <div class="requirement-head accordion-head" role="button" tabindex="0" onclick={toggleElectivesAccordion}>
+                            <p>{electiveSummaryText}</p>
+                            <div class="requirement-meta">
+                                <span class={electivesIndicatorClass}></span>
+                            </div>
+                        </div>
+
+                        <div class={electivesBodyClass}>
+                            <template for:each={computedElectiveGroups} for:item="group">
+                                <article key={group.groupKey} class="course-card">
+                                    <div
+                                        class="requirement-head accordion-head"
+                                        role="button"
+                                        tabindex="0"
+                                        data-group={group.groupKey}
+                                        onclick={toggleElectiveGroup}
+                                    >
+                                        <p>{group.groupName}</p>
+                                        <div class="requirement-meta">
+                                            <template for:each={group.pills} for:item="pill">
+                                                <span key={pill.key} class="credits-pill">{pill.label}</span>
+                                            </template>
+                                            <span class={group.indicatorClass}></span>
+                                        </div>
+                                    </div>
+
+                                    <div class={group.bodyClass}>
+                                        <template for:each={group.courses} for:item="course">
+                                            <article key={course.id} class={course.cardClass} data-course-anchor={course.id}>
+                                                <div class="course-top course-top-selectable" data-course-id={course.id} onclick={handleElectiveToggle}>
+                                                    <span class={course.checkClass} aria-hidden="true"></span>
+                                                    <div>
+                                                        <h3 class={course.titleClass}>{course.title}</h3>
+                                                        <p class={course.subtitleClass}>{course.subtitle}</p>
+                                                    </div>
+                                                </div>
+
+                                                <template if:true={course.showDetails}>
+                                                    <label class="preference-label" for={course.preferenceId}>Choose Preference</label>
+                                                    <div class="preference-select-wrap">
+                                                        <select id={course.preferenceId} class="preference-select">
+                                                            <option>{course.preference}</option>
+                                                        </select>
+                                                        <span class="select-chevron" aria-hidden="true"></span>
+                                                    </div>
+
+                                                    <template if:true={course.hasFacultySummary}>
+                                                        <p class={course.facultySummaryClass}>{course.facultySummaryText}</p>
+                                                    </template>
+                                                    <template if:true={course.hasFacultyOptions}>
+                                                        <div class={course.facultyGridClass}>
+                                                            <template for:each={course.facultyOptions} for:item="faculty">
+                                                                <section
+                                                                    key={faculty.id}
+                                                                    class={faculty.optionClass}
+                                                                    data-course-id={course.id}
+                                                                    data-faculty-id={faculty.facultyOptionId}
+                                                                    onclick={handleFacultySelection}
+                                                                >
+                                                                    <template if:true={faculty.isAssigned}>
+                                                                        <p class="faculty-name">
+                                                                            <span class={faculty.radioClass} aria-hidden="true"></span>
+                                                                            {faculty.name}
+                                                                        </p>
+                                                                    </template>
+                                                                    <template if:true={faculty.hasSeatInfo}>
+                                                                        <div class="seat-summary">
+                                                                            <span class="seat-pill">{faculty.seatsRemainingText}</span>
+                                                                            <span class="seat-capacity">{faculty.seatCapacityText}</span>
+                                                                        </div>
+                                                                    </template>
+                                                                    <template if:true={faculty.scheduleLines.length}>
+                                                                        <div class={faculty.scheduleCardClass}>
+                                                                            <template for:each={faculty.scheduleLines} for:item="line">
+                                                                                <p key={line.id} class={line.lineClass}>{line.text}</p>
+                                                                            </template>
+                                                                        </div>
+                                                                    </template>
+                                                                </section>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+                                                </template>
+
+                                                <template if:true={course.showScheduleConflict}>
+                                                    <div class="conflict-alert">
+                                                        <span class="conflict-alert-icon" aria-hidden="true">!</span>
+                                                        <span>{course.scheduleConflictText}</span>
+                                                        <button
+                                                            type="button"
+                                                            class="resolve-inline-button"
+                                                            data-course-id={course.id}
+                                                            onclick={handleResolveConflict}
+                                                        >
+                                                            {course.resolveActionLabel}
+                                                        </button>
+                                                    </div>
+                                                    <template if:true={course.alternativeSuggestion}>
+                                                        <p class="conflict-suggestion">{course.alternativeSuggestion}</p>
+                                                    </template>
+                                                </template>
+
+                                                <template if:true={course.showWarning}>
+                                                    <div class={course.warningClass}>
+                                                        <span class={course.warningIconClass} aria-hidden="true">!</span>
+                                                        <span>{course.warningText}</span>
+                                                    </div>
+                                                </template>
+                                            </article>
+                                        </template>
+                                    </div>
+                                </article>
+                            </template>
+                        </div>
+                    </article>
+                </section>
+            </div>
+
+            <footer class="footer-bar">
+                <div class="footer-actions">
+                    <button type="button" class="discard-button" onclick={handleSecondaryFooterAction}>{secondaryFooterButtonLabel}</button>
+                    <button type="button" class="submit-button" onclick={handlePrimaryFooterAction} disabled={isPrimaryFooterDisabled}>{primaryFooterButtonLabel}</button>
+                </div>
+            </footer>
+        </div>
+
+        <template if:false={isLiveHidden}>
+        <aside class="live-panel">
+            <h2>Live Selection</h2>
+            <p class="live-conflict-text">
+                <span class="live-conflict-dot" aria-hidden="true">!</span>
+                {liveConflictCount} conflicts in schedule
+            </p>
+
+            <template if:true={hasLiveSelection}>
+                <template for:each={computedLiveSelection} for:item="day">
+                    <section key={day.id} class="day-block">
+                        <div class="live-day-head" role="button" tabindex="0" data-day-id={day.id} onclick={toggleLiveDayAccordion}>
+                            <h3>{day.day}</h3>
+                            <span class={day.indicatorClass}></span>
+                        </div>
+
+                        <div class={day.bodyClass}>
+                            <template for:each={day.sessions} for:item="session">
+                                <article key={session.id} class={session.cardClass} data-course-id={session.sourceCourseId} onclick={handleCourseFocus}>
+                                    <div class="session-top">
+                                        <h4>{session.title}</h4>
+                                        <template if:true={session.time}>
+                                            <span class="time-pill">{session.time}</span>
+                                        </template>
+                                    </div>
+                                    <template if:true={session.details}>
+                                        <p class="session-detail">{session.details}</p>
+                                    </template>
+                                    <template if:true={session.faculty}>
+                                        <p class="session-faculty">{session.faculty}</p>
+                                    </template>
+                                </article>
+                            </template>
+                        </div>
+                    </section>
+                </template>
+            </template>
+            <template if:false={hasLiveSelection}>
+                <div class="live-empty-state">Selected courses with published schedules will appear here.</div>
+            </template>
+        </aside>
+        </template>
+
+        <template if:true={isReviewModalOpen}>
+            <section class="review-modal-overlay" role="dialog" aria-modal="true" aria-label="Review and Submit Course Enrollment">
+                <div class="review-modal-backdrop" onclick={handleCloseReviewModal}></div>
+                <div class="review-modal">
+                    <header class="review-modal-header">
+                        <h2>Review &amp; Submit Course Enrollment</h2>
+                        <div class="review-modal-header-right">
+                            <span class="semester-badge">{semesterTitle}</span>
+                            <button type="button" class="review-close-button" onclick={handleCloseReviewModal}>×</button>
+                        </div>
+                    </header>
+
+                    <div class="review-modal-body">
+                        <template for:each={reviewPathwaySummaries} for:item="pathway">
+                            <article key={pathway.id} class="review-pathway-card">
+                                <div class="review-pathway-head">
+                                    <h3>{pathway.title}</h3>
+                                    <div class="review-pathway-actions">
+                                        <span class="credits-pill">Credits: {pathway.totalCredits}</span>
+                                        <button type="button" class="edit-details-button" data-id={pathway.id} onclick={handleEditPathway}>Edit Details</button>
+                                    </div>
+                                </div>
+                                <p class="review-meta">Mandatory: {pathway.mandatoryCredits} credits &nbsp;&nbsp; Elective: {pathway.electiveCredits} credits</p>
+
+                                <template if:true={pathway.hasMandatoryCourses}>
+                                    <h4>Mandatory Courses</h4>
+                                    <template for:each={pathway.mandatoryCourses} for:item="course">
+                                        <div key={course.id} class="review-course-card">
+                                            <p>{course.name}</p>
+                                            <span>{course.subtitle}</span>
+                                        </div>
+                                    </template>
+                                </template>
+
+                                <template if:true={pathway.hasElectiveCourses}>
+                                    <h4>Elective Courses</h4>
+                                    <template for:each={pathway.electiveCourses} for:item="course">
+                                        <div key={course.id} class="review-course-card">
+                                            <p>{course.name}</p>
+                                            <span>{course.subtitle}</span>
+                                        </div>
+                                    </template>
+                                </template>
+                            </article>
+                        </template>
+                    </div>
+
+                    <footer class="review-modal-footer">
+                        <p>Major Credits: <strong>{reviewMajorCreditsText}</strong> | Minor Credits: <strong>{reviewMinorCreditsText}</strong></p>
+                        <div class="review-footer-actions">
+                            <button type="button" class="discard-button" onclick={handleBackToSelection}>Back to Selection</button>
+                            <button type="button" class="submit-button" onclick={handleConfirmEnrollment} disabled={isSubmitting}>{confirmEnrollmentLabel}</button>
+                        </div>
+                    </footer>
+                </div>
+            </section>
+        </template>
+        </template>
+    </section>
+</template>

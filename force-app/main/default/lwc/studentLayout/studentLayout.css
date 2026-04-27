@@ -1,0 +1,33 @@
+:host {
+    display: block;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.layout {
+    display: flex;
+    height: 100%;
+    overflow: hidden;
+}
+
+
+.left {
+    width: 260px;
+    height: 100%;
+    overflow: hidden;
+}
+
+
+.right {
+    flex: 1;
+    height: 100%;
+    padding: 16px;
+    background: #f4f6f9;
+
+    overflow-y: auto;   /* vertical scroll */
+    overflow-x: hidden; /* prevent horizontal scroll */
+}
+
+.content {
+    min-height: 100%;
+}

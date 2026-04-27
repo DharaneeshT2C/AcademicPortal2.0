@@ -1,0 +1,338 @@
+<template>
+    <div class="page">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <button type="button" class="crumb-btn" onclick={handleBackToMasterData}>Master Data</button>
+            <span class="sep">&gt;</span>
+            <button type="button" class="crumb-btn" onclick={handleBackToFeePlans}>Fee Plans</button>
+            <span class="sep">&gt;</span>
+            <span class="crumbCurrent">{planName}</span>
+        </nav>
+
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+        </template>
+
+        <template if:false={isLoading}>
+            <header class="recordHeader">
+                <div class="titleArea">
+                    <div class="titleRow">
+                        <h1 class="pageTitle">{planName} ({versionLabel})</h1>
+                        <span class={statusBadgeClass}>{statusLabel}</span>
+                        <span class="lockBadge">{lockText}</span>
+                    </div>
+                    <div class="metaRow">
+                        <span class="metaText">Created by {createdByName}</span>
+                        <span class="metaText">Last modified {lastModifiedText}</span>
+                    </div>
+                </div>
+                <div class="headerActions">
+                    <lightning-button
+                        label="Edit"
+                        icon-name="utility:edit"
+                        disabled={isEditRestricted}
+                        onclick={handleEdit}>
+                    </lightning-button>
+                </div>
+            </header>
+
+            <section class="workflowCard">
+                <div class="workflowLabel">Workflow Status</div>
+                <div class="fp-lifecycle">
+                    <div class={draftStageClass}><span class="fp-dot">1</span><span>Draft</span></div>
+                    <div class="fp-stage-line"></div>
+                    <div class={reviewStageClass}><span class="fp-dot">2</span><span>Under Review</span></div>
+                    <div class="fp-stage-line"></div>
+                    <div class={activeStageClass}><span class={activeDotClass}>3</span><span>Active</span></div>
+                    <div class="fp-stage-line"></div>
+                    <div class={archivedStageClass}><span class="fp-dot">4</span><span>Archived</span></div>
+                </div>
+            </section>
+
+            <template if:true={showActiveBanner}>
+                <div class="warningBanner">
+                    <div class="warningTitle">Active Record - Locked</div>
+                    <p class="warningText">
+                        This Fee Plan is currently active and used by {programmeFeesCount} Programme Fee configurations.
+                        Clone to create a new version for modifications.
+                    </p>
+                </div>
+            </template>
+
+            <div class="tabsCard">
+                <div class="tabs">
+                    <button type="button" class={detailsTabClass} data-tab="details" onclick={handleTabClick}>Details</button>
+                    <button type="button" class={categoriesTabClass} data-tab="categories" onclick={handleTabClick}>Categories &amp; Quotas</button>
+                    <button type="button" class={feeStructureTabClass} data-tab="feeStructure" onclick={handleTabClick}>Fee Structure</button>
+                    <button type="button" class={usageTabClass} data-tab="usage" onclick={handleTabClick}>Usage</button>
+                    <button type="button" class={versionHistoryTabClass} data-tab="versionHistory" onclick={handleTabClick}>Version History</button>
+                    <button type="button" class={auditLogTabClass} data-tab="auditLog" onclick={handleTabClick}>Audit Log</button>
+                </div>
+            </div>
+
+            <template if:true={isDetailsTab}>
+                <div class="detailCardGrid">
+                    <section class="card">
+                        <h2 class="card-title">Plan Information</h2>
+                        <div class="grid two-col">
+                            <div class="fieldItem">
+                                <div class="label">Plan Name</div>
+                                <div class="value">{planName}</div>
+                            </div>
+                            <div class="fieldItem">
+                                <div class="label">Status</div>
+                                <div class="value"><span class={statusBadgeClass}>{statusLabel}</span></div>
+                            </div>
+                            <div class="fieldItem">
+                                <div class="label">Version</div>
+                                <div class="value">{versionLabel}</div>
+                            </div>
+                            <div class="fieldItem">
+                                <div class="label">Currency</div>
+                                <div class="value">{currencyLabel}</div>
+                            </div>
+                            <div class="fieldItem">
+                                <div class="label">Created By</div>
+                                <div class="value">{createdByName}</div>
+                            </div>
+                            <div class="fieldItem">
+                                <div class="label">Last Modified</div>
+                                <div class="value">{lastModifiedText}</div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="card">
+                        <h2 class="card-title">Configuration</h2>
+                        <div class="grid two-col">
+                            <div class="fieldItem">
+                                <div class="label">Description</div>
+                                <div class="value">{recordData.description}</div>
+                            </div>
+                            <div class="fieldItem">
+                                <div class="label">Lock State</div>
+                                <div class="value">{lockText}</div>
+                            </div>
+                            <div class="fieldItem">
+                                <div class="label">Programme Fee Usage</div>
+                                <div class="value">{programmeFeesCount}</div>
+                            </div>
+                            <div class="fieldItem">
+                                <div class="label">Students Assigned</div>
+                                <div class="value">{studentsAssignedCount}</div>
+                            </div>
+                            <div class="fieldItem">
+                                <div class="label">Total Revenue</div>
+                                <div class="value">{totalRevenueLabel}</div>
+                            </div>
+                            <div class="fieldItem">
+                                <div class="label">Currency Policy</div>
+                                <div class="value">{currencyLabel}</div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </template>
+
+            <template if:true={isCategoriesTab}>
+                <section class="card">
+                    <h2 class="card-title">Categories &amp; Quotas</h2>
+                    <template for:each={categories} for:item="category">
+                        <div key={category.categoryName} class="category-block">
+                            <div class="category-head">
+                                <div>
+                                    <div class="category-name">{category.categoryName}</div>
+                                    <div class="category-count">{category.quotaCount} quotas</div>
+                                </div>
+                                <div class="chips">
+                                    <template for:each={category.quotaCodes} for:item="code">
+                                        <span key={code} class="chip">{code}</span>
+                                    </template>
+                                </div>
+                            </div>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Quota Name</th>
+                                        <th>Code</th>
+                                        <th>Currency</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={category.quotas} for:item="quota">
+                                        <tr key={quota.quotaName}>
+                                            <td>{quota.quotaName}</td>
+                                            <td>{quota.code}</td>
+                                            <td>{quota.currencyCode}</td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
+                </section>
+            </template>
+
+            <template if:true={isFeeStructureTab}>
+                <section class="card">
+                    <h2 class="card-title">Fee Structure by Category</h2>
+                    <template for:each={feeStructureCategories} for:item="category">
+                        <div key={category.categoryName} class="category-block">
+                            <div class="category-name">Fee Structure - {category.categoryName}</div>
+                            <table class="table feeStructureTable">
+                                <thead>
+                                    <tr>
+                                        <th>Fee Head</th>
+                                        <th>Settlement Order</th>
+                                        <th>Tax</th>
+                                        <template for:each={category.headers} for:item="headerCode">
+                                            <th key={headerCode}>{headerCode}</th>
+                                        </template>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={category.rows} for:item="row">
+                                        <tr key={row.rowKey}>
+                                            <td>{row.feeHeadName}</td>
+                                            <td>{row.settlementOrder}</td>
+                                            <td>{row.taxSummary}</td>
+                                            <template for:each={row.cells} for:item="cell">
+                                                <td key={cell.key}>{cell.amountLabel}</td>
+                                            </template>
+                                        </tr>
+                                    </template>
+                                    <template if:true={category.rows}>
+                                        <tr class="total-row">
+                                            <td>Total</td>
+                                            <td></td>
+                                            <td></td>
+                                            <template for:each={category.totalCells} for:item="totalCell">
+                                                <td key={totalCell.key}>{totalCell.amountLabel}</td>
+                                            </template>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
+                </section>
+            </template>
+
+            <template if:true={isUsageTab}>
+                <section class="card">
+                    <h2 class="card-title">Usage Metrics</h2>
+                    <div class="usage-metrics">
+                        <div class="metric-card">
+                            <div class="label">Programme Fees</div>
+                            <div class="metric-value">{programmeFeesCount}</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="label">Students Assigned</div>
+                            <div class="metric-value">{studentsAssignedCount}</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="label">Total Revenue</div>
+                            <div class="metric-value">{totalRevenueLabel}</div>
+                        </div>
+                    </div>
+
+                    <div class="sub-title">Programme Fee Configurations</div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Programme</th>
+                                <th>Batch</th>
+                                <th>Status</th>
+                                <th>Students</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template if:true={hasProgrammeFeeConfigs}>
+                                <template for:each={programmeFeeConfigs} for:item="row">
+                                    <tr key={row.rowKey}>
+                                        <td>{row.programmeName}</td>
+                                        <td>{row.batch}</td>
+                                        <td><span class={row.statusClass}>{row.status}</span></td>
+                                        <td>{row.students}</td>
+                                    </tr>
+                                </template>
+                            </template>
+                            <template if:false={hasProgrammeFeeConfigs}>
+                                <tr>
+                                    <td colspan="4" class="empty">No programme fee configurations found.</td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </section>
+            </template>
+
+            <template if:true={isVersionHistoryTab}>
+                <section class="card">
+                    <h2 class="card-title">Version History</h2>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Version</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Created By</th>
+                                <th>Change Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template if:true={hasVersionHistory}>
+                                <template for:each={versionHistoryRows} for:item="row">
+                                    <tr key={row.rowKey}>
+                                        <td>{row.version}</td>
+                                        <td><span class={row.statusClass}>{row.status}</span></td>
+                                        <td>{row.dateLabel}</td>
+                                        <td>{row.createdBy}</td>
+                                        <td>{row.changeReason}</td>
+                                    </tr>
+                                </template>
+                            </template>
+                            <template if:false={hasVersionHistory}>
+                                <tr>
+                                    <td colspan="5" class="empty">No version history available.</td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </section>
+            </template>
+
+            <template if:true={isAuditLogTab}>
+                <section class="card">
+                    <h2 class="card-title">Audit Trail</h2>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Action</th>
+                                <th>User</th>
+                                <th>Date &amp; Time</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template if:true={hasAuditLogs}>
+                                <template for:each={auditLogRows} for:item="row">
+                                    <tr key={row.rowKey}>
+                                        <td>{row.action}</td>
+                                        <td>{row.userName}</td>
+                                        <td>{row.dateTimeLabel}</td>
+                                        <td>{row.details}</td>
+                                    </tr>
+                                </template>
+                            </template>
+                            <template if:false={hasAuditLogs}>
+                                <tr>
+                                    <td colspan="4" class="empty">No audit entries available.</td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </section>
+            </template>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,79 @@
+<template>
+    <lightning-modal-body>
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 class="modal-title">{modalTitle}</h2>
+                    <p class="modal-subtitle">Configure a new student category for fee assignment</p>
+                </div>
+                <lightning-button-icon
+                    icon-name="utility:close"
+                    variant="bare"
+                    alternative-text="Close"
+                    onclick={handleCancel}
+                    class="close-button">
+                </lightning-button-icon>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label">Category Name <span class="required">*</span></label>
+                <lightning-input
+                    data-id="categoryName"
+                    name="categoryName"
+                    variant="label-hidden"
+                    value={categoryName}
+                    placeholder="e.g., Social Reservation"
+                    required
+                    onchange={handleFieldInput}>
+                </lightning-input>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label">Category Type <span class="required">*</span></label>
+                <lightning-combobox
+                    data-id="categoryType"
+                    name="categoryType"
+                    variant="label-hidden"
+                    value={categoryType}
+                    options={categoryTypeOptions}
+                    placeholder="Select type"
+                    required
+                    onchange={handleFieldInput}>
+                </lightning-combobox>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label">Regulatory Source</label>
+                <lightning-input
+                    data-id="regulatorySource"
+                    name="regulatorySource"
+                    variant="label-hidden"
+                    value={regulatorySource}
+                    placeholder="e.g., Constitution of India, UGC Guidelines"
+                    onchange={handleFieldInput}>
+                </lightning-input>
+            </div>
+
+            <div class="toggle-row">
+                <lightning-input
+                    data-id="isActive"
+                    type="toggle"
+                    name="isActive"
+                    variant="label-hidden"
+                    checked={isActive}
+                    message-toggle-active=""
+                    message-toggle-inactive=""
+                    onchange={handleFieldInput}>
+                </lightning-input>
+                <span class="toggle-label">Active</span>
+            </div>
+        </div>
+    </lightning-modal-body>
+
+    <lightning-modal-footer>
+        <div class="modal-actions">
+            <lightning-button label="Cancel" onclick={handleCancel}></lightning-button>
+            <lightning-button variant="brand" label={saveButtonLabel} onclick={handleSave}></lightning-button>
+        </div>
+    </lightning-modal-footer>
+</template>

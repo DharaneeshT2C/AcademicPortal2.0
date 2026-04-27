@@ -1,0 +1,45 @@
+<template>
+    <section class="choose-course-shell">
+        <article class="choose-course-panel">
+            <div class="panel-head">
+                <h2 class="panel-title">Choose a Course</h2>
+                <div class="semester-wrap">
+                    <select class="semester-select" onchange={handleSemesterChange}>
+                        <template for:each={semesterSelectOptions} for:item="option">
+                            <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                        </template>
+                    </select>
+                    <span class="current-pill"><span class="dot"></span>Current</span>
+                    <span class="caret" aria-hidden="true">⌄</span>
+                </div>
+            </div>
+
+            <div class="course-grid">
+                <template for:each={courseCards} for:item="course">
+                    <article class="course-card" key={course.id} onclick={handleCourseClick}>
+                        <div class={course.imageClass}>
+                            <div class="badge-row">
+                                <span class={course.categoryClass}>{course.category}</span>
+                                <span class="badge badge-students">{course.students} Students</span>
+                            </div>
+                        </div>
+
+                        <div class="card-content">
+                            <h3 class="course-title" title={course.title}>{course.title}</h3>
+                            <p class="course-code">{course.code}</p>
+
+                            <div class="info-line">
+                                <span class="meta-icon icon-book" aria-hidden="true"></span>
+                                <span>{course.courseType}</span>
+                            </div>
+                            <div class="info-line">
+                                <span class="meta-icon icon-grid" aria-hidden="true"></span>
+                                <span>{course.program}</span>
+                            </div>
+                        </div>
+                    </article>
+                </template>
+            </div>
+        </article>
+    </section>
+</template>

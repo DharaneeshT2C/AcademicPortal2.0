@@ -1,0 +1,87 @@
+<template>
+    <section class="question-paper-shell">
+        <h2 class="title">Question papers</h2>
+        <div class="table-wrapper">
+            <table class="question-paper-table">
+                <thead>
+                    <tr>
+                        <th>Exam type</th>
+                        <th>Class</th>
+                        <th>Course</th>
+                        <th>Due date</th>
+                        <th>Submitted on</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={tableRows} for:item="row">
+                        <tr key={row.id}>
+                            <td>{row.examType}</td>
+                            <td>{row.className}</td>
+                            <td>{row.course}</td>
+                            <td>{row.dueDate}</td>
+                            <td>{row.submittedOn}</td>
+                            <td><span class={row.statusClass}>{row.status}</span></td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class={row.actionClass}
+                                    data-id={row.id}
+                                    data-action={row.action}
+                                    onclick={handleActionClick}
+                                >
+                                    {row.action}
+                                </button>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mobile-cards" aria-label="Question paper cards">
+            <template for:each={tableRows} for:item="row">
+                <article key={row.id} class="qp-card">
+                    <div class="qp-card-head">
+                        <p class="qp-card-exam">{row.examType}</p>
+                        <span class={row.statusClass}>{row.status}</span>
+                    </div>
+                    <p class="qp-card-course">{row.course}</p>
+                    <dl class="qp-card-grid">
+                        <div class="qp-card-item">
+                            <dt>Class</dt>
+                            <dd>{row.className}</dd>
+                        </div>
+                        <div class="qp-card-item">
+                            <dt>Due date</dt>
+                            <dd>{row.dueDate}</dd>
+                        </div>
+                        <div class="qp-card-item">
+                            <dt>Submitted on</dt>
+                            <dd>{row.submittedOn}</dd>
+                        </div>
+                    </dl>
+                    <button
+                        type="button"
+                        class={row.actionClass}
+                        data-id={row.id}
+                        data-action={row.action}
+                        onclick={handleActionClick}
+                    >
+                        {row.action}
+                    </button>
+                </article>
+            </template>
+        </div>
+
+        <div class="table-footer">
+            <span>Rows per page: <strong>10</strong> <span class="caret">▼</span></span>
+            <span>1-5 of 13</span>
+            <div class="footer-nav">
+                <button type="button" class="nav-btn">‹</button>
+                <button type="button" class="nav-btn">›</button>
+            </div>
+        </div>
+    </section>
+</template>

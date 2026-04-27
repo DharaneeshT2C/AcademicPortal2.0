@@ -1,0 +1,48 @@
+<template>
+    <template if:true={isSkeletonLoading}>
+        <div class="sync-shell skeleton-shell" aria-busy="true">
+            <div class="sync-card skeleton-card">
+                <div class="sync-hero skeleton-hero">
+                    <div class="skeleton-icon skeleton-shimmer" aria-hidden="true"></div>
+                    <div class="skeleton-hero-text">
+                        <div class="skeleton-line skeleton-shimmer w-40"></div>
+                        <div class="skeleton-line skeleton-shimmer w-70"></div>
+                    </div>
+                </div>
+                <div class="sync-body skeleton-body">
+                    <div class="skeleton-block skeleton-shimmer"></div>
+                    <div class="skeleton-actions">
+                        <div class="skeleton-btn skeleton-shimmer w-18"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template if:false={isSkeletonLoading}>
+        <div class="sync-shell">
+            <div class="sync-card">
+                <div class="sync-hero">
+                    <div class="hero-icon" aria-hidden="true">
+                        <lightning-icon icon-name="utility:sync" size="small"></lightning-icon>
+                    </div>
+                    <div>
+                        <div class="hero-title">Sync Program Plans</div>
+                        <div class="hero-subtitle">Link curriculum courses to course offerings for this session.</div>
+                    </div>
+                </div>
+
+                <div class="sync-body">
+                    <lightning-dual-listbox name="programPlans" label="Learning Program Plans" source-label="Available"
+                        selected-label="Selected" options={planOptions} value={selectedPlanIds}
+                        onchange={handlePlanChange}></lightning-dual-listbox>
+
+                    <div class="action-bar">
+                        <lightning-button variant="brand" label="Sync" onclick={handleSync}
+                            disabled={isSyncDisabled}></lightning-button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+</template>

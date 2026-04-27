@@ -1,0 +1,60 @@
+<template>
+    <section class="conduct-shell">
+        <article class="conduct-card">
+            <header class="case-head">
+                <h2 class="case-title">Suspension Issued for Academic Misconduct</h2>
+                <span class="status-pill">{status}</span>
+            </header>
+
+            <div class="case-meta-grid">
+                <div class="meta-item">
+                    <p class="meta-label">Case ID</p>
+                    <p class="meta-value">{caseId}</p>
+                </div>
+                <div class="meta-item">
+                    <p class="meta-label">Date &amp; Time</p>
+                    <p class="meta-value">{caseDateTime}</p>
+                </div>
+                <div class="meta-item">
+                    <p class="meta-label">Category</p>
+                    <p class="meta-value">{category}</p>
+                </div>
+            </div>
+
+            <section class="thread-section">
+                <p class="thread-meta">{committeeMeta}</p>
+                <article class="message-card">
+                    <p class="message-text">Hello Joshua,</p>
+                    <p class="message-text">
+                        The Student Conduct Panel has reviewed the incident report submitted by the examination invigilator.
+                        Based on the evidence provided, the committee has determined that academic integrity protocols were violated.
+                    </p>
+                    <p class="message-text">As per institutional guidelines, the following action has been taken:</p>
+                    <ul class="bullet-list">
+                        <li>Suspension issued for 7 days</li>
+                        <li>Student placed under probation for one semester</li>
+                        <li>Mandatory integrity counselling assigned</li>
+                        <li>Please refer to the official decision letter below.</li>
+                    </ul>
+
+                    <p class="section-label">Supporting Documents</p>
+                    <button type="button" class="doc-chip">attachment.pdf</button>
+                </article>
+            </section>
+
+            <section class="thread-section">
+                <p class="thread-meta">{youMeta}</p>
+                <article class="message-card">
+                    <p class="section-label">Description</p>
+                    <p class="message-text">
+                        During the mid-semester examination, I was questioned regarding unauthorized notes found near my desk.
+                        I would like to provide clarification that these materials were not used intentionally, and I request a
+                        review of the case.
+                    </p>
+                    <div class="divider"></div>
+                    <p class="section-label">Supporting Documents</p>
+                </article>
+            </section>
+        </article>
+    </section>
+</template>

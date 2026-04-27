@@ -1,0 +1,84 @@
+.program-path {
+    padding: 24px;
+    background: #f7f9fc;
+    min-height: 100vh;
+}
+
+.title {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #111827;
+}
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+}
+
+.program-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+}
+
+.card-body {
+    margin-bottom: 16px;
+}
+
+.program-name {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #111827;
+}
+
+.meta {
+    font-size: 14px;
+    color: #4b5563;
+    margin: 4px 0;
+}
+
+.highlight {
+    font-weight: 600;
+    color: #111827;
+}
+
+.date {
+    font-weight: 500;
+}
+
+.card-footer {
+    display: flex;
+    justify-content: center;
+}
+
+.btn {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 14px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn.enroll {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+}
+
+.btn.enroll:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+.btn.enrolled {
+    background: #e5e7eb;
+    color: #374151;
+    cursor: default;
+}

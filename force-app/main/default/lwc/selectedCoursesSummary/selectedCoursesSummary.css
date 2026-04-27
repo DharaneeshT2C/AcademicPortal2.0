@@ -1,0 +1,126 @@
+/* MAIN CARD */
+
+.summary-card {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 24px;
+    height:85vh;
+    overflow-y: hidden;
+    display: flex;
+    flex-direction: column;
+
+    /* 🔑 THIS IS THE MOST IMPORTANT LINE */
+    min-height: 420px;
+}
+
+/* HEADER */
+.summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.summary-header h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #111827;
+}
+
+/* CREDIT BADGES */
+.credit-badges {
+    display: flex;
+    gap: 12px;
+}
+
+.badge {
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.badge.total {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.badge.mandatory {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.badge.elective {
+    background: #eef2ff;
+    color: #1e40af;
+}
+
+/* TABLE WRAPPER */
+.table-wrapper {
+    overflow-x: auto;
+}
+
+/* TABLE */
+.course-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.course-table th {
+    text-align: left;
+    font-weight: 600;
+    color: #1f2937;
+    padding: 14px 10px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.course-table td {
+    padding: 14px 10px;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* TYPE BADGES */
+.Mandatory {
+    background: #e8f5e9;
+    color: #2e7d32;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.Elective {
+    background: #eef2ff;
+    color: #1e40af;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* FOOTER */
+.footer {
+    display: flex;
+    justify-content: flex-end;
+
+    /* 🔑 THIS pushes button to bottom */
+    margin-top: auto;
+    padding-top: 24px;
+}
+
+/* BUTTON */
+.submit-btn {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 14px;
+    cursor: pointer;
+}
+
+.submit-btn:hover {
+    background: #2563eb;
+}

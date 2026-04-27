@@ -1,0 +1,111 @@
+<template>
+    <template if:true={selectedSchema}>
+        <div class="esd-card">
+            <!-- Header -->
+            <div class="esd-card-header">
+                <div class="esd-header-left">
+                    <nav class="esd-breadcrumb" aria-label="Breadcrumbs">
+                        <button class="esd-breadcrumb-link" onclick={handleBack}>Evaluation Schema</button>
+                        <span class="esd-breadcrumb-sep">›</span>
+                        <span class="esd-breadcrumb-current">{selectedSchema.name}</span>
+                    </nav>
+                    <h2 class="esd-title">{selectedSchema.name}</h2>
+                    <p class="esd-desc">{selectedSchema.description}</p>
+                    <div class="esd-meta-badges">
+                        <span class="esd-badge esd-badge-blue">Total Marks: {selectedSchema.totalMarks}</span>
+                        <span class="esd-badge esd-badge-amber">Passing Marks: {selectedSchema.passingMarks}</span>
+                        <span class="esd-badge esd-badge-gray">Courses Applied: {selectedSchema.coursesApplied}</span>
+                    </div>
+                </div>
+                <div class="esd-header-actions">
+                    <button class="esd-btn-ghost" onclick={handleBack}>&#8592; Back</button>
+                    <button class="esd-btn-primary" onclick={handleEditSchema}>Edit Schema</button>
+                    <button class="esd-btn-danger" onclick={handleDeleteSchema}>Delete</button>
+                </div>
+            </div>
+
+            <!-- Components -->
+            <div class="esd-components">
+                <template for:each={componentRows} for:item="component">
+                    <div key={component.id} class="esd-component">
+                        <div class="esd-component-header">
+                            <div class="esd-component-title-group">
+                                <h3 class="esd-component-name">{component.name}</h3>
+                                <span class="esd-component-label">{component.examCategory}</span>
+                            </div>
+                            <div class="esd-component-meta">
+                                <span class="esd-comp-stat">
+                                    <span class="esd-comp-stat-lbl">EFFECTIVE MARKS</span>
+                                    <span class="esd-comp-stat-val">{component.effectiveMarks}</span>
+                                </span>
+                                <span class="esd-comp-stat">
+                                    <span class="esd-comp-stat-lbl">PASSING MARKS</span>
+                                    <span class="esd-comp-stat-val">{component.passingMarks}</span>
+                                </span>
+                                <span class="esd-comp-stat">
+                                    <span class="esd-comp-stat-lbl">WEIGHTAGE %</span>
+                                    <span class="esd-comp-stat-val">{component.weightage}</span>
+                                </span>
+                                <span class="esd-comp-stat">
+                                    <span class="esd-comp-stat-lbl">PASS/FAIL</span>
+                                    <span class="esd-comp-stat-val">
+                                        <template if:true={component.considerForPassFail}>Yes</template>
+                                        <template if:false={component.considerForPassFail}>No</template>
+                                    </span>
+                                </span>
+                                <span class={component.typeClass}>{component.type}</span>
+                            </div>
+                        </div>
+
+                        <div class="esd-table-wrap">
+                            <table class="esd-table">
+                                <thead>
+                                    <tr>
+                                        <th class="esd-th">Sub-component name</th>
+                                        <th class="esd-th">Effective marks</th>
+                                        <th class="esd-th">Max marks</th>
+                                        <th class="esd-th">Min marks</th>
+                                        <th class="esd-th">Passing marks</th>
+                                        <th class="esd-th">Weightage %</th>
+                                        <th class="esd-th">Enrollment type</th>
+                                        <th class="esd-th">Consider pass/fail</th>
+                                        <th class="esd-th">Exam Required</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={component.subComponents} for:item="sub">
+                                        <tr key={sub.id} class="esd-row">
+                                            <td class="esd-td esd-td-name">{sub.name}</td>
+                                            <td class="esd-td">{sub.effectiveMarks}</td>
+                                            <td class="esd-td">{sub.maxMarks}</td>
+                                            <td class="esd-td">{sub.minMarks}</td>
+                                            <td class="esd-td">{sub.passingMarks}</td>
+                                            <td class="esd-td">{sub.weightage}</td>
+                                            <td class="esd-td">
+                                                <span class={sub.enrollmentClass}>{sub.enrollmentType}</span>
+                                            </td>
+                                            <td class="esd-td">
+                                                <template if:true={sub.considerForPassFail}>Yes</template>
+                                                <template if:false={sub.considerForPassFail}>No</template>
+                                            </td>
+                                            <td class="esd-td">
+                                                <template if:true={sub.examRequired}>Yes</template>
+                                                <template if:false={sub.examRequired}>No</template>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </template>
+
+    <template if:false={selectedSchema}>
+        <div class="esd-card esd-empty-state">
+            <p>No schema selected.</p>
+        </div>
+    </template>
+</template>

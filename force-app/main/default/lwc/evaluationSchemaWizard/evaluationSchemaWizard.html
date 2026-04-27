@@ -1,0 +1,810 @@
+<template>
+    <div class="esw-shell">
+        <!-- Breadcrumb / back navigation -->
+        <div class="esw-nav">
+            <nav class="esw-breadcrumb" aria-label="Breadcrumbs">
+                <button class="esw-breadcrumb-link" onclick={handleCancel}>Evaluation Schema</button>
+                <span class="esw-breadcrumb-sep">›</span>
+                <span class="esw-breadcrumb-current">{title}</span>
+            </nav>
+            <button class="esw-btn-back" onclick={handleCancel}>&#8592; Back</button>
+        </div>
+
+        <div class="esw-hero">
+            <div class="esw-hero-left">
+                <h2 class="esw-title">{title}</h2>
+                <p class="esw-subtitle">Build a reusable schema with components and sub-components.</p>
+            </div>
+            <div class="esw-hero-right">
+                <div class="esw-metric">
+                    <span class="esw-metric-label">Total Marks</span>
+                    <span class="esw-metric-value">{draftSchema.totalMarks}</span>
+                </div>
+                <div class="esw-metric esw-metric--muted">
+                    <span class="esw-metric-label">Passing</span>
+                    <span class="esw-metric-value">{draftSchema.passingMarks}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schema Details -->
+        <section class="esw-card">
+            <div class="esw-card-head">
+                <h3 class="esw-card-title">Schema Details</h3>
+                <span class="esw-chip">Define schema fields</span>
+            </div>
+
+            <div class="esw-schema-inline-row">
+                <div class="esw-field esw-field--schema-name">
+                    <label class="esw-label" for="esw-name">Schema Name</label>
+                    <input
+                        id="esw-name"
+                        class={schemaNameInputClass}
+                        type="text"
+                        value={draftSchema.name}
+                        data-field="name"
+                        oninput={handleHeaderFieldChange}
+                        required
+                    />
+                    <template if:true={schemaNameError}>
+                        <span class="esw-field-error">{schemaNameError}</span>
+                    </template>
+                </div>
+
+                <div class="esw-field esw-field--schema-desc">
+                    <label class="esw-label" for="esw-desc">Description</label>
+                    <input
+                        id="esw-desc"
+                        class="esw-input esw-input--sm"
+                        type="text"
+                        value={draftSchema.description}
+                        data-field="description"
+                        oninput={handleHeaderFieldChange}
+                    />
+                </div>
+
+                <div class="esw-field esw-field--schema-num">
+                    <label class="esw-label" for="esw-total">Total Marks</label>
+                    <input
+                        id="esw-total"
+                        class="esw-input esw-input--sm"
+                        type="number"
+                        value={draftSchema.totalMarks}
+                        min="0"
+                        data-field="totalMarks"
+                        oninput={handleHeaderFieldChange}
+                    />
+                </div>
+
+                <div class="esw-field esw-field--schema-num">
+                    <label class="esw-label" for="esw-pass">Passing Marks</label>
+                    <input
+                        id="esw-pass"
+                        class="esw-input esw-input--sm"
+                        type="number"
+                        value={draftSchema.passingMarks}
+                        min="0"
+                        data-field="passingMarks"
+                        oninput={handleHeaderFieldChange}
+                    />
+                </div>
+
+                <div class="esw-field esw-field--schema-check">
+                    <label class="esw-label">Consider for Grade</label>
+                    <label class="esw-toggle">
+                        <input
+                            type="checkbox"
+                            checked={draftSchema.isRequiredForGrading}
+                            data-field="isRequiredForGrading"
+                            onchange={handleHeaderFieldChange}
+                        />
+                        <span class="esw-toggle-ui"></span>
+                        <span class="esw-toggle-text">Yes</span>
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── Regular Components ──────────────────────────────────────────── -->
+        <section class="esw-section">
+            <div class="esw-section-head">
+                <div>
+                    <h3 class="esw-section-title">Components</h3>
+                    <p class="esw-section-sub">Regular exam components</p>
+                </div>
+                <button class="esw-btn esw-btn--primary" type="button"
+                        data-group="regular" onclick={handleAddComponent}>
+                    + Add Component
+                </button>
+            </div>
+
+            <template for:each={components} for:item="component">
+                <article key={component.uiId} class="esw-component-card">
+                    <div class="esw-component-top">
+                        <div class="esw-component-top-left">
+                            <div class="esw-component-kicker">Regular Component</div>
+                            <div class="esw-component-title">
+                                <span class="esw-component-name">{component.kenComponent}</span>
+                                <span class="esw-pill">Effective: {component.effectiveMarks}</span>
+                            </div>
+                        </div>
+                        <div class="esw-component-top-right">
+                            <label class="esw-toggle" title="Consider for Pass/Fail">
+                                <input
+                                    type="checkbox"
+                                    checked={component.considerForPassFail}
+                                    data-group="regular"
+                                    data-comp-id={component.uiId}
+                                    data-field="considerForPassFail"
+                                    onchange={handleComponentFieldChange}
+                                />
+                                <span class="esw-toggle-ui"></span>
+                                <span class="esw-toggle-text">Pass/Fail</span>
+                            </label>
+                            <button
+                                class="esw-icon-btn"
+                                type="button"
+                                data-group="regular"
+                                data-comp-id={component.uiId}
+                                onclick={handleDeleteComponent}
+                                aria-label="Delete component"
+                                title="Delete component"
+                            >&#x2715;</button>
+                        </div>
+                    </div>
+
+                    <div class="esw-flex-row">
+                        <div class="esw-field esw-field--flex-wide">
+                            <label class="esw-label">Component</label>
+                            <select
+                                class={component.kenComponentInputClass}
+                                value={component.kenComponent}
+                                data-group="regular"
+                                data-comp-id={component.uiId}
+                                data-field="kenComponent"
+                                onchange={handleComponentFieldChange}
+                            >
+                                <option value="">-- Select --</option>
+                                <template for:each={regularComponentOptions} for:item="opt">
+                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                </template>
+                            </select>
+                            <template if:true={component.kenComponentError}>
+                                <span class="esw-field-error">{component.kenComponentError}</span>
+                            </template>
+                        </div>
+
+                        <div class="esw-field">
+                            <label class="esw-label">Effective Marks</label>
+                            <input
+                                class={component.effectiveMarksInputClass}
+                                type="number"
+                                value={component.effectiveMarks}
+                                min="0"
+                                data-group="regular"
+                                data-comp-id={component.uiId}
+                                data-field="effectiveMarks"
+                                oninput={handleComponentFieldChange}
+                            />
+                            <template if:true={component.effectiveMarksError}>
+                                <span class="esw-field-error">{component.effectiveMarksError}</span>
+                            </template>
+                        </div>
+
+                        <div class="esw-field">
+                            <label class="esw-label">Max Marks</label>
+                            <input
+                                class="esw-input esw-input--sm"
+                                type="number"
+                                value={component.maxMarks}
+                                min="0"
+                                data-group="regular"
+                                data-comp-id={component.uiId}
+                                data-field="maxMarks"
+                                oninput={handleComponentFieldChange}
+                            />
+                        </div>
+
+                        <div class="esw-field">
+                            <label class="esw-label">Min Marks</label>
+                            <input
+                                class="esw-input esw-input--sm"
+                                type="number"
+                                value={component.minMarks}
+                                min="0"
+                                data-group="regular"
+                                data-comp-id={component.uiId}
+                                data-field="minMarks"
+                                oninput={handleComponentFieldChange}
+                            />
+                        </div>
+
+                        <div class="esw-field">
+                            <label class="esw-label">Passing Marks</label>
+                            <input
+                                class="esw-input esw-input--sm"
+                                type="number"
+                                value={component.passingMarks}
+                                min="0"
+                                data-group="regular"
+                                data-comp-id={component.uiId}
+                                data-field="passingMarks"
+                                oninput={handleComponentFieldChange}
+                            />
+                        </div>
+
+                        <div class="esw-field">
+                            <label class="esw-label">Weightage %</label>
+                            <input
+                                class="esw-input esw-input--sm"
+                                type="number"
+                                value={component.weightage}
+                                min="0"
+                                data-group="regular"
+                                data-comp-id={component.uiId}
+                                data-field="weightage"
+                                oninput={handleComponentFieldChange}
+                            />
+                        </div>
+
+                        <div class="esw-field">
+                            <label class="esw-label">Enrollment</label>
+                            <select
+                                class="esw-select esw-select--sm"
+                                value={component.enrollmentType}
+                                data-group="regular"
+                                data-comp-id={component.uiId}
+                                data-field="enrollmentType"
+                                onchange={handleComponentFieldChange}
+                            >
+                                <template for:each={enrollmentOptions} for:item="opt">
+                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                </template>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="esw-sub-head">
+                        <div class="esw-sub-title">Sub-components</div>
+                        <button
+                            class="esw-btn esw-btn--ghost"
+                            type="button"
+                            data-group="regular"
+                            data-comp-id={component.uiId}
+                            onclick={handleAddSubComponent}
+                        >+ Add Sub-component</button>
+                    </div>
+
+                    <div class="esw-sub-list">
+                        <template for:each={component.subComponents} for:item="sub">
+                            <div key={sub.uiId} class="esw-sub-card">
+                                <div class="esw-sub-card-top">
+                                    <div class="esw-sub-kicker">Sub-component</div>
+                                    <div class="esw-sub-actions">
+                                        <label class="esw-toggle esw-toggle--sm" title="Exam Required">
+                                            <input
+                                                type="checkbox"
+                                                checked={sub.examRequired}
+                                                data-group="regular"
+                                                data-comp-id={component.uiId}
+                                                data-sub-id={sub.uiId}
+                                                data-field="examRequired"
+                                                onchange={handleSubComponentFieldChange}
+                                            />
+                                            <span class="esw-toggle-ui"></span>
+                                            <span class="esw-toggle-text">Exam Required</span>
+                                        </label>
+                                        <label class="esw-toggle esw-toggle--sm" title="Consider for Pass/Fail">
+                                            <input
+                                                type="checkbox"
+                                                checked={sub.considerForPassFail}
+                                                data-group="regular"
+                                                data-comp-id={component.uiId}
+                                                data-sub-id={sub.uiId}
+                                                data-field="considerForPassFail"
+                                                onchange={handleSubComponentFieldChange}
+                                            />
+                                            <span class="esw-toggle-ui"></span>
+                                            <span class="esw-toggle-text">Pass/Fail</span>
+                                        </label>
+                                        <button
+                                            class="esw-icon-btn"
+                                            type="button"
+                                            data-group="regular"
+                                            data-comp-id={component.uiId}
+                                            data-sub-id={sub.uiId}
+                                            onclick={handleDeleteSubComponent}
+                                            aria-label="Remove sub-component"
+                                            title="Remove sub-component"
+                                        >&#x2715;</button>
+                                    </div>
+                                </div>
+
+                                <div class="esw-flex-row">
+                                    <div class="esw-field esw-field--flex-wide">
+                                        <label class="esw-label">Assessment</label>
+                                        <select
+                                            class={sub.kenAssessmentInputClass}
+                                            value={sub.kenAssessment}
+                                            data-group="regular"
+                                            data-comp-id={component.uiId}
+                                            data-sub-id={sub.uiId}
+                                            data-field="kenAssessment"
+                                            onchange={handleSubComponentFieldChange}
+                                        >
+                                            <option value="">-- Select --</option>
+                                            <template for:each={assessmentOptions} for:item="opt">
+                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                            </template>
+                                        </select>
+                                        <template if:true={sub.kenAssessmentError}>
+                                            <span class="esw-field-error">{sub.kenAssessmentError}</span>
+                                        </template>
+                                    </div>
+
+                                    <div class="esw-field">
+                                        <label class="esw-label">Effective</label>
+                                        <input
+                                            class={sub.subEffectiveInputClass}
+                                            type="number"
+                                            value={sub.effectiveMarks}
+                                            min="0"
+                                            data-group="regular"
+                                            data-comp-id={component.uiId}
+                                            data-sub-id={sub.uiId}
+                                            data-field="effectiveMarks"
+                                            oninput={handleSubComponentFieldChange}
+                                        />
+                                        <template if:true={sub.subEffectiveError}>
+                                            <span class="esw-field-error">{sub.subEffectiveError}</span>
+                                        </template>
+                                    </div>
+
+                                    <div class="esw-field">
+                                        <label class="esw-label">Max</label>
+                                        <input
+                                            class="esw-input esw-input--sm"
+                                            type="number"
+                                            value={sub.maxMarks}
+                                            min="0"
+                                            data-group="regular"
+                                            data-comp-id={component.uiId}
+                                            data-sub-id={sub.uiId}
+                                            data-field="maxMarks"
+                                            oninput={handleSubComponentFieldChange}
+                                        />
+                                    </div>
+
+                                    <div class="esw-field">
+                                        <label class="esw-label">Min</label>
+                                        <input
+                                            class="esw-input esw-input--sm"
+                                            type="number"
+                                            value={sub.minMarks}
+                                            min="0"
+                                            data-group="regular"
+                                            data-comp-id={component.uiId}
+                                            data-sub-id={sub.uiId}
+                                            data-field="minMarks"
+                                            oninput={handleSubComponentFieldChange}
+                                        />
+                                    </div>
+
+                                    <div class="esw-field">
+                                        <label class="esw-label">Passing</label>
+                                        <input
+                                            class="esw-input esw-input--sm"
+                                            type="number"
+                                            value={sub.passingMarks}
+                                            min="0"
+                                            data-group="regular"
+                                            data-comp-id={component.uiId}
+                                            data-sub-id={sub.uiId}
+                                            data-field="passingMarks"
+                                            oninput={handleSubComponentFieldChange}
+                                        />
+                                    </div>
+
+                                    <div class="esw-field">
+                                        <label class="esw-label">Weight %</label>
+                                        <input
+                                            class="esw-input esw-input--sm"
+                                            type="number"
+                                            value={sub.weightage}
+                                            min="0"
+                                            data-group="regular"
+                                            data-comp-id={component.uiId}
+                                            data-sub-id={sub.uiId}
+                                            data-field="weightage"
+                                            oninput={handleSubComponentFieldChange}
+                                        />
+                                    </div>
+
+                                    <div class="esw-field">
+                                        <label class="esw-label">Enrollment</label>
+                                        <select
+                                            class="esw-select esw-select--sm"
+                                            value={sub.enrollmentType}
+                                            data-group="regular"
+                                            data-comp-id={component.uiId}
+                                            data-sub-id={sub.uiId}
+                                            data-field="enrollmentType"
+                                            onchange={handleSubComponentFieldChange}
+                                        >
+                                            <template for:each={enrollmentOptions} for:item="opt">
+                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </article>
+            </template>
+        </section>
+
+        <!-- ── Re-exam / Retest Section ──────────────────────────────────── -->
+        <section class="esw-section esw-retest-section">
+            <div class="esw-retest-toggle-row">
+                <div class="esw-retest-toggle-info">
+                    <h3 class="esw-section-title">Re-exam / Retest</h3>
+                    <p class="esw-retest-desc">Enable to define separate components for retest exams.</p>
+                </div>
+                <label class="esw-toggle" title="Enable Retest Section">
+                    <input
+                        type="checkbox"
+                        checked={retestEnabled}
+                        onchange={handleToggleRetest}
+                    />
+                    <span class="esw-toggle-ui esw-toggle-ui--amber"></span>
+                    <span class="esw-toggle-text">Enable Retest</span>
+                </label>
+            </div>
+
+            <template if:true={retestEnabled}>
+                <div class="esw-retest-body">
+                    <div class="esw-section-head">
+                        <span></span>
+                        <button class="esw-btn esw-btn--amber" type="button"
+                                data-group="retest" onclick={handleAddComponent}>
+                            + Add Retest Component
+                        </button>
+                    </div>
+
+                    <template for:each={retestComponents} for:item="component">
+                        <article key={component.uiId} class="esw-component-card esw-component-card--retest">
+                            <div class="esw-component-top">
+                                <div class="esw-component-top-left">
+                                    <div class="esw-component-kicker esw-component-kicker--retest">Retest Component</div>
+                                    <div class="esw-component-title">
+                                        <span class="esw-component-name">{component.kenComponent}</span>
+                                        <span class="esw-pill esw-pill--amber">Effective: {component.effectiveMarks}</span>
+                                    </div>
+                                </div>
+                                <div class="esw-component-top-right">
+                                    <label class="esw-toggle" title="Consider for Pass/Fail">
+                                        <input
+                                            type="checkbox"
+                                            checked={component.considerForPassFail}
+                                            data-group="retest"
+                                            data-comp-id={component.uiId}
+                                            data-field="considerForPassFail"
+                                            onchange={handleComponentFieldChange}
+                                        />
+                                        <span class="esw-toggle-ui"></span>
+                                        <span class="esw-toggle-text">Pass/Fail</span>
+                                    </label>
+                                    <button
+                                        class="esw-icon-btn"
+                                        type="button"
+                                        data-group="retest"
+                                        data-comp-id={component.uiId}
+                                        onclick={handleDeleteComponent}
+                                        aria-label="Delete component"
+                                        title="Delete component"
+                                    >&#x2715;</button>
+                                </div>
+                            </div>
+
+                            <div class="esw-flex-row">
+                                <div class="esw-field esw-field--flex-wide">
+                                    <label class="esw-label">Component</label>
+                                    <select
+                                        class={component.kenComponentInputClass}
+                                        value={component.kenComponent}
+                                        data-group="retest"
+                                        data-comp-id={component.uiId}
+                                        data-field="kenComponent"
+                                        onchange={handleComponentFieldChange}
+                                    >
+                                        <option value="">-- Select --</option>
+                                        <template for:each={retestComponentOptions} for:item="opt">
+                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                        </template>
+                                    </select>
+                                    <template if:true={component.kenComponentError}>
+                                        <span class="esw-field-error">{component.kenComponentError}</span>
+                                    </template>
+                                </div>
+
+                                <div class="esw-field">
+                                    <label class="esw-label">Effective Marks</label>
+                                    <input
+                                        class={component.effectiveMarksInputClass}
+                                        type="number"
+                                        value={component.effectiveMarks}
+                                        min="0"
+                                        data-group="retest"
+                                        data-comp-id={component.uiId}
+                                        data-field="effectiveMarks"
+                                        oninput={handleComponentFieldChange}
+                                    />
+                                    <template if:true={component.effectiveMarksError}>
+                                        <span class="esw-field-error">{component.effectiveMarksError}</span>
+                                    </template>
+                                </div>
+
+                                <div class="esw-field">
+                                    <label class="esw-label">Max Marks</label>
+                                    <input
+                                        class="esw-input esw-input--sm"
+                                        type="number"
+                                        value={component.maxMarks}
+                                        min="0"
+                                        data-group="retest"
+                                        data-comp-id={component.uiId}
+                                        data-field="maxMarks"
+                                        oninput={handleComponentFieldChange}
+                                    />
+                                </div>
+
+                                <div class="esw-field">
+                                    <label class="esw-label">Min Marks</label>
+                                    <input
+                                        class="esw-input esw-input--sm"
+                                        type="number"
+                                        value={component.minMarks}
+                                        min="0"
+                                        data-group="retest"
+                                        data-comp-id={component.uiId}
+                                        data-field="minMarks"
+                                        oninput={handleComponentFieldChange}
+                                    />
+                                </div>
+
+                                <div class="esw-field">
+                                    <label class="esw-label">Passing Marks</label>
+                                    <input
+                                        class="esw-input esw-input--sm"
+                                        type="number"
+                                        value={component.passingMarks}
+                                        min="0"
+                                        data-group="retest"
+                                        data-comp-id={component.uiId}
+                                        data-field="passingMarks"
+                                        oninput={handleComponentFieldChange}
+                                    />
+                                </div>
+
+                                <div class="esw-field">
+                                    <label class="esw-label">Weightage %</label>
+                                    <input
+                                        class="esw-input esw-input--sm"
+                                        type="number"
+                                        value={component.weightage}
+                                        min="0"
+                                        data-group="retest"
+                                        data-comp-id={component.uiId}
+                                        data-field="weightage"
+                                        oninput={handleComponentFieldChange}
+                                    />
+                                </div>
+
+                                <div class="esw-field">
+                                    <label class="esw-label">Enrollment</label>
+                                    <select
+                                        class="esw-select esw-select--sm"
+                                        value={component.enrollmentType}
+                                        data-group="retest"
+                                        data-comp-id={component.uiId}
+                                        data-field="enrollmentType"
+                                        onchange={handleComponentFieldChange}
+                                    >
+                                        <template for:each={enrollmentOptions} for:item="opt">
+                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="esw-sub-head">
+                                <div class="esw-sub-title">Sub-components</div>
+                                <button
+                                    class="esw-btn esw-btn--ghost"
+                                    type="button"
+                                    data-group="retest"
+                                    data-comp-id={component.uiId}
+                                    onclick={handleAddSubComponent}
+                                >+ Add Sub-component</button>
+                            </div>
+
+                            <div class="esw-sub-list">
+                                <template for:each={component.subComponents} for:item="sub">
+                                    <div key={sub.uiId} class="esw-sub-card esw-sub-card--retest">
+                                        <div class="esw-sub-card-top">
+                                            <div class="esw-sub-kicker">Sub-component</div>
+                                            <div class="esw-sub-actions">
+                                                <label class="esw-toggle esw-toggle--sm" title="Exam Required">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={sub.examRequired}
+                                                        data-group="retest"
+                                                        data-comp-id={component.uiId}
+                                                        data-sub-id={sub.uiId}
+                                                        data-field="examRequired"
+                                                        onchange={handleSubComponentFieldChange}
+                                                    />
+                                                    <span class="esw-toggle-ui"></span>
+                                                    <span class="esw-toggle-text">Exam Required</span>
+                                                </label>
+                                                <label class="esw-toggle esw-toggle--sm" title="Consider for Pass/Fail">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={sub.considerForPassFail}
+                                                        data-group="retest"
+                                                        data-comp-id={component.uiId}
+                                                        data-sub-id={sub.uiId}
+                                                        data-field="considerForPassFail"
+                                                        onchange={handleSubComponentFieldChange}
+                                                    />
+                                                    <span class="esw-toggle-ui"></span>
+                                                    <span class="esw-toggle-text">Pass/Fail</span>
+                                                </label>
+                                                <button
+                                                    class="esw-icon-btn"
+                                                    type="button"
+                                                    data-group="retest"
+                                                    data-comp-id={component.uiId}
+                                                    data-sub-id={sub.uiId}
+                                                    onclick={handleDeleteSubComponent}
+                                                    aria-label="Remove sub-component"
+                                                    title="Remove sub-component"
+                                                >&#x2715;</button>
+                                            </div>
+                                        </div>
+
+                                        <div class="esw-flex-row">
+                                            <div class="esw-field esw-field--flex-wide">
+                                                <label class="esw-label">Assessment</label>
+                                                <select
+                                                    class={sub.kenAssessmentInputClass}
+                                                    value={sub.kenAssessment}
+                                                    data-group="retest"
+                                                    data-comp-id={component.uiId}
+                                                    data-sub-id={sub.uiId}
+                                                    data-field="kenAssessment"
+                                                    onchange={handleSubComponentFieldChange}
+                                                >
+                                                    <option value="">-- Select --</option>
+                                                    <template for:each={assessmentOptions} for:item="opt">
+                                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                    </template>
+                                                </select>
+                                                <template if:true={sub.kenAssessmentError}>
+                                                    <span class="esw-field-error">{sub.kenAssessmentError}</span>
+                                                </template>
+                                            </div>
+
+                                            <div class="esw-field">
+                                                <label class="esw-label">Effective</label>
+                                                <input
+                                                    class={sub.subEffectiveInputClass}
+                                                    type="number"
+                                                    value={sub.effectiveMarks}
+                                                    min="0"
+                                                    data-group="retest"
+                                                    data-comp-id={component.uiId}
+                                                    data-sub-id={sub.uiId}
+                                                    data-field="effectiveMarks"
+                                                    oninput={handleSubComponentFieldChange}
+                                                />
+                                                <template if:true={sub.subEffectiveError}>
+                                                    <span class="esw-field-error">{sub.subEffectiveError}</span>
+                                                </template>
+                                            </div>
+
+                                            <div class="esw-field">
+                                                <label class="esw-label">Max</label>
+                                                <input
+                                                    class="esw-input esw-input--sm"
+                                                    type="number"
+                                                    value={sub.maxMarks}
+                                                    min="0"
+                                                    data-group="retest"
+                                                    data-comp-id={component.uiId}
+                                                    data-sub-id={sub.uiId}
+                                                    data-field="maxMarks"
+                                                    oninput={handleSubComponentFieldChange}
+                                                />
+                                            </div>
+
+                                            <div class="esw-field">
+                                                <label class="esw-label">Min</label>
+                                                <input
+                                                    class="esw-input esw-input--sm"
+                                                    type="number"
+                                                    value={sub.minMarks}
+                                                    min="0"
+                                                    data-group="retest"
+                                                    data-comp-id={component.uiId}
+                                                    data-sub-id={sub.uiId}
+                                                    data-field="minMarks"
+                                                    oninput={handleSubComponentFieldChange}
+                                                />
+                                            </div>
+
+                                            <div class="esw-field">
+                                                <label class="esw-label">Passing</label>
+                                                <input
+                                                    class="esw-input esw-input--sm"
+                                                    type="number"
+                                                    value={sub.passingMarks}
+                                                    min="0"
+                                                    data-group="retest"
+                                                    data-comp-id={component.uiId}
+                                                    data-sub-id={sub.uiId}
+                                                    data-field="passingMarks"
+                                                    oninput={handleSubComponentFieldChange}
+                                                />
+                                            </div>
+
+                                            <div class="esw-field">
+                                                <label class="esw-label">Weight %</label>
+                                                <input
+                                                    class="esw-input esw-input--sm"
+                                                    type="number"
+                                                    value={sub.weightage}
+                                                    min="0"
+                                                    data-group="retest"
+                                                    data-comp-id={component.uiId}
+                                                    data-sub-id={sub.uiId}
+                                                    data-field="weightage"
+                                                    oninput={handleSubComponentFieldChange}
+                                                />
+                                            </div>
+
+                                            <div class="esw-field">
+                                                <label class="esw-label">Enrollment</label>
+                                                <select
+                                                    class="esw-select esw-select--sm"
+                                                    value={sub.enrollmentType}
+                                                    data-group="retest"
+                                                    data-comp-id={component.uiId}
+                                                    data-sub-id={sub.uiId}
+                                                    data-field="enrollmentType"
+                                                    onchange={handleSubComponentFieldChange}
+                                                >
+                                                    <template for:each={enrollmentOptions} for:item="opt">
+                                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                                    </template>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </article>
+                    </template>
+                </div>
+            </template>
+        </section>
+
+        <div class="esw-footer">
+            <button class="esw-btn esw-btn--ghost" type="button" onclick={handleCancel}>Cancel</button>
+            <button class="esw-btn esw-btn--primary" type="button" onclick={handleSave} disabled={disableSave}>
+                Save Schema
+            </button>
+        </div>
+    </div>
+</template>

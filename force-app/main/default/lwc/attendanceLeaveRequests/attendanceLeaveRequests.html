@@ -1,0 +1,134 @@
+<template>
+    <section class="leave-page">
+        <div class="header-row">
+            <div class="tab-row">
+                <button class={pendingTabClass} type="button" data-tab="pending" onclick={handleTabChange}>Pending</button>
+                <button class={approvedTabClass} type="button" data-tab="approved" onclick={handleTabChange}>Approved</button>
+                <button class={rejectedTabClass} type="button" data-tab="rejected" onclick={handleTabChange}>Rejected</button>
+            </div>
+
+            <div class="header-actions">
+                <div class="semester-wrap">
+                    <select class="semester-select" onchange={handleSemesterChange}>
+                        <template for:each={selectedSemesterOptions} for:item="option">
+                            <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                        </template>
+                    </select>
+                    <span class="current-pill"><span class="dot"></span>Current</span>
+                    <span class="caret">⌄</span>
+                </div>
+                <button type="button" class="help-btn">Get Help</button>
+                <button type="button" class="filter-btn">
+                    Filters
+                    <img class="filter-icon" src={filterIconUrl} alt="Filter" />
+                </button>
+            </div>
+        </div>
+
+        <div class="request-list">
+            <template for:each={displayRequests} for:item="item">
+                <article class="request-card" key={item.id}>
+                    <div class="meta-grid">
+                        <div class="meta-col">
+                            <p class="name">{item.name}</p>
+                            <p class="sub">{item.studentCode} &nbsp;|&nbsp; {item.className}</p>
+                        </div>
+                        <div class="meta-col">
+                            <p class="label">Leave Type:</p>
+                            <p class="value">{item.leaveType}</p>
+                        </div>
+                        <div class="meta-col">
+                            <p class="label">Period</p>
+                            <p class="value"><img class="calendar-icon" src={calendarIconUrl} alt="Calendar" /> {item.period}</p>
+                        </div>
+                        <div class="meta-col">
+                            <p class="label">No. of days</p>
+                            <p class="value">{item.days}</p>
+                        </div>
+                        <div class="meta-col">
+                            <p class="label">Applied on</p>
+                            <p class="value"><img class="calendar-icon" src={calendarIconUrl} alt="Calendar" /> {item.appliedOn}</p>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="lower-row">
+                        <div class="reason-col">
+                            <p class="reason-line"><span>Reason:</span> {item.reason}</p>
+
+                            <template lwc:if={item.isApproved}>
+                                <p class="status-date">
+                                    Approved on: &nbsp; <img class="calendar-icon" src={calendarIconUrl} alt="Calendar" /> {item.statusDate}
+                                </p>
+                            </template>
+
+                            <template lwc:if={item.isRejected}>
+                                <p class="status-date">
+                                    Rejected on: &nbsp; <img class="calendar-icon" src={calendarIconUrl} alt="Calendar" /> {item.statusDate}
+                                </p>
+                            </template>
+
+                            <template lwc:if={item.fileName}>
+                                <button type="button" class="file-btn">📎 {item.fileName}</button>
+                            </template>
+                        </div>
+
+                        <div class="action-col">
+                            <template lwc:if={item.isPending}>
+                                <div class="pending-actions">
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline"
+                                        data-request-id={item.id}
+                                        onclick={handleRejectClick}
+                                    >
+                                        <img class="cancel-icon" src={cancelIconUrl} alt="Reject" />
+                                        Reject
+                                    </button>
+                                    <button type="button" class="btn btn-primary">
+                                        <img class="accept-icon" src={acceptIconUrl} alt="Accept" />
+                                        Accept
+                                    </button>
+                                </div>
+                            </template>
+
+                            <template lwc:if={item.isRejected}>
+                                <div class="rejection-box">
+                                    <p class="rejection-title">Reason for Rejection</p>
+                                    <p class="rejection-text">{item.rejectionReason}</p>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </article>
+            </template>
+        </div>
+
+        <template lwc:if={showRejectModal}>
+            <section class="modal-backdrop" role="presentation">
+                <div class="reject-modal" role="dialog" aria-modal="true" aria-labelledby="reject-modal-title">
+                    <h3 id="reject-modal-title" class="reject-modal-title">Are you sure you want to reject this request?</h3>
+                    <div class="reject-modal-divider"></div>
+                    <p class="reject-modal-label">Please add a reason for rejection</p>
+                    <textarea
+                        class="reject-modal-input"
+                        placeholder="Enter description"
+                        onchange={handleRejectReasonChange}
+                    ></textarea>
+                    <div class="reject-modal-actions">
+                        <button type="button" class="modal-btn modal-btn-cancel" onclick={handleRejectCancel}>Cancel</button>
+                        <button
+                            type="button"
+                            class="modal-btn modal-btn-submit"
+                            onclick={handleRejectSubmit}
+                            disabled={isRejectSubmitDisabled}
+                        >
+                            Submit
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </template>
+    </section>
+</template>

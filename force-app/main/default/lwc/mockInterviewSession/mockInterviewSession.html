@@ -1,0 +1,66 @@
+<template>
+    <div class="interview-session-page">
+        <!-- Interview Header -->
+        <div class="session-header">
+            <button class="btn-exit" onclick={handleBackToPrepHub}>← Exit Interview</button>
+            <div class="session-controls">
+                <div class="timer-badge">⏱ {timerDisplay}</div>
+                <div class="recording-dot"></div>
+            </div>
+        </div>
+
+        <!-- Main Session Area -->
+        <div class="session-main">
+            <!-- Video Area -->
+            <div class="video-area">
+                <div class="interviewer-video">
+                    <div class="video-placeholder">
+                        <div class="interviewer-avatar">👩‍💼</div>
+                        <div class="video-label">Interviewer</div>
+                    </div>
+                    <div class="candidate-pip">
+                        <div class="candidate-avatar">👨‍💼</div>
+                        <div class="video-label-sm">You</div>
+                    </div>
+                </div>
+                <div class="session-controls-bar">
+                    <button class={micBtnClass} onclick={handleToggleMic}>{micLabel}</button>
+                    <button class={camBtnClass} onclick={handleToggleCam}>{camLabel}</button>
+                    <button class="ctrl-btn ctrl-end" onclick={handleEndInterview}>End</button>
+                </div>
+            </div>
+
+            <!-- Transcription Panel -->
+            <div class="transcription-panel">
+                <div class="trans-header">
+                    <div class="trans-live-dot"></div>
+                    <span class="trans-title">Live Transcription</span>
+                </div>
+                <div class="trans-content">
+                    <template for:each={transcriptLines} for:item="line">
+                        <div key={line.key} class="trans-line">
+                            <span class="trans-speaker">{line.speaker}</span>
+                            <p class="trans-text">{line.text}</p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Completion Modal -->
+    <template lwc:if={showCompletionModal}>
+        <div class="modal-overlay" onclick={handleCloseModal}>
+            <div class="modal-box" onclick={stopProp}>
+                <div class="completion-modal-body">
+                    <div class="completion-robot">🤖</div>
+                    <h3 class="completion-title">Great Job on Completing Your Mock Interview! 🎉</h3>
+                    <div class="completion-actions">
+                        <button class="btn-outline" onclick={handleCloseModal}>Retake Interview</button>
+                        <button class="btn-primary" onclick={handleViewResults}>View Results</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+</template>

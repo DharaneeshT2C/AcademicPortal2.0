@@ -1,0 +1,369 @@
+:host {
+    display: block;
+    font-family: Roboto, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --stx-brand: #145dff;
+    --stx-border: #d8e2f3;
+    --stx-surface: #ffffff;
+    --stx-muted-surface: #f6f9ff;
+    --stx-text-primary: #1a2432;
+    --stx-text-secondary: #5d6b80;
+    --stx-success: #17824f;
+    --stx-warning: #b86b00;
+    --stx-info: #0b63ce;
+    --stx-neutral: #667085;
+    --stx-shadow-soft: 0 4px 12px rgba(20, 93, 255, 0.08);
+    --stx-shadow-lift: 0 14px 28px rgba(15, 56, 133, 0.16);
+}
+
+.modulePanel {
+    display: grid;
+    gap: 18px;
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.toolbarLeft,
+.toolbarRight {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    min-height: 38px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 0 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition:
+        transform 140ms ease,
+        background-color 170ms ease,
+        border-color 170ms ease,
+        box-shadow 170ms ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btnSecondary {
+    color: var(--stx-text-secondary);
+    border-color: #bfd0eb;
+    background: var(--stx-surface);
+}
+
+.btnSecondary:hover {
+    border-color: var(--stx-brand);
+    color: var(--stx-brand);
+}
+
+.buttonIcon {
+    --slds-c-icon-color-foreground-default: currentColor;
+}
+
+.metricsGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.metricCard {
+    border: 1px solid var(--stx-border);
+    border-radius: 14px;
+    background: var(--stx-surface);
+    box-shadow: var(--stx-shadow-soft);
+    padding: 14px;
+    transition:
+        transform 160ms ease,
+        box-shadow 180ms ease,
+        border-color 180ms ease;
+}
+
+.metricCard:hover {
+    transform: translateY(-3px);
+    border-color: #b9cbee;
+    box-shadow: var(--stx-shadow-lift);
+}
+
+.metricLabel {
+    margin: 0;
+    font-size: 12px;
+    color: var(--stx-text-secondary);
+    font-weight: 600;
+}
+
+.metricValue {
+    margin: 8px 0 0;
+    font-size: 30px;
+    line-height: 1.1;
+    color: var(--stx-text-primary);
+    font-weight: 700;
+}
+
+.metricValueSuccess {
+    color: var(--stx-success);
+}
+
+.card {
+    border: 1px solid var(--stx-border);
+    border-radius: 14px;
+    background: var(--stx-surface);
+    box-shadow: var(--stx-shadow-soft);
+    padding: 16px;
+}
+
+.sectionHeader {
+    margin-bottom: 12px;
+}
+
+.sectionTitle {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--stx-text-primary);
+}
+
+.distributionList {
+    display: grid;
+    gap: 10px;
+}
+
+.distributionRow {
+    display: grid;
+    grid-template-columns: 210px 1fr auto;
+    gap: 12px;
+    align-items: center;
+}
+
+.distributionMeta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.typeDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.typeDotIncome {
+    background: var(--stx-success);
+}
+
+.typeDotExpense {
+    background: var(--stx-info);
+}
+
+.typeLabel {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--stx-text-primary);
+}
+
+.distributionTrack {
+    width: 100%;
+    border-radius: 999px;
+    background: var(--stx-muted-surface);
+    height: 9px;
+    overflow: hidden;
+    border: 1px solid #e3ebf9;
+}
+
+.distributionFill {
+    height: 100%;
+    border-radius: inherit;
+    transition: width 280ms ease;
+}
+
+.distributionFillIncome {
+    background: linear-gradient(90deg, #1c9b5f 0%, var(--stx-success) 100%);
+}
+
+.distributionFillExpense {
+    background: linear-gradient(90deg, #2c7dff 0%, var(--stx-info) 100%);
+}
+
+.distributionValue {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--stx-text-secondary);
+    min-width: 84px;
+    text-align: right;
+}
+
+.tableCard {
+    padding-bottom: 0;
+}
+
+.tableWrap {
+    border-top: 1px solid var(--stx-border);
+    max-height: 390px;
+    overflow: auto;
+    border-radius: 0 0 14px 14px;
+}
+
+.dataTable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 860px;
+}
+
+.dataTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    color: var(--stx-text-secondary);
+    background: #f8fbff;
+    text-align: left;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--stx-border);
+}
+
+.dataTable tbody td {
+    font-size: 13px;
+    color: var(--stx-text-primary);
+    padding: 13px 14px;
+    border-bottom: 1px solid #edf2fb;
+    vertical-align: middle;
+}
+
+.dataTable tbody tr {
+    transition: background-color 170ms ease;
+}
+
+.dataTable tbody tr:hover {
+    background: #f7faff;
+}
+
+.studentCell {
+    display: grid;
+    gap: 2px;
+}
+
+.studentName {
+    font-weight: 600;
+}
+
+.studentId {
+    font-size: 11px;
+    color: var(--stx-text-secondary);
+}
+
+.scholarshipCell {
+    display: grid;
+    gap: 6px;
+}
+
+.scholarshipName {
+    font-weight: 700;
+}
+
+.amountCell {
+    font-weight: 700;
+}
+
+.typeBadge,
+.statusBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 800;
+    border: 1px solid transparent;
+    width: fit-content;
+}
+
+.typeIncome {
+    background: #e8f7ee;
+    color: var(--stx-success);
+    border-color: #b7e4c7;
+}
+
+.typeExpense {
+    background: #eef4ff;
+    color: var(--stx-info);
+    border-color: #c7dbff;
+}
+
+.typeNeutral {
+    background: #f2f4f7;
+    color: var(--stx-neutral);
+    border-color: #d0d5dd;
+}
+
+.statusActive {
+    background: #e8f7ee;
+    color: var(--stx-success);
+    border-color: #b7e4c7;
+}
+
+.statusPending {
+    background: #fff5e6;
+    color: var(--stx-warning);
+    border-color: #ffd8a8;
+}
+
+.statusExpired {
+    background: #f2f4f7;
+    color: var(--stx-neutral);
+    border-color: #d0d5dd;
+}
+
+.loadingState {
+    padding: 12px 0;
+}
+
+.errorBanner {
+    margin-bottom: 12px;
+    border: 1px solid #fecaca;
+    background: #fff1f2;
+    color: #991b1b;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.emptyState {
+    text-align: center;
+    color: var(--stx-text-secondary);
+    padding: 16px;
+}
+
+.btn:focus-visible {
+    outline: 3px solid rgba(20, 93, 255, 0.2);
+    outline-offset: 2px;
+}
+
+@media (max-width: 1200px) {
+    .metricsGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .metricsGrid {
+        grid-template-columns: 1fr;
+    }
+}

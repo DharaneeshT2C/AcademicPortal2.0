@@ -1,0 +1,98 @@
+<template>
+    <div class="page">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <button type="button" class="crumb-btn" onclick={handleGoToMasterData}>Master Data</button>
+            <span class="sep">&gt;</span>
+            <button type="button" class="crumb-btn" onclick={handleGoToTaxes}>Taxes</button>
+        </nav>
+
+        <header class="pageHeader">
+            <div class="titleBlock">
+                <h1 class="pageTitle">Taxes</h1>
+                <p class="pageMeta">{itemCountLabel}</p>
+            </div>
+            <lightning-button class="primaryActionBtn" variant="brand" label="New" icon-name="utility:add" onclick={handleNew}></lightning-button>
+        </header>
+
+        <div class="toolbar">
+            <lightning-combobox
+                class="view-picklist"
+                variant="label-hidden"
+                value={selectedView}
+                options={viewOptions}
+                onchange={handleViewChange}>
+            </lightning-combobox>
+
+            <div class="toolbar-right">
+                <lightning-input
+                    class="searchInput"
+                    type="search"
+                    variant="label-hidden"
+                    placeholder="Search taxes..."
+                    value={searchTerm}
+                    onchange={handleSearch}
+                    aria-label="Search taxes">
+                </lightning-input>
+                <button class="filterBtn" type="button" disabled aria-disabled="true" aria-label="Filters">
+                    <lightning-icon icon-name="utility:filterList" size="x-small"></lightning-icon>
+                    <span>Filters</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="tableCard">
+            <template if:true={isLoading}>
+                <div class="loading">
+                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <template if:false={isLoading}>
+                <div class="tableScroll">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Tax Name</th>
+                                <th>Tax Rate</th>
+                                <th>Parent Tax</th>
+                                <th>Last Modified</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template if:true={hasRows}>
+                                <template for:each={filteredRows} for:item="row">
+                                    <tr key={row.id}>
+                                        <td class="nameCell">
+                                            <button
+                                                type="button"
+                                                class="nameButton"
+                                                data-id={row.id}
+                                                aria-label="Edit tax"
+                                                onclick={handleEditTax}>
+                                                {row.name}
+                                            </button>
+                                        </td>
+                                        <td>{row.taxRateLabel}</td>
+                                        <td>{row.parentTaxName}</td>
+                                        <td>{row.lastModifiedLabel}</td>
+                                    </tr>
+                                </template>
+                            </template>
+                            <template if:false={hasRows}>
+                                <tr>
+                                    <td colspan="4" class="empty">
+                                        <div class="emptyState">
+                                            <p class="emptyTitle">No taxes configured yet.</p>
+                                            <p class="emptyText">Create your first tax rule.</p>
+                                            <lightning-button label="New Tax" variant="brand" onclick={handleNew}></lightning-button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>

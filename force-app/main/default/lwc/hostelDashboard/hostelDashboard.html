@@ -1,0 +1,361 @@
+<template>
+    <c-custom-toast></c-custom-toast>
+    <template if:false={isThemeLoaded}>
+        <div class="skeleton-wrap">
+            <div class="skeleton-row">
+                <div class="skeleton-card-large"></div>
+                <div class="skeleton-card-small"></div>
+            </div>
+            <div class="skeleton-row">
+                <div class="skeleton-card-medium"></div>
+                <div class="skeleton-card-medium"></div>
+            </div>
+        </div>
+    </template>
+    <div class={dashboardContainerClass}>
+        <!-- LEFT COLUMN -->
+        <div class="left-column">
+            <!-- Details & Allocation Row -->
+            <div class="details-row">
+                <!-- Wrapper for Grid Item 1 -->
+                <!-- Wrapper for Grid Item 1 -->
+                <div class="details-wrapper">
+                    <div class="section-header">
+                        <div class="section-title">Hostel Details</div>
+                        <button class="btn-outline" onclick={handleViewDetails} disabled={isViewDetailsDisabled}>View Details</button>
+                    </div>
+
+                    <div class="card details-section-card">
+                        <!-- Room Info Card -->
+                        <div class="details-inner-card room-card-mb">
+                            <div class="room-header">
+                                <span class="room-number">{roomDetails.number}</span>
+                                <span class="room-badge">{roomDetails.type}</span>
+                            </div>
+                            <div class="room-details-row">
+                                <img src="data:image/svg+xml;charset=utf-8,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 100 100%22%3E%3Crect width%3D%22100%22 height%3D%22100%22 fill%3D%22%23E0E0E0%22/%3E%3Cpath d%3D%22M20 80 L50 30 L80 80 Z%22 fill%3D%22%23BDBDBD%22/%3E%3C/svg%3E" class="loc-img" alt="Building">
+                                
+                                <div class="loc-info">
+                                    <h4>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                        {roomDetails.hall}
+                                    </h4>
+                                    <p>{roomFeaturesText}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- People Info Card -->
+                        <div class="details-inner-card">
+                            <div class="people-grid">
+                                <div class="roommates-section">
+                                    <div class="person-group-title">Roommates ({roommates.length})</div>
+                                    <template for:each={roommates} for:item="mate">
+                                        <div key={mate.id} class="person-item">
+                                            <img src={mate.avatar} class="person-avatar" alt={mate.name}>
+                                            <div class="person-details">
+                                                <h5>{mate.name}</h5>
+                                                <p>{mate.studentId}</p>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                                <div class="warden-section">
+                                    <div class="person-group-title">Warden Details</div>
+                                    <div class="person-details">
+                                        <h5>{warden.name}</h5>
+                                        <div class="contact-item">
+                                            <svg class="contact-icon" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-2.2 2.2a15.161 15.161 0 01-6.59-6.59l2.2-2.21c.28-.26.36-.65.25-1.01A11.36 11.36 0 018.59 3.99c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1z"/>
+                                            </svg>
+                                            {warden.phone}
+                                        </div>
+                                        <div class="contact-item">
+                                            <svg class="contact-icon" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                                            </svg>
+                                            {warden.email}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wrapper for Grid Item 2: Allocation -->
+                <div class="card allocation-card">
+                    <div>
+                        <div class="alloc-title">{residenceAllocationTitle}</div>
+                        <div class="alloc-desc">Get Started with your Allocation for the coming year.</div>
+                        <div class="alloc-illustration">
+                            <!-- SVG Illustration -->
+                         <svg width="194" height="184" viewBox="0 0 194 184" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_17200_151170)">
+<path d="M121.422 183.68C121.422 183.858 121.565 184 121.742 184H192.734C192.911 184 193.054 183.858 193.054 183.68C193.054 183.502 192.911 183.359 192.734 183.359H121.742C121.565 183.359 121.422 183.502 121.422 183.68Z" fill="#3F3D58"/>
+<path d="M147.232 93.8981L146.41 95.9531C146.41 95.9531 145.654 98.8294 146.54 99.9768C147.426 101.124 147.622 109.907 146.672 110.556C145.718 111.205 158.743 104.542 158.743 104.542C158.743 104.542 153.658 92.7508 153.572 92.7077C153.486 92.6646 150.154 91.625 150.154 91.625L147.235 93.8954L147.232 93.8981Z" fill="#2F2E43"/>
+<path d="M155.707 104.056L151.344 105.492V99.2109H155.303L155.707 104.056Z" fill="#F6A6A9"/>
+<path d="M142.367 139.719C142.13 141.157 141.171 142.189 140.223 142.024C139.275 141.857 138.699 140.557 138.936 139.118C139.022 138.542 139.251 137.998 139.601 137.529L140.684 131.445L143.628 132.062L142.249 137.993C142.429 138.553 142.472 139.145 142.367 139.719Z" fill="#F6A6A9"/>
+<path d="M154.073 174.367H149.984V180.166H154.073V174.367Z" fill="#F6A6A9"/>
+<path d="M146.004 183.683C145.573 183.683 145.191 183.672 144.903 183.645C143.817 183.545 142.78 182.745 142.26 182.277C142.026 182.067 141.951 181.73 142.075 181.442C142.161 181.234 142.336 181.078 142.554 181.016L145.422 180.197L150.068 177.062L150.119 177.154C150.138 177.189 150.596 178.011 150.747 178.565C150.806 178.775 150.79 178.953 150.701 179.088C150.639 179.182 150.556 179.236 150.486 179.268C150.569 179.357 150.833 179.535 151.644 179.664C152.829 179.853 153.077 178.625 153.087 178.573L153.095 178.533L153.13 178.511C153.693 178.148 154.041 177.984 154.162 178.019C154.237 178.04 154.361 178.078 154.698 181.423C154.733 181.528 154.967 182.298 154.808 183.033C154.633 183.833 151.137 183.559 150.437 183.494C150.418 183.494 147.798 183.683 146.004 183.683Z" fill="#2F2E43"/>
+<path d="M165.703 169.813L162.234 171.977L165.303 176.897L168.772 174.733L165.703 169.813Z" fill="#F6A6A9"/>
+<path d="M161.093 182.888C160.614 182.888 160.172 182.831 159.86 182.775C159.55 182.721 159.31 182.476 159.259 182.166C159.224 181.942 159.289 181.719 159.44 181.552L161.441 179.338L163.725 174.221L163.819 174.272C163.854 174.291 164.675 174.746 165.098 175.137C165.26 175.285 165.341 175.444 165.335 175.605C165.335 175.718 165.289 175.81 165.249 175.872C165.368 175.901 165.685 175.915 166.442 175.594C167.546 175.129 167.11 173.954 167.089 173.903L167.072 173.865L167.091 173.828C167.377 173.222 167.584 172.896 167.705 172.863C167.781 172.842 167.907 172.81 169.962 175.468C170.046 175.538 170.654 176.066 170.908 176.777C171.182 177.55 168.069 179.166 167.444 179.481C167.425 179.497 164.166 181.864 162.831 182.538C162.3 182.804 161.672 182.888 161.099 182.888H161.093Z" fill="#2F2E43"/>
+<path d="M157.074 125.883H145.633L144.594 136.527L149.137 175.853H154.979L152.644 153.138L162.119 173.645L167.311 170.012L159.913 150.868C159.913 150.868 162.555 134.189 160.479 130.036C158.402 125.883 157.077 125.883 157.077 125.883H157.074Z" fill="#2F2E43"/>
+<path d="M162.766 126.532H142.906L150.046 103.039H157.964L162.766 126.532Z" fill="#E6E6E6"/>
+<path d="M151.298 103.043C151.298 103.043 146.366 102.913 145.847 104.211C145.327 105.51 139.227 136.401 139.227 136.401H143.25L151.298 103.043Z" fill="#E6E6E6"/>
+<path d="M151.886 100.952C154.287 100.952 156.233 99.0054 156.233 96.6047C156.233 94.204 154.287 92.2578 151.886 92.2578C149.485 92.2578 147.539 94.204 147.539 96.6047C147.539 99.0054 149.485 100.952 151.886 100.952Z" fill="#F6A6A9"/>
+<path d="M152.726 89.8459C152.726 89.8459 157.962 88.5046 159.562 95.4694C159.562 95.4694 159.605 97.2873 160.512 98.0226C161.42 98.7578 161.118 102.566 161.118 102.566C161.118 102.566 162.85 105.421 161.377 106.719C161.377 106.719 160.728 109.358 161.679 110.872C162.629 112.386 166.222 120.716 160.251 121.222C160.251 121.222 157.224 119.394 158.651 113.942C160.079 108.491 158.479 105.48 158.479 105.48C158.479 105.48 153.892 103.818 154.154 100.269C154.412 96.7217 151.213 93.2178 150.994 93.2609C150.776 93.304 148.527 92.0059 147.534 95.9865L146.467 95.806C146.467 95.806 146.02 89.1079 152.726 89.8432V89.8459Z" fill="#2F2E43"/>
+<path d="M166.155 139.009C166.445 140.439 165.915 141.743 164.969 141.926C164.024 142.107 163.025 141.097 162.734 139.666C162.61 139.098 162.629 138.506 162.791 137.945L161.641 131.875L164.611 131.406L165.427 137.442C165.796 137.902 166.044 138.441 166.152 139.015L166.155 139.009Z" fill="#F6A6A9"/>
+<path d="M154.5 103.069C154.5 103.069 158.844 102.519 159.364 103.817C159.884 105.115 165.984 136.007 165.984 136.007H161.96L154.503 103.071L154.5 103.069Z" fill="#E6E6E6"/>
+<path d="M26.1191 57.0459H4.95019C2.22193 57.0459 0 54.8266 0 52.0957V30.9268C0 28.1985 2.21924 25.9766 4.95019 25.9766H26.1191C28.8474 25.9766 31.0693 28.1958 31.0693 30.9268V52.0957C31.0693 54.8239 28.8501 57.0459 26.1191 57.0459ZM4.95019 26.5179C2.51819 26.5179 0.53865 28.4974 0.53865 30.9294V52.0984C0.53865 54.5304 2.51819 56.5099 4.95019 56.5099H26.1191C28.5511 56.5099 30.5307 54.5304 30.5307 52.0984V30.9294C30.5307 28.4974 28.5511 26.5179 26.1191 26.5179H4.95019Z" fill="#CCCCCC"/>
+<path d="M72.0879 57.0459H50.9189C48.1907 57.0459 45.9688 54.8266 45.9688 52.0957V30.9268C45.9688 28.1985 48.188 25.9766 50.9189 25.9766H72.0879C74.8161 25.9766 77.0381 28.1958 77.0381 30.9268V52.0957C77.0381 54.8239 74.8188 57.0459 72.0879 57.0459ZM50.9189 26.5152C48.4869 26.5152 46.5074 28.4947 46.5074 30.9268V52.0957C46.5074 54.5277 48.4869 56.5072 50.9189 56.5072H72.0879C74.5199 56.5072 76.4994 54.5277 76.4994 52.0957V30.9268C76.4994 28.4947 74.5199 26.5152 72.0879 26.5152H50.9189Z" fill="#CCCCCC"/>
+<path d="M72.0879 114.71H50.9189C48.1907 114.71 45.9688 112.491 45.9688 109.76V88.5908C45.9688 85.8626 48.188 83.6406 50.9189 83.6406H72.0879C74.8161 83.6406 77.0381 85.8599 77.0381 88.5908V109.76C77.0381 112.488 74.8188 114.71 72.0879 114.71ZM50.9189 84.1793C48.4869 84.1793 46.5074 86.1588 46.5074 88.5908V109.76C46.5074 112.192 48.4869 114.171 50.9189 114.171H72.0879C74.5199 114.171 76.4994 112.192 76.4994 109.76V88.5908C76.4994 86.1588 74.5199 84.1793 72.0879 84.1793H50.9189Z" fill="#CCCCCC"/>
+<path d="M26.1191 114.71H4.95019C2.22193 114.71 0 112.491 0 109.76V88.5908C0 85.8626 2.21924 83.6406 4.95019 83.6406H26.1191C28.8474 83.6406 31.0693 85.8599 31.0693 88.5908V109.76C31.0693 112.488 28.8501 114.71 26.1191 114.71ZM4.95019 84.1793C2.51819 84.1793 0.53865 86.1588 0.53865 88.5908V109.76C0.53865 112.192 2.51819 114.171 4.95019 114.171H26.1191C28.5511 114.171 30.5307 112.192 30.5307 109.76V88.5908C30.5307 86.1588 28.5511 84.1793 26.1191 84.1793H4.95019Z" fill="#CCCCCC"/>
+<path d="M29.903 91.2903C33.3702 91.2903 36.1809 88.4796 36.1809 85.0123C36.1809 81.5451 33.3702 78.7344 29.903 78.7344C26.4357 78.7344 23.625 81.5451 23.625 85.0123C23.625 88.4796 26.4357 91.2903 29.903 91.2903Z" fill="#3D3D3D"/>
+<path d="M118.057 57.0459H96.8877C94.1594 57.0459 91.9375 54.8266 91.9375 52.0957V30.9268C91.9375 28.1985 94.1567 25.9766 96.8877 25.9766H118.057C120.785 25.9766 123.007 28.1958 123.007 30.9268V52.0957C123.007 54.8239 120.788 57.0459 118.057 57.0459ZM96.8877 26.5152C94.4557 26.5152 92.4761 28.4947 92.4761 30.9268V52.0957C92.4761 54.5277 94.4557 56.5072 96.8877 56.5072H118.057C120.489 56.5072 122.468 54.5277 122.468 52.0957V30.9268C122.468 28.4947 120.489 26.5152 118.057 26.5152H96.8877Z" fill="#CCCCCC"/>
+<path d="M122.739 33.6419C126.206 33.6419 129.017 30.8311 129.017 27.3639C129.017 23.8967 126.206 21.0859 122.739 21.0859C119.272 21.0859 116.461 23.8967 116.461 27.3639C116.461 30.8311 119.272 33.6419 122.739 33.6419Z" fill="#3D3D3D"/>
+<path d="M21.0681 63.5195H8.43945C7.45103 63.5195 6.64844 62.7169 6.64844 61.7285C6.64844 60.7401 7.45103 59.9375 8.43945 59.9375H21.0681C22.0565 59.9375 22.8591 60.7401 22.8591 61.7285C22.8591 62.7169 22.0565 63.5195 21.0681 63.5195Z" fill="#E6E6E6"/>
+<path d="M67.8181 63.5195H55.1894C54.201 63.5195 53.3984 62.7169 53.3984 61.7285C53.3984 60.7401 54.201 59.9375 55.1894 59.9375H67.8181C68.8065 59.9375 69.6091 60.7401 69.6091 61.7285C69.6091 62.7169 68.8065 63.5195 67.8181 63.5195Z" fill="#E6E6E6"/>
+<path d="M114.576 63.5195H101.947C100.959 63.5195 100.156 62.7169 100.156 61.7285C100.156 60.7401 100.959 59.9375 101.947 59.9375H114.576C115.564 59.9375 116.367 60.7401 116.367 61.7285C116.367 62.7169 115.564 63.5195 114.576 63.5195Z" fill="#E6E6E6"/>
+<path d="M118.057 115.249H96.8877C94.1594 115.249 91.9375 113.03 91.9375 110.299V89.1299C91.9375 86.4016 94.1567 84.1797 96.8877 84.1797H118.057C120.785 84.1797 123.007 86.3989 123.007 89.1299V110.299C123.007 113.027 120.788 115.249 118.057 115.249ZM96.8877 84.7183C94.4557 84.7183 92.4761 86.6979 92.4761 89.1299V110.299C92.4761 112.731 94.4557 114.71 96.8877 114.71H118.057C120.489 114.71 122.468 112.731 122.468 110.299V89.1299C122.468 86.6979 120.489 84.7183 118.057 84.7183H96.8877Z" fill="#CCCCCC"/>
+<path d="M114.576 121.707H101.947C100.959 121.707 100.156 120.904 100.156 119.916C100.156 118.928 100.959 118.125 101.947 118.125H114.576C115.564 118.125 116.367 118.928 116.367 119.916C116.367 120.904 115.564 121.707 114.576 121.707Z" fill="#E6E6E6"/>
+<path d="M164.025 57.0459H142.856C140.128 57.0459 137.906 54.8266 137.906 52.0957V30.9268C137.906 28.1985 140.125 25.9766 142.856 25.9766H164.025C166.754 25.9766 168.976 28.1958 168.976 30.9268V52.0957C168.976 54.8239 166.756 57.0459 164.025 57.0459ZM142.856 26.5152C140.424 26.5152 138.445 28.4947 138.445 30.9268V52.0957C138.445 54.5277 140.424 56.5072 142.856 56.5072H164.025C166.457 56.5072 168.437 54.5277 168.437 52.0957V30.9268C168.437 28.4947 166.457 26.5152 164.025 26.5152H142.856Z" fill="#CCCCCC"/>
+<path d="M160.545 63.5195H147.916C146.928 63.5195 146.125 62.7169 146.125 61.7285C146.125 60.7401 146.928 59.9375 147.916 59.9375H160.545C161.533 59.9375 162.336 60.7401 162.336 61.7285C162.336 62.7169 161.533 63.5195 160.545 63.5195Z" fill="#E6E6E6"/>
+<path d="M21.0681 121.168H8.43945C7.45103 121.168 6.64844 120.365 6.64844 119.377C6.64844 118.389 7.45103 117.586 8.43945 117.586H21.0681C22.0565 117.586 22.8591 118.389 22.8591 119.377C22.8591 120.365 22.0565 121.168 21.0681 121.168Z" fill="#E6E6E6"/>
+<path d="M67.8181 121.168H55.1894C54.201 121.168 53.3984 120.365 53.3984 119.377C53.3984 118.389 54.201 117.586 55.1894 117.586H67.8181C68.8065 117.586 69.6091 118.389 69.6091 119.377C69.6091 120.365 68.8065 121.168 67.8181 121.168Z" fill="#E6E6E6"/>
+<path d="M80.189 139.948C81.0398 139.948 81.7295 139.259 81.7295 138.408C81.7295 137.557 81.0398 136.867 80.189 136.867C79.3382 136.867 78.6484 137.557 78.6484 138.408C78.6484 139.259 79.3382 139.948 80.189 139.948Z" fill="#3D3D3D"/>
+<path d="M84.7593 139.948C85.6101 139.948 86.2998 139.259 86.2998 138.408C86.2998 137.557 85.6101 136.867 84.7593 136.867C83.9085 136.867 83.2188 137.557 83.2188 138.408C83.2188 139.259 83.9085 139.948 84.7593 139.948Z" fill="#E6E6E6"/>
+<path d="M89.3296 139.948C90.1804 139.948 90.8701 139.259 90.8701 138.408C90.8701 137.557 90.1804 136.867 89.3296 136.867C88.4788 136.867 87.7891 137.557 87.7891 138.408C87.7891 139.259 88.4788 139.948 89.3296 139.948Z" fill="#E6E6E6"/>
+<path d="M105.913 7.58957H63.5917C61.499 7.58957 59.7969 5.88744 59.7969 3.79479C59.7969 1.70213 61.499 0 63.5917 0H105.913C108.006 0 109.708 1.70213 109.708 3.79479C109.708 5.88744 108.006 7.58957 105.913 7.58957ZM63.5944 0.535956C61.798 0.535956 60.3382 1.99839 60.3382 3.79209C60.3382 5.5858 61.8007 7.04823 63.5944 7.04823H105.916C107.712 7.04823 109.172 5.5858 109.172 3.79209C109.172 1.99839 107.71 0.535956 105.916 0.535956H63.5944Z" fill="#CCCCCC"/>
+<path d="M75.7151 4.78959C74.864 4.78959 74.1719 4.09742 74.1719 3.24636C74.1719 2.39529 74.864 1.70312 75.7151 1.70312C76.5662 1.70312 77.2583 2.39529 77.2583 3.24636C77.2583 4.09742 76.5662 4.78959 75.7151 4.78959ZM75.7151 2.12327C75.0957 2.12327 74.592 2.62691 74.592 3.24636C74.592 3.8658 75.0957 4.36944 75.7151 4.36944C76.3345 4.36944 76.8382 3.8658 76.8382 3.24636C76.8382 2.62691 76.3345 2.12327 75.7151 2.12327Z" fill="#484662"/>
+<path d="M78.6211 6.05375C78.5726 6.05375 78.5241 6.0376 78.4837 6.00258L76.5338 4.33008C76.4449 4.25467 76.4369 4.1227 76.5123 4.03382C76.5877 3.94494 76.7197 3.93686 76.8085 4.01227L78.7584 5.68478C78.8473 5.76019 78.8554 5.89216 78.78 5.98104C78.7396 6.02952 78.6803 6.05375 78.6211 6.05375Z" fill="#484662"/>
+<path d="M70.1909 106.259C71.3833 105.043 72.9756 104.674 73.7481 105.435C74.5206 106.195 74.1793 107.797 72.9865 109.013C72.5166 109.506 71.9359 109.878 71.2929 110.1L66.1758 115.188L63.8438 112.73L69.1358 107.975C69.3457 107.327 69.7075 106.739 70.1909 106.259Z" fill="#FFB6B6"/>
+<path d="M53.8216 102.058L59.1867 113.984L67.754 109.337L70.8198 110.967C70.8198 110.967 63.8162 122.7 59.021 121.364C54.2257 120.029 45.7106 107.919 47.2448 104.181C48.7791 100.444 53.8216 102.058 53.8216 102.058Z" fill="#3D3D3D"/>
+<path d="M51.4852 181.542H55.3973L57.2582 166.422H51.4844L51.4852 181.542Z" fill="#ED9DA0"/>
+<path d="M64.8785 181.462C65.0003 181.667 65.0646 182.331 65.0646 182.57C65.0646 182.923 64.9247 183.261 64.6757 183.511C64.4267 183.76 64.0889 183.9 63.7368 183.9H51.6217C51.3814 183.9 51.151 183.805 50.9812 183.635C50.8113 183.464 50.7159 183.234 50.7159 182.993V182.487C50.7159 182.487 50.1165 180.968 51.3504 179.096C51.3504 179.096 52.884 180.562 55.1756 178.266L55.8514 177.039L60.7424 180.624L63.4538 180.958C64.047 181.031 64.5729 180.947 64.878 181.462H64.8785Z" fill="#090814"/>
+<path d="M54.4316 102.827L54.5107 97.5402L51.2574 95.5078L47.7188 99.8445L54.4316 102.827Z" fill="#ED9DA0"/>
+<path d="M54.4508 99.1832C57.6468 99.1832 60.2376 96.5871 60.2376 93.3846C60.2376 90.1821 57.6468 87.5859 54.4508 87.5859C51.2549 87.5859 48.6641 90.1821 48.6641 93.3846C48.6641 96.5871 51.2549 99.1832 54.4508 99.1832Z" fill="#ED9DA0"/>
+<path d="M62.3418 137.788L56.9512 174.546H50.188L51.0873 153.563L51.5606 142.531L50.188 137.279C49.7522 136.442 49.3671 135.58 49.0349 134.697C48.4407 133.1 47.9713 131.186 48.6681 130.278C48.9245 129.943 49.5911 129.695 50.497 129.511C51.1232 129.389 51.7551 129.299 52.3904 129.241C56.39 128.844 62.079 129.092 62.079 129.092L62.2238 133.875L62.3041 136.545L62.3418 137.788Z" fill="#090814"/>
+<path d="M29.2031 175.695L32.6494 177.55L41.4304 165.113L36.3441 162.375L29.2031 175.695Z" fill="#ED9DA0"/>
+<path d="M41.0492 181.969C41.0593 182.208 40.8025 182.823 40.6897 183.033C40.523 183.344 40.24 183.576 39.9028 183.678C39.5656 183.779 39.2019 183.743 38.8917 183.576L28.2193 177.83C28.0077 177.716 27.8499 177.522 27.7806 177.292C27.7114 177.061 27.7364 176.813 27.85 176.601L28.0887 176.155C28.0887 176.155 28.2783 174.533 30.2495 173.469C30.2495 173.469 30.9081 175.487 34.0115 174.552L35.1862 173.791L37.8022 179.269L40.0326 180.849C40.5206 181.195 41.0233 181.37 41.0494 181.969L41.0492 181.969Z" fill="#090814"/>
+<path d="M62.3042 136.548L59.4432 142.296L51.0877 153.566L37.3326 172.12L31.375 168.913L47.7049 141.362L48.9775 136.084C48.9775 136.084 48.9775 135.513 49.0354 134.699C49.1485 133.088 49.4876 130.52 50.4975 129.513C50.6258 129.381 50.7773 129.273 50.9445 129.196C51.2482 129.059 51.7531 129.092 52.3904 129.243C55.0546 129.881 60.0253 132.62 62.2236 133.877L62.304 136.548H62.3042Z" fill="#090814"/>
+<path d="M48.4741 98.7188L55.0476 101.881C55.0476 101.881 62.016 122.565 62.016 123.619C62.016 124.673 63.9881 125.332 62.8048 126.518C61.6214 127.704 65.0072 128.708 63.1828 129.655C61.3585 130.602 49.9778 135.783 48.7123 135.316C45.2221 134.028 48.8595 129.293 48.8595 129.293C48.8595 129.293 46.2378 127.177 46.6322 126.123C47.0266 125.069 44.2656 104.911 44.2656 104.911L48.4729 98.7192L48.4741 98.7188Z" fill="#3D3D3D"/>
+<path d="M54.0986 94.7672L54.8428 96.2588C54.8428 96.2588 55.5872 93.5739 56.778 92.9771C57.9689 92.3804 58.1178 91.4855 58.1178 91.4855C58.1178 91.4855 59.6064 93.4247 60.6481 92.9771C61.6898 92.5296 62.1367 92.2314 60.9458 90.4416C59.755 88.6519 60.0527 89.5467 60.0527 89.5467C60.0527 89.5467 59.0107 88.0551 59.1596 88.5026C59.3085 88.9501 58.2665 87.3086 58.2665 87.7568C58.2665 88.205 57.5223 86.8619 57.5223 87.3093C57.5223 87.7567 54.3962 86.2652 54.8428 86.8618C55.2894 87.4583 52.1634 85.6678 50.6748 88.0557C49.1862 90.4437 47.122 90.001 47.8563 91.4901C48.5907 92.9792 48.2929 97.006 48.2929 97.006H50.346C50.346 97.006 52.4611 92.9767 54.0986 94.7672Z" fill="#090814"/>
+<path d="M68.4963 116.944C70.1277 116.461 71.6989 116.913 72.0055 117.953C72.3121 118.994 71.2381 120.228 69.6059 120.711C68.9565 120.913 68.2684 120.956 67.599 120.837L60.6605 122.796L59.8125 119.513L66.7427 117.93C67.2402 117.465 67.8416 117.127 68.4965 116.943L68.4963 116.944Z" fill="#FFB6B6"/>
+<path d="M56.2249 105.306L55.1374 118.343L64.8787 118.448L66.7692 121.365C66.7692 121.365 54.9622 128.215 51.4169 124.715C47.8717 121.215 46.2946 106.485 49.4462 103.963C52.5979 101.442 56.2249 105.306 56.2249 105.306Z" fill="#3D3D3D"/>
+</g>
+<defs>
+<clipPath id="clip0_17200_151170">
+<rect width="193.049" height="184" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+
+                        </div>
+                    </div>
+                    <button class="btn-white" onclick={handleGetStarted} disabled={isGetStartedDisabled}>Get Started</button>
+                </div>
+            </div>
+
+            <!-- In & Out Section + Leave Requests -->
+            <div class="in-out-section">
+                <!-- Header/Tabs -->
+                <div class="in-out-actions">
+                    <div class="tabs">
+                        <div class={inOutTabClass} onclick={handleTabChange} data-tab="in-out">Hostel- In & Out</div>
+                        <div class={leaveRequestsTabClass} onclick={handleTabChange} data-tab="leave-requests">Leave Requests</div>
+                    </div>
+                    <div class="tab-actions">
+                        <template if:true={isLeaveRequestsTab}>
+                             <button class="btn-outline" style="margin-right:12px; height: 36px; padding: 0 16px;">View All</button>
+                        </template>
+                        <button class="btn-primary" onclick={handleOpenModal}>Request Leave Of Absence</button>
+                    </div>
+                </div>
+
+                <!-- Tab Content: In & Out -->
+                <template if:true={isInOutTab}>
+                    <div class="card table-card">
+                        <div class="data-table">
+                            <div class="header-row">
+                                <div class="header-cell">Date</div>
+                                <div class="header-cell">Day</div>
+                                <div class="header-cell">Time</div>
+                                <div class="header-cell" >Status</div>
+                            </div>
+                            <template for:each={inOutRecords} for:item="rec">
+                                <div key={rec.id} class="row">
+                                    <div class="cell">{rec.date}</div>
+                                    <div class="cell">{rec.day}</div>
+                                    <div class="cell">{rec.time}</div>
+                                    <div class="cell status-cell">
+                                        <span class={rec.statusClass}>{rec.status}</span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Tab Content: Leave Requests -->
+                <template if:true={isLeaveRequestsTab}>
+                    <div class="leave-requests-list">
+                        <template for:each={leaveRequests} for:item="req">
+                            <div key={req.id} class="leave-req-card">
+                                <div class="req-header">
+                                    <span class="req-id">{req.requestId}</span>
+                                    <div class="req-meta-right">
+                                        <template if:false={req.isClosed}>
+                                            <span class="meta-label">Submitted on: <strong>{req.submittedOn}</strong></span>
+                                        </template>
+                                        <template if:true={req.isClosed}>
+                                            <span class="meta-label">Closed on: <strong>{req.closedOn}</strong></span>
+                                        </template>
+                                        
+                                        <span class={req.statusClass}>{req.status}</span>
+                                        
+                                        <template if:false={req.isClosed}>
+                                            <button class="btn-outline btn-sm">Withdraw</button>
+                                        </template>
+                                        <template if:true={req.isClosed}>
+                                            <button class="btn-primary btn-sm">Leave Feedback</button>
+                                        </template>
+                                    </div>
+                                </div>
+                                <div class="req-title">{req.title}</div>
+                                <div class="req-type">Type: <span class="text-gray">{req.type}</span></div>
+                                
+                                <template if:false={req.isClosed}>
+                                    <div class="req-desc">{req.description}</div>
+                                    <div class="req-dates">Leave Dates: <strong>{req.dates}</strong></div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN -->
+        <div class="right-column">
+            <!-- Bills Section -->
+            <div class="card">
+                <div class="section-header">
+                    <div class="section-title">Bills and Payments</div>
+                    <button class="btn-primary" style="padding: 6px 12px; font-size: 0.8rem;">Pay Now</button>
+                </div>
+                <template for:each={bills} for:item="bill">
+                    <div key={bill.id} class="bill-item">
+                        <div class="bill-head">
+                            <span class="bill-name">{bill.label}: {bill.amount}</span>
+                            <span class="bill-due-tag">{bill.dueDate}</span>
+                        </div>
+                        <div class="bill-total">Total used: {bill.totalUsed} of {bill.limit}</div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Notices Section -->
+            <div class="card notices-section">
+                <div class="section-header">
+                    <div class="section-title">Hostel Notice Board</div>
+                </div>
+                <div class="notice-list">
+                    <template for:each={notices} for:item="notice">
+                        <div key={notice.id} class="notice-card">
+                            <div class="notice-top">
+                                <div class="notice-user">
+                                    <div class="notice-icon-circle">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                        </svg>
+                                    </div>
+                                    {notice.author}
+                                </div>
+                                <span class="notice-tag">{notice.tag}</span>
+                            </div>
+                            <div class="notice-content">
+                                {notice.title}
+                                <template if:true={notice.extraInfo}>
+                                    <br/><span style="color:#6B7280; font-size:0.85rem; display:block; margin-top:4px;">{notice.extraInfo}</span>
+                                </template>
+                            </div>
+                            <div class="notice-meta">{notice.date}</div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Overlay -->
+    <template if:true={isModalOpen}>
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" class="modal-overlay">
+            <div class="modal-backdrop-blur"></div>
+            <div class="modal-container-wrapper">
+                 <div class="modal-container">
+                    <header class="modal-header">
+                        <h2 id="modal-heading-01" class="modal-title">Apply for Leave of Absence</h2>
+                    </header>
+                    <div class="modal-content">
+                        
+                        <div class="form-group">
+                            <label class="form-label">Leave Type<span class="required">*</span></label>
+                            <div class="custom-select-wrapper">
+                                <select class="form-input select-input">
+                                    <option>Select</option>
+                                    <option>Personal leave</option>
+                                    <option>Exception</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Dates<span class="required">*</span></label>
+                            <div class="date-input-wrapper">
+                                 <input type="date" class="form-input" />
+                                 <span class="calendar-icon">
+                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                     </svg>
+                                 </span>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Number of Days</label>
+                            <div class="read-only-input">2</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Reason (Optional)</label>
+                            <textarea class="form-input textarea-input" placeholder="Describe" rows="4"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Upload Supporting Document (Optional)</label>
+                            <div class="file-upload-wrapper">
+                                <input type="text" class="form-input" placeholder="Upload" value={uploadedFileName} readonly />
+                                <input type="file" class="file-input-hidden" onchange={handleFileUpload} />
+                                 <span class="upload-icon">
+                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                     </svg>
+                                 </span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <footer class="modal-footer">
+                        <button class="btn-outline" onclick={handleCancelModal}>Cancel</button>
+                        <button class="btn-primary" onclick={handleCloseModal}>Submit</button>
+                    </footer>
+                </div>
+            </div>
+        </section>
+        <div class="modal-backdrop" onclick={handleCloseModal}></div>
+    </template>
+</template>

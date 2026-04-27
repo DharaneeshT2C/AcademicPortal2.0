@@ -1,0 +1,642 @@
+<template>
+    <lightning-card>
+        <div class="bulk-shell">
+            <div class="bulk-card">
+
+                <!-- ─── HEADER (matches curriculum-header) ─── -->
+                <div class="bulk-header">
+                    <div class="bulk-hero">
+                        <div class="hero-icon" aria-hidden="true">
+                            <lightning-icon icon-name="standard:education" size="small"></lightning-icon>
+                        </div>
+                        <div class="hero-copy">
+                            <div class="hero-title">Bulk Program Plan Creator</div>
+                            <div class="hero-subtitle">Create multiple Learning Program Plans efficiently with CSV
+                                import or manual entry.</div>
+                        </div>
+                        <div class="help-btn-wrap">
+                            <lightning-button label="Help" icon-name="utility:help" variant="neutral"
+                                onclick={handleHelpClick} title="View Help &amp; Import Guide"></lightning-button>
+                        </div>
+                    </div>
+
+                    <!-- ─── CONFIGURATION CARD (matches selection-card) ─── -->
+                    <div class="section-card selection-card">
+                        <div class="section-heading">
+                            <div>
+                                <div class="section-kicker">Configuration</div>
+                                <div class="section-title">Import &amp; Template</div>
+                            </div>
+                            <p class="section-description">Select a program to download template or import CSV data.</p>
+                        </div>
+                        <div class="slds-grid slds-wrap slds-gutters">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_4-of-12">
+                                <lightning-combobox label="Program (for Template / Import)"
+                                    placeholder="Choose a program..." options={programOptions} value={importProgramId}
+                                    onchange={handleImportProgramChange} dropdown-alignment="bottom">
+                                </lightning-combobox>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_3-of-12">
+                                <label class="slds-form-element__label provider-label">Provider</label>
+                                <div class="auto-field-top">
+                                    <template if:true={importProviderName}>
+                                        <lightning-icon icon-name="standard:account" size="xx-small"
+                                            class="slds-m-right_xx-small"></lightning-icon>
+                                        {importProviderName}
+                                    </template>
+                                    <template if:false={importProviderName}>
+                                        <span class="placeholder-text">Select a program</span>
+                                    </template>
+                                </div>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_5-of-12">
+                                <label class="slds-form-element__label">&nbsp;</label>
+                                <div class="slds-grid slds-gap_small action-btn-group">
+                                    <lightning-button label="Download Template" icon-name="utility:download"
+                                        variant="neutral" onclick={generateTemplate}
+                                        disabled={isImportProgramNotSelected}></lightning-button>
+                                    <lightning-button label="Import CSV" icon-name="utility:upload" variant="neutral"
+                                        onclick={handleImportClick}
+                                        disabled={isImportProgramNotSelected}></lightning-button>
+                                    <input type="file" accept=".csv" class="file-input-hidden"
+                                        onchange={handleFileUpload}>
+                                    <lightning-button-menu alternative-text="Import options" variant="border-filled"
+                                        icon-name="utility:settings" onselect={handleImportOption}
+                                        menu-alignment="bottom-right">
+                                        <lightning-menu-item value="append" label="Append to existing rows"
+                                            checked={isImportAppend}></lightning-menu-item>
+                                        <lightning-menu-item value="replace" label="Replace all rows"
+                                            checked={isImportReplace}></lightning-menu-item>
+                                    </lightning-button-menu>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="import-hint">
+                            Imported rows auto-assign selected program &amp; provider. Mode:
+                            <strong>{importModeLabel}</strong>
+                        </p>
+                    </div>
+
+                    <!-- ─── STATS STRIP (matches selection-chip-grid / summary-card) ─── -->
+                    <div class="stats-strip">
+                        <div class="stat-card">
+                            <span class="stat-label">Total Rows</span>
+                            <span class="stat-value">{totalRows}</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Valid</span>
+                            <span class="stat-value stat-valid">{validRowCount}</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Warnings</span>
+                            <span class="stat-value stat-warning">{warningRowCount}</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Errors</span>
+                            <span class="stat-value stat-error">{errorRowCount}</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">Programs</span>
+                            <span class="stat-value">{uniqueProgramCount}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ─── BODY ─── -->
+                <div class="bulk-body">
+
+                    <!-- ─── WORKSPACE CARD ─── -->
+                    <div class="section-card" style="margin-top: 18px;">
+                        <div class="section-heading">
+                            <div>
+                                <div class="section-kicker">Workspace</div>
+                                <div class="section-title">Program Plan Grid</div>
+                            </div>
+                            <div class="slds-grid slds-gap_x-small slds-grid_vertical-center">
+                                <template if:true={hasSelectedRows}>
+                                    <lightning-button label="Apply to Selected" icon-name="utility:paste"
+                                        variant="neutral" size="small" onclick={handleBulkApply}></lightning-button>
+                                    <lightning-button label="Delete Selected" icon-name="utility:delete"
+                                        variant="destructive-text" size="small"
+                                        onclick={handleBulkDelete}></lightning-button>
+                                </template>
+                                <lightning-button-icon icon-name={expandAllIcon} alternative-text="Expand/Collapse All"
+                                    size="small" onclick={handleExpandCollapseAll}></lightning-button-icon>
+                            </div>
+                        </div>
+
+                        <!-- Bulk Select -->
+                        <div class="bulk-actions slds-grid slds-grid_vertical-center">
+                            <div class="slds-grid slds-gap_x-small slds-grid_vertical-center">
+                                <lightning-input type="checkbox" label="Select All" variant="label-hidden"
+                                    checked={isAllSelected} onchange={handleSelectAll}></lightning-input>
+                                <span class="bulk-select-label">Select All</span>
+                            </div>
+                        </div>
+
+                        <!-- DATA GRID -->
+                        <div class="grid-scroll-wrapper">
+                            <div class="grid-container">
+                                <div class="grid-header slds-grid slds-p-vertical_x-small slds-p-horizontal_small">
+                                    <div class="col-check"></div>
+                                    <div class="col-num">#</div>
+                                    <div class="col-status"></div>
+                                    <div class="col-program">Program *</div>
+                                    <div class="col-provider">Provider</div>
+                                    <div class="col-name">Plan Name *</div>
+                                    <div class="col-batch">Batch #</div>
+                                    <div class="col-section">Section</div>
+                                    <div class="col-cadence">Cadence</div>
+                                    <div class="col-duration">Duration (min)</div>
+                                    <div class="col-actions">Actions</div>
+                                </div>
+
+                                <template for:each={rows} for:item="row">
+                                    <div key={row.id} class={row.rowClass} style={row.zIndexStyle}>
+                                        <div
+                                            class="slds-grid slds-grid_vertical-center slds-p-vertical_xx-small slds-p-horizontal_small">
+                                            <div class="col-check">
+                                                <lightning-input type="checkbox" variant="label-hidden" label="Select"
+                                                    data-row-id={row.id} checked={row.isSelected}
+                                                    onchange={handleRowSelect}></lightning-input>
+                                            </div>
+                                            <div class="col-num"><span class={row.numberClass}>{row.index}</span></div>
+                                            <div class="col-status">
+                                                <template if:true={row.statusIcon}>
+                                                    <lightning-icon icon-name={row.statusIcon} size="xx-small"
+                                                        variant={row.statusVariant}
+                                                        alternative-text={row.statusText}></lightning-icon>
+                                                </template>
+                                            </div>
+                                            <div class="col-program">
+                                                <lightning-combobox data-row-id={row.id} data-field="learningProgramId"
+                                                    placeholder="Select Program" options={programOptions}
+                                                    value={row.learningProgramId} onchange={handleFieldChange}
+                                                    variant="label-hidden"
+                                                    dropdown-alignment="bottom"></lightning-combobox>
+                                            </div>
+                                            <div class="col-provider">
+                                                <div class="auto-field">
+                                                    <template if:true={row.providerName}>
+                                                        <lightning-icon icon-name="standard:account" size="xx-small"
+                                                            class="slds-m-right_xx-small"></lightning-icon>
+                                                        {row.providerName}
+                                                    </template>
+                                                    <template if:false={row.providerName}>
+                                                        <span class="placeholder-text">Auto-filled</span>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                            <div class="col-name">
+                                                <lightning-input data-row-id={row.id} data-field="name" type="text"
+                                                    value={row.name} placeholder="Plan Name"
+                                                    onchange={handleFieldChange}
+                                                    variant="label-hidden"></lightning-input>
+                                            </div>
+                                            <div class="col-batch">
+                                                <lightning-combobox data-row-id={row.id} data-field="batchNumber"
+                                                    placeholder="Batch" options={batchOptions} value={row.batchNumber}
+                                                    onchange={handleFieldChange} variant="label-hidden"
+                                                    dropdown-alignment="bottom"></lightning-combobox>
+                                            </div>
+                                            <div class="col-section">
+                                                <lightning-button data-row-id={row.id} label={row.sectionDisplay}
+                                                    icon-name="utility:chevrondown" icon-position="right"
+                                                    variant="neutral" class="section-btn"
+                                                    onclick={handleSectionClick}></lightning-button>
+                                            </div>
+                                            <div class="col-cadence">
+                                                <lightning-combobox data-row-id={row.id} data-field="cadenceType"
+                                                    placeholder="Cadence" options={cadenceOptions}
+                                                    value={row.cadenceType} onchange={handleFieldChange}
+                                                    variant="label-hidden"
+                                                    dropdown-alignment="bottom"></lightning-combobox>
+                                            </div>
+                                            <div class="col-duration">
+                                                <div class="auto-field">
+                                                    <template if:true={row.durationPerSession}>
+                                                        <lightning-icon icon-name="utility:clock" size="xx-small"
+                                                            class="slds-m-right_xx-small"></lightning-icon>
+                                                        {row.durationPerSession} min
+                                                    </template>
+                                                    <template if:false={row.durationPerSession}>
+                                                        <span class="placeholder-text">Auto from program</span>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                            <div class="col-actions">
+                                                <div class="action-buttons">
+                                                    <lightning-button-icon data-row-id={row.id}
+                                                        icon-name={row.expandIcon} alternative-text="Expand"
+                                                        size="small"
+                                                        onclick={handleToggleExpand}></lightning-button-icon>
+                                                    <lightning-button-icon data-row-id={row.id} icon-name="utility:copy"
+                                                        alternative-text="Clone" size="small"
+                                                        onclick={handleCloneRow}></lightning-button-icon>
+                                                    <lightning-button-icon data-row-id={row.id}
+                                                        icon-name="utility:delete" alternative-text="Delete"
+                                                        size="small" variant="bare" class="delete-btn"
+                                                        onclick={handleDeleteRow}
+                                                        disabled={isDeleteDisabled}></lightning-button-icon>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <template if:true={row.isExpanded}>
+                                            <div class="expanded-section slds-p-around_small">
+                                                <div class="slds-grid slds-wrap slds-gutters_x-small">
+                                                    <div class="slds-col slds-size_4-of-12 slds-p-bottom_x-small">
+                                                        <lightning-input data-row-id={row.id}
+                                                            data-field="activeFromDate" type="date" label="Active From"
+                                                            value={row.activeFromDate}
+                                                            onchange={handleFieldChange}></lightning-input>
+                                                    </div>
+                                                    <div class="slds-col slds-size_4-of-12 slds-p-bottom_x-small">
+                                                        <lightning-input data-row-id={row.id} data-field="activeToDate"
+                                                            type="date" label="Active To" value={row.activeToDate}
+                                                            onchange={handleFieldChange}
+                                                            class={row.dateErrorClass}></lightning-input>
+                                                    </div>
+                                                    <div class="slds-col slds-size_4-of-12 slds-p-bottom_x-small">
+                                                        <lightning-input data-row-id={row.id}
+                                                            data-field="intakeStrength" type="number"
+                                                            label="Intake Strength" value={row.intakeStrength}
+                                                            onchange={handleFieldChange}></lightning-input>
+                                                    </div>
+                                                    <div class="slds-col slds-size_12-of-12">
+                                                        <lightning-textarea data-row-id={row.id}
+                                                            data-field="description" label="Description"
+                                                            value={row.description} max-length="32000"
+                                                            onchange={handleFieldChange}></lightning-textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <template if:true={row.warningMessage}>
+                                            <div class="row-warning">
+                                                <lightning-icon icon-name="utility:warning" size="xx-small"
+                                                    variant="warning" class="slds-m-right_xx-small"></lightning-icon>
+                                                <span>{row.warningMessage}</span>
+                                            </div>
+                                        </template>
+                                        <template if:true={row.errorMessage}>
+                                            <div class="row-error">
+                                                <lightning-icon icon-name="utility:error" size="xx-small"
+                                                    variant="error" class="slds-m-right_xx-small"></lightning-icon>
+                                                <span>{row.errorMessage}</span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ─── FOOTER ─── -->
+                    <div class="footer-bar slds-grid slds-grid_align-spread">
+                        <div class="slds-grid slds-gap_small">
+                            <lightning-button label="Add Row" icon-name="utility:add" variant="neutral"
+                                onclick={handleAddRow}></lightning-button>
+                            <lightning-button label="Add 5 Rows" icon-name="utility:rows" variant="neutral"
+                                onclick={handleAddFiveRows}></lightning-button>
+                            <lightning-button label="Clear All" icon-name="utility:clear" variant="destructive-text"
+                                onclick={handleClearAll}></lightning-button>
+                        </div>
+                        <div class="slds-grid slds-gap_small">
+                            <lightning-button label="Validate" icon-name="utility:check" variant="neutral"
+                                onclick={handleValidate}></lightning-button>
+                            <lightning-button label="Save All Plans" icon-name="utility:save" variant="brand"
+                                onclick={handleSave} disabled={isSaveDisabled}></lightning-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </lightning-card>
+
+    <!-- ═══════ SECTION MODAL ═══════ -->
+    <template if:true={showSectionModal}>
+        <section class="slds-modal slds-fade-in-open bulk-modal">
+            <div class="slds-modal__container modal-container">
+                <header class="slds-modal__header">
+                    <lightning-button-icon icon-name="utility:close" alternative-text="Close" class="slds-modal__close"
+                        onclick={handleCloseSectionModal}></lightning-button-icon>
+                    <h2 class="slds-modal__title">Select Sections</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-checkbox-group label="Available Sections" options={sectionOptions}
+                        value={currentSectionValues} onchange={handleSectionChange}></lightning-checkbox-group>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={handleCloseSectionModal}></lightning-button>
+                    <lightning-button label="Apply" variant="brand" onclick={handleApplySection}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- ═══════ BULK APPLY MODAL ═══════ -->
+    <template if:true={showBulkApplyModal}>
+        <section class="slds-modal slds-fade-in-open slds-modal_medium bulk-modal">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <lightning-button-icon icon-name="utility:close" alternative-text="Close" class="slds-modal__close"
+                        onclick={handleCloseBulkApply}></lightning-button-icon>
+                    <h2 class="slds-modal__title">Apply Values to {selectedRowCount} Selected Rows</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <p class="slds-m-bottom_small bulk-apply-hint">Only fill the fields you want to apply. Empty fields
+                        will be skipped.</p>
+                    <div class="slds-grid slds-wrap slds-gutters_small">
+                        <div class="slds-col slds-size_4-of-12 slds-p-bottom_small">
+                            <lightning-combobox label="Program" placeholder="--None--" options={programOptions}
+                                value={bulkApply.learningProgramId} onchange={handleBulkApplyField}
+                                data-field="learningProgramId" dropdown-alignment="bottom"></lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_4-of-12 slds-p-bottom_small">
+                            <lightning-input label="Plan Name Prefix" type="text" value={bulkApply.namePrefix}
+                                onchange={handleBulkApplyField} data-field="namePrefix"
+                                placeholder="e.g. BE Mech Batch 1"></lightning-input>
+                            <p class="field-hint">Rows auto-numbered: Prefix + 1, 2, 3...</p>
+                        </div>
+                        <div class="slds-col slds-size_4-of-12 slds-p-bottom_small">
+                            <lightning-combobox label="Batch #" placeholder="--None--" options={batchOptions}
+                                value={bulkApply.batchNumber} onchange={handleBulkApplyField} data-field="batchNumber"
+                                dropdown-alignment="bottom"></lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_4-of-12 slds-p-bottom_small">
+                            <lightning-combobox label="Cadence" placeholder="--None--" options={cadenceOptions}
+                                value={bulkApply.cadenceType} onchange={handleBulkApplyField} data-field="cadenceType"
+                                dropdown-alignment="bottom"></lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_4-of-12 slds-p-bottom_small">
+                            <lightning-button label={bulkApply.sectionDisplay} icon-name="utility:chevrondown"
+                                icon-position="right" variant="neutral" class="section-btn slds-m-top_large"
+                                onclick={handleBulkSectionClick}></lightning-button>
+                        </div>
+                        <div class="slds-col slds-size_4-of-12 slds-p-bottom_small"></div>
+                        <div class="slds-col slds-size_4-of-12 slds-p-bottom_small">
+                            <lightning-input label="Active From" type="date" value={bulkApply.activeFromDate}
+                                onchange={handleBulkApplyField} data-field="activeFromDate"></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_4-of-12 slds-p-bottom_small">
+                            <lightning-input label="Active To" type="date" value={bulkApply.activeToDate}
+                                onchange={handleBulkApplyField} data-field="activeToDate"></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_4-of-12 slds-p-bottom_small">
+                            <lightning-input label="Intake Strength" type="number" value={bulkApply.intakeStrength}
+                                onchange={handleBulkApplyField} data-field="intakeStrength"></lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_12-of-12 slds-p-bottom_small">
+                            <lightning-textarea label="Description" value={bulkApply.description} max-length="32000"
+                                onchange={handleBulkApplyField} data-field="description"></lightning-textarea>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={handleCloseBulkApply}></lightning-button>
+                    <lightning-button label="Apply to Selected" variant="brand"
+                        onclick={handleConfirmBulkApply}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- ═══════ CONFIRMATION MODAL ═══════ -->
+    <template if:true={showConfirmModal}>
+        <section class="slds-modal slds-fade-in-open slds-modal_medium bulk-modal">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 class="slds-modal__title">Confirm Bulk Insert</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <div class="confirm-summary">
+                        <div class="confirm-item">
+                            <lightning-icon icon-name="utility:check" size="small" variant="success"></lightning-icon>
+                            <span class="slds-m-left_small"><strong>{validRowCount}</strong> plan(s) ready to
+                                insert</span>
+                        </div>
+                        <template if:true={hasSkippedRows}>
+                            <div class="confirm-item slds-m-top_small">
+                                <lightning-icon icon-name="utility:warning" size="small"
+                                    variant="warning"></lightning-icon>
+                                <span class="slds-m-left_small"><strong>{skippedRowCount}</strong> row(s) will be
+                                    skipped</span>
+                            </div>
+                        </template>
+                        <template if:true={hasDuplicates}>
+                            <div class="confirm-item slds-m-top_small">
+                                <lightning-icon icon-name="utility:info" size="small"></lightning-icon>
+                                <span class="slds-m-left_small"><strong>{duplicateCount}</strong> potential
+                                    duplicate(s)</span>
+                            </div>
+                        </template>
+                        <template if:true={isAsyncInsert}>
+                            <div class="confirm-item slds-m-top_small async-notice">
+                                <lightning-icon icon-name="utility:clock" size="small"></lightning-icon>
+                                <span class="slds-m-left_small">Large batch — will process asynchronously.</span>
+                            </div>
+                        </template>
+                        <div class="confirm-programs slds-m-top_medium">
+                            <p class="slds-text-title_caps slds-m-bottom_x-small">Programs:</p>
+                            <template for:each={confirmProgramList} for:item="prog">
+                                <lightning-badge key={prog} label={prog}
+                                    class="slds-m-right_xx-small slds-m-bottom_xx-small"></lightning-badge>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={handleCancelSave}></lightning-button>
+                    <lightning-button label="Confirm Insert" variant="brand"
+                        onclick={handleConfirmSave}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- ═══════ SUCCESS MODAL ═══════ -->
+    <template if:true={showSuccessModal}>
+        <section class="slds-modal slds-fade-in-open bulk-modal">
+            <div class="slds-modal__container modal-container">
+                <header class="slds-modal__header slds-theme_success">
+                    <h2 class="slds-modal__title">Insert Complete</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <div class="success-summary">
+                        <div class="success-count">{lastSuccessCount}</div>
+                        <div class="success-label">Plans Created Successfully</div>
+                        <template if:true={lastErrorCount}>
+                            <div class="error-summary slds-m-top_small"><span
+                                    class="error-count-inline">{lastErrorCount}</span> failed</div>
+                        </template>
+                        <template if:true={hasCreatedIds}>
+                            <div class="slds-m-top_medium">
+                                <lightning-button label="Download Error Report" icon-name="utility:download"
+                                    variant="neutral" onclick={handleDownloadErrors}
+                                    disabled={noErrors}></lightning-button>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Close" variant="brand" onclick={handleCloseSuccess}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+       <!-- ═══════ HELP MODAL ═══════ -->
+    <template if:true={showHelpModal}>
+        <section class="slds-modal slds-fade-in-open slds-modal_large bulk-modal">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <lightning-button-icon icon-name="utility:close" alternative-text="Close" class="slds-modal__close"
+                        onclick={handleCloseHelp}></lightning-button-icon>
+                    <h2 class="slds-modal__title">
+                        <lightning-icon icon-name="utility:help" size="small"
+                            class="slds-m-right_small"></lightning-icon>
+                        Help &amp; Import Guide
+                    </h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <div class="help-content">
+                        <div class="help-section">
+                            <h3 class="help-heading"><span class="help-step-num">1</span> Download the CSV Template</h3>
+                            <p class="help-text">Go to <strong>Configuration</strong> section. Select a
+                                <strong>Program</strong>, then click <strong>Download Template</strong>. Open in Excel
+                                or Google Sheets.</p>
+                        </div>
+                        <div class="help-section">
+                            <h3 class="help-heading"><span class="help-step-num">2</span> Fill in the CSV Columns</h3>
+                            <p class="help-text">Your CSV must use these exact column headers:</p>
+                            <div class="col-ref-grid">
+                                <div class="col-ref-item"><strong>Name</strong> <span class="col-ref-required">* Required</span></div>
+                                <div class="col-ref-item"><strong>Batch_Number__c</strong> <span class="col-ref-optional">Use numbers: 1, 2, 3...</span></div>
+                                <div class="col-ref-item"><strong>Section__c</strong> <span class="col-ref-optional">Use letters: A, B, C... (or A;B)</span></div>
+                                <div class="col-ref-item"><strong>Cadence_Type__c</strong> <span class="col-ref-optional">Optional</span></div>
+                                <div class="col-ref-item"><strong>ActiveFromDate</strong> <span class="col-ref-optional">YYYY-MM-DD</span></div>
+                                <div class="col-ref-item"><strong>ActiveToDate</strong> <span class="col-ref-optional">YYYY-MM-DD</span></div>
+                                <div class="col-ref-item"><strong>Intake_Strength__c</strong> <span class="col-ref-optional">Number</span></div>
+                                <div class="col-ref-item"><strong>Description</strong> <span class="col-ref-optional">Optional text</span></div>
+                            </div>
+                            <div class="help-callout">
+                                <lightning-icon icon-name="utility:info" size="xx-small"></lightning-icon>
+                                <span class="help-callout-text"><strong>Program</strong>, <strong>Provider</strong>, and
+                                    <strong>Duration</strong> are auto-assigned from the selected program. <strong>Is
+                                        Active</strong> is always set to true.</span>
+                            </div>
+                        </div>
+                        <div class="help-section">
+                            <h3 class="help-heading"><span class="help-step-num">3</span> Example CSV in Excel</h3>
+                            <p class="help-text">Here's how your file should look:</p>
+                            <div class="csv-example-wrap">
+                                <div class="csv-example-title"><lightning-icon icon-name="doctype:excel"
+                                        size="xx-small"></lightning-icon> Excel Preview</div>
+                                <table class="csv-example-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Batch_Number__c</th>
+                                            <th>Section__c</th>
+                                            <th>Cadence_Type__c</th>
+                                            <th>ActiveFromDate</th>
+                                            <th>ActiveToDate</th>
+                                            <th>Intake_Strength__c</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>B.E. CSE 2026 Sec A</td>
+                                            <td>1</td>
+                                            <td>A</td>
+                                            <td>Semester</td>
+                                            <td>2026-07-01</td>
+                                            <td>2026-12-31</td>
+                                            <td>60</td>
+                                            <td>CSE first batch</td>
+                                        </tr>
+                                        <tr>
+                                            <td>B.E. CSE 2026 Sec B</td>
+                                            <td>1</td>
+                                            <td>B</td>
+                                            <td>Semester</td>
+                                            <td>2026-07-01</td>
+                                            <td>2026-12-31</td>
+                                            <td>60</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>B.E. CSE 2027 Sec A</td>
+                                            <td>2</td>
+                                            <td>A;B</td>
+                                            <td>Trimester</td>
+                                            <td>2027-01-15</td>
+                                            <td>2027-06-30</td>
+                                            <td>45</td>
+                                            <td>Multi-section</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="csv-raw-block"><span class="csv-raw-label">RAW CSV</span>
+Name,Batch_Number__c,Section__c,Cadence_Type__c,ActiveFromDate,ActiveToDate,Intake_Strength__c,Description
+B.E. CSE 2026 Sec A,1,A,Semester,2026-07-01,2026-12-31,60,CSE first batch
+B.E. CSE 2026 Sec B,1,B,Semester,2026-07-01,2026-12-31,60,
+B.E. CSE 2027 Sec A,2,A;B,Trimester,2027-01-15,2027-06-30,45,Multi-section</div>
+                        </div>
+                        <div class="help-section">
+                            <h3 class="help-heading"><span class="help-step-num">4</span> Import the CSV</h3>
+                            <p class="help-text">Save as <strong>.csv</strong> (File → Save As → CSV UTF-8). Select your
+                                Program, click <strong>Import CSV</strong>, and choose the file.</p>
+                            <div class="help-callout help-callout-warn">
+                                <lightning-icon icon-name="utility:warning" size="xx-small"
+                                    variant="warning"></lightning-icon>
+                                <span class="help-callout-text">Use the <strong>gear icon</strong> to toggle
+                                    <strong>Append</strong> vs <strong>Replace</strong> mode.</span>
+                            </div>
+                        </div>
+                        <div class="help-section">
+                            <h3 class="help-heading"><span class="help-step-num">5</span> Validate &amp; Save</h3>
+                            <p class="help-text">Click <strong>Validate</strong> to check errors/duplicates. Green =
+                                valid, Yellow = warnings, Red = errors. Fix reds, then <strong>Save All Plans</strong>.
+                            </p>
+                        </div>
+                        <div class="help-section">
+                            <h3 class="help-heading"><lightning-icon icon-name="utility:sparkles"
+                                    size="xx-small"></lightning-icon> Quick Tips</h3>
+                            <p class="help-text">
+                                • <strong>Batch</strong>: Use simple numbers (1, 2, 3...)<br />
+                                • <strong>Section</strong>: Use letters (A, B, C...) or combine with semicolons (A;B)<br />
+                                • <strong>Select All</strong> + <strong>Apply to Selected</strong> for bulk values.<br />
+                                • <strong>Clone</strong> a row to duplicate settings.<br />
+                                • Dates: <strong>YYYY-MM-DD</strong> format. Must be in the future.<br />
+                                • Lines starting with <code>#</code> in CSV are ignored.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Got it" variant="brand" onclick={handleCloseHelp}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+    <template if:true={isPolling}>
+        <div class="polling-bar">
+            <lightning-spinner size="small" alternative-text="Processing"></lightning-spinner>
+            <span class="slds-m-left_small">Processing bulk insert asynchronously...</span>
+        </div>
+    </template>
+
+    <template if:true={isLoading}>
+        <lightning-spinner alternative-text="Loading" size="large"></lightning-spinner>
+    </template>
+</template>

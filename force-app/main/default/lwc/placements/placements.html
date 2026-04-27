@@ -1,0 +1,35 @@
+<template>
+    <template lwc:if={isLanding}>
+        <c-placements-landing onsubnavigate={handleSubNavigate}></c-placements-landing>
+    </template>
+    <template lwc:if={isAllJobs}>
+        <c-all-jobs-page onsubnavigate={handleSubNavigate}></c-all-jobs-page>
+    </template>
+    <template lwc:if={isJobDetail}>
+        <c-job-detail job-id={selectedJobId} onsubnavigate={handleSubNavigate}></c-job-detail>
+    </template>
+    <template lwc:if={isApplications}>
+        <c-applications-tracker onsubnavigate={handleSubNavigate}></c-applications-tracker>
+    </template>
+    <template lwc:if={isResumeLibrary}>
+        <c-resume-library onsubnavigate={handleSubNavigate}></c-resume-library>
+    </template>
+    <template lwc:if={isResumeEditor}>
+        <c-resume-editor onsubnavigate={handleSubNavigate}></c-resume-editor>
+    </template>
+    <template lwc:if={isPrepHub}>
+        <c-prep-hub onsubnavigate={handleSubNavigate}></c-prep-hub>
+    </template>
+    <template lwc:if={isMockInterview}>
+        <c-mock-interview-session interview-id={mockInterviewId} onsubnavigate={handleSubNavigate}></c-mock-interview-session>
+    </template>
+    <template lwc:if={isInterviewResults}>
+        <c-interview-results onsubnavigate={handleSubNavigate}></c-interview-results>
+    </template>
+    <template lwc:if={isCareerCompass}>
+        <c-career-compass onsubnavigate={handleSubNavigate}></c-career-compass>
+    </template>
+    <template lwc:if={isCompareOffers}>
+        <c-compare-offers onsubnavigate={handleSubNavigate}></c-compare-offers>
+    </template>
+</template>

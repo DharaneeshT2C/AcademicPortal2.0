@@ -1,0 +1,180 @@
+:host {
+    display: block;
+}
+
+.page {
+    min-height: 100vh;
+    background: #f1f5f9;
+}
+
+.top-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 var(--slds-g-spacing-5, 24px);
+    min-height: 58px;
+    background: #f8fafc;
+    border-top: 5px solid #0176d3;
+    border-bottom: 1px solid #cbd5e1;
+}
+
+.top-tab {
+    border: none;
+    background: transparent;
+    color: #475569;
+    font-size: var(--slds-g-font-scale-2, 16px);
+    line-height: var(--slds-g-font-line-height-1, 1);
+    padding: var(--slds-g-spacing-3, 12px )10px 11px;
+    border-bottom: 3px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.top-tab span {
+    font-size: var(--slds-g-font-scale-2, 16px);
+}
+
+.top-tab lightning-icon {
+    --slds-c-icon-color-foreground-default: #6b7280;
+}
+
+.top-tab.active {
+    color: #0176d3;
+    border-bottom-color: #0176d3;
+}
+
+.top-tab.active lightning-icon {
+    --slds-c-icon-color-foreground-default: #0176d3;
+}
+
+.content {
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: var(--slds-g-spacing-7, 40px )28px var(--slds-g-spacing-9, 56px);
+}
+
+.title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 44px;
+    font-weight: var(--slds-g-font-weight-5, 500);
+    line-height: 1.15;
+}
+
+p {
+    margin: 10px 0 0;
+    color: #475569;
+    font-size: var(--slds-g-font-scale-2, 16px);
+}
+
+.new-btn {
+    border: none;
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    background: #0176d3;
+    color: #fff;
+    font-size: var(--slds-g-font-scale-2, 16px);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    padding: 0 20px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
+}
+
+.new-btn lightning-icon {
+    --slds-c-icon-color-foreground-default: #fff;
+}
+
+.card {
+    border: var(--slds-g-sizing-border-1, 1px )solid #c4ccd7;
+    border-radius: var(--slds-g-radius-border-3, 12px);
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+}
+
+.card-head {
+    min-height: 72px;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--slds-g-spacing-5, 24px);
+    border-bottom: 1px solid #d8dde6;
+}
+
+h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: var(--slds-g-font-scale-6, 32px);
+    font-weight: var(--slds-g-font-weight-5, 500);
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead th {
+    text-align: left;
+    padding: 20px var(--slds-g-spacing-4, 16px);
+    background: #f8fafc;
+    color: #334155;
+    font-size: var(--slds-g-font-scale-2, 16px);
+    font-weight: var(--slds-g-font-weight-5, 500);
+    letter-spacing: 0.04em;
+}
+
+tbody td {
+    padding: 34px var(--slds-g-spacing-4, 16px);
+    border-top: 1px solid #d8dde6;
+    color: #64748b;
+    font-size: var(--slds-g-font-scale-2, 16px);
+}
+
+.empty-state {
+    text-align: center;
+}
+
+@media (max-width: 1200px) {
+    .top-tab,
+    .top-tab span {
+        font-size: 18px;
+    }
+
+    h1 {
+        font-size: 36px;
+    }
+
+    p {
+        font-size: 15px;
+    }
+
+    .new-btn {
+        font-size: 18px;
+        min-height: 44px;
+    }
+
+    h2 {
+        font-size: var(--slds-g-font-scale-5, 28px);
+    }
+
+    thead th,
+    tbody td {
+        font-size: var(--slds-g-font-scale-2, 16px);
+    }
+}

@@ -1,0 +1,1231 @@
+@font-face {
+    font-family: 'General Sans';
+    src: url('/resource/GeneralSansFont') format('woff2'),
+         url('/resource/GeneralSansFont') format('woff');
+    font-weight: var(--slds-g-font-weight-4, 400 )var(--slds-g-font-weight-7, 700);
+    font-display: swap;
+}
+
+.hidden {
+    display: none !important;
+}
+
+@keyframes skeleton-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton-wrap {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: calc(100vh - 160px);
+}
+
+.skeleton-card-tall {
+    height: 100px;
+    border-radius: 16px;
+    background: linear-gradient(90deg, #e7ebf2 0%, #f3f5f9 50%, #e7ebf2 100%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.1s ease-in-out infinite;
+}
+
+.skeleton-card-wide {
+    flex: 1;
+    border-radius: 16px;
+    background: linear-gradient(90deg, #e7ebf2 0%, #f3f5f9 50%, #e7ebf2 100%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.1s ease-in-out infinite;
+}
+
+.allocation-page {
+    /* padding: 24px 24px 48px 24px; */
+    background-color: #edf0f5;
+    height: calc(100vh - 160px);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    font-family: 'General Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: #1F2937;
+}
+
+/* Header */
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--slds-g-spacing-5, 24px);
+}
+
+.page-title {
+    font-size: 18px;
+    font-weight: var(--slds-g-font-weight-4, 400);
+    color: #3C3C43;
+    margin: 0;
+    line-height: 140%;
+}
+
+.btn-help {
+    background: transparent;
+    border: var(--slds-g-sizing-border-1, 1px )solid var(--primary-color, #3061FF);
+    color: #3C3C43;
+    padding: 6px var(--slds-g-spacing-4, 16px);
+    border-radius: 6px;
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: var(--slds-g-font-weight-5, 500);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-help:hover {
+    background: var(--secondary-color, #EFF6FF);
+}
+
+/* Progress Tracker */
+.tracker-card {
+    background: #FFFFFF;
+    border: var(--slds-g-sizing-border-1, 1px )solid #E5E7EB;
+    border-radius: var(--slds-g-radius-border-3, 12px);
+    padding: var(--slds-g-spacing-4, 16px);
+    margin-bottom: var(--slds-g-spacing-4, 16px);
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--slds-g-spacing-4, 16px);
+}
+
+.progress-tracker {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 10px var(--slds-g-spacing-8, 48px);
+}
+
+.progress-tracker::before {
+    content: '';
+    position: absolute;
+    top: 15px; /* Centers with the 10px circle */
+    left: var(--slds-g-spacing-12, 80px); /* Aligns with middle of first circle's expected position */
+    right: var(--slds-g-spacing-12, 80px); /* Aligns with middle of last circle's expected position */
+    height: var(--slds-g-sizing-border-1, 1px);
+    background: #E5E7EB;
+    z-index: 0;
+}
+
+.progress-step {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    flex: 0 0 auto;
+}
+
+.progress-circle {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #374151; /* Default: Dark Gray */
+    transition: all 0.3s;
+}
+
+.progress-circle.completed {
+    background: var(--slds-g-color-palette-green-40, #28652B); /* Green */
+    box-shadow: 0 0 0 3px #FFFFFF; /* White gap */
+}
+
+.progress-circle.active {
+    background: var(--primary-color, #3061FF); /* Inner Blue Dot */
+    width: var(--slds-g-sizing-3, 8px);
+    height: var(--slds-g-sizing-3, 8px);
+    border: none;
+    border-radius: 50%;
+    transform: translateY(-2px); /* Vertical adjustment */
+    box-shadow: 0 0 0 3px #FFFFFF, 0 0 0 4px var(--primary-color, #3061FF); /* White gap + Blue ring */
+}
+
+.progress-circle.rejected {
+    background: var(--primary-color, #3061FF); /* Same 'active' style */
+    width: var(--slds-g-sizing-3, 8px);
+    height: var(--slds-g-sizing-3, 8px);
+    border: none;
+    border-radius: 50%;
+    transform: translateY(-2px);
+    box-shadow: 0 0 0 3px #FFFFFF, 0 0 0 4px var(--primary-color, #3061FF);
+}
+
+.progress-line {
+    display: none; /* Removed from HTML */
+}
+
+.progress-box {
+    padding: var(--slds-g-spacing-3, 12px )var(--slds-g-spacing-5, 24px);
+    border: var(--slds-g-sizing-border-1, 1px )dashed var(--primary-color, #3061FF); /* Solid blue as requested */
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    font-size: var(--slds-g-font-scale-base, 13px);
+    font-weight: var(--slds-g-font-weight-5, 500);
+    color: #373A45; /* Dark text */
+    background: transparent;
+    white-space: nowrap;
+    transition: all 0.3s;
+}
+
+.progress-box.completed {
+    background: #EBF4EC;
+    border-color: var(--slds-g-color-palette-green-50, #338137);
+    color: #373A45;
+}
+
+.progress-box.active {
+    background: var(--secondary-color, #EAEFFF);
+    border-color: var(--primary-color, #3061FF);
+    color: #373A45;
+    border-style: dashed; /* Usually active step has solid border or kept dashed? Image had solid blue line in active usually but user just said border color. Assuming dashed maintained or solid? The user specified border: 1px solid */
+    border-width: var(--slds-g-sizing-border-1, 1px);
+    border-style: dashed;
+}
+
+.progress-box.rejected {
+    background: #FEF2F2;
+    border-color: #EF4444;
+    color: #991B1B;
+}
+
+/* Content Section - Unified White Card */
+.content-section {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    background: #FFFFFF;
+    border: var(--slds-g-sizing-border-1, 1px )solid #E5E7EB;
+    border-radius: var(--slds-g-radius-border-3, 12px);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Get Started Card */
+.get-started-card {
+    padding: var(--slds-g-spacing-5, 24px);
+    text-align: left;
+    border-top: 1px solid #E6E6E8; /* Applied as requested in Step 207 */
+}
+
+.section-heading {
+    font-size: 22px;
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: #1F2937;
+    margin: 0 0 var(--slds-g-spacing-2, 8px )0;
+    line-height: 140%;
+}
+
+.section-description {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    color: #6B7280;
+    margin: 0 0 20px 0;
+    line-height: 140%;
+}
+
+.btn-primary {
+    background: var(--primary-color, #3061FF);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: var(--slds-g-font-weight-5, 500);
+    cursor: pointer;
+    font-size: var(--slds-g-font-scale-1, 14px);
+    transition: background 0.2s;
+}
+
+.btn-primary:hover {
+    background: var(--primary-color, #2451DB);
+    opacity: 0.9;
+}
+
+.btn-primary-large {
+    background: var(--primary-color, #3061FF);
+    color: white;
+    border: none;
+    padding: var(--slds-g-spacing-3, 12px )var(--slds-g-spacing-5, 24px);
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    cursor: pointer;
+    font-size: var(--slds-g-font-scale-2, 16px);
+    transition: background 0.2s;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.btn-primary-large:hover {
+    background: var(--primary-color, #2451DB);
+    opacity: 0.9;
+}
+
+/* Info Card */
+.info-card {
+    background: var(--secondary-color, #EFF6FF);
+    border-radius: var(--slds-g-radius-border-3, 12px);
+    padding: var(--slds-g-spacing-5, 24px);
+    margin: 0 var(--slds-g-spacing-5, 24px )var(--slds-g-spacing-5, 24px )var(--slds-g-spacing-5, 24px); /* Margin to sit inside content-section */
+}
+
+.info-title {
+    font-size: var(--slds-g-font-scale-2, 16px);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: #1F2937;
+    margin: 0 0 var(--slds-g-spacing-4, 16px )0;
+}
+
+.info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.info-list li {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    color: #4B5563;
+    margin-bottom: 10px;
+    padding-left: 20px;
+    position: relative;
+    line-height: 140%;
+}
+
+.info-list li:before {
+    content: "\2022";
+    position: absolute;
+    left: var(--slds-g-spacing-1, 4px);
+    color: #3C3C43;
+    font-weight: var(--slds-g-font-weight-bold, bold);
+    font-size: var(--slds-g-font-scale-2, 16px);
+}
+
+.info-list li:last-child {
+    margin-bottom: 0;
+}
+
+/* Status Card */
+/* Status Card */
+.status-card {
+    /* Merged into unified card */
+    padding: var(--slds-g-spacing-5, 24px )var(--slds-g-spacing-5, 24px )var(--slds-g-spacing-4, 16px )var(--slds-g-spacing-5, 24px); /* Top, Right, Bottom, Left */
+    margin-bottom: var(--slds-g-spacing-4, 16px);
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.status-card.rejected {
+    background: #FFFFFF;
+    border: var(--slds-g-sizing-border-1, 1px )solid #E5E7EB; /* Card border */
+    border-radius: var(--slds-g-radius-border-3, 12px);
+    margin: var(--slds-g-spacing-5, 24px); /* Separate from edges */
+    padding: var(--slds-g-spacing-6, 32px);
+    border-bottom: 1px solid #E5E7EB; /* Ensure full border definition overrides if needed */
+}
+
+/* Specific fix to remove the unified divider border if it was applied via .status-card */
+.status-card.rejected {
+   border-bottom: 1px solid #E5E7EB; 
+}
+
+.status-card.rejected .status-heading {
+    font-weight: var(--slds-g-font-weight-6, 600);
+    font-size: var(--slds-g-font-scale-4, 24px);
+    line-height: 140%;
+    color: #373A45;
+}
+
+.status-card.success {
+    background: #EBF4EC; /* Updated as requested */
+    border: var(--slds-g-sizing-border-1, 1px )solid #A3CBA5; /* Updated as requested */
+    border-radius: var(--slds-g-radius-border-3, 12px);
+    padding: var(--slds-g-spacing-5, 24px);
+    margin: var(--slds-g-spacing-5, 24px); /* Added margin around the banner */
+    margin-bottom: var(--slds-g-spacing-5, 24px); /* Keep bottom separation */
+}
+
+.status-card.success .status-heading {
+    color: var(--slds-g-color-palette-green-50, #338137); /* Updated color */
+    font-family: 'General Sans', sans-serif; /* Added font */
+    font-weight: var(--slds-g-font-weight-6, 600);
+    font-size: var(--slds-g-font-scale-4, 24px); /* Increased size */
+    line-height: 140%;
+    letter-spacing: 0;
+}
+
+.status-card.success .status-description {
+    color: #4B5563; /* Gray text for description as per image */
+    margin-bottom: 20px; /* Space before button */
+}
+
+.status-card.success .btn-primary-large {
+    width: auto;
+    display: inline-block;
+    margin-top: 0;
+    padding: 10px var(--slds-g-spacing-5, 24px);
+    background: var(--primary-color, #3061FF);
+    font-weight: var(--slds-g-font-weight-5, 500);
+    font-size: var(--slds-g-font-scale-2, 16px);
+    line-height: 140%;
+    letter-spacing: 0;
+    text-align: center;
+    text-transform: capitalize;
+    border-radius: var(--slds-g-radius-border-2, 8px); /* Maintain rounded corners */
+    color: white; /* Ensure text is visible */
+    border: none;
+}
+
+.status-heading {
+    font-size: var(--slds-g-font-scale-3, 20px);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: #1F2937;
+    margin: 0 0 6px 0;
+    line-height: 140%;
+}
+
+.status-description {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    color: #6B7280;
+    margin: 0 0 var(--slds-g-spacing-4, 16px )0;
+    line-height: 140%;
+}
+
+.status-badge-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #FEF3C7; /* Yellow background */
+    border: none;
+    padding: 6px var(--slds-g-spacing-4, 16px);
+    border-radius: var(--slds-g-radius-border-4, 20px); /* Pill shape */
+}
+
+/* Specific styling overridden if needed */
+.status-badge-wrapper.rejected-badge {
+    background: #FBEAEA;
+    border: var(--slds-g-sizing-border-1, 1px )solid #F1BFBF;
+    font-weight: var(--slds-g-font-weight-5, 500);
+    font-size: var(--slds-g-font-scale-2, 16px);
+    line-height: 140%;
+    text-transform: capitalize;
+    color: #585A64; /* Wrapper color, ensuring text inherits or matches */
+}
+
+/* Override base status icon/text if needed, or ensure they inherit */
+.rejected-badge .status-text {
+    color: #585A64; /* Match requested color */
+    font-weight: var(--slds-g-font-weight-5, 500);
+    font-size: var(--slds-g-font-scale-2, 16px); /* Match requested size */
+}
+
+.success-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--slds-g-spacing-2, 8px);
+}
+
+.success-left {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.success-icon {
+    flex-shrink: 0;
+}
+
+.payment-due {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #FBEAEA;
+    border: var(--slds-g-sizing-border-1, 1px )solid #F1BFBF;
+    padding: 6px var(--slds-g-spacing-4, 16px); /* Slightly adjusted padding for larger font */
+    border-radius: var(--slds-g-radius-border-4, 20px);
+    font-weight: var(--slds-g-font-weight-5, 500);
+    font-size: var(--slds-g-font-scale-2, 16px);
+    line-height: 140%;
+    letter-spacing: 0;
+    text-transform: capitalize;
+    color: #585A64;
+    white-space: nowrap;
+}
+
+/* Preferences Card Section */
+.preferences-card {
+    padding: 0 var(--slds-g-spacing-5, 24px )var(--slds-g-spacing-5, 24px )var(--slds-g-spacing-5, 24px); /* Default for Under Review */
+}
+
+.preferences-card.rejected-style {
+    padding: var(--slds-g-spacing-6, 32px);
+    border: var(--slds-g-sizing-border-1, 1px )solid #E5E7EB;
+    border-radius: var(--slds-g-radius-border-3, 12px);
+    margin: 0 var(--slds-g-spacing-5, 24px )var(--slds-g-spacing-5, 24px )var(--slds-g-spacing-5, 24px); /* Align with rejected status card */
+}
+
+.preferences-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.preferences-title {
+    font-size: var(--slds-g-font-scale-2, 16px);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: #1F2937;
+    margin: 0;
+}
+
+.submitted-date {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--slds-g-font-scale-base, 13px);
+    color: #6B7280;
+}
+
+/* Preference Item */
+.preference-item {
+    background: #F9FAFB; /* Gray background */
+    border: none;
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    padding: 20px;
+    margin-bottom: var(--slds-g-spacing-4, 16px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Vertically center the content and badge */
+    gap: 16px;
+}
+
+.preference-item:last-child {
+    margin-bottom: 0;
+}
+
+.pref-main {
+    flex: 1;
+}
+
+.pref-header-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: var(--slds-g-spacing-2, 8px);
+    flex-wrap: wrap; 
+}
+
+.pref-type {
+    font-size: 15px;
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: #373A45;
+    margin: 0;
+}
+
+.pref-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 0; /* Reset margin since it's in row */
+}
+
+.feature-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--secondary-color, #EAEFFF); /* Updated background */
+    padding: var(--slds-g-spacing-1, 4px )var(--slds-g-spacing-3, 12px);
+    border-radius: var(--slds-g-radius-border-4, 20px);
+    font-family: 'General Sans', sans-serif;
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: var(--slds-g-font-weight-5, 500);
+    line-height: 140%;
+    letter-spacing: 0;
+    color: #373A45; /* Updated text color */
+}
+
+.feature-tag svg {
+    flex-shrink: 0;
+}
+
+.pref-details {
+    font-size: var(--slds-g-font-scale-base, 13px);
+    color: #6B7280;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.separator {
+    color: #D1D5DB;
+}
+
+.pref-badge {
+    background: #FFFFFF;
+    color: var(--primary-color, #3061FF);
+    padding: 6px var(--slds-g-spacing-4, 16px);
+    border-radius: var(--slds-g-radius-border-4, 20px);
+    font-size: var(--slds-g-font-scale-base, 13px);
+    font-weight: var(--slds-g-font-weight-5, 500);
+    white-space: nowrap;
+    border: var(--slds-g-sizing-border-1, 1px )solid var(--primary-color, #3061FF);
+}
+
+/* Allocation Details Card Section */
+.allocation-details-card {
+    padding: var(--slds-g-spacing-5, 24px);
+    border: var(--slds-g-sizing-border-1, 1px )solid #E5E7EB;
+    border-radius: var(--slds-g-radius-border-3, 12px);
+    margin: 0 var(--slds-g-spacing-5, 24px )var(--slds-g-spacing-5, 24px )var(--slds-g-spacing-5, 24px); /* Align with banner margins */
+}
+
+.allocation-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: var(--slds-g-spacing-5, 24px);
+    padding-bottom: var(--slds-g-spacing-5, 24px);
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.residence-image {
+    width: var(--slds-g-sizing-11, 64px);
+    height: var(--slds-g-sizing-11, 64px);
+    border-radius: var(--slds-g-radius-border-3, 12px);
+    /* object-fit: cover; removed for div */
+    flex-shrink: 0;
+    background-color: #F3F4F6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9CA3AF;
+}
+
+.allocation-title-section {
+    flex: 1;
+}
+
+.allocation-type {
+    font-size: 18px;
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: #1F2937;
+    margin: 0 0 var(--slds-g-spacing-1, 4px )0;
+}
+
+.allocation-features {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    color: #6B7280;
+    margin: 0;
+}
+
+.btn-outline-small {
+    background: #FFFFFF;
+    border: var(--slds-g-sizing-border-1, 1px )solid #D1D5DB;
+    color: #373A45;
+    padding: var(--slds-g-spacing-2, 8px )var(--slds-g-spacing-4, 16px);
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: var(--slds-g-font-weight-5, 500);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-outline-small:hover {
+    background: #F3F4F6;
+    border-color: #373A45;
+}
+
+/* Allocation Grid */
+.allocation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: var(--slds-g-spacing-5, 24px);
+    padding-bottom: var(--slds-g-spacing-5, 24px);
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.grid-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: #F9FAFB; /* Gray box */
+    padding: var(--slds-g-spacing-4, 16px);
+    border-radius: var(--slds-g-radius-border-2, 8px);
+}
+
+.grid-label {
+    font-size: var(--slds-g-font-scale-base, 13px);
+    color: #9CA3AF;
+    font-weight: var(--slds-g-font-weight-5, 500);
+}
+
+.grid-value {
+    font-size: 15px;
+    color: #1F2937;
+    font-weight: var(--slds-g-font-weight-6, 600);
+}
+
+/* Roommate Section */
+.roommate-section {
+    margin-top: var(--slds-g-spacing-5, 24px);
+}
+
+.roommate-title {
+    font-size: var(--slds-g-font-scale-2, 16px);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: #1F2937;
+    margin: 0 0 var(--slds-g-spacing-4, 16px )0;
+}
+
+.roommate-list {
+    display: flex;
+    gap: 16px;
+}
+
+.roommate-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #F9FAFB; /* Gray card style */
+    padding: var(--slds-g-spacing-3, 12px )var(--slds-g-spacing-4, 16px);
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    border: var(--slds-g-sizing-border-1, 1px )solid #F3F4F6;
+    min-width: 200px;
+}
+
+.roommate-avatar {
+    width: var(--slds-g-sizing-10, 48px);
+    height: var(--slds-g-sizing-10, 48px);
+    border-radius: 50%;
+    /* object-fit: cover; removed for div */
+    background-color: #E5E7EB;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9CA3AF;
+}
+
+.roommate-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.roommate-name {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: #1F2937;
+}
+
+.roommate-id {
+    font-size: var(--slds-g-font-scale-base, 13px);
+    color: #6B7280;
+}
+
+.empty-state-message {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    color: #6B7280;
+}
+
+.amenity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.amenity-list-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: var(--slds-g-font-scale-1, 14px);
+    color: #374151;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) { 
+    .allocation-page {
+        padding: 20px;
+    }
+
+    .progress-tracker {
+        flex-direction: column;
+        gap: 16px;
+        padding: 0;
+    }
+
+    .progress-line {
+        width: 2px;
+        height: var(--slds-g-sizing-6, 20px);
+        margin: 0;
+    }
+
+    .progress-step {
+        width: 100%;
+        flex-direction: row;
+        justify-content: flex-start;
+    }
+
+    .progress-box {
+        white-space: normal;
+    }
+
+    .allocation-header {
+        flex-wrap: wrap;
+    }
+
+    .allocation-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .roommate-list {
+        flex-direction: column;
+    }
+
+    .preferences-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .success-header {
+        flex-direction: column;
+        gap: 12px;
+    }
+}
+
+/* Submitted ("Under Review") Styling - Matches Rejected Separation Style */
+.status-card.submitted {
+    background: #FFFFFF;
+    border: var(--slds-g-sizing-border-1, 1px )solid #E5E7EB;
+    border-radius: var(--slds-g-radius-border-3, 12px);
+    margin: var(--slds-g-spacing-5, 24px);
+    padding: var(--slds-g-spacing-5, 24px);
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.status-card.submitted .status-heading {
+    font-weight: var(--slds-g-font-weight-6, 600);
+    font-size: var(--slds-g-font-scale-4, 24px);
+    line-height: 140%;
+    color: #373A45;
+}
+
+.status-badge-wrapper.submitted-badge {
+    background: #FFF9EA; 
+    border: var(--slds-g-sizing-border-1, 1px )solid #FEEBBE;
+    padding: 6px var(--slds-g-spacing-4, 16px);
+    border-radius: var(--slds-g-radius-border-4, 20px);
+    font-weight: var(--slds-g-font-weight-5, 500);
+    font-size: var(--slds-g-font-scale-2, 16px); 
+    line-height: 140%;
+    text-transform: capitalize;
+    color: #695113;
+}
+
+.preferences-card.submitted-style {
+    padding: var(--slds-g-spacing-5, 24px);
+    border: var(--slds-g-sizing-border-1, 1px )solid #E5E7EB;
+    border-radius: var(--slds-g-radius-border-3, 12px);
+    margin: 0 var(--slds-g-spacing-5, 24px )var(--slds-g-spacing-5, 24px )var(--slds-g-spacing-5, 24px);
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+.modal-container-wrapper {
+    position: relative;
+    z-index: 9001;
+    width: 100%;
+    max-width: 600px;
+    padding: var(--slds-g-spacing-4, 16px);
+}
+
+.modal-container {
+    background: white;
+    border-radius: var(--slds-g-radius-border-3, 12px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+.modal-header {
+    padding: var(--slds-g-spacing-5, 24px )var(--slds-g-spacing-6, 32px);
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.modal-title {
+    font-size: var(--slds-g-font-scale-4, 24px);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: #1F2937;
+    margin: 0;
+}
+
+.modal-content {
+    padding: var(--slds-g-spacing-5, 24px )var(--slds-g-spacing-6, 32px);
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+}
+
+.form-group {
+    margin-bottom: var(--slds-g-spacing-5, 24px);
+}
+
+.form-label {
+    display: block;
+    font-size: var(--slds-g-font-scale-2, 16px); 
+    font-weight: var(--slds-g-font-weight-5, 500);
+    color: #374151;
+    margin-bottom: var(--slds-g-spacing-2, 8px);
+}
+
+.required {
+    color: #EF4444;
+    margin-left: 2px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: var(--slds-g-sizing-border-1, 1px )solid #D1D5DB;
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    font-size: var(--slds-g-font-scale-1, 14px);
+    color: #1F2937;
+    transition: all 0.2s;
+    outline: none;
+    font-family: inherit;
+    box-sizing: border-box; /* Ensure padding doesn't affect width */
+}
+
+.form-input:focus {
+    border-color: var(--primary-color, #3061FF);
+    box-shadow: 0 0 0 1px var(--primary-color, #3061FF);
+}
+
+.form-input::placeholder {
+    color: #9CA3AF;
+}
+
+/* Textarea specific */
+.textarea-wrapper {
+    position: relative;
+}
+
+.textarea-input {
+    min-height: 120px;
+    resize: vertical;
+    padding-bottom: var(--slds-g-spacing-7, 40px); /* Space for the button */
+}
+
+.btn-auto-create {
+    position: absolute;
+    bottom: var(--slds-g-spacing-3, 12px);
+    right: var(--slds-g-spacing-3, 12px);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: white;
+    border: var(--slds-g-sizing-border-1, 1px )solid var(--primary-color, #3061FF);
+    border-radius: 6px;
+    padding: 6px var(--slds-g-spacing-3, 12px);
+    font-size: var(--slds-g-font-scale-neg-1, 12px);
+    font-weight: var(--slds-g-font-weight-5, 500);
+    color: #373A45;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-auto-create:hover {
+    background: var(--secondary-color, #EFF6FF);
+}
+
+/* Select specific */
+.select-wrapper {
+    position: relative;
+}
+
+/* File Upload */
+.file-upload-box {
+    border: var(--slds-g-sizing-border-1, 1px )dashed #D1D5DB;
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    padding: var(--slds-g-spacing-6, 32px )var(--slds-g-spacing-4, 16px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #F9FAFB;
+}
+
+.file-upload-box:hover {
+    border-color: var(--primary-color, #3061FF);
+    background: var(--secondary-color, #EFF6FF);
+}
+
+.upload-text {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    color: #373A45;
+}
+
+.upload-link {
+    color: var(--primary-color, #3061FF);
+    font-weight: var(--slds-g-font-weight-5, 500);
+}
+
+.upload-hint {
+    font-size: var(--slds-g-font-scale-neg-1, 12px);
+    color: #6B7280;
+}
+
+.modal-footer {
+    padding: var(--slds-g-spacing-5, 24px )var(--slds-g-spacing-6, 32px);
+    border-top: 0px solid #E5E7EB;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn-outline {
+    background: white;
+    border: var(--slds-g-sizing-border-1, 1px )solid #D1D5DB;
+    color: #374151;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: var(--slds-g-font-weight-5, 500);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-outline:hover {
+    background: #F3F4F6;
+    border-color: #9CA3AF;
+}
+
+/* Ensure existing buttons match specific modal needs if customized */
+.modal-footer .btn-primary {
+    margin-top: 0; /* Override any global margin */
+}
+
+/* =========================================
+   MOBILE & TABLET RESPONSIVENESS
+   ========================================= */
+
+@media screen and (max-width: 1024px) {
+    .allocation-page {
+        /* Reset fixed height for mobile scrolling */
+        height: auto;
+        overflow-y: visible;
+        padding-bottom: var(--slds-g-spacing-7, 40px);
+    }
+
+    .content-section, .info-card, .status-card, .preferences-card, .allocation-details-card {
+        height: auto;
+        overflow: visible;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .allocation-page {
+        padding: 0;
+        padding-bottom: 0;
+    }
+
+    /* Progress Tracker adjustments */
+    .progress-tracker {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0;
+        padding: var(--slds-g-spacing-4, 16px )0;
+    }
+
+    .progress-tracker::before {
+        left: 19px; /* Adjust line position for vertical layout (center of 8px/10px circle + padding) */
+        top: 20px;
+        bottom: 20px;
+        width: var(--slds-g-sizing-border-1, 1px);
+        height: auto;
+        right: auto;
+    }
+    
+    .progress-step {
+         flex-direction: row;
+         width: 100%;
+         align-items: center;
+         gap: 16px;
+         padding-bottom: var(--slds-g-spacing-5, 24px);
+         text-align: left;
+    }
+    
+    .progress-circle {
+        margin-left: 15px; /* Alignment */
+        z-index: 2;
+        margin-top: 0;
+        flex-shrink: 0;
+    }
+    
+    /* Ensure the progress box looks good in row layout */
+    .progress-box {
+        width: 100%;
+        text-align: left;
+    }
+
+    /* Cards */
+    .get-started-card, .info-card, .status-card, .preferences-card, .allocation-details-card {
+        margin: 0;
+        padding: 20px var(--slds-g-spacing-4, 16px);
+    }
+    
+    .content-section {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        gap: 16px;
+    }
+    
+    .content-section > div {
+        background: #FFFFFF;
+        border-radius: var(--slds-g-radius-border-3, 12px);
+        border: var(--slds-g-sizing-border-1, 1px )solid #E5E7EB;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    
+    /* Specific adjustments for status/success cards */
+    .status-card.success, .status-card.rejected, .status-card.submitted {
+        margin: 0;
+    }
+
+    .preferences-card.rejected-style, .preferences-card.submitted-style {
+        margin: 0;
+    }
+    
+    /* Allocation Details */
+    .allocation-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+    
+    .allocation-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Roommates */
+    .roommate-list {
+        flex-direction: column;
+    }
+    
+    .roommate-item {
+        width: 100%;
+    }
+    
+    /* Buttons */
+    .btn-primary-large, .btn-primary {
+         width: 100%;
+    }
+    
+    .progress-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+    
+    .btn-help {
+        width: 100%;
+        text-align: center;
+    }
+    
+    /* Features tags wrapping */
+    .pref-features {
+        flex-wrap: wrap;
+    }
+    
+    /* Preference Item stacking */
+    .preference-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .pref-badge {
+        align-self: flex-start;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .allocation-page {
+        padding: 0;
+        padding-bottom: 0;
+    }
+    
+    .status-badge-wrapper {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .payment-due {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .allocation-header .btn-outline-small {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .grid-item {
+        width: 100%;
+    }
+    
+    /* Modal full screen on mobile */
+    .modal-container-wrapper {
+        padding: 0;
+        height: 100%;
+        max-width: 100%;
+    }
+    
+    .modal-container {
+        height: 100%;
+        border-radius: 0;
+        max-height: 100vh;
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+    }
+    
+    .modal-footer button {
+        width: 100%;
+    }
+
+    .modal-header, .modal-content, .modal-footer {
+        padding: var(--slds-g-spacing-4, 16px);
+    }
+}

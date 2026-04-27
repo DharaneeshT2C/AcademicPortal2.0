@@ -1,0 +1,134 @@
+<template>
+    <div class="page">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <button type="button" class="crumb-btn" onclick={handleGoToMasterData}>Master Data</button>
+            <span class="sep">&gt;</span>
+            <span class="crumb-current">Programme Fee Publishing</span>
+        </nav>
+
+        <header class="pageHeader">
+            <div class="titleBlock">
+                <h1 class="pageTitle">{tabHeading}</h1>
+                <p class="pageMeta">{itemCountLabel}</p>
+            </div>
+            <lightning-button
+                class="primaryActionBtn"
+                variant="brand"
+                label="New"
+                icon-name="utility:add"
+                onclick={handleNew}>
+            </lightning-button>
+        </header>
+
+        <div class="modeTabs" role="tablist" aria-label="Fee publishing tabs">
+            <button class={structureTabClass} data-tab="structure" role="tab" aria-selected={isStructureTab} onclick={handleTabChange}>
+                Fee Structure
+            </button>
+            <button class={typeTabClass} data-tab="type" role="tab" aria-selected={isFeeTypeTab} onclick={handleTabChange}>
+                Fee Type
+            </button>
+        </div>
+
+        <div class="toolbar">
+            <lightning-combobox
+                class="view-picklist"
+                variant="label-hidden"
+                value={selectedView}
+                options={viewOptions}
+                onchange={handleViewChange}>
+            </lightning-combobox>
+
+            <div class="toolbar-right">
+                <lightning-input
+                    class="searchInput"
+                    type="search"
+                    variant="label-hidden"
+                    placeholder="Search programme fees..."
+                    value={searchTerm}
+                    onchange={handleSearch}
+                    aria-label="Search programme fees">
+                </lightning-input>
+                <button class="filterBtn" type="button" disabled aria-disabled="true" aria-label="Filters">
+                    <lightning-icon icon-name="utility:filterList" size="x-small"></lightning-icon>
+                    <span>Filters</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="tableCard">
+            <template if:true={isLoading}>
+                <div class="loading">
+                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <template if:false={isLoading}>
+                <div class="tableScroll">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Programme Fee Name</th>
+                                <th>Programme</th>
+                                <th>Batch / Intake</th>
+                                <th>Frequency</th>
+                                <th>Activation Date</th>
+                                <th>Status</th>
+                                <th>Last Modified</th>
+                                <th>Assigned Students</th>
+                                <th class="actions-col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template if:true={hasRows}>
+                                <template for:each={filteredRows} for:item="row">
+                                    <tr key={row.feeTypeId}>
+                                        <td>
+                                            <button class="link-button" data-id={row.feeTypeId} onclick={handleOpenRecord}>{row.programmeFeeName}</button>
+                                        </td>
+                                        <td class="bodyText">{row.programmeName}</td>
+                                        <td class="bodyText">{row.batchIntake}</td>
+                                        <td>
+                                            <span class="frequencyBadge">{row.frequency}</span>
+                                        </td>
+                                        <td class="bodyText">{row.activationDateLabel}</td>
+                                        <td><span class={row.statusClass}>{row.statusLabel}</span></td>
+                                        <td class="bodyText">{row.lastModifiedLabel}</td>
+                                        <td>
+                                            <span class="usageBadge">{row.usedInAssignments}</span>
+                                        </td>
+                                        <td class="actions-cell">
+                                            <lightning-button-icon
+                                                class="three-dot-btn"
+                                                icon-name="utility:threedots_vertical"
+                                                variant="bare"
+                                                alternative-text="Actions"
+                                                title="Actions"
+                                                data-id={row.feeTypeId}
+                                                onclick={handleToggleActionMenu}>
+                                            </lightning-button-icon>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </template>
+                            <template if:false={hasRows}>
+                                <tr>
+                                    <td colspan="9" class="empty">{tabEmptyStateLabel}</td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+        </div>
+
+        <template if:true={openActionMenu}>
+            <div class="action-popover action-popover-floating" style={openActionMenu.style} onclick={handleMenuContainerClick}>
+                <button class="action-item" type="button" data-action="view" data-id={openActionMenu.recordId} onclick={handleActionClick}>View</button>
+                <button class="action-item" type="button" data-action="edit" data-id={openActionMenu.recordId} onclick={handleActionClick}>Edit</button>
+                <button class="action-item action-item-disabled" type="button" disabled aria-disabled="true">Clone</button>
+                <button class="action-item action-item-disabled" type="button" disabled aria-disabled="true">Archive</button>
+                <button class="action-item action-item-danger" type="button" data-action="delete" data-id={openActionMenu.recordId} onclick={handleActionClick}>Delete</button>
+            </div>
+        </template>
+    </div>
+</template>

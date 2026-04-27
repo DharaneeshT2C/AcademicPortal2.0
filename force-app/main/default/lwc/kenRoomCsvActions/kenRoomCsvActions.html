@@ -1,0 +1,56 @@
+<template>
+    <div class="csv-actions">
+        <button class="action-btn" type="button" onclick={handleDownloadTemplate} disabled={isBusy}>
+            <lightning-icon icon-name="utility:download" size="x-small"></lightning-icon>
+            <span>Download CSV Template</span>
+        </button>
+
+        <button class="action-btn" type="button" onclick={handleUploadClick} disabled={isBusy}>
+            <lightning-icon icon-name="utility:upload" size="x-small"></lightning-icon>
+            <span>{uploadButtonLabel}</span>
+        </button>
+
+        <input class="file-input" type="file" accept=".csv" onchange={handleFileChange} />
+    </div>
+    <p class="template-help-text">{templateHelpText}</p>
+
+    <template if:true={isErrorModalOpen}>
+        <div class="modal-overlay" onclick={handleCloseErrorModal}></div>
+        <section class="modal" role="dialog" aria-modal="true" aria-label="CSV Upload Errors">
+            <header class="modal-header">
+                <h2>CSV Upload Errors</h2>
+                <button class="close-btn" type="button" onclick={handleCloseErrorModal}>
+                    <lightning-icon icon-name="utility:close" size="x-small"></lightning-icon>
+                </button>
+            </header>
+            <div class="modal-body">
+                <p class="error-summary">{errorSummaryText}</p>
+                <div class="errors-table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ROW</th>
+                                <th>MESSAGE</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={csvErrors} for:item="err">
+                                <tr key={err.key}>
+                                    <td class="row-no">{err.rowNumber}</td>
+                                    <td>{err.message}</td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <footer class="modal-footer">
+                <button class="action-btn" type="button" onclick={handleDownloadErrorsCsv}>
+                    <lightning-icon icon-name="utility:download" size="x-small"></lightning-icon>
+                    <span>Download Errors</span>
+                </button>
+                <button class="new-btn" type="button" onclick={handleCloseErrorModal}>Close</button>
+            </footer>
+        </section>
+    </template>
+</template>

@@ -1,0 +1,98 @@
+<template>
+    <lightning-card title="Program Enrollment" icon-name="standard:education">
+
+        <div class="slds-p-around_medium slds-grid slds-gutters">
+
+            <!-- LEFT PANEL -->
+            <div class="slds-col slds-size_1-of-2">
+
+                <!-- Institute -->
+                <lightning-combobox
+                    label="Institute"
+                    required
+                    options={instituteOptions}
+                    value={selectedInstitute}
+                    onchange={handleInstituteChange}>
+                </lightning-combobox>
+
+                <!-- Learning Program -->
+                <lightning-combobox
+                    label="Learning Program"
+                    required
+                    class="slds-m-top_small"
+                    options={programOptions}
+                    value={selectedProgram}
+                    onchange={handleProgramChange}>
+                </lightning-combobox>
+
+                <!-- Program Plan -->
+                <lightning-combobox
+                    label="Learning Program Plan"
+                    required
+                    class="slds-m-top_small"
+                    options={programPlanOptions}
+                    value={selectedProgramPlan}
+                    onchange={handleProgramPlanChange}
+                    disabled={isProgramPlanDisabled}>
+                </lightning-combobox>
+
+                <!-- Learning Pathway Template -->
+                <lightning-combobox
+                    label="Learning Pathway Template"
+                    required
+                    class="slds-m-top_small"
+                    options={pathwayOptions}
+                    value={selectedPathway}
+                    onchange={handlePathwayChange}
+                    disabled={isPathwayDisabled}>
+                </lightning-combobox>
+
+                <!-- Section -->
+                <lightning-input
+                    label="Section (Class Cohort)"
+                    required
+                    class="slds-m-top_small"
+                    value={section}
+                    onchange={handleSectionChange}>
+                </lightning-input>
+
+                <lightning-button
+                    label="Search Students"
+                    variant="brand"
+                    class="slds-m-top_medium"
+                    onclick={loadStudents}>
+                </lightning-button>
+
+            </div>
+
+            <!-- RIGHT PANEL -->
+            <div class="slds-col slds-size_1-of-2">
+
+                <template if:true={hasStudents}>
+                    <lightning-datatable
+                        key-field="contactId"
+                        data={students}
+                        columns={columns}
+                        onrowselection={handleRowSelection}>
+                    </lightning-datatable>
+
+                    <lightning-button
+                        label="Enroll Selected Students"
+                        variant="brand"
+                        class="slds-m-top_medium"
+                        onclick={enroll}
+                        disabled={isEnrollDisabled}>
+                    </lightning-button>
+                </template>
+
+                <template if:false={hasStudents}>
+                    <div class="slds-align_absolute-center slds-text-color_weak slds-m-top_large">
+                        No students found
+                    </div>
+                </template>
+
+            </div>
+
+        </div>
+    </lightning-card>
+</template>

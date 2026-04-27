@@ -1,0 +1,1487 @@
+<template>
+    <div class="manager-shell">
+        <template lwc:if={showAppChrome}>
+            <header class="topbar">
+                <div class="brand-block">
+                    <div class="brand-mark">
+                        <lightning-icon icon-name="utility:shield" size="x-small" variant="inverse"></lightning-icon>
+                    </div>
+                    <div class="brand-title">ID Lifecycle Manager</div>
+                </div>
+
+                <div class="global-search">
+                    <lightning-icon icon-name="utility:search" size="xx-small"></lightning-icon>
+                    <input
+                        type="search"
+                        value={globalSearch}
+                        placeholder="Search ID cards, users, or reports..."
+                        oninput={handleGlobalSearchChange}
+                    />
+                </div>
+
+                <div class="utility-actions">
+                    <button class="utility-button" type="button" aria-label="Help">
+                        <lightning-icon icon-name="utility:help" size="xx-small" variant="inverse"></lightning-icon>
+                    </button>
+                    <button class="utility-button" type="button" aria-label="Settings">
+                        <lightning-icon icon-name="utility:settings" size="xx-small" variant="inverse"></lightning-icon>
+                    </button>
+                    <button class="utility-button" type="button" aria-label="Notifications">
+                        <lightning-icon icon-name="utility:notification" size="xx-small" variant="inverse"></lightning-icon>
+                    </button>
+                    <div class="avatar-pill">SA</div>
+                </div>
+            </header>
+
+            <nav class="section-nav">
+                <template for:each={sectionItems} for:item="section">
+                    <button
+                        key={section.value}
+                        class={section.className}
+                        data-section={section.value}
+                        onclick={handleSectionChange}
+                        type="button"
+                    >
+                        <lightning-icon icon-name={section.icon} size="xx-small"></lightning-icon>
+                        <span>{section.label}</span>
+                    </button>
+                </template>
+            </nav>
+        </template>
+
+        <main class="content-shell">
+            <template lwc:if={showSectionPlaceholder}>
+                <section class="placeholder-card">
+                    <p class="placeholder-eyebrow">Coming Soon</p>
+                    <h1>{sectionLabel}</h1>
+                    <p>
+                        The app shell and navigation are ready. This section is intentionally held while the Templates
+                        workflow is built first.
+                    </p>
+                </section>
+            </template>
+
+            <template lwc:if={showTemplatesLanding}>
+                <section class="toolbar-card toolbar-card--with-tabs">
+                    <div class="toolbar-intro">
+                        <div class="toolbar-icon">
+                            <lightning-icon icon-name="utility:settings" size="small" variant="inverse"></lightning-icon>
+                        </div>
+                        <div>
+                            <h1>ID Card Templates</h1>
+                            <p>{toolbarSubtitle}</p>
+                        </div>
+                    </div>
+
+                    <div class="template-sub-tabs">
+                        <button class={templatesSubTabClass} data-view="templates" onclick={handleTemplateSubViewChange} type="button">
+                            <lightning-icon icon-name="utility:settings" size="xx-small"></lightning-icon>
+                            <span>TEMPLATES</span>
+                        </button>
+                        <button class={globalAssetsSubTabClass} data-view="globalAssets" onclick={handleTemplateSubViewChange} type="button">
+                            <lightning-icon icon-name="utility:world" size="xx-small"></lightning-icon>
+                            <span>GLOBAL ASSETS</span>
+                        </button>
+                    </div>
+
+                    <div class="toolbar-actions">
+                        <div class="toolbar-search">
+                            <lightning-icon icon-name="utility:search" size="xx-small"></lightning-icon>
+                            <input
+                                type="search"
+                                value={activeSearch}
+                                placeholder={toolbarSearchPlaceholder}
+                                oninput={handleActiveSearchChange}
+                            />
+                        </div>
+                        <button class="icon-filter" type="button" aria-label="Filter">
+                            <lightning-icon icon-name="utility:filterList" size="x-small"></lightning-icon>
+                        </button>
+                        <button class="primary-button" type="button" onclick={handleToolbarPrimaryAction}>{toolbarPrimaryButtonLabel}</button>
+                        <input class="global-asset-file-input hidden-file-input" type="file" accept=".png,.jpg,.jpeg,.gif,.svg,.webp" onchange={handleGlobalAssetFileChange} />
+                    </div>
+                </section>
+
+                <template lwc:if={showGlobalAssetsSubView}>
+                    <section class="panel global-assets-panel">
+                        <template lwc:if={hasGlobalAssets}>
+                            <table class="global-assets-table">
+                                <thead>
+                                    <tr>
+                                        <th class="gas-col--asset">ASSET</th>
+                                        <th class="gas-col--name">NAME</th>
+                                        <th class="gas-col--date">UPLOADED ON</th>
+                                        <th class="gas-col--actions">ACTIONS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={globalAssetItems} for:item="asset">
+                                        <tr key={asset.contentDocumentId}>
+                                            <td>
+                                                <div class="gas-thumbnail">
+                                                    <img src={asset.previewUrl} alt={asset.name} />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="gas-name-block">
+                                                    <strong>{asset.name}</strong>
+                                                    <span>Image Asset</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="gas-date-block">
+                                                    <span>{asset.uploadedOnDateDisplay}</span>
+                                                    <span class="gas-time">{asset.uploadedOnTimeDisplay}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="gas-actions">
+                                                    <button
+                                                        class="gas-action-btn"
+                                                        type="button"
+                                                        data-id={asset.contentDocumentId}
+                                                        onclick={handleViewGlobalAsset}
+                                                        title="View"
+                                                    >
+                                                        <lightning-icon icon-name="utility:preview" size="x-small"></lightning-icon>
+                                                    </button>
+                                                    <button
+                                                        class="gas-action-btn"
+                                                        type="button"
+                                                        data-id={asset.contentDocumentId}
+                                                        data-url={asset.downloadUrl}
+                                                        onclick={handleDownloadGlobalAsset}
+                                                        title="Download"
+                                                    >
+                                                        <lightning-icon icon-name="utility:download" size="x-small"></lightning-icon>
+                                                    </button>
+                                                    <button
+                                                        class="gas-action-btn gas-action-btn--danger"
+                                                        type="button"
+                                                        data-id={asset.contentDocumentId}
+                                                        onclick={handleDeleteGlobalAsset}
+                                                        title="Delete"
+                                                    >
+                                                        <lightning-icon icon-name="utility:delete" size="x-small"></lightning-icon>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </template>
+                        <template lwc:else>
+                            <div class="empty-state">
+                                <p class="empty-title">No global assets yet</p>
+                                <p class="empty-copy">Click <strong>+ Add Asset</strong> to upload your first shared image asset.</p>
+                            </div>
+                        </template>
+                    </section>
+                </template>
+
+                <template lwc:if={showTemplatesSubView}>
+                <div class="templates-table-panel">
+                    <template lwc:if={hasTemplateTableRows}>
+                        <table class="tt-table">
+                            <thead>
+                                <tr>
+                                    <th class="tt-th">TEMPLATE NAME</th>
+                                    <th class="tt-th">UNIQUE ID</th>
+                                    <th class="tt-th">CREATED ON</th>
+                                    <th class="tt-th">STATUS</th>
+                                    <th class="tt-th tt-th--actions">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={templateTableRows} for:item="row">
+                                    <tr key={row.recordId} class="tt-row">
+                                        <td class="tt-td tt-name-cell">
+                                            <lightning-icon icon-name="utility:settings" size="x-small" class="tt-name-icon"></lightning-icon>
+                                            <span class="tt-name-text">{row.templateName}</span>
+                                        </td>
+                                        <td class="tt-td">
+                                            <span class="tt-uid-tag">{row.uniqueIdTag}</span>
+                                        </td>
+                                        <td class="tt-td tt-date-cell">
+                                            <div class="tt-date-line">
+                                                <lightning-icon icon-name="utility:event" size="xx-small" class="tt-date-icon"></lightning-icon>
+                                                <span>{row.createdDateDisplay}</span>
+                                            </div>
+                                            <div class="tt-time-line">
+                                                <lightning-icon icon-name="utility:clock" size="xx-small" class="tt-date-icon"></lightning-icon>
+                                                <span>{row.createdTimeDisplay}</span>
+                                            </div>
+                                        </td>
+                                        <td class="tt-td">
+                                            <span class={row.statusClass}>{row.statusText}</span>
+                                        </td>
+                                        <td class="tt-td tt-actions">
+                                            <button
+                                                class="tt-action-btn"
+                                                type="button"
+                                                title="Edit template"
+                                                data-id={row.recordId}
+                                                onclick={handleTemplateSelect}
+                                            >
+                                                <lightning-icon icon-name="utility:edit" size="xx-small"></lightning-icon>
+                                            </button>
+                                            <button
+                                                class="tt-action-btn tt-action-btn--danger"
+                                                type="button"
+                                                title="Delete template"
+                                                data-id={row.recordId}
+                                                disabled
+                                            >
+                                                <lightning-icon icon-name="utility:delete" size="xx-small"></lightning-icon>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </template>
+                    <template lwc:else>
+                        <div class="empty-state">
+                            <p class="empty-title">No templates yet</p>
+                            <p class="empty-copy">Click <strong>Customize your template</strong> to start your first ID card design.</p>
+                        </div>
+                    </template>
+                </div>
+                </template>
+            </template>
+
+            <template lwc:if={showTemplateWizard}>
+                <div class="wizard-header-bar">
+                    <div class="wizard-header-copy">
+                        <h1>New ID Card Template</h1>
+                        <p>{currentStepSummary}</p>
+                    </div>
+                    <div class="wizard-header-actions">
+                        <button class="ghost-button" type="button" onclick={handleCancelWizard} disabled={nextActionDisabled}>Cancel</button>
+                        <template lwc:if={showPreviousAction}>
+                            <button class="ghost-button" type="button" onclick={handlePreviousStep} disabled={nextActionDisabled}>Previous</button>
+                        </template>
+                        <template lwc:if={showSaveActions}>
+                            <button
+                                class="ghost-button"
+                                type="button"
+                                onclick={handleSaveAsDraft}
+                                disabled={saveActionsDisabled}
+                            >
+                                {saveAsDraftLabel}
+                            </button>
+                            <button
+                                class="primary-button"
+                                type="button"
+                                onclick={handleSaveAndActivate}
+                                disabled={saveActionsDisabled}
+                            >
+                                {saveAndActivateLabel}
+                            </button>
+                        </template>
+                        <template lwc:else>
+                            <button class="primary-button" type="button" onclick={handleNextStep} disabled={nextActionDisabled}>
+                                {nextButtonLabel}
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <section class="stepper-card">
+                    <template for:each={wizardSteps} for:item="step">
+                        <div class="step-item" key={step.value}>
+                            <div class="step-node">
+                                <span class={step.circleClass}>{step.value}</span>
+                                <template lwc:if={step.showConnector}>
+                                    <span class={step.lineClass}></span>
+                                </template>
+                            </div>
+                            <span class={step.labelClass}>{step.label}</span>
+                        </div>
+                    </template>
+                </section>
+
+                <div class="wizard-grid">
+                    <section class="panel wizard-form-panel">
+                        <div class="panel-title-row">
+                            <div class="panel-title-copy">
+                                <h2>{currentStepTitle}</h2>
+                                <template lwc:if={panelStepCopy}>
+                                    <p class="panel-step-copy">{panelStepCopy}</p>
+                                </template>
+                            </div>
+                            <template lwc:if={showDesignThemeStep}>
+                                <div class="theme-layout-pill">{designThemeModeLabel}</div>
+                            </template>
+                            <template lwc:if={showFieldCustomizationStep}>
+                                <div class="field-customization-status">
+                                    <lightning-icon icon-name="utility:success" size="xx-small"></lightning-icon>
+                                    <span>Auto-saved</span>
+                                </div>
+                            </template>
+                        </div>
+
+                        <div class="section-divider"></div>
+
+                        <template lwc:if={showBasicDetailsStep}>
+                            <div class="form-layout">
+                                <div class="form-field form-field--full">
+                                    <label class="field-label">Template Name <span>*</span></label>
+                                    <input
+                                        class="text-field"
+                                        data-field="templateName"
+                                        type="text"
+                                        value={formData.templateName}
+                                        placeholder="e.g. Standard Student Template"
+                                        oninput={handleInputChange}
+                                    />
+                                    <template lwc:if={templateNameError}>
+                                        <p class="field-error">{templateNameError}</p>
+                                    </template>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-field">
+                                        <label class="field-label">Card Type</label>
+                                        <div class="select-shell">
+                                            <select class="select-field" data-field="cardType" value={formData.cardType} onchange={handleInputChange}>
+                                                <option value="Student">Student</option>
+                                                <option value="Faculty">Faculty</option>
+                                                <option value="Staff">Staff</option>
+                                                <option value="Visitor">Visitor</option>
+                                            </select>
+                                            <lightning-icon class="select-arrow" icon-name="utility:down" size="xx-small"></lightning-icon>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-field">
+                                        <label class="field-label">Institute <span>*</span></label>
+                                        <template lwc:if={hasInstituteOptions}>
+                                            <div class="institute-picker">
+                                                <div class="institute-checkbox-list">
+                                                    <template for:each={instituteSelectionOptions} for:item="institute">
+                                                        <label key={institute.value} class={institute.checkboxItemClass}>
+                                                            <input
+                                                                type="checkbox"
+                                                                data-value={institute.value}
+                                                                checked={institute.selected}
+                                                                onchange={handleInstituteCheckboxChange}
+                                                            />
+                                                            <span>{institute.label}</span>
+                                                        </label>
+                                                    </template>
+                                                </div>
+                                                <template lwc:if={hasSelectedInstitutes}>
+                                                    <div class="institute-selected-tags">
+                                                        <template for:each={selectedInstituteTags} for:item="tag">
+                                                            <span key={tag.key} class="institute-tag">
+                                                                <span>{tag.label}</span>
+                                                                <button type="button" data-value={tag.key} onclick={handleRemoveInstituteTag}>&#x2715;</button>
+                                                            </span>
+                                                        </template>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+                                        <template lwc:else>
+                                            <div class="empty-institute-state">{instituteEmptyCopy}</div>
+                                        </template>
+                                        <template lwc:if={instituteError}>
+                                            <p class="field-error">{instituteError}</p>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <div class="section-divider"></div>
+
+                                <div class="checkbox-stack">
+                                    <label class="checkbox-row">
+                                        <input data-field="isActive" type="checkbox" checked={formData.isActive} onchange={handleCheckboxChange} />
+                                        <span>Is Active</span>
+                                    </label>
+
+                                    <label class="checkbox-row">
+                                        <input data-field="deactive" type="checkbox" checked={formData.deactive} onchange={handleCheckboxChange} />
+                                        <span>Deactive</span>
+                                    </label>
+
+                                    <label class="checkbox-row">
+                                        <input
+                                            data-field="includeBackVariantLayout"
+                                            type="checkbox"
+                                            checked={formData.includeBackVariantLayout}
+                                            onchange={handleCheckboxChange}
+                                        />
+                                        <span>Include Back Variant Layout</span>
+                                    </label>
+                                </div>
+
+                                <div class="section-divider"></div>
+
+                                <div class="logo-grid">
+                                    <div class="form-field">
+                                        <label class="field-label">Primary Logo <span>*</span></label>
+                                        <div class="logo-dropzone">
+                                            <img src={primaryLogoPreviewUrl} alt="Primary logo preview" class="logo-preview-image" />
+                                            <div class="logo-meta">
+                                                <p>Sample static resource</p>
+                                                <span>{formData.primaryLogo}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-field">
+                                        <label class="field-label">Secondary Logo (Optional)</label>
+                                        <div class="logo-dropzone logo-dropzone--upload">
+                                            <template lwc:if={secondaryLogoPreviewUrl}>
+                                                <img src={secondaryLogoPreviewUrl} alt="Secondary logo preview" class="logo-preview-image" />
+                                            </template>
+                                            <template lwc:else>
+                                                <div class="logo-placeholder">
+                                                    <lightning-icon icon-name="utility:upload" size="small"></lightning-icon>
+                                                    <p>Upload PNG or JPEG</p>
+                                                    <span>Photo-link integration comes next.</span>
+                                                </div>
+                                            </template>
+
+                                            <input
+                                                class="secondary-logo-input hidden-file-input"
+                                                type="file"
+                                                accept=".png,.jpg,.jpeg"
+                                                onchange={handleSecondaryLogoFileChange}
+                                            />
+                                            <button class="upload-link" type="button" onclick={handleSecondaryLogoUploadClick}>Upload image</button>
+                                            <template lwc:if={secondaryLogoFileName}>
+                                                <p class="logo-file-name">{secondaryLogoFileName}</p>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-field form-field--full">
+                                    <label class="field-label">Description</label>
+                                    <textarea
+                                        class="text-area"
+                                        data-field="description"
+                                        value={formData.description}
+                                        placeholder="Describe the purpose of this template..."
+                                        oninput={handleInputChange}
+                                    ></textarea>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template lwc:if={showDesignThemeStep}>
+                            <div class="form-layout form-layout--theme">
+                                <div class="theme-gallery">
+                                    <template for:each={themeCards} for:item="theme">
+                                        <button
+                                            key={theme.value}
+                                            class={theme.cardClass}
+                                            data-value={theme.value}
+                                            onclick={handleThemeStyleSelect}
+                                            type="button"
+                                        >
+                                            <div class={theme.visualClass}>
+                                                <template lwc:if={theme.showBadge}>
+                                                    <span class="theme-compatibility-badge">{theme.badgeLabel}</span>
+                                                </template>
+                                                <div class={theme.miniCardClass}>
+                                                    <div class="theme-mini-card-band"></div>
+                                                    <div class="theme-mini-card-body">
+                                                        <span class="theme-mini-logo"></span>
+                                                        <span class="theme-mini-line theme-mini-line--short"></span>
+                                                        <span class="theme-mini-line theme-mini-line--long"></span>
+                                                        <span class="theme-mini-photo"></span>
+                                                        <span class="theme-mini-line theme-mini-line--wide"></span>
+                                                        <span class="theme-mini-line theme-mini-line--medium"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="theme-showcase-copy">
+                                                <div class="theme-showcase-heading">
+                                                    <strong>{theme.label}</strong>
+                                                    <span class="theme-selected-indicator">
+                                                        <lightning-icon icon-name="utility:check" size="xx-small" variant="inverse"></lightning-icon>
+                                                    </span>
+                                                </div>
+                                                <p>{theme.description}</p>
+                                                <div class="theme-tag-row">
+                                                    <template for:each={theme.tagItems} for:item="tag">
+                                                        <span key={tag.key} class="theme-tag">{tag.label}</span>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template lwc:if={showFieldCustomizationStep}>
+                            <div class="field-customization-shell">
+                                <div class="field-customization-grid">
+                                    <section class="field-library-panel">
+                                        <div class="field-customization-search">
+                                            <lightning-icon icon-name="utility:search" size="xx-small"></lightning-icon>
+                                            <input
+                                                type="search"
+                                                value={fieldSearch}
+                                                placeholder="Search fields..."
+                                                oninput={handleFieldSearchChange}
+                                            />
+                                        </div>
+
+                                        <template lwc:if={hasFieldCustomizationSections}>
+                                            <div class="field-library-sections">
+                                                <template for:each={fieldCustomizationSections} for:item="sectionValue">
+                                                    <div key={sectionValue.key} class="field-library-section">
+                                                        <div class="field-library-section__title">{sectionValue.label}</div>
+                                                        <template for:each={sectionValue.fields} for:item="fieldItem">
+                                                            <div key={fieldItem.key} class={fieldItem.className}>
+                                                                <span>{fieldItem.label}</span>
+                                                                <button
+                                                                    class="field-add-button"
+                                                                    data-field-key={fieldItem.key}
+                                                                    onclick={handleAddField}
+                                                                    type="button"
+                                                                    disabled={fieldItem.isAdded}
+                                                                >
+                                                                    +
+                                                                </button>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </section>
+
+                                    <section class="field-placement-panel">
+                                        <div class="field-side-board">
+                                            <div class="field-side-board__header">
+                                                <span>FRONT SIDE</span>
+                                                <strong>{frontFieldCountLabel}</strong>
+                                            </div>
+                                            <div class="field-card-list">
+                                                <template for:each={frontFieldCards} for:item="fieldCard">
+                                                    <article key={fieldCard.instanceId} class={fieldCard.cardClass}>
+                                                        <div class="field-card__row">
+                                                            <div class="field-card__title-block">
+                                                                <div class="field-card__reorder">
+                                                                    <button
+                                                                        class="field-icon-button"
+                                                                        data-id={fieldCard.instanceId}
+                                                                        data-side="front"
+                                                                        data-action="move-up"
+                                                                        onclick={handleFieldCardAction}
+                                                                        type="button"
+                                                                        disabled={fieldCard.disableMoveUp}
+                                                                    >
+                                                                        &#8593;
+                                                                    </button>
+                                                                    <button
+                                                                        class="field-icon-button"
+                                                                        data-id={fieldCard.instanceId}
+                                                                        data-side="front"
+                                                                        data-action="move-down"
+                                                                        onclick={handleFieldCardAction}
+                                                                        type="button"
+                                                                        disabled={fieldCard.disableMoveDown}
+                                                                    >
+                                                                        &#8595;
+                                                                    </button>
+                                                                </div>
+                                                                <div class="field-card__title-copy">
+                                                                    <strong>{fieldCard.label}</strong>
+                                                                    <template lwc:if={fieldCard.showRequiredBadge}>
+                                                                        <span class="field-required-star">*</span>
+                                                                    </template>
+                                                                    <label class="field-card__toggle">
+                                                                        <input
+                                                                            data-id={fieldCard.instanceId}
+                                                                            data-side="front"
+                                                                            type="checkbox"
+                                                                            checked={fieldCard.showLabel}
+                                                                            onchange={handleFieldLabelToggle}
+                                                                        />
+                                                                        <span>Show Label</span>
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="field-card__actions">
+                                                                <template lwc:if={fieldCard.canMoveAcross}>
+                                                                    <button
+                                                                        class="field-action-link"
+                                                                        data-id={fieldCard.instanceId}
+                                                                        data-side="front"
+                                                                        data-action={fieldCard.actionName}
+                                                                        onclick={handleFieldCardAction}
+                                                                        type="button"
+                                                                    >
+                                                                        {fieldCard.actionLabel}
+                                                                    </button>
+                                                                </template>
+                                                                <template lwc:if={fieldCard.canDelete}>
+                                                                    <button
+                                                                        class="field-icon-button field-icon-button--danger"
+                                                                        data-id={fieldCard.instanceId}
+                                                                        data-side="front"
+                                                                        data-action="delete"
+                                                                        onclick={handleFieldCardAction}
+                                                                        type="button"
+                                                                    >
+                                                                        &#128465;
+                                                                    </button>
+                                                                </template>
+                                                                <template lwc:if={fieldCard.showRequiredBadge}>
+                                                                    <span class="field-required-badge">Required</span>
+                                                                </template>
+                                                            </div>
+                                                        </div>
+
+                                                        <template lwc:if={fieldCard.showTextInput}>
+                                                            <input
+                                                                class="field-custom-text-input"
+                                                                data-id={fieldCard.instanceId}
+                                                                data-side="front"
+                                                                type="text"
+                                                                value={fieldCard.textValue}
+                                                                placeholder={fieldCard.inputPlaceholder}
+                                                                oninput={handleCustomTextChange}
+                                                            />
+                                                        </template>
+
+                                                        <template lwc:if={fieldCard.showValueSummary}>
+                                                            <div class="field-card__summary">
+                                                                <span class="field-card__summary-label">{fieldCard.valueSummaryLabel}</span>
+                                                                <strong class="field-card__summary-value">{fieldCard.valueSummaryValue}</strong>
+                                                            </div>
+                                                        </template>
+
+                                                        <template lwc:if={fieldCard.showValueEditor}>
+                                                            <div class="field-card__editor">
+                                                                <label class="field-card__editor-label">{fieldCard.valueEditorLabel}</label>
+                                                                <input
+                                                                    class="field-card__editor-input"
+                                                                    data-id={fieldCard.instanceId}
+                                                                    data-side="front"
+                                                                    type="text"
+                                                                    value={fieldCard.valueEditorValue}
+                                                                    placeholder={fieldCard.valueEditorPlaceholder}
+                                                                    oninput={handleFieldEditorTextChange}
+                                                                />
+                                                                <template lwc:if={fieldCard.editorHelpText}>
+                                                                    <p class="field-card__editor-help">{fieldCard.editorHelpText}</p>
+                                                                </template>
+                                                            </div>
+                                                        </template>
+
+                                                        <template lwc:if={fieldCard.showCardTypeEditor}>
+                                                            <div class="field-card__editor">
+                                                                <label class="field-card__editor-label">Card Type</label>
+                                                                <div class="select-shell">
+                                                                    <select class="select-field" data-field="cardType" value={formData.cardType} onchange={handleInputChange}>
+                                                                        <option value="Student">Student</option>
+                                                                        <option value="Faculty">Faculty</option>
+                                                                        <option value="Staff">Staff</option>
+                                                                        <option value="Visitor">Visitor</option>
+                                                                    </select>
+                                                                    <lightning-icon class="select-arrow" icon-name="utility:down" size="xx-small"></lightning-icon>
+                                                                </div>
+                                                                <template lwc:if={fieldCard.editorHelpText}>
+                                                                    <p class="field-card__editor-help">{fieldCard.editorHelpText}</p>
+                                                                </template>
+                                                            </div>
+                                                        </template>
+
+                                                        <template lwc:if={fieldCard.showInstituteEditor}>
+                                                            <div class="field-card__editor">
+                                                                <label class="field-card__editor-label">Institute</label>
+                                                                <div class="institute-picker">
+                                                                    <div class="institute-checkbox-list">
+                                                                        <template for:each={instituteSelectionOptions} for:item="institute">
+                                                                            <label key={institute.value} class={institute.checkboxItemClass}>
+                                                                                <input
+                                                                                    type="checkbox"
+                                                                                    data-value={institute.value}
+                                                                                    checked={institute.selected}
+                                                                                    onchange={handleInstituteCheckboxChange}
+                                                                                />
+                                                                                <span>{institute.label}</span>
+                                                                            </label>
+                                                                        </template>
+                                                                    </div>
+                                                                    <template lwc:if={hasSelectedInstitutes}>
+                                                                        <div class="institute-selected-tags">
+                                                                            <template for:each={selectedInstituteTags} for:item="tag">
+                                                                                <span key={tag.key} class="institute-tag">
+                                                                                    <span>{tag.label}</span>
+                                                                                    <button type="button" data-value={tag.key} onclick={handleRemoveInstituteTag}>&#x2715;</button>
+                                                                                </span>
+                                                                            </template>
+                                                                        </div>
+                                                                    </template>
+                                                                </div>
+                                                                <template lwc:if={fieldCard.editorHelpText}>
+                                                                    <p class="field-card__editor-help">{fieldCard.editorHelpText}</p>
+                                                                </template>
+                                                            </div>
+                                                        </template>
+
+                                                        <template lwc:if={fieldCard.showPrimaryLogoEditor}>
+                                                            <div class="field-card__editor field-card__editor--media">
+                                                                <label class="field-card__editor-label">Institution Logo</label>
+                                                                <div class="field-card__media-row">
+                                                                    <template lwc:if={fieldCard.primaryLogoPreviewUrl}>
+                                                                        <img src={fieldCard.primaryLogoPreviewUrl} alt="Primary logo preview" class="field-card__media-image" />
+                                                                    </template>
+                                                                    <input
+                                                                        class="field-card__editor-input"
+                                                                        data-field="primaryLogo"
+                                                                        type="text"
+                                                                        value={fieldCard.primaryLogoResourceValue}
+                                                                        oninput={handleInputChange}
+                                                                    />
+                                                                </div>
+                                                                <p class="field-card__editor-help">{fieldCard.editorHelpText}</p>
+                                                            </div>
+                                                        </template>
+
+                                                        <template lwc:if={fieldCard.showPhotoEditor}>
+                                                            <div class="field-card__editor field-card__editor--media">
+                                                                <label class="field-card__editor-label">Student Photo</label>
+                                                                <div class="field-card__media-row">
+                                                                    <template lwc:if={fieldCard.photoPreviewUrl}>
+                                                                        <img src={fieldCard.photoPreviewUrl} alt="Secondary logo preview" class="field-card__media-image" />
+                                                                    </template>
+                                                                    <template lwc:else>
+                                                                        <div class="field-card__media-placeholder">No photo</div>
+                                                                    </template>
+                                                                    <button class="ghost-button field-card__upload-button" type="button" onclick={handlePhotoFieldUploadClick}>
+                                                                        Upload Photo
+                                                                    </button>
+                                                                </div>
+                                                                <template lwc:if={fieldCard.photoFileName}>
+                                                                    <p class="field-card__editor-help">{fieldCard.photoFileName}</p>
+                                                                </template>
+                                                                <template lwc:else>
+                                                                    <p class="field-card__editor-help">{fieldCard.editorHelpText}</p>
+                                                                </template>
+                                                            </div>
+                                                        </template>
+                                                    </article>
+                                                </template>
+                                            </div>
+                                        </div>
+
+                                        <div class="field-side-board field-side-board--back">
+                                            <div class="field-side-board__header">
+                                                <span>BACK SIDE</span>
+                                                <strong>{backFieldCountLabel}</strong>
+                                            </div>
+
+                                            <template lwc:if={hasBackCustomizationFields}>
+                                                <div class="field-card-list">
+                                                    <template for:each={backFieldCards} for:item="fieldCard">
+                                                        <article key={fieldCard.instanceId} class={fieldCard.cardClass}>
+                                                            <div class="field-card__row">
+                                                                <div class="field-card__title-block">
+                                                                    <div class="field-card__reorder">
+                                                                        <button
+                                                                            class="field-icon-button"
+                                                                            data-id={fieldCard.instanceId}
+                                                                            data-side="back"
+                                                                            data-action="move-up"
+                                                                            onclick={handleFieldCardAction}
+                                                                            type="button"
+                                                                            disabled={fieldCard.disableMoveUp}
+                                                                        >
+                                                                            &#8593;
+                                                                        </button>
+                                                                        <button
+                                                                            class="field-icon-button"
+                                                                            data-id={fieldCard.instanceId}
+                                                                            data-side="back"
+                                                                            data-action="move-down"
+                                                                            onclick={handleFieldCardAction}
+                                                                            type="button"
+                                                                            disabled={fieldCard.disableMoveDown}
+                                                                        >
+                                                                            &#8595;
+                                                                        </button>
+                                                                    </div>
+                                                                    <div class="field-card__title-copy">
+                                                                        <strong>{fieldCard.label}</strong>
+                                                                        <label class="field-card__toggle">
+                                                                            <input
+                                                                                data-id={fieldCard.instanceId}
+                                                                                data-side="back"
+                                                                                type="checkbox"
+                                                                                checked={fieldCard.showLabel}
+                                                                                onchange={handleFieldLabelToggle}
+                                                                            />
+                                                                            <span>Show Label</span>
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="field-card__actions">
+                                                                    <button
+                                                                        class="field-action-link"
+                                                                        data-id={fieldCard.instanceId}
+                                                                        data-side="back"
+                                                                        data-action={fieldCard.actionName}
+                                                                        onclick={handleFieldCardAction}
+                                                                        type="button"
+                                                                    >
+                                                                        {fieldCard.actionLabel}
+                                                                    </button>
+                                                                    <button
+                                                                        class="field-icon-button field-icon-button--danger"
+                                                                        data-id={fieldCard.instanceId}
+                                                                        data-side="back"
+                                                                        data-action="delete"
+                                                                        onclick={handleFieldCardAction}
+                                                                        type="button"
+                                                                    >
+                                                                        &#128465;
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+
+                                                            <template lwc:if={fieldCard.showTextInput}>
+                                                                <input
+                                                                    class="field-custom-text-input"
+                                                                    data-id={fieldCard.instanceId}
+                                                                    data-side="back"
+                                                                    type="text"
+                                                                    value={fieldCard.textValue}
+                                                                    placeholder={fieldCard.inputPlaceholder}
+                                                                    oninput={handleCustomTextChange}
+                                                                />
+                                                            </template>
+
+                                                            <template lwc:if={fieldCard.showValueSummary}>
+                                                                <div class="field-card__summary">
+                                                                    <span class="field-card__summary-label">{fieldCard.valueSummaryLabel}</span>
+                                                                    <strong class="field-card__summary-value">{fieldCard.valueSummaryValue}</strong>
+                                                                </div>
+                                                            </template>
+
+                                                            <template lwc:if={fieldCard.showValueEditor}>
+                                                                <div class="field-card__editor">
+                                                                    <label class="field-card__editor-label">{fieldCard.valueEditorLabel}</label>
+                                                                    <input
+                                                                        class="field-card__editor-input"
+                                                                        data-id={fieldCard.instanceId}
+                                                                        data-side="back"
+                                                                        type="text"
+                                                                        value={fieldCard.valueEditorValue}
+                                                                        placeholder={fieldCard.valueEditorPlaceholder}
+                                                                        oninput={handleFieldEditorTextChange}
+                                                                    />
+                                                                    <template lwc:if={fieldCard.editorHelpText}>
+                                                                        <p class="field-card__editor-help">{fieldCard.editorHelpText}</p>
+                                                                    </template>
+                                                                </div>
+                                                            </template>
+
+                                                            <template lwc:if={fieldCard.showCardTypeEditor}>
+                                                                <div class="field-card__editor">
+                                                                    <label class="field-card__editor-label">Card Type</label>
+                                                                    <div class="select-shell">
+                                                                        <select class="select-field" data-field="cardType" value={formData.cardType} onchange={handleInputChange}>
+                                                                            <option value="Student">Student</option>
+                                                                            <option value="Faculty">Faculty</option>
+                                                                            <option value="Staff">Staff</option>
+                                                                            <option value="Visitor">Visitor</option>
+                                                                        </select>
+                                                                        <lightning-icon class="select-arrow" icon-name="utility:down" size="xx-small"></lightning-icon>
+                                                                    </div>
+                                                                    <template lwc:if={fieldCard.editorHelpText}>
+                                                                        <p class="field-card__editor-help">{fieldCard.editorHelpText}</p>
+                                                                    </template>
+                                                                </div>
+                                                            </template>
+
+                                                            <template lwc:if={fieldCard.showInstituteEditor}>
+                                                                <div class="field-card__editor">
+                                                                    <label class="field-card__editor-label">Institute</label>
+                                                                    <div class="select-shell select-shell--multi">
+                                                                        <select class="select-field select-field--multi" multiple size="8" onchange={handleInstituteFieldChange}>
+                                                                            <template for:each={instituteSelectionOptions} for:item="institute">
+                                                                                <option key={institute.value} value={institute.value}>
+                                                                                    {institute.label}
+                                                                                </option>
+                                                                            </template>
+                                                                        </select>
+                                                                    </div>
+                                                                    <template lwc:if={fieldCard.editorHelpText}>
+                                                                        <p class="field-card__editor-help">{fieldCard.editorHelpText}</p>
+                                                                    </template>
+                                                                </div>
+                                                            </template>
+
+                                                            <template lwc:if={fieldCard.showPrimaryLogoEditor}>
+                                                                <div class="field-card__editor field-card__editor--media">
+                                                                    <label class="field-card__editor-label">Institution Logo</label>
+                                                                    <div class="field-card__media-row">
+                                                                        <template lwc:if={fieldCard.primaryLogoPreviewUrl}>
+                                                                            <img src={fieldCard.primaryLogoPreviewUrl} alt="Primary logo preview" class="field-card__media-image" />
+                                                                        </template>
+                                                                        <input
+                                                                            class="field-card__editor-input"
+                                                                            data-field="primaryLogo"
+                                                                            type="text"
+                                                                            value={fieldCard.primaryLogoResourceValue}
+                                                                            oninput={handleInputChange}
+                                                                        />
+                                                                    </div>
+                                                                    <p class="field-card__editor-help">{fieldCard.editorHelpText}</p>
+                                                                </div>
+                                                            </template>
+
+                                                            <template lwc:if={fieldCard.showPhotoEditor}>
+                                                                <div class="field-card__editor field-card__editor--media">
+                                                                    <label class="field-card__editor-label">Student Photo</label>
+                                                                    <div class="field-card__media-row">
+                                                                        <template lwc:if={fieldCard.photoPreviewUrl}>
+                                                                            <img src={fieldCard.photoPreviewUrl} alt="Secondary logo preview" class="field-card__media-image" />
+                                                                        </template>
+                                                                        <template lwc:else>
+                                                                            <div class="field-card__media-placeholder">No photo</div>
+                                                                        </template>
+                                                                        <button class="ghost-button field-card__upload-button" type="button" onclick={handlePhotoFieldUploadClick}>
+                                                                            Upload Photo
+                                                                        </button>
+                                                                    </div>
+                                                                    <template lwc:if={fieldCard.photoFileName}>
+                                                                        <p class="field-card__editor-help">{fieldCard.photoFileName}</p>
+                                                                    </template>
+                                                                    <template lwc:else>
+                                                                        <p class="field-card__editor-help">{fieldCard.editorHelpText}</p>
+                                                                    </template>
+                                                                </div>
+                                                            </template>
+                                                        </article>
+                                                    </template>
+                                                </div>
+                                            </template>
+
+                                            <template lwc:else>
+                                                <div class="field-side-board__empty">
+                                                    Move optional fields here for the back side layout.
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </section>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template lwc:if={showBrandingStep}>
+                            <div class="form-layout form-layout--branding">
+                                <div class="branding-grid">
+                                    <div class="branding-column">
+                                        <label class="field-label">Primary Brand Color</label>
+                                        <div class="branding-color-row">
+                                            <template for:each={brandColorOptions} for:item="colorOption">
+                                                <button
+                                                    key={colorOption.value}
+                                                    class={colorOption.className}
+                                                    style={colorOption.style}
+                                                    data-value={colorOption.value}
+                                                    onclick={handleBrandColorSelect}
+                                                    type="button"
+                                                    aria-label={colorOption.value}
+                                                ></button>
+                                            </template>
+                                            <div class="brand-color-custom-group">
+                                                <div class={customBrandColorClass} style={customBrandColorStyle}></div>
+                                                <input
+                                                    class="brand-color-input"
+                                                    type="text"
+                                                    value={brandColorValue}
+                                                    maxlength="7"
+                                                    onchange={handleBrandColorInput}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="branding-column">
+                                        <label class="field-label">Typography Style</label>
+                                        <div class="branding-typography-list">
+                                            <template for:each={typographyOptions} for:item="typographyOption">
+                                                <button
+                                                    key={typographyOption.value}
+                                                    class={typographyOption.className}
+                                                    data-value={typographyOption.value}
+                                                    onclick={handleTypographyStyleSelect}
+                                                    type="button"
+                                                >
+                                                    <span class={typographyOption.sampleClass}>Aa</span>
+                                                    <span class="branding-typography-copy">
+                                                        <strong>{typographyOption.label}</strong>
+                                                        <span>{typographyOption.eyebrow}</span>
+                                                    </span>
+                                                    <span class={typographyOption.checkClass}>
+                                                        <lightning-icon icon-name="utility:check" size="xx-small" variant="inverse"></lightning-icon>
+                                                    </span>
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template lwc:if={showReviewSaveStep}>
+                            <div class="review-save-shell">
+                                <div class="review-save-hero">
+                                    <div class="review-save-checkmark">
+                                        <lightning-icon icon-name="utility:check" size="small"></lightning-icon>
+                                    </div>
+                                    <h3>Review & Save</h3>
+                                    <p>{reviewReadyCopy}</p>
+                                </div>
+
+                                <section class="review-summary-card">
+                                    <div class="review-summary-heading">CONFIGURATION SUMMARY</div>
+                                    <div class="section-divider section-divider--summary"></div>
+                                    <div class="review-summary-grid">
+                                        <div class="review-summary-item">
+                                            <span>Template Name</span>
+                                            <strong>{formData.templateName}</strong>
+                                        </div>
+                                        <div class="review-summary-item">
+                                            <span>Card Type</span>
+                                            <strong>{formData.cardType}</strong>
+                                        </div>
+                                        <div class="review-summary-item">
+                                            <span>Design Style</span>
+                                            <strong>{selectedThemeConfig.label}</strong>
+                                        </div>
+                                        <div class="review-summary-item">
+                                            <span>Layout</span>
+                                            <strong>{reviewLayoutLabel}</strong>
+                                        </div>
+                                        <div class="review-summary-item">
+                                            <span>Institutes</span>
+                                            <strong>{previewInstitutionName}</strong>
+                                        </div>
+                                        <div class="review-summary-item">
+                                            <span>Deactive</span>
+                                            <strong>{reviewDeactiveLabel}</strong>
+                                        </div>
+                                        <div class="review-summary-item">
+                                            <span>Brand Color</span>
+                                            <strong>{brandColorValue}</strong>
+                                        </div>
+                                        <div class="review-summary-item">
+                                            <span>Typography</span>
+                                            <strong>{selectedTypographyOption.label}</strong>
+                                        </div>
+                                    </div>
+                                    <div class={reviewStatusClass}>{reviewStatusLabel}</div>
+                                </section>
+                            </div>
+                        </template>
+
+                        <template lwc:if={showPlaceholderStep}>
+                            <div class="step-placeholder">
+                                <h3>{currentStepLabel}</h3>
+                                <p>{currentStepPlaceholderCopy}</p>
+                            </div>
+                        </template>
+                    </section>
+
+                    <aside class="panel preview-panel">
+                        <div class="preview-header">
+                            <h2>LIVE PREVIEW</h2>
+                            <div class="preview-toggle">
+                                <button class={frontPreviewClass} data-side="front" onclick={handlePreviewSideToggle} type="button">
+                                    Front
+                                </button>
+                                <button
+                                    class={backPreviewClass}
+                                    data-side="back"
+                                    onclick={handlePreviewSideToggle}
+                                    type="button"
+                                    disabled={backPreviewDisabled}
+                                >
+                                    Back
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="section-divider"></div>
+
+                        <div class="preview-shell">
+                            <div class="preview-stage">
+                                <div class="preview-card-wrapper">
+                                    <template lwc:if={previewEnabled}>
+                                        <template lwc:if={showVerticalFrontPreview}>
+                                                <div class={previewCardClass} style={previewBrandStyle}>
+                                                    <div class="preview-top-band"></div>
+                                                <template lwc:if={primaryLogoPreviewUrl}>
+                                                    <img src={primaryLogoPreviewUrl} alt="Primary logo" class="preview-logo-image" />
+                                                </template>
+                                                <template lwc:else>
+                                                    <div class="preview-logo-fallback">LOGO</div>
+                                                </template>
+                                                <div class="preview-header-copy">
+                                                    <span>{previewInstitutionName}</span>
+                                                    <strong>{previewCardHeaderTitle}</strong>
+                                                </div>
+                                                <template lwc:if={secondaryLogoPreviewUrl}>
+                                                    <img src={secondaryLogoPreviewUrl} alt="Secondary logo" class="preview-photo-image" />
+                                                </template>
+                                                <template lwc:else>
+                                                    <div class="preview-photo-placeholder">
+                                                        <lightning-icon icon-name="utility:image" size="small"></lightning-icon>
+                                                    </div>
+                                                </template>
+                                                <div class="preview-info-grid">
+                                                    <div class="preview-dynamic-row">
+                                                        <template lwc:if={showPreviewFullNameLabel}>
+                                                            <span>FULL NAME:</span>
+                                                        </template>
+                                                        <strong>{previewFullName}</strong>
+                                                    </div>
+                                                    <div class="preview-dynamic-row">
+                                                        <template lwc:if={showPreviewIdNumberLabel}>
+                                                            <span>ID NUMBER:</span>
+                                                        </template>
+                                                        <strong>{previewIdNumber}</strong>
+                                                    </div>
+                                                    <div class="preview-dynamic-row">
+                                                        <template lwc:if={showPreviewCardTypeTextLabel}>
+                                                            <span>CARD TYPE:</span>
+                                                        </template>
+                                                        <strong>{previewCardTypeTitle}</strong>
+                                                    </div>
+                                                    <template for:each={frontOptionalPreviewRows} for:item="previewRow">
+                                                        <div key={previewRow.key} class={previewRow.rowClass}>
+                                                            <template lwc:if={previewRow.showLabel}>
+                                                                <span>{previewRow.label}</span>
+                                                            </template>
+                                                            <strong>{previewRow.value}</strong>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                                <div class="preview-bottom-band">{previewCardTypeLabel}</div>
+                                            </div>
+                                        </template>
+
+                                        <template lwc:if={showVerticalBackPreview}>
+                                            <div class={previewCardClass} style={previewBrandStyle}>
+                                                <div class="preview-top-band"></div>
+                                                <template lwc:if={primaryLogoPreviewUrl}>
+                                                    <img src={primaryLogoPreviewUrl} alt="Primary logo" class="preview-logo-image" />
+                                                </template>
+                                                <template lwc:else>
+                                                    <div class="preview-logo-fallback">LOGO</div>
+                                                </template>
+                                                <div class="preview-header-copy">
+                                                    <span>{previewInstitutionName}</span>
+                                                    <strong>BACK LAYOUT</strong>
+                                                </div>
+                                                <div class="preview-info-grid preview-info-grid--back">
+                                                    <template lwc:if={hasBackPreviewRows}>
+                                                        <template for:each={backPreviewRows} for:item="previewRow">
+                                                            <div key={previewRow.key} class={previewRow.rowClass}>
+                                                                <template lwc:if={previewRow.showLabel}>
+                                                                    <span>{previewRow.label}</span>
+                                                                </template>
+                                                                <strong>{previewRow.value}</strong>
+                                                            </div>
+                                                        </template>
+                                                    </template>
+                                                    <template lwc:else>
+                                                        <div class="preview-back-empty-state">
+                                                            <span>BACK SIDE</span>
+                                                            <strong>Add optional fields to the back side.</strong>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                                <div class="preview-bottom-band">BACK VIEW</div>
+                                            </div>
+                                        </template>
+
+                                        <template lwc:if={showLandscapeFrontPreview}>
+                                            <div class={previewLandscapeCardClass} style={previewBrandStyle}>
+                                                <div class="preview-landscape-accent"></div>
+                                                <div class="preview-landscape-header">
+                                                    <template lwc:if={primaryLogoPreviewUrl}>
+                                                        <img src={primaryLogoPreviewUrl} alt="Primary logo" class="preview-landscape-logo-image" />
+                                                    </template>
+                                                    <template lwc:else>
+                                                        <div class="preview-landscape-logo-fallback">LOGO</div>
+                                                    </template>
+                                                    <div class="preview-landscape-heading">
+                                                        <span>{previewInstitutionName}</span>
+                                                        <strong>{previewCardHeaderTitle}</strong>
+                                                    </div>
+                                                </div>
+                                                <div class="preview-landscape-body">
+                                                    <template lwc:if={secondaryLogoPreviewUrl}>
+                                                        <img src={secondaryLogoPreviewUrl} alt="Secondary logo" class="preview-landscape-photo-image" />
+                                                    </template>
+                                                    <template lwc:else>
+                                                        <div class="preview-landscape-photo-placeholder">
+                                                            <lightning-icon icon-name="utility:image" size="small"></lightning-icon>
+                                                        </div>
+                                                    </template>
+                                                    <div class="preview-landscape-info-grid">
+                                                        <div class="preview-landscape-info-row">
+                                                            <template lwc:if={showPreviewFullNameLabel}>
+                                                                <span>FULL NAME:</span>
+                                                            </template>
+                                                            <strong>{previewFullName}</strong>
+                                                        </div>
+                                                        <div class="preview-landscape-info-row">
+                                                            <template lwc:if={showPreviewIdNumberLabel}>
+                                                                <span>ID NUMBER:</span>
+                                                            </template>
+                                                            <strong>{previewIdNumber}</strong>
+                                                        </div>
+                                                        <div class="preview-landscape-info-row">
+                                                            <template lwc:if={showPreviewCardTypeTextLabel}>
+                                                                <span>CARD TYPE:</span>
+                                                            </template>
+                                                            <strong>{previewCardTypeTitle}</strong>
+                                                        </div>
+                                                        <template for:each={frontOptionalPreviewRows} for:item="previewRow">
+                                                            <div key={previewRow.key} class="preview-landscape-info-row preview-landscape-info-grid__wide">
+                                                                <template lwc:if={previewRow.showLabel}>
+                                                                    <span>{previewRow.label}</span>
+                                                                </template>
+                                                                <strong>{previewRow.value}</strong>
+                                                            </div>
+                                                        </template>
+                                                        <div class="preview-landscape-info-row preview-landscape-info-grid__wide">
+                                                            <span>STATUS:</span>
+                                                            <strong>{reviewStatusLabel}</strong>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="preview-landscape-footer">{previewCardTypeLabel}</div>
+                                            </div>
+                                        </template>
+
+                                        <template lwc:if={showLandscapeBackPreview}>
+                                            <div class={previewLandscapeCardClass} style={previewBrandStyle}>
+                                                <div class="preview-landscape-accent"></div>
+                                                <div class="preview-landscape-header">
+                                                    <template lwc:if={primaryLogoPreviewUrl}>
+                                                        <img src={primaryLogoPreviewUrl} alt="Primary logo" class="preview-landscape-logo-image" />
+                                                    </template>
+                                                    <template lwc:else>
+                                                        <div class="preview-landscape-logo-fallback">LOGO</div>
+                                                    </template>
+                                                    <div class="preview-landscape-heading">
+                                                        <span>{previewInstitutionName}</span>
+                                                        <strong>BACK LAYOUT</strong>
+                                                    </div>
+                                                </div>
+                                                <div class="preview-landscape-back-grid">
+                                                    <template lwc:if={hasBackPreviewRows}>
+                                                        <template for:each={backPreviewRows} for:item="previewRow">
+                                                            <div key={previewRow.key} class="preview-landscape-info-row preview-landscape-info-grid__wide">
+                                                                <template lwc:if={previewRow.showLabel}>
+                                                                    <span>{previewRow.label}</span>
+                                                                </template>
+                                                                <strong>{previewRow.value}</strong>
+                                                            </div>
+                                                        </template>
+                                                    </template>
+                                                    <template lwc:else>
+                                                        <div class="preview-landscape-info-row preview-landscape-info-grid__wide">
+                                                            <span>BACK SIDE</span>
+                                                            <strong>Add optional fields to the back side.</strong>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                                <div class="preview-landscape-footer">BACK VIEW</div>
+                                            </div>
+                                        </template>
+                                    </template>
+
+                                    <template lwc:else>
+                                        <template lwc:if={showVerticalFrontPreview}>
+                                            <div class={mutedPreviewCardClass} style={previewBrandStyle}>
+                                                <div class="preview-top-band"></div>
+                                                <div class="preview-logo-fallback">LOGO</div>
+                                                <div class="preview-header-copy">
+                                                    <span>Institutes</span>
+                                                    <strong>{previewCardHeaderTitle}</strong>
+                                                </div>
+                                                <div class="preview-photo-placeholder">
+                                                    <lightning-icon icon-name="utility:image" size="small"></lightning-icon>
+                                                </div>
+                                                <div class="preview-info-grid">
+                                                    <div class="preview-dynamic-row">
+                                                        <template lwc:if={showPreviewFullNameLabel}>
+                                                            <span>FULL NAME:</span>
+                                                        </template>
+                                                        <strong>{previewFullName}</strong>
+                                                    </div>
+                                                    <div class="preview-dynamic-row">
+                                                        <template lwc:if={showPreviewIdNumberLabel}>
+                                                            <span>ID NUMBER:</span>
+                                                        </template>
+                                                        <strong>{previewIdNumber}</strong>
+                                                    </div>
+                                                    <div class="preview-dynamic-row">
+                                                        <template lwc:if={showPreviewCardTypeTextLabel}>
+                                                            <span>CARD TYPE:</span>
+                                                        </template>
+                                                        <strong>{previewCardTypeTitle}</strong>
+                                                    </div>
+                                                    <template for:each={frontOptionalPreviewRows} for:item="previewRow">
+                                                        <div key={previewRow.key} class={previewRow.rowClass}>
+                                                            <template lwc:if={previewRow.showLabel}>
+                                                                <span>{previewRow.label}</span>
+                                                            </template>
+                                                            <strong>{previewRow.value}</strong>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                                <div class="preview-bottom-band">{previewCardTypeLabel}</div>
+                                            </div>
+                                        </template>
+
+                                        <template lwc:if={showVerticalBackPreview}>
+                                            <div class={mutedPreviewCardClass} style={previewBrandStyle}>
+                                                <div class="preview-top-band"></div>
+                                                <div class="preview-logo-fallback">LOGO</div>
+                                                <div class="preview-header-copy">
+                                                    <span>Institutes</span>
+                                                    <strong>BACK LAYOUT</strong>
+                                                </div>
+                                                <div class="preview-info-grid preview-info-grid--back preview-info-grid--placeholder">
+                                                    <template lwc:if={hasBackPreviewRows}>
+                                                        <template for:each={backPreviewRows} for:item="previewRow">
+                                                            <div key={previewRow.key} class={previewRow.rowClass}>
+                                                                <template lwc:if={previewRow.showLabel}>
+                                                                    <span>{previewRow.label}</span>
+                                                                </template>
+                                                                <strong>{previewRow.value}</strong>
+                                                            </div>
+                                                        </template>
+                                                    </template>
+                                                    <template lwc:else>
+                                                        <div class="preview-back-empty-state">
+                                                            <span>BACK SIDE</span>
+                                                            <strong>Add optional fields to the back side.</strong>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                                <div class="preview-bottom-band">BACK VIEW</div>
+                                            </div>
+                                        </template>
+
+                                        <template lwc:if={showLandscapeFrontPreview}>
+                                            <div class={mutedLandscapePreviewCardClass} style={previewBrandStyle}>
+                                                <div class="preview-landscape-accent"></div>
+                                                <div class="preview-landscape-header">
+                                                    <div class="preview-landscape-logo-fallback">LOGO</div>
+                                                    <div class="preview-landscape-heading">
+                                                        <span>Institutes</span>
+                                                        <strong>{previewCardHeaderTitle}</strong>
+                                                    </div>
+                                                </div>
+                                                <div class="preview-landscape-body">
+                                                    <div class="preview-landscape-photo-placeholder">
+                                                        <lightning-icon icon-name="utility:image" size="small"></lightning-icon>
+                                                    </div>
+                                                    <div class="preview-landscape-info-grid">
+                                                        <div class="preview-landscape-info-row">
+                                                            <template lwc:if={showPreviewFullNameLabel}>
+                                                                <span>FULL NAME:</span>
+                                                            </template>
+                                                            <strong>{previewFullName}</strong>
+                                                        </div>
+                                                        <div class="preview-landscape-info-row">
+                                                            <template lwc:if={showPreviewIdNumberLabel}>
+                                                                <span>ID NUMBER:</span>
+                                                            </template>
+                                                            <strong>{previewIdNumber}</strong>
+                                                        </div>
+                                                        <div class="preview-landscape-info-row">
+                                                            <template lwc:if={showPreviewCardTypeTextLabel}>
+                                                                <span>CARD TYPE:</span>
+                                                            </template>
+                                                            <strong>{previewCardTypeTitle}</strong>
+                                                        </div>
+                                                        <template for:each={frontOptionalPreviewRows} for:item="previewRow">
+                                                            <div key={previewRow.key} class="preview-landscape-info-row preview-landscape-info-grid__wide">
+                                                                <template lwc:if={previewRow.showLabel}>
+                                                                    <span>{previewRow.label}</span>
+                                                                </template>
+                                                                <strong>{previewRow.value}</strong>
+                                                            </div>
+                                                        </template>
+                                                        <div class="preview-landscape-info-row preview-landscape-info-grid__wide">
+                                                            <span>STATUS:</span>
+                                                            <strong>DRAFT</strong>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="preview-landscape-footer">{previewCardTypeLabel}</div>
+                                            </div>
+                                        </template>
+
+                                        <template lwc:if={showLandscapeBackPreview}>
+                                            <div class={mutedLandscapePreviewCardClass} style={previewBrandStyle}>
+                                                <div class="preview-landscape-accent"></div>
+                                                <div class="preview-landscape-header">
+                                                    <div class="preview-landscape-logo-fallback">LOGO</div>
+                                                    <div class="preview-landscape-heading">
+                                                        <span>Institutes</span>
+                                                        <strong>BACK LAYOUT</strong>
+                                                    </div>
+                                                </div>
+                                                <div class="preview-landscape-back-grid">
+                                                    <template lwc:if={hasBackPreviewRows}>
+                                                        <template for:each={backPreviewRows} for:item="previewRow">
+                                                            <div key={previewRow.key} class="preview-landscape-info-row preview-landscape-info-grid__wide">
+                                                                <template lwc:if={previewRow.showLabel}>
+                                                                    <span>{previewRow.label}</span>
+                                                                </template>
+                                                                <strong>{previewRow.value}</strong>
+                                                            </div>
+                                                        </template>
+                                                    </template>
+                                                    <template lwc:else>
+                                                        <div class="preview-landscape-info-row preview-landscape-info-grid__wide">
+                                                            <span>BACK SIDE</span>
+                                                            <strong>Add optional fields to the back side.</strong>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                                <div class="preview-landscape-footer">BACK VIEW</div>
+                                            </div>
+                                        </template>
+
+                                        <div class="preview-overlay">
+                                            <div class="preview-overlay-icon">
+                                                <lightning-icon icon-name="utility:preview" size="small"></lightning-icon>
+                                            </div>
+                                            <h3>PREVIEW DISABLED</h3>
+                                            <p>Complete Template Name and Institute to enable the live preview.</p>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <p class="preview-caption">Real-time preview of your configuration.</p>
+                        </div>
+                    </aside>
+                </div>
+            </template>
+        </main>
+    </div>
+</template>

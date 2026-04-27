@@ -1,0 +1,153 @@
+<template>
+    <div class="page">
+        <template if:true={notification}>
+            <section class={notification.containerClass} role="alert" aria-live="assertive">
+                <div class="noticeContent">
+                    <div class="noticeIconWrap">
+                        <lightning-icon icon-name={notification.iconName} size="x-small"></lightning-icon>
+                    </div>
+                    <div class="noticeCopy">
+                        <div class="noticeTitle">{notification.title}</div>
+                        <p class="noticeMessage">{notification.message}</p>
+                    </div>
+                </div>
+                <button type="button" class="noticeDismiss" onclick={dismissNotification} aria-label="Dismiss message">
+                    <lightning-icon icon-name="utility:close" size="x-small"></lightning-icon>
+                </button>
+            </section>
+        </template>
+
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <button type="button" class="crumb-btn" onclick={handleGoToMasterData}>Master Data</button>
+            <span class="sep">&gt;</span>
+            <button type="button" class="crumb-btn" onclick={handleGoToInstallmentPlans}>Installment Plans</button>
+        </nav>
+
+        <header class="pageHeader">
+            <div class="titleBlock">
+                <h1 class="pageTitle">Installment Plans</h1>
+                <p class="pageMeta">{itemCountLabel}</p>
+            </div>
+            <lightning-button
+                class="primaryActionBtn"
+                variant="brand"
+                label="New"
+                icon-name="utility:add"
+                onclick={handleNew}>
+            </lightning-button>
+        </header>
+
+        <div class="toolbar">
+            <lightning-combobox
+                class="view-picklist"
+                variant="label-hidden"
+                value={selectedView}
+                options={viewOptions}
+                onchange={handleViewChange}>
+            </lightning-combobox>
+
+            <div class="toolbar-right">
+                <lightning-input
+                    class="searchInput"
+                    type="search"
+                    variant="label-hidden"
+                    placeholder="Search installment plans..."
+                    value={searchTerm}
+                    onchange={handleSearch}
+                    aria-label="Search installment plans">
+                </lightning-input>
+                <button class="filterBtn" type="button" disabled aria-disabled="true" aria-label="Filters">
+                    <lightning-icon icon-name="utility:filterList" size="x-small"></lightning-icon>
+                    <span>Filters</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="tableCard">
+            <template if:true={isLoading}>
+                <div class="loading">
+                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <template if:false={isLoading}>
+                <div class="tableScroll">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Installment Plan Name</th>
+                                <th>No. of Installments</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Status</th>
+                                <th>Last Modified</th>
+                                <th class="actions-col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template if:true={hasRows}>
+                                <template for:each={filteredRows} for:item="row">
+                                    <tr key={row.id}>
+                                        <td>
+                                            <button class="link-button" data-id={row.id} onclick={handleOpenRecord}>{row.name}</button>
+                                        </td>
+                                        <td class="bodyText">{row.installmentCount}</td>
+                                        <td class="bodyText">{row.startDateLabel}</td>
+                                        <td class="bodyText">{row.endDateLabel}</td>
+                                        <td><span class={row.statusClass}>{row.statusLabel}</span></td>
+                                        <td class="bodyText">{row.lastModifiedLabel}</td>
+                                        <td class="actions-cell">
+                                            <lightning-button-icon
+                                                class="three-dot-btn"
+                                                alternative-text="Actions"
+                                                icon-name="utility:threedots_vertical"
+                                                variant="bare"
+                                                data-id={row.id}
+                                                onclick={handleToggleActionMenu}>
+                                            </lightning-button-icon>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </template>
+                            <template if:false={hasRows}>
+                                <tr>
+                                    <td colspan="7" class="empty">No installment plans found.</td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+        </div>
+
+        <template if:true={openActionMenu}>
+            <div class="action-popover action-popover-floating" style={openActionMenu.style} onclick={handleMenuContainerClick}>
+                <button class="action-item" type="button" data-action="view" data-id={openActionMenu.recordId} onclick={handleActionClick}>View</button>
+                <button class={openActionMenuEditClass} type="button" data-action="edit" data-id={openActionMenu.recordId} onclick={handleActionClick}>Edit</button>
+                <button class="action-item action-item-disabled" type="button" disabled aria-disabled="true">Clone</button>
+                <button class="action-item action-item-disabled" type="button" disabled aria-disabled="true">Archive</button>
+                <button class={openActionMenuDeleteClass} type="button" data-action="delete" data-id={openActionMenu.recordId} onclick={handleActionClick}>Delete</button>
+            </div>
+        </template>
+
+        <template if:true={confirmDialog}>
+            <section class="dialogBackdrop" role="presentation">
+                <div class="dialogCard" role="dialog" aria-modal="true" aria-labelledby="installment-confirm-title">
+                    <div class="dialogHeader">
+                        <div class="dialogIconWrap">
+                            <lightning-icon icon-name="utility:warning" size="small"></lightning-icon>
+                        </div>
+                        <div>
+                            <h2 id="installment-confirm-title" class="dialogTitle">{confirmDialog.title}</h2>
+                            <p class="dialogMessage">{confirmDialog.message}</p>
+                        </div>
+                    </div>
+                    <div class="dialogFooter">
+                        <button type="button" class="dialogBtn dialogBtnNeutral" onclick={closeConfirmDialog}>Cancel</button>
+                        <button type="button" class="dialogBtn dialogBtnDanger" onclick={handleConfirmDelete}>Delete Installment Plan</button>
+                    </div>
+                </div>
+            </section>
+        </template>
+    </div>
+</template>

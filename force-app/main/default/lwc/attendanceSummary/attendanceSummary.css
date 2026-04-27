@@ -1,0 +1,858 @@
+:host {
+    --primary-blue: #3665f3;
+}
+
+.attendance-summary-page {
+    height: calc(100vh - 153px);
+    overflow-y: auto;
+    border-radius: 14px;
+    background: #ffffff;
+}
+
+.summary-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.summary-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.top-tabs {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    border: 0;
+    background: transparent;
+    color: #3e4654;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 0 2px 8px;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+}
+
+.tab-active {
+    color: #2f3642;
+    border-bottom-color: var(--primary-blue, #3665f3);
+}
+
+.head-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.semester-wrap {
+    min-width: 232px;
+    height: 32px;
+    border: 1px solid #ccd2dd;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    background: #ffffff;
+}
+
+.semester-select {
+    border: 0;
+    background: transparent;
+    font-size: 12px;
+    color: #424957;
+    outline: none;
+}
+
+.current-pill {
+    border: 1px solid #4770f4;
+    border-radius: 999px;
+    min-height: 20px;
+    padding: 0 8px;
+    font-size: 11px;
+    color: #444c5a;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: #e55459;
+}
+
+.ghost-btn,
+.primary-btn,
+.filter-btn {
+    min-height: 32px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 0 14px;
+    cursor: pointer;
+}
+
+.ghost-btn,
+.filter-btn {
+    border: 1px solid var(--primary-blue, #3665f3);
+    background: #ffffff;
+    color: #404856;
+}
+
+.primary-btn {
+    border: 0;
+    background: var(--primary-blue, #3665f3);
+    color: #ffffff;
+}
+
+.attendance-table-wrap {
+    border: 1px solid #d7dce5;
+    border-radius: 10px;
+    overflow-x: auto;
+    background: #ffffff;
+}
+
+.attendance-cards {
+    display: none;
+}
+
+.attendance-card {
+    border: 1px solid #d7dce5;
+    border-radius: 12px;
+    background: #ffffff;
+    padding: 12px;
+    box-shadow: 0 1px 2px rgba(25, 36, 58, 0.04);
+}
+
+.attendance-card + .attendance-card {
+    margin-top: 10px;
+}
+
+.attendance-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.attendance-card-date {
+    margin: 0;
+    color: #2f3642;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.attendance-card-day {
+    margin: 4px 0 0;
+    color: #667081;
+    font-size: 14px;
+    line-height: 1.2;
+}
+
+.attendance-card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 12px;
+    margin: 12px 0 0;
+}
+
+.attendance-card-item {
+    margin: 0;
+}
+
+.attendance-card-item dt {
+    color: #6a7485;
+    font-size: 12px;
+    line-height: 1.3;
+}
+
+.attendance-card-item dd {
+    margin: 2px 0 0;
+    color: #3f4654;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+.attendance-card-item-full {
+    grid-column: 1 / -1;
+}
+
+.attendance-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 1080px;
+}
+
+.attendance-table th {
+    text-align: left;
+    padding: 12px 18px;
+    border-bottom: 1px solid #d7dce5;
+    color: #1f3d90;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.attendance-table td {
+    padding: 12px 18px;
+    color: #4a5260;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 88px;
+    min-height: 28px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 0 12px;
+}
+
+.status-present {
+    background: #e7efe9;
+    border-color: #b8cfbb;
+    color: #3f4b43;
+}
+
+.status-absent {
+    background: #f3e4e5;
+    border-color: #e1b6b8;
+    color: #5b484a;
+}
+
+.leave-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.leave-panel-title {
+    margin: 0;
+    color: #3b4351;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.leave-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.leave-request-card {
+    border: 1px solid #d7dce5;
+    border-radius: 10px;
+    padding: 12px;
+    background: #ffffff;
+    cursor: pointer;
+}
+
+.request-topline {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.request-number {
+    margin: 0;
+    color: #6c7482;
+    font-size: 12px;
+}
+
+.request-meta-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.request-meta {
+    margin: 0;
+    color: #4f5765;
+    font-size: 14px;
+}
+
+.request-meta span {
+    font-weight: 600;
+}
+
+.request-status {
+    min-width: 104px;
+    min-height: 30px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 0 12px;
+}
+
+.request-status-review {
+    background: #f2ebdb;
+    border-color: #e7d4a8;
+    color: #4f4637;
+}
+
+.request-status-rejected {
+    background: #f3e4e5;
+    border-color: #e1b6b8;
+    color: #5b484a;
+}
+
+.request-title {
+    margin: 8px 0 0;
+    color: #2f3642;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.request-description {
+    margin: 8px 0 0;
+    color: #4e5664;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.request-dates {
+    margin: 10px 0 0;
+    color: #4e5664;
+    font-size: 14px;
+}
+
+.request-dates span {
+    font-weight: 600;
+}
+
+.help-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 31, 41, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 40;
+}
+
+.help-modal {
+    width: min(680px, calc(100vw - 32px));
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 20px 22px;
+}
+
+.help-modal h3 {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.2;
+    font-weight: 500;
+    color: #363b47;
+}
+
+.help-divider {
+    margin: 14px 0 16px;
+    border-top: 1px solid #cfd5e1;
+}
+
+.help-modal .field-label {
+    display: block;
+    margin: 0 0 8px;
+    color: #4b5262;
+    font-size: 16px;
+    line-height: 1.2;
+}
+
+.help-modal .required::after {
+    content: '*';
+    color: #e54a45;
+}
+
+.description-wrap {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.modal-textarea {
+    width: 100%;
+    border: 1px solid #b6bece;
+    border-radius: 10px;
+    min-height: 140px;
+    resize: vertical;
+    padding: 14px;
+    font-size: 16px;
+    color: #343b4d;
+    font-family: inherit;
+}
+
+.auto-create-button {
+    position: absolute;
+    right: 12px;
+    bottom: 14px;
+    border: 1px solid var(--primary-blue, #3665f3);
+    background: #ffffff;
+    color: #3b4761;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 16px;
+    line-height: 1.2;
+}
+
+.modal-input {
+    width: 100%;
+    margin-bottom: 16px;
+    border: 1px solid #c4cad6;
+    border-radius: 10px;
+    min-height: 42px;
+    padding: 0 12px;
+    font-size: 16px;
+    color: #363b47;
+    background: #ffffff;
+}
+
+.upload-label {
+    margin-bottom: 8px;
+}
+
+.upload-box {
+    border: 1px dashed #c5cbd8;
+    border-radius: 12px;
+    text-align: center;
+    padding: 18px 12px;
+    margin-bottom: 20px;
+}
+
+.upload-box p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.4;
+    color: #555c6b;
+}
+
+.upload-box p + p {
+    margin-top: 4px;
+}
+
+.upload-box span {
+    color: var(--primary-blue, #3665f3);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.cancel-button,
+.modal-submit-button {
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-size: 16px;
+    line-height: 1.2;
+}
+
+.cancel-button {
+    border: 1px solid var(--primary-blue, #3665f3);
+    background: #ffffff;
+    color: #38425c;
+}
+
+.modal-submit-button {
+    border: 1px solid var(--primary-blue, #3665f3);
+    background: var(--primary-blue, #3665f3);
+    color: #ffffff;
+}
+
+.apply-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.56);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 14px;
+}
+
+.apply-modal {
+    width: min(560px, calc(100vw - 28px));
+    max-height: calc(100vh - 28px);
+    overflow-y: auto;
+    border-radius: 12px;
+    background: #ffffff;
+    padding: 18px;
+}
+
+.apply-modal-head {
+    margin-bottom: 12px;
+}
+
+.apply-modal-title {
+    margin: 0;
+    color: #343b47;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.apply-block {
+    margin-bottom: 12px;
+}
+
+.field-group {
+    display: block;
+}
+
+.field-label {
+    display: inline-block;
+    margin-bottom: 8px;
+    color: #434b58;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.request-type-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.radio-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #454d5b;
+    font-size: 14px;
+}
+
+.field-input {
+    width: 100%;
+    min-height: 32px;
+    border: 1px solid #cfd5df;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #4c5462;
+    font-size: 14px;
+    padding: 0 10px;
+    outline: none;
+}
+
+.field-input-gap {
+    margin-top: 8px;
+}
+
+.field-textarea {
+    width: 100%;
+    min-height: 132px;
+    border: 1px solid #aeb5c2;
+    border-radius: 8px;
+    resize: vertical;
+    outline: none;
+    font-size: 14px;
+    color: #4c5462;
+    padding: 10px;
+}
+
+.icon-input-wrap {
+    position: relative;
+    display: block;
+}
+
+.field-trailing-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    --slds-c-icon-color-foreground-default: #6f7786;
+    pointer-events: none;
+}
+
+.apply-modal-actions {
+    margin-top: 14px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+@media (max-width: 1024px) {
+    .summary-head {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .head-actions {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .leave-panel-title {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .attendance-summary-page {
+        height: auto;
+        padding: 8px;
+    }
+
+    .summary-card {
+        min-height: auto;
+        padding: 10px;
+    }
+
+    .summary-head {
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+    .top-tabs {
+        width: 100%;
+        gap: 12px;
+    }
+
+    .attendance-table-wrap {
+        display: none;
+    }
+
+    .attendance-cards {
+        display: block;
+    }
+
+    .tab-btn,
+    .ghost-btn,
+    .primary-btn,
+    .filter-btn,
+    .attendance-table th,
+    .attendance-table td,
+    .status-pill,
+    .request-meta,
+    .request-status,
+    .request-title,
+    .request-description,
+    .request-dates {
+        font-size: 14px;
+    }
+
+    .attendance-card {
+        padding: 12px;
+    }
+
+    .attendance-card-date {
+        font-size: 16px;
+    }
+
+    .attendance-card-day {
+        font-size: 13px;
+    }
+
+    .attendance-card-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 10px;
+    }
+
+    .attendance-card-item dt {
+        font-size: 11px;
+    }
+
+    .attendance-card-item dd {
+        font-size: 15px;
+    }
+
+    .attendance-card .status-pill {
+        min-width: 96px;
+        min-height: 30px;
+        font-size: 13px;
+        padding: 0 10px;
+    }
+
+    .head-actions {
+        width: 100%;
+        gap: 8px;
+    }
+
+    .semester-wrap {
+        min-width: 0;
+        width: 100%;
+        height: 36px;
+    }
+
+    .semester-select {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .ghost-btn,
+    .primary-btn {
+        flex: 1 1 170px;
+    }
+
+    .leave-panel-head {
+        gap: 10px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .leave-panel-title {
+        font-size: 18px;
+    }
+
+    .request-topline,
+    .request-meta-wrap {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .apply-modal-actions {
+        flex-direction: column;
+    }
+
+    .apply-modal-actions .ghost-btn,
+    .apply-modal-actions .primary-btn {
+        width: 100%;
+        flex: none;
+    }
+
+    .help-modal {
+        padding: 14px;
+    }
+
+    .help-modal .field-label,
+    .modal-textarea,
+    .modal-input,
+    .auto-create-button,
+    .cancel-button,
+    .modal-submit-button,
+    .upload-box p {
+        font-size: 14px;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+    }
+
+    .cancel-button,
+    .modal-submit-button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .attendance-summary-page {
+        padding: 6px;
+    }
+
+    .summary-card {
+        padding: 8px;
+    }
+
+    .attendance-card {
+        padding: 10px;
+    }
+
+    .attendance-card-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .attendance-card-date {
+        font-size: 15px;
+    }
+
+    .attendance-card-day {
+        font-size: 12px;
+    }
+
+    .attendance-card-item dt {
+        font-size: 11px;
+    }
+
+    .attendance-card-item dd {
+        font-size: 14px;
+    }
+
+    .attendance-card .status-pill {
+        min-width: 90px;
+        min-height: 28px;
+        font-size: 12px;
+    }
+
+    .top-tabs {
+        gap: 10px;
+    }
+
+    .tab-btn {
+        font-size: 13px;
+        padding-bottom: 6px;
+    }
+
+    .semester-wrap {
+        padding: 0 6px;
+    }
+
+    .semester-select {
+        font-size: 12px;
+    }
+
+    .current-pill {
+        font-size: 10px;
+        min-height: 18px;
+        padding: 0 6px;
+    }
+
+    .ghost-btn,
+    .primary-btn,
+    .filter-btn {
+        min-height: 30px;
+        font-size: 13px;
+        padding: 0 10px;
+    }
+
+    .leave-request-card {
+        padding: 10px;
+    }
+
+    .request-title {
+        font-size: 15px;
+    }
+
+    .request-description,
+    .request-dates {
+        font-size: 13px;
+    }
+
+    .help-modal,
+    .apply-modal {
+        padding: 12px;
+    }
+
+    .auto-create-button {
+        position: static;
+        width: 100%;
+        margin-top: 8px;
+    }
+}

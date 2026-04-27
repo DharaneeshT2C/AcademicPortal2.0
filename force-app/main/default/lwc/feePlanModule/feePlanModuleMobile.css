@@ -1,0 +1,188 @@
+/* .fee-plan-mobile {
+    padding: 16px;
+} */
+
+.mobile-semester-section {
+    border-bottom: 1px solid #d8dde6;
+    padding-bottom: 18px;
+    margin-bottom: 18px;
+}
+
+.mobile-semester-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.mobile-semester-headline {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.mobile-semester-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--secondary-font-color);
+}
+
+.mobile-semester-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px;
+    border: 1px solid #3061ff;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #373a45;
+    background: #ffffff;
+}
+
+.mobile-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #d95c59;
+}
+
+.mobile-semester-toggle {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: #525866;
+    padding: 0;
+}
+
+.mobile-total-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    color: var(--teritary-font-color);
+    font-size: 12px;
+}
+
+.mobile-total-value {
+    color: var(--secondary-font-color);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.mobile-item-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.mobile-item-card,
+.mobile-child-card {
+    border: 1px solid #d8dde6;
+    border-radius: 8px;
+    background: #ffffff;
+    overflow: hidden;
+}
+
+.mobile-item-header,
+.mobile-child-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border: none;
+    background: transparent;
+    padding: 16px;
+    text-align: left;
+}
+
+.mobile-item-title,
+.mobile-child-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--secondary-font-color);
+}
+
+.mobile-item-body {
+    padding: 0 16px 16px;
+}
+
+.mobile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 20px;
+}
+
+.mobile-grid-cell {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    font-size: 12px;
+    color: #666d7b;
+}
+
+.mobile-grid-cell-full {
+    grid-column: 1 / -1;
+}
+
+.mobile-field-label {
+    color: var(--secondary-font-color);
+    font-weight: 500;
+}
+
+.mobile-field-value {
+    color: var(--teritary-font-color);
+}
+
+.mobile-divider {
+    height: 1px;
+    background: var(--border-color);
+    margin: 14px 0;
+}
+
+.totals-grid {
+    gap: 12px 20px;
+}
+
+.mobile-child-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.mobile-child-header {
+    background: var(--teritary-color);
+    padding-bottom: 14px;
+    border-bottom:1px solid var(--border-color);
+}
+
+.mobile-child-card .mobile-grid,
+.mobile-child-card .mobile-divider,
+.mobile-child-card .totals-grid {
+    margin: 16px;
+}
+
+.mobile-child-card .totals-grid {
+    margin-bottom: 16px;
+}
+
+.mobile-download-button {
+    width: 100%;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary-color);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 14px 16px;
+}
+
+.toggle-icon {
+    --slds-c-icon-color-foreground-default: currentColor;
+}

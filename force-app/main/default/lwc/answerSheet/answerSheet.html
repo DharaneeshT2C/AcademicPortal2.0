@@ -1,0 +1,96 @@
+<template>
+    <section class="answer-sheet-page">
+        <article class="answer-sheet-card">
+            <header class="top-row">
+                <h2 class="semester-title">Semester 2</h2>
+                <button type="button" class="help-btn">Get Help</button>
+            </header>
+
+            <div class="table-wrap">
+                <table class="answer-table" aria-label="Answer sheet request courses">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="checkbox-col">
+                                <input
+                                    type="checkbox"
+                                    checked={isAllSelected}
+                                    onclick={handleSelectAll}
+                                    aria-label="Select all courses"
+                                />
+                            </th>
+                            <th scope="col">Course Name</th>
+                            <th scope="col">Course Code</th>
+                            <th scope="col">Exam</th>
+                            <th scope="col">Credits</th>
+                            <th scope="col">Format</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Eligibility</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={rows} for:item="row">
+                            <tr key={row.id}>
+                                <td class="checkbox-col">
+                                    <input
+                                        type="checkbox"
+                                        checked={row.selected}
+                                        data-id={row.id}
+                                        onclick={handleRowToggle}
+                                        aria-label="Select course"
+                                    />
+                                </td>
+                                <td>{row.courseName}</td>
+                                <td>{row.courseCode}</td>
+                                <td>{row.exam}</td>
+                                <td>{row.credits}</td>
+                                <td>{row.format}</td>
+                                <td>{row.type}</td>
+                                <td>
+                                    <span class="status-pill status-eligible">Eligible</span>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+            <footer class="bottom-bar">
+                <div></div>
+                <div class="bottom-actions">
+                    <button type="button" class="cancel-btn" onclick={handleCancelSheet}>Cancel</button>
+                    <button type="button" class="submit-btn" onclick={openConfirmModal}>Submit Request</button>
+                </div>
+            </footer>
+        </article>
+
+        <template lwc:if={isConfirmModalOpen}>
+            <section
+                class="confirm-modal-backdrop"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Submit request confirmation"
+                onclick={closeConfirmModal}
+            >
+                <article class="confirm-modal" onclick={stopModalClose}>
+                    <template lwc:if={isSuccessToastVisible}>
+                        <div class="success-state">
+                            <div class="success-icon-wrap">
+                                <span class="success-check">&#10003;</span>
+                            </div>
+                            <p class="success-text">Request raised successfully</p>
+                        </div>
+                    </template>
+                    <template lwc:else>
+                        <h3 class="confirm-title">Are you sure you want to submit this request?</h3>
+                        <footer class="confirm-actions">
+                            <button type="button" class="confirm-cancel-btn" onclick={closeConfirmModal}>Cancel</button>
+                            <button type="button" class="confirm-primary-btn" onclick={handleConfirmSubmit}>
+                                Submit Request
+                            </button>
+                        </footer>
+                    </template>
+                </article>
+            </section>
+        </template>
+    </section>
+</template>

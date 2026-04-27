@@ -1,0 +1,30 @@
+:host { font-family: var(--font-family, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif); }
+.page { width: 100%; }
+.page-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; }
+.banner { background: linear-gradient(135deg, #4C6EF5, #3B5BDB); color: #fff; border-radius: var(--radius-lg); padding: 24px 28px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.banner-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+.banner-desc { font-size: 13px; opacity: 0.9; }
+.banner-right { display: flex; align-items: center; gap: 16px; }
+.banner-date { font-size: 13px; color: #fca5a5; }
+.btn-outline-white { display: flex; align-items: center; gap: 4px; padding: 8px 16px; border: 1px solid #fff; color: #fff; background: transparent; border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; cursor: pointer; }
+.credits-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+.section-title { font-size: 16px; font-weight: 600; }
+.credits-badges { display: flex; gap: 8px; }
+.credit-badge { padding: 6px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; background: #fff; }
+.semesters-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.semester-card { background: #fff; border-radius: var(--radius-lg); padding: 20px; border: 1px solid var(--border); cursor: pointer; transition: box-shadow 0.2s; }
+.semester-card:hover { box-shadow: var(--shadow-md); }
+.sem-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.sem-name { font-size: 15px; font-weight: 600; }
+.sem-status { font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+.sem-status.completed { background: var(--success-light); color: var(--success); }
+.sem-status.ongoing { background: var(--warning-light); color: #b45309; }
+.sem-status.upcoming { background: var(--border-light); color: var(--text-muted); }
+.sem-credits { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+.sem-btn { width: 100%; padding: 8px; border: none; border-radius: var(--radius-sm); font-size: 12px; font-family: inherit; cursor: pointer; margin-top: 12px; }
+.sem-btn.completed { background: var(--border-light); color: var(--text-secondary); }
+.sem-btn.ongoing { background: var(--primary); color: #fff; }
+.sem-btn.upcoming { background: var(--border-light); color: var(--text-muted); }
+
+@media (max-width: 1024px) { .banner { flex-direction: column; gap: 12px; align-items: flex-start; } .banner-right { flex-direction: column; align-items: flex-start; } }
+@media (max-width: 640px) { .semesters-grid { grid-template-columns: 1fr; } }

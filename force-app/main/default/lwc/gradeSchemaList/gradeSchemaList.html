@@ -1,0 +1,75 @@
+<template>
+    <div class="gsl-wrap">
+        <!-- Header -->
+        <div class="gsl-header">
+            <div class="gsl-header-text">
+                <h2 class="gsl-title">Grade Schema</h2>
+                <p class="gsl-subtitle">Manage grading criteria and letter grade ranges.</p>
+            </div>
+            <button class="gsl-btn-primary" onclick={handleCreate}>+ Create Grade Schema</button>
+        </div>
+
+        <!-- Table -->
+        <template lwc:if={hasSchemas}>
+            <div class="gsl-table-wrap">
+
+                <!-- Column Headers -->
+                <div class="gsl-table-head">
+                    <div class="gsl-th gsl-col-name">Name</div>
+                    <div class="gsl-th gsl-col-relative">Relative Grades</div>
+                    <div class="gsl-th gsl-col-absolute">Absolute Grades</div>
+                    <div class="gsl-th gsl-col-total">Total Ranges</div>
+                    <div class="gsl-th gsl-col-status">Status</div>
+                    <div class="gsl-th gsl-col-action"></div>
+                </div>
+
+                <!-- Rows -->
+                <template for:each={schemaCards} for:item="schema">
+                    <div key={schema.id} class="gsl-table-row">
+                        <div class="gsl-td gsl-col-name">
+                            <div class="gsl-name-cell">
+                                <div class="gsl-row-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                                        <path d="M2 17l10 5 10-5"/>
+                                        <path d="M2 12l10 5 10-5"/>
+                                    </svg>
+                                </div>
+                                <span class="gsl-name-text">{schema.name}</span>
+                            </div>
+                        </div>
+                        <div class="gsl-td gsl-col-relative">{schema.relativeCriteriaCount}</div>
+                        <div class="gsl-td gsl-col-absolute">{schema.absoluteCriteriaCount}</div>
+                        <div class="gsl-td gsl-col-total">{schema.totalGrades}</div>
+                        <div class="gsl-td gsl-col-status">
+                            <span class={schema.activeBadgeClass}>{schema.activeLabel}</span>
+                        </div>
+                        <div class="gsl-td gsl-col-action">
+                            <button
+                                class="gsl-view-btn"
+                                data-id={schema.id}
+                                onclick={handleCardClick}
+                            >View</button>
+                        </div>
+                    </div>
+                </template>
+
+            </div>
+        </template>
+
+        <template lwc:else>
+            <div class="gsl-empty">
+                <div class="gsl-empty-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/>
+                        <path d="M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+                <p class="gsl-empty-text">No grade schemas yet.</p>
+                <p class="gsl-empty-sub">Create one to define grading criteria and letter grade ranges.</p>
+                <button class="gsl-btn-primary" onclick={handleCreate}>+ Create Grade Schema</button>
+            </div>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,70 @@
+<template>
+    <template lwc:if={showToast}>
+        <c-toast message={toastMessage} variant={toastVariant} onclose={handleToastClose}></c-toast>
+    </template>
+    <div class="page">
+        <div class="page-header"><button class="back-btn" onclick={handleBack}><c-icon name="arrow_back" size="20"></c-icon></button><div><h2 class="page-title">Hostel Details</h2></div></div>
+        <div class="hostel-grid">
+            <div class="main-col">
+                <div class="card">
+                    <h3 class="section-title">Room Details</h3>
+                    <div class="room-info"><span class="room-number">{data.room.number}</span><span class="room-type">{data.room.type}</span><span class="room-loc">{data.room.location}</span></div>
+                </div>
+                <div class="card">
+                    <h3 class="section-title">Warden Contact</h3>
+                    <div class="warden-info"><div class="warden-avatar"><c-icon name="person" size="20"></c-icon></div><div><p class="warden-name">{data.warden.name}</p><p class="warden-detail"><c-icon name="phone" size="16"></c-icon> {data.warden.phone}</p><p class="warden-detail"><c-icon name="email" size="16"></c-icon> {data.warden.email}</p></div></div>
+                </div>
+                <div class="card">
+                    <h3 class="section-title">Notice Board</h3>
+                    <template for:each={data.noticeBoard} for:item="notice">
+                        <div key={notice.title} class="notice-item"><div class="notice-header"><strong>{notice.title}</strong><span class="notice-type">{notice.type}</span></div><p class="notice-msg">{notice.message}</p><template lwc:if={notice.location}><p class="notice-loc"><c-icon name="location_on" size="16"></c-icon> {notice.location}</p></template><span class="notice-date">{notice.date}</span></div>
+                    </template>
+                </div>
+            </div>
+            <div class="right-col">
+                <div class="card">
+                    <h3 class="section-title">Residence Allocation</h3>
+                    <p class="alloc-title">{data.residenceAllocation.title}</p>
+                    <p class="alloc-desc">{data.residenceAllocation.description}</p>
+                    <button class="btn-primary full-width" onclick={handleGetStarted}>Get Started</button>
+                </div>
+                <div class="card">
+                    <h3 class="section-title">Bills &amp; Payments</h3>
+                    <template for:each={data.billsAndPayments} for:item="bill">
+                        <div key={bill.title} class="bill-item"><p class="bill-title">{bill.title}</p><p class="bill-due">Due by {bill.dueBy}</p></div>
+                    </template>
+                </div>
+                <div class="card">
+                    <h3 class="section-title">Leave Requests</h3>
+                    <template for:each={formattedLeaveRequests} for:item="lr">
+                        <div key={lr.id} class="leave-item"><div class="leave-header"><span class="leave-id">{lr.requestId}</span><span class={lr.lrStatusClass}>{lr.status}</span></div><h4 class="leave-title">{lr.title}</h4><p class="leave-type">{lr.type}</p></div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <template lwc:if={showAllocModal}>
+        <div class="modal-backdrop" onclick={handleCloseAlloc}>
+            <div class="modal" onclick={stopProp}>
+                <div class="modal-header"><h3>Residence Allocation</h3><button class="icon-btn" onclick={handleCloseAlloc}>&#x2715;</button></div>
+                <div class="modal-body">
+                    <label class="field"><span>Room type</span>
+                        <select data-field="roomType" value={allocFormRoomType} onchange={handleAllocChange}>
+                            <option value="Single occupancy">Single occupancy</option>
+                            <option value="Double sharing">Double sharing</option>
+                            <option value="Triple sharing">Triple sharing</option>
+                        </select>
+                    </label>
+                    <label class="field"><span>Preference / notes (optional)</span>
+                        <textarea data-field="preference" rows="3" oninput={handleAllocChange} value={allocFormPreference} placeholder="e.g. Prefer ground floor; need quiet study space"></textarea>
+                    </label>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-outline" onclick={handleCloseAlloc}>Cancel</button>
+                    <button class="btn-primary" onclick={handleSubmitAlloc}>Submit</button>
+                </div>
+            </div>
+        </div>
+    </template>
+</template>

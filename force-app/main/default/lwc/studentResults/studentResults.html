@@ -1,0 +1,113 @@
+<template>
+    <section class="results-page">
+        <div class="results-grid">
+            <article class="card chart-card">
+                <header class="card-head">
+                    <h2 class="card-title">Semester Breakup</h2>
+                    <p class="metrics">Credits Earned: <strong>12/12</strong> <span>|</span> CGPA: <strong>8.5</strong></p>
+                </header>
+                <div class="chart-shell">
+                    <canvas class="semester-line-chart"></canvas>
+                </div>
+            </article>
+
+            <article class="card grade-card">
+                <h3 class="grade-title">Semester Grade Card</h3>
+                <div class="grade-visual">
+                    <img class="grade-illustration" src={marksBgImageUrl} alt="Grade card illustration" />
+                </div>
+                <button type="button" class="grade-btn" onclick={handleViewAllGradeCards}>
+                    <span>View all Grade Cards</span>
+                        <img src={rightArrowUrl} class="arrow-image" alt="" aria-hidden="true" />
+                   
+                </button>
+            </article>
+        </div>
+
+        <article class="card marks-card">
+            <header class="marks-head">
+                <h2 class="card-title">Marks Breakdown</h2>
+                <div class="marks-head-right">
+                    <p class="metrics">Credits Earned: <strong>12/12</strong> <span>|</span> CGPA: <strong>8.5</strong></p>
+                    <div class="semester-wrap">
+                        <template if:true={isDropdownOpen}>
+                            <div class="sem-backdrop" onclick={closeDropdown}></div>
+                        </template>
+
+                        <button
+                            class="semester-trigger"
+                            type="button"
+                            aria-haspopup="listbox"
+                            aria-expanded={isDropdownOpen}
+                            aria-label="Select semester"
+                            onclick={handleDropdownToggle}
+                        >
+                            <span class="semester-label-text">{selectedSemesterLabel}</span>
+                            <template if:true={selectedSemesterIsCurrent}>
+                                <span class="current-pill"><span class="dot"></span>Current</span>
+                            </template>
+                            <span class="semester-caret">⌄</span>
+                        </button>
+
+                        <template if:true={isDropdownOpen}>
+                            <ul class="semester-dropdown" role="listbox">
+                                <template for:each={semesterOptions} for:item="opt">
+                                    <li
+                                        key={opt.value}
+                                        class="semester-option"
+                                        role="option"
+                                        data-value={opt.value}
+                                        onclick={handleOptionSelect}
+                                    >
+                                        <span class="option-label">{opt.label}</span>
+                                        <template if:true={opt.isCurrent}>
+                                            <span class="current-pill"><span class="dot"></span>Current</span>
+                                        </template>
+                                    </li>
+                                </template>
+                            </ul>
+                        </template>
+                    </div>
+                </div>
+            </header>
+
+            <div class="table-wrap">
+                <table class="marks-table" aria-label="Marks breakdown">
+                    <thead>
+                        <tr>
+                            <th>Course Name</th>
+                            <th>Course Code</th>
+                            <th>Credits</th>
+                            <th>Credits Earned</th>
+                            <th>Composite Score</th>
+                            <th>Grade</th>
+                            <th>Marks Breakdown</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={marksRows} for:item="row">
+                            <tr key={row.id}>
+                                <td>{row.courseName}</td>
+                                <td>{row.courseCode}</td>
+                                <td>{row.credits}</td>
+                                <td>{row.creditsEarned}</td>
+                                <td>{row.compositeScore}</td>
+                                <td class={row.gradeClass}>{row.grade}</td>
+                                <td>
+                                    <button
+                                        type="button"
+                                        class="marks-breakdown-btn"
+                                        onclick={handleMarksBreakdownClick}
+                                        aria-label="View marks details"
+                                    >
+                                        <img class="eye-icon" src={eyeIconUrl} alt="View marks details" />
+                                    </button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </article>
+    </section>
+</template>

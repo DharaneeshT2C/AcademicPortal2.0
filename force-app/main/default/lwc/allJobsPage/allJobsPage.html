@@ -1,0 +1,160 @@
+<template>
+    <template lwc:if={showToast}>
+        <c-toast message={toastMessage} variant={toastVariant} onclose={handleToastClose}></c-toast>
+    </template>
+    <div class="all-jobs-page">
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <button class="bc-link" onclick={handleBack}>Home</button>
+            <span class="bc-sep">›</span>
+            <button class="bc-link" onclick={handleBack}>Placements</button>
+            <span class="bc-sep">›</span>
+            <span class="bc-current">All Jobs</span>
+        </div>
+
+        <!-- Compact Cycle Banner -->
+        <div class="cycle-banner">
+            <div class="cycle-banner-left">
+                <h2 class="cycle-title">Placement Cycle 1 (Jul–Dec 2026)</h2>
+                <div class="cycle-meta">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>Cycle Closes on: <strong>Dec, 2026</strong></span>
+                </div>
+            </div>
+            <div class="cycle-banner-right">
+                <button class="btn-setup-prefs" onclick={handleSetupPrefs}>Setup Preferences</button>
+            </div>
+        </div>
+
+        <!-- Two-column layout -->
+        <div class="jobs-layout">
+            <div class="jobs-main">
+
+                <!-- Tabs: Recommended | All Jobs -->
+                <div class="jobs-tabs-row">
+                    <div class="jobs-tabs">
+                        <button class={recommendedTabClass} data-tab="recommended" onclick={handleJobsTab}>Recommended Jobs (12)</button>
+                        <button class={allTabClass} data-tab="all" onclick={handleJobsTab}>All Jobs ({totalCount})</button>
+                    </div>
+                    <button class="btn-view-more" onclick={handleViewAllJobs}>View More →</button>
+                </div>
+
+                <!-- Preferences row -->
+                <div class="prefs-row">
+                    <span class="prefs-label">Your Preferences:</span>
+                    <template for:each={preferenceTags} for:item="tag">
+                        <span key={tag} class="pref-tag">{tag}</span>
+                    </template>
+                </div>
+
+                <!-- Job Cards Grid -->
+                <div class="jobs-grid">
+                    <template for:each={filteredJobs} for:item="job">
+                        <div key={job.id} class="job-card" data-id={job.id} onclick={handleViewDetail}>
+                            <div class="job-card-top-row">
+                                <div class="company-logo" style={job.logoStyle}>{job.companyInitial}</div>
+                                <div class="job-card-company-name">{job.company}</div>
+                                <button class={job.saveBtnClass} title={job.saveBtnTitle} data-id={job.id} onclick={handleToggleSave}>
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                                </button>
+                            </div>
+                            <div class="job-card-badge-row">
+                                <span class={job.categoryClass}>{job.categoryLabel}</span>
+                            </div>
+                            <div class="job-card-title">{job.title}</div>
+                            <div class="job-card-tags">
+                                <template for:each={job.tagChips} for:item="chip">
+                                    <span key={chip.key} class="tag-chip">{chip.label}</span>
+                                </template>
+                            </div>
+                            <div class="job-card-footer">
+                                <div class="job-salary">{job.salaryFormatted}</div>
+                                <div class="job-skills-match">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="#10B981"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                    <span>Skills Match: {job.skillsPct}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Right Rail -->
+            <div class="jobs-rail">
+                <!-- Applied/Saved tabs -->
+                <div class="rail-card">
+                    <div class="rail-tabs">
+                        <button class={appliedRailTabClass} data-rtab="applied" onclick={handleRailTab}>Applied Jobs (12)</button>
+                        <button class={savedRailTabClass} data-rtab="saved" onclick={handleRailTab}>Saved Jobs (43)</button>
+                    </div>
+                    <div class="rail-empty-state">
+                        <div class="rail-empty-icon">
+                            <svg width="56" height="56" viewBox="0 0 80 80" fill="none">
+                                <circle cx="40" cy="40" r="36" fill="#EEF2FF"/>
+                                <rect x="24" y="22" width="32" height="38" rx="4" fill="#C7D2FE"/>
+                                <rect x="28" y="28" width="18" height="3" rx="1.5" fill="#6366F1"/>
+                                <rect x="28" y="34" width="24" height="3" rx="1.5" fill="#A5B4FC"/>
+                                <rect x="28" y="40" width="14" height="3" rx="1.5" fill="#A5B4FC"/>
+                                <circle cx="53" cy="52" r="10" fill="#4F46E5"/>
+                                <path d="M49 52l3 3 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <p class="rail-empty-text">You have not applied for any jobs yet</p>
+                    </div>
+                </div>
+
+                <!-- Resources Card -->
+                <div class="rail-card">
+                    <h3 class="rail-section-title">Resources</h3>
+                    <div class="resource-links">
+                        <button class="resource-link" onclick={handleGoToResumeLibrary}>
+                            <span class="res-icon-wrap res-icon-blue">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+                            </span>
+                            <span>Resume Library</span>
+                        </button>
+                        <button class="resource-link" onclick={handleGoToPrepHub}>
+                            <span class="res-icon-wrap res-icon-blue">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                            </span>
+                            <span>Preparation Resources</span>
+                        </button>
+                        <button class="resource-link" onclick={handleBookCounsellor}>
+                            <span class="res-icon-wrap res-icon-green">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            </span>
+                            <span>Book Slot with a Counsellor</span>
+                        </button>
+                        <button class="resource-link" onclick={handleSupport}>
+                            <span class="res-icon-wrap res-icon-blue">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            </span>
+                            <span>Support</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Career Compass Card -->
+                <div class="compass-card">
+                    <div class="compass-top-row">
+                        <div>
+                            <div class="compass-confused">Confused?</div>
+                            <div class="compass-headline">Unlock your Direction Today.</div>
+                        </div>
+                        <button class="compass-arrow" onclick={handleGoToCompass}>→</button>
+                    </div>
+                    <div class="compass-art">
+                        <svg width="80" height="60" viewBox="0 0 80 60" fill="none">
+                            <circle cx="56" cy="36" r="20" fill="rgba(255,255,255,0.12)"/>
+                            <circle cx="56" cy="36" r="12" fill="rgba(255,255,255,0.15)"/>
+                            <line x1="56" y1="20" x2="56" y2="36" stroke="#fff" stroke-width="2"/>
+                            <polygon points="56,18 54,23 58,23" fill="#FBBF24"/>
+                            <line x1="70" y1="36" x2="56" y2="36" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

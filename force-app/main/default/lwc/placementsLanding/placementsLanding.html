@@ -1,0 +1,585 @@
+<template>
+    <template lwc:if={showToast}>
+        <c-toast message={toastMessage} variant={toastVariant} onclose={handleToastClose}></c-toast>
+    </template>
+    <div class="placements-page">
+
+        <!-- HERO BANNER -->
+        <div class={heroBannerClass}>
+            <div class="hero-inner">
+                <div class="hero-left">
+                    <template lwc:if={isPhase0}>
+                        <p class="hero-eyebrow">Registrations Now Open. Opt in to Participate.</p>
+                        <h1 class="hero-title">{cycle.name}</h1>
+                        <p class="hero-dates">12 Oct – 27 Oct, 2026</p>
+                        <div class="hero-actions">
+                            <button class="btn-hero-primary" onclick={handleOptIn}>Record My Response</button>
+                        </div>
+                    </template>
+
+                    <template lwc:if={isOptedOut}>
+                        <p class="hero-eyebrow-muted">Placement Cycle · {cycle.closeDate}</p>
+                        <h1 class="hero-title">{cycle.name}</h1>
+                        <p class="hero-subtitle-muted">You have opted out of this placement cycle. If this was a mistake, please reach out to the placement cell immediately.</p>
+                        <div class="hero-actions">
+                            <button class="btn-hero-outline" onclick={handleRaiseQuery}>Raise A Query</button>
+                        </div>
+                    </template>
+
+                    <template lwc:if={isPhase1}>
+                        <p class="hero-eyebrow">Placement Cycle · Closes {cycle.closeDate}</p>
+                        <h1 class="hero-title">{cycle.name}</h1>
+                        <p class="hero-subtitle">You are opted in. Start exploring jobs and applying now.</p>
+                        <div class="hero-actions">
+                            <button class="btn-hero-outline" onclick={handleSetupPrefs}>Setup Preferences</button>
+                            <button class="btn-hero-primary" onclick={handleViewAllJobs}>Browse All Jobs</button>
+                        </div>
+                    </template>
+
+                    <template lwc:if={isPhase2Plus}>
+                        <template lwc:if={isPhase5}>
+                            <p class="hero-eyebrow hero-green-eyebrow">Super Dream Offer Accepted</p>
+                            <h1 class="hero-title">Congratulations! You've been placed at PayPal</h1>
+                            <p class="hero-subtitle">You have accepted a Super Dream Offer. All other applications are now closed.</p>
+                            <div class="hero-actions">
+                                <button class="btn-hero-primary" onclick={handleDownloadOffer}>Download Offer Letter</button>
+                            </div>
+                        </template>
+                        <template lwc:else>
+                            <p class="hero-eyebrow">Placement Cycle · Closes {cycle.closeDate}</p>
+                            <h1 class="hero-title">{cycle.name}</h1>
+                            <p class="hero-subtitle">Track your applications, interviews, and offers below.</p>
+                            <div class="hero-actions">
+                                <button class="btn-hero-outline" onclick={handleSetupPrefs}>Setup Preferences</button>
+                                <button class="btn-hero-primary" onclick={handleCompareOffers}>Compare Offers</button>
+                            </div>
+                        </template>
+                    </template>
+                </div>
+                <template lwc:if={isPhase5}>
+                    <div class="hero-illustration">
+                        <div class="confetti-icon">🎉</div>
+                    </div>
+                </template>
+            </div>
+            <!-- Blue diagonal swoosh decoration -->
+            <div class="hero-swoosh"></div>
+        </div>
+
+        <!-- PHASE 0: Instructions layout -->
+        <template lwc:if={isPhase0}>
+            <div class="placement-grid">
+                <div class="main-col">
+                    <div class="card instructions-card">
+                        <div class="card-header-row">
+                            <span class="info-icon">ℹ</span>
+                            <h3 class="section-title">Important Instructions</h3>
+                        </div>
+                        <h4 class="sub-heading">Before You Opt-In</h4>
+                        <ul class="inst-list">
+                            <template for:each={beforeOptInList} for:item="item">
+                                <li key={item.key}>{item.text}</li>
+                            </template>
+                        </ul>
+                        <h4 class="sub-heading">Policies to Note</h4>
+                        <ul class="inst-list">
+                            <template for:each={policiesToNoteList} for:item="item">
+                                <li key={item.key}><strong>{item.title}:</strong> {item.text}</li>
+                            </template>
+                        </ul>
+                        <h4 class="sub-heading">Next Steps</h4>
+                        <ul class="inst-list">
+                            <template for:each={nextStepsList} for:item="item">
+                                <li key={item.key}>{item.text}</li>
+                            </template>
+                        </ul>
+                    </div>
+                </div>
+                <div class="right-col">
+                    <div class="card resources-card">
+                        <h3 class="section-title">Resources</h3>
+                        <div class="resource-links">
+                            <button class="resource-link" onclick={handleGoToResumeLibrary}>
+                                <span class="res-icon">📄</span>Resume Library
+                            </button>
+                            <button class="resource-link" onclick={handleGoToPrepHub}>
+                                <span class="res-icon">🎓</span>Interview Prep Hub
+                            </button>
+                            <button class="resource-link" onclick={handleGoToApplications}>
+                                <span class="res-icon">📋</span>My Applications
+                            </button>
+                            <button class="resource-link" onclick={handleCounsellor}>
+                                <span class="res-icon">💬</span>Placement Counselor
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card compass-card" onclick={handleGoToCareerCompass}>
+                        <div class="compass-top">
+                            <span class="compass-icon">🧭</span>
+                            <span class="compass-arrow-btn">→</span>
+                        </div>
+                        <h3 class="compass-title">Career Compass</h3>
+                        <p class="compass-desc">Confused? Unlock your Direction Today.</p>
+                        <p class="compass-hint">Take a quick quiz to find the best career path for your interests and aspirations.</p>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- OPTED-OUT: What's Next layout -->
+        <template lwc:if={isOptedOut}>
+            <div class="placement-grid">
+                <div class="main-col">
+                    <div class="card instructions-card">
+                        <div class="card-header-row">
+                            <span class="info-icon">ℹ</span>
+                            <h3 class="section-title">What's Next for you?</h3>
+                        </div>
+                        <ul class="inst-list whats-next-list">
+                            <li>Use Career Compass to explore career paths and skill gaps.</li>
+                            <li>Access preparation resources (guides, practice tests, webinars).</li>
+                            <li>Connect with a career counsellor for 1:1 advice.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="right-col">
+                    <div class="card resources-card">
+                        <h3 class="section-title">Resources</h3>
+                        <div class="resource-links">
+                            <button class="resource-link" onclick={handleGoToResumeLibrary}>
+                                <span class="res-icon">📄</span>Resume Library
+                            </button>
+                            <button class="resource-link" onclick={handleGoToPrepHub}>
+                                <span class="res-icon">🎓</span>Interview Prep Hub
+                            </button>
+                            <button class="resource-link" onclick={handleGoToApplications}>
+                                <span class="res-icon">📋</span>My Applications
+                            </button>
+                            <button class="resource-link" onclick={handleCounsellor}>
+                                <span class="res-icon">💬</span>Placement Counselor
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card compass-card" onclick={handleGoToCareerCompass}>
+                        <div class="compass-top">
+                            <span class="compass-icon">🧭</span>
+                            <span class="compass-arrow-btn">→</span>
+                        </div>
+                        <h3 class="compass-title">Career Compass</h3>
+                        <p class="compass-desc">Confused? Unlock your Direction Today.</p>
+                        <p class="compass-hint">Take a quick quiz to find the best career path for your interests and aspirations.</p>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- PHASE 1+: Main layout with tabs -->
+        <template lwc:if={isPhase1Plus}>
+            <div class="placement-grid">
+                <div class="main-col">
+
+                    <!-- Tabs: Applications | Saved Jobs -->
+                    <div class="tabs-bar">
+                        <button class={applicationsTabClass} data-tab="applications" onclick={handleTabSwitch}>
+                            Applications ({applicationCount})
+                        </button>
+                        <button class={savedTabClass} data-tab="saved-jobs" onclick={handleTabSwitch}>
+                            Saved Jobs ({savedCount})
+                        </button>
+                    </div>
+
+                    <!-- Applications Tab -->
+                    <template lwc:if={isApplicationsTab}>
+                        <template lwc:if={isPhase1}>
+                            <div class="empty-state-card">
+                                <div class="empty-icon">📭</div>
+                                <p class="empty-title">You have not applied for any jobs yet</p>
+                                <p class="empty-sub">Browse recommended jobs below and start your placement journey.</p>
+                                <button class="btn-primary" onclick={handleViewAllJobs}>Browse All Jobs</button>
+                            </div>
+                        </template>
+                        <template lwc:if={isPhase2Plus}>
+                            <!-- Three-card row: app cards + placement summary -->
+                            <div class="phase2-cards-row">
+                                <!-- PayPal: Application in Review -->
+                                <div class="app-status-card">
+                                    <div class="asc-header">
+                                        <div class="asc-logo" style="background:#003087">P</div>
+                                        <div class="asc-meta">
+                                            <div class="asc-company">Paypal</div>
+                                            <div class="asc-role">Developer</div>
+                                        </div>
+                                    </div>
+                                    <div class="asc-status asc-status-green">
+                                        <span class="asc-dot asc-dot-green"></span>
+                                        Application in Review
+                                    </div>
+                                    <button class="btn-sm-outline" data-id="JOB001" onclick={handleViewJobDetail}>View Details</button>
+                                </div>
+                                <!-- Reliance: Slots Open -->
+                                <div class="app-status-card">
+                                    <div class="asc-header">
+                                        <div class="asc-logo" style="background:#CC0000">R</div>
+                                        <div class="asc-meta">
+                                            <div class="asc-company">Reliance Industries</div>
+                                            <div class="asc-role">Data Scientist</div>
+                                        </div>
+                                    </div>
+                                    <div class="asc-status asc-status-blue">
+                                        <span class="asc-dot asc-dot-blue"></span>
+                                        Slots Open for Technical Interview
+                                    </div>
+                                    <button class="btn-sm-primary" data-id="JOB003" onclick={handleViewJobDetail}>Book Slot</button>
+                                </div>
+                                <!-- Placement Summary -->
+                                <div class="placement-summary-card">
+                                    <div class="pscard-title">Placement Summary</div>
+                                    <div class="pscard-row">
+                                        <span class="pscard-lbl">Active Applications</span>
+                                        <span class="pscard-val">3</span>
+                                    </div>
+                                    <div class="pscard-row">
+                                        <span class="pscard-lbl">Offers Received</span>
+                                        <span class="pscard-val pscard-val-dash">--</span>
+                                    </div>
+                                    <div class="pscard-row">
+                                        <span class="pscard-lbl">Interviews Scheduled</span>
+                                        <span class="pscard-val pscard-val-dash">--</span>
+                                    </div>
+                                    <div class="pscard-row">
+                                        <span class="pscard-lbl">Exams Scheduled</span>
+                                        <span class="pscard-val pscard-val-dash">--</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+
+                    <!-- Saved Jobs Tab -->
+                    <template lwc:if={isSavedJobsTab}>
+                        <template for:each={mySavedJobs} for:item="job">
+                            <div key={job.id} class="job-card" data-id={job.id} onclick={handleViewJobDetail}>
+                                <div class="job-card-header">
+                                    <div class="company-logo-sm" style={job.logoStyle}>{job.companyInitial}</div>
+                                    <div class="job-card-meta">
+                                        <div class="job-company">{job.company}</div>
+                                        <div class="job-title">{job.title}</div>
+                                    </div>
+                                    <span class={job.categoryClass}>{job.category}</span>
+                                    <span class="saved-icon">🔖</span>
+                                </div>
+                                <div class="job-tags">
+                                    <template for:each={job.tags} for:item="tag">
+                                        <span key={tag} class="tag-chip">{tag}</span>
+                                    </template>
+                                </div>
+                                <div class="job-card-footer">
+                                    <span class="salary">{job.salaryFormatted}</span>
+                                    <span class="skills-match">✓ {job.skillsText}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </template>
+
+                    <!-- Preferences pills (Phase 1+) -->
+                    <div class="prefs-section">
+                        <span class="prefs-label">Your Preferences:</span>
+                        <template for:each={selectedPreferences} for:item="pref">
+                            <span key={pref} class="pref-pill">{pref}</span>
+                        </template>
+                        <button class="btn-edit-prefs" onclick={handleSetupPrefs}>Edit</button>
+                    </div>
+
+                    <!-- Job Listings sub-tabs -->
+                    <div class="subtabs-bar">
+                        <button class={recommendedSubTabClass} data-tab="recommended" onclick={handleJobsTabSwitch}>
+                            Recommended Jobs (12)
+                        </button>
+                        <button class={allSubTabClass} data-tab="all" onclick={handleJobsTabSwitch}>
+                            All Jobs (43)
+                        </button>
+                        <button class="btn-view-all" onclick={handleViewAllJobs}>View All →</button>
+                    </div>
+
+                    <!-- Job Cards Grid -->
+                    <div class="job-cards-grid">
+                        <template for:each={recommendedJobs} for:item="job">
+                            <div key={job.id} class="job-card" data-id={job.id} onclick={handleViewJobDetail}>
+                                <div class="job-card-top">
+                                    <div class="company-logo-md" style={job.logoStyle}>{job.companyInitial}</div>
+                                    <div class="job-card-title-group">
+                                        <div class="job-company-name">{job.company}</div>
+                                        <div class="job-role-title">{job.title}</div>
+                                    </div>
+                                    <span class={job.categoryClass}>{job.category}</span>
+                                </div>
+                                <div class="job-card-tags">
+                                    <template for:each={job.tags} for:item="tag">
+                                        <span key={tag} class="tag-chip">{tag}</span>
+                                    </template>
+                                </div>
+                                <div class="job-card-bottom">
+                                    <span class="job-salary">{job.salaryFormatted}</span>
+                                    <span class="skills-match-green">✓ {job.skillsText}</span>
+                                    <button class="bookmark-btn" data-id={job.id} onclick={handleToggleRecBookmark}>🔖</button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Right Rail -->
+                <div class="right-col">
+                    <template lwc:if={isPhase2Plus}>
+                        <div class="card schedule-rail-card">
+                            <h3 class="section-title">Schedule</h3>
+                            <div class="schedule-empty">
+                                <div class="schedule-empty-icon">📅</div>
+                                <p class="schedule-empty-text">Next steps related to your application will appear here.</p>
+                            </div>
+                        </div>
+                    </template>
+
+                    <div class="card resources-card">
+                        <h3 class="section-title">Resources</h3>
+                        <div class="resource-links">
+                            <button class="resource-link" onclick={handleGoToResumeLibrary}>
+                                <span class="res-icon">📄</span>Resume Library
+                            </button>
+                            <button class="resource-link" onclick={handleGoToPrepHub}>
+                                <span class="res-icon">🎓</span>Interview Prep Hub
+                            </button>
+                            <button class="resource-link" onclick={handleGoToApplications}>
+                                <span class="res-icon">📋</span>My Applications
+                            </button>
+                            <button class="resource-link" onclick={handleCounsellor}>
+                                <span class="res-icon">💬</span>Placement Counselor
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card compass-card" onclick={handleGoToCareerCompass}>
+                        <div class="compass-top">
+                            <span class="compass-icon">🧭</span>
+                            <span class="compass-arrow-btn">→</span>
+                        </div>
+                        <h3 class="compass-title">Career Compass</h3>
+                        <p class="compass-desc">Confused? Unlock your Direction Today.</p>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- REGISTRATION MODAL -->
+        <template lwc:if={showRegistrationModal}>
+            <div class="modal-overlay" onclick={handleCloseModal}>
+                <div class="modal-box" onclick={stopProp}>
+                    <div class="modal-header">
+                        <div>
+                            <h3 class="modal-title">2026 – Placement Cycle 1 Registration</h3>
+                            <p class="modal-subtitle-date">12 Oct – 27 Oct, 2026</p>
+                        </div>
+                        <button class="modal-close" onclick={handleCloseModal}>✕</button>
+                    </div>
+
+                    <div class="modal-body">
+                        <p class="modal-question">Are you interested in participating in Placements?</p>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="participation" value="yes" onchange={handleParticipationChange} />
+                                <span class="radio-text">Yes</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="participation" value="no" onchange={handleParticipationChange} />
+                                <span class="radio-text">No</span>
+                            </label>
+                        </div>
+
+                        <!-- YES selected -->
+                        <template lwc:if={isParticipationYes}>
+                            <div class="participation-detail-box">
+                                <label class="terms-label">
+                                    <input type="checkbox" onchange={handleTermsChange} />
+                                    I confirm my participation in the Placement Cycle 1 (Jul–Dec 2026)
+                                </label>
+                            </div>
+                        </template>
+
+                        <!-- NO selected -->
+                        <template lwc:if={isParticipationNo}>
+                            <div class="participation-detail-box">
+                                <label class="field-label">Choose Reason</label>
+                                <select class="field-select" onchange={handleOptOutReasonChange}>
+                                    <option value="">Select a reason</option>
+                                    <option value="higher-studies">Higher Studies</option>
+                                    <option value="entrepreneurship">Entrepreneurship</option>
+                                    <option value="international">International Opportunities</option>
+                                    <option value="personal">Personal Reasons</option>
+                                    <option value="other">Other</option>
+                                </select>
+                                <label class="terms-label" style="margin-top:12px">
+                                    <input type="checkbox" onchange={handleTermsChange} />
+                                    I confirm that I do not wish to participate in the Placement Cycle 1 (Jul–Dec 2026)
+                                </label>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn-outline" onclick={handleCloseModal}>Cancel</button>
+                        <button class="btn-primary" onclick={handleSubmitRegistration} disabled={cannotSubmitReg}>Submit</button>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- JOB PREFERENCES MODAL -->
+        <template lwc:if={showPrefsModal}>
+            <div class="modal-overlay" onclick={handleClosePrefs}>
+                <div class="modal-box modal-lg" onclick={stopProp}>
+                    <div class="modal-header">
+                        <h3 class="modal-title">Job Preferences</h3>
+                        <button class="modal-close" onclick={handleClosePrefs}>✕</button>
+                    </div>
+                    <div class="modal-body prefs-modal-body">
+                        <!-- Preferred Role -->
+                        <div class="pref-field-group">
+                            <label class="pref-field-label">Preferred Role</label>
+                            <div class="pref-tags-row">
+                                <template for:each={preferredRoles} for:item="role">
+                                    <span key={role} class="pref-tag-chip">
+                                        {role}
+                                        <button class="pref-tag-remove" data-val={role} data-type="role" onclick={handleRemovePreference}>×</button>
+                                    </span>
+                                </template>
+                                <button class="pref-add-btn" onclick={handleAddRole}>+ Add Role</button>
+                            </div>
+                        </div>
+
+                        <!-- Industry Preferences -->
+                        <div class="pref-field-group">
+                            <label class="pref-field-label">Industry Preferences</label>
+                            <div class="pref-grid">
+                                <template for:each={industryPrefsList} for:item="pref">
+                                    <button key={pref.key} class={pref.cls} data-pref={pref.label} data-type="industry" onclick={handleTogglePref}>{pref.label}</button>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Functional Area -->
+                        <div class="pref-field-group">
+                            <label class="pref-field-label">Functional Area Preferences</label>
+                            <div class="pref-grid">
+                                <template for:each={functionalAreaList} for:item="pref">
+                                    <button key={pref.key} class={pref.cls} data-pref={pref.label} data-type="functional" onclick={handleTogglePref}>{pref.label}</button>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Location Types -->
+                        <div class="pref-field-group">
+                            <label class="pref-field-label">Preferred Location Types</label>
+                            <div class="checkbox-row">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" data-val="Remote" onchange={handleLocationTypeChange} checked={isRemoteChecked} />
+                                    Remote
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" data-val="On-site" onchange={handleLocationTypeChange} checked={isOnsiteChecked} />
+                                    On-site
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" data-val="Hybrid" onchange={handleLocationTypeChange} checked={isHybridChecked} />
+                                    Hybrid
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Preferred Cities -->
+                        <div class="pref-field-group">
+                            <label class="pref-field-label">Preferred Cities</label>
+                            <div class="pref-tags-row">
+                                <template for:each={preferredCities} for:item="city">
+                                    <span key={city} class="pref-tag-chip">
+                                        {city}
+                                        <button class="pref-tag-remove" data-val={city} data-type="city" onclick={handleRemovePreference}>×</button>
+                                    </span>
+                                </template>
+                                <button class="pref-add-btn" onclick={handleAddCity}>+ Add City</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-outline" onclick={handleClosePrefs}>Discard Changes</button>
+                        <button class="btn-primary" onclick={handleSavePrefs}>Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- WITHDRAW MODAL -->
+        <template lwc:if={showWithdrawModal}>
+            <div class="modal-overlay" onclick={handleCancelWithdraw}>
+                <div class="modal-box modal-sm" onclick={stopProp}>
+                    <div class="modal-header">
+                        <h3 class="modal-title">Withdraw Application?</h3>
+                        <button class="modal-close" onclick={handleCancelWithdraw}>✕</button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="modal-desc">This action may affect your placement eligibility. Withdrawing from a shortlisted position may restrict future applications this cycle.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-outline" onclick={handleCancelWithdraw}>Cancel</button>
+                        <button class="btn-danger" onclick={handleConfirmWithdraw}>Withdraw</button>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- REGISTERED SUCCESS MODAL -->
+        <template lwc:if={showRegisteredModal}>
+            <div class="modal-overlay" onclick={handleCloseRegistered}>
+                <div class="modal-box modal-sm" onclick={stopProp}>
+                    <div class="success-modal-body">
+                        <div class="success-icon">🎉</div>
+                        <h3 class="success-title">You're Registered!</h3>
+                        <p class="success-msg">You have successfully opted into the Placement Cycle 1 (Jul–Dec 2026). Setup your job preferences to get the best recommendations.</p>
+                        <div class="success-actions">
+                            <button class="btn-outline" onclick={handleCloseRegistered}>Do It Later</button>
+                            <button class="btn-primary" onclick={handleSetupPrefsFromSuccess}>Setup Preferences</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- OPTED-OUT SUCCESS MODAL -->
+        <template lwc:if={showOptedOutModal}>
+            <div class="modal-overlay" onclick={handleCloseOptedOut}>
+                <div class="modal-box modal-sm" onclick={stopProp}>
+                    <div class="opted-out-modal-body">
+                        <div class="opted-out-icon">✗</div>
+                        <h3 class="opted-out-title">You've Opted Out</h3>
+                        <p class="opted-out-msg">You've opted out of Placement Cycle 1 (Jul–Dec 2026). If this was a mistake, please raise a query to the placement cell immediately.</p>
+                        <button class="btn-outline" onclick={handleCloseOptedOut}>Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- GENERIC SUCCESS MODAL -->
+        <template lwc:if={showSuccessModal}>
+            <div class="modal-overlay" onclick={handleCloseSuccess}>
+                <div class="modal-box modal-sm" onclick={stopProp}>
+                    <div class="success-modal-body">
+                        <div class="success-icon">✓</div>
+                        <h3 class="success-title">Success!</h3>
+                        <p class="success-msg">{successMessage}</p>
+                        <button class="btn-primary" onclick={handleCloseSuccess}>Continue</button>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+    </div>
+</template>

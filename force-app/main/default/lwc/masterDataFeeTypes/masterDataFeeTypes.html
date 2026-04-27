@@ -1,0 +1,292 @@
+<template>
+    <div class="fee-type-page">
+        <template if:true={isLoading}>
+            <div class="loading-card">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={isLoading}>
+            <section class="form-card">
+                <div class="card-head">
+                    <h2 class="section-title">Context</h2>
+                </div>
+
+                <div class="form-grid two-col-grid">
+                    <div class="field-control field-span-two linked-mapping-shell">
+                        <div class="linked-mapping-table">
+                            <template for:each={feeTypeLinkedMappings} for:item="mapping">
+                                <article key={mapping.key} class="linked-mapping-row">
+                                    <div class="linked-mapping-head">
+                                        <h3 class="linked-mapping-title">Link Level {mapping.rowIndex}</h3>
+                                        <lightning-button-icon
+                                            icon-name="utility:delete"
+                                            alternative-text="Remove link level"
+                                            title="Remove link level"
+                                            variant="bare"
+                                            data-key={mapping.key}
+                                            onclick={handleRemoveLinkedLevel}
+                                            disabled={mapping.removeDisabled}>
+                                        </lightning-button-icon>
+                                    </div>
+
+                                    <div class="form-grid two-col-grid">
+                                        <lightning-combobox
+                                            class="field-control"
+                                            label="Link Level"
+                                            value={mapping.linkedLevel}
+                                            options={mapping.availableLinkedLevelOptions}
+                                            placeholder="Select link level"
+                                            data-key={mapping.key}
+                                            onchange={handleLinkedLevelChange}>
+                                        </lightning-combobox>
+
+                                        <template if:true={mapping.isLearningProgramPlan}>
+                                            <lightning-record-picker
+                                                class="field-control"
+                                                data-key={mapping.key}
+                                                label="Learning Program Plan"
+                                                object-api-name="LearningProgramPlan"
+                                                value={mapping.linkedEntityId}
+                                                placeholder="Search learning program plan..."
+                                                onchange={handleLearningProgramPlanChange}>
+                                            </lightning-record-picker>
+                                        </template>
+
+                                        <template if:true={mapping.isLearningProgram}>
+                                            <lightning-record-picker
+                                                class="field-control"
+                                                data-key={mapping.key}
+                                                label="Learning Program"
+                                                object-api-name="LearningProgram"
+                                                value={mapping.linkedEntityId}
+                                                placeholder="Search learning program..."
+                                                onchange={handleLearningProgramChange}>
+                                            </lightning-record-picker>
+                                        </template>
+
+                                        <template if:true={mapping.isInstitute}>
+                                            <lightning-record-picker
+                                                class="field-control"
+                                                data-key={mapping.key}
+                                                label="Institute"
+                                                object-api-name="Account"
+                                                value={mapping.linkedEntityId}
+                                                filter={instituteAccountFilter}
+                                                placeholder="Search institute..."
+                                                onchange={handleInstituteChange}>
+                                            </lightning-record-picker>
+                                        </template>
+                                    </div>
+                                </article>
+                            </template>
+                        </div>
+                        <div class="linked-mapping-actions">
+                            <lightning-button
+                                class="btn-outline"
+                                label="Add Link Level"
+                                icon-name="utility:add"
+                                onclick={handleAddLinkedLevel}
+                                disabled={isAddLinkedLevelDisabled}>
+                            </lightning-button>
+                        </div>
+                    </div>
+
+                    <lightning-combobox
+                        class="field-control"
+                        label="Fee Category"
+                        required
+                        value={feeCategory}
+                        options={feeCategoryOptions}
+                        onchange={handleFeeCategoryChange}>
+                    </lightning-combobox>
+
+                    <lightning-input
+                        class="field-control"
+                        label="Batch / Intake"
+                        required={isBatchIntakeRequired}
+                        value={batchIntake}
+                        onchange={handleBatchChange}
+                        placeholder="e.g., 2025-26">
+                    </lightning-input>
+
+                    <lightning-input
+                        class="field-control"
+                        label="Activation Date"
+                        type="date"
+                        required
+                        value={activationDate}
+                        onchange={handleActivationDateChange}>
+                    </lightning-input>
+
+                    <lightning-combobox
+                        class="field-control"
+                        label="Frequency"
+                        required
+                        value={frequency}
+                        options={frequencyOptions}
+                        onchange={handleFrequencyChange}>
+                    </lightning-combobox>
+
+                    <div class="status-field">
+                        <span class="field-label">Status</span>
+                        <span class="status-pill" data-status={statusLabel}>{statusLabel}</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="form-card">
+                <div class="card-head card-head-stacked">
+                    <h2 class="section-title">Global Financial Mapping</h2>
+                    <p class="section-subtitle">Term-level values can override these defaults.</p>
+                </div>
+
+                <div class="form-grid single-col-grid">
+                    <div class="dual-list-shell">
+                        <lightning-dual-listbox
+                            class="dual-list-control"
+                            name="remittanceAccounts"
+                            label="Remittance Accounts"
+                            required
+                            source-label="Available Accounts"
+                            selected-label="Selected Accounts"
+                            value={selectedRemittanceIds}
+                            options={remittanceOptions}
+                            onchange={handleRemittanceAccountsChange}>
+                        </lightning-dual-listbox>
+
+                        <template if:true={selectedRemittanceMerchantIds}>
+                            <p class="helper-text">
+                                <strong>Available Merchant IDs:</strong> {selectedRemittanceMerchantIds}
+                            </p>
+                        </template>
+                    </div>
+
+                    <lightning-textarea
+                        class="field-control notes-field"
+                        label="Notes"
+                        value={notes}
+                        onchange={handleNotesChange}
+                        placeholder="Add any additional notes...">
+                    </lightning-textarea>
+                </div>
+            </section>
+
+            <section class="form-card">
+                <div class="card-head">
+                    <h2 class="section-title">Fee Configuration</h2>
+                </div>
+
+                <div class="form-grid two-col-grid">
+                    <lightning-combobox
+                        class="field-control"
+                        label="Fee Head"
+                        required
+                        value={oneTimeFeeHeadId}
+                        options={feeHeadOptions}
+                        placeholder="Select an option"
+                        onchange={handleOneTimeFeeHeadChange}>
+                    </lightning-combobox>
+
+                    <lightning-record-picker
+                        class="field-control"
+                        label="Category"
+                        object-api-name="Category__c"
+                        value={oneTimeCategoryId}
+                        placeholder="Search category..."
+                        onchange={handleOneTimeCategoryChange}>
+                    </lightning-record-picker>
+
+                    <lightning-record-picker
+                        class="field-control"
+                        label="Quota"
+                        object-api-name="Quota__c"
+                        value={oneTimeQuotaId}
+                        filter={oneTimeQuotaFilter}
+                        placeholder="Search quota..."
+                        onchange={handleOneTimeQuotaChange}>
+                    </lightning-record-picker>
+
+                    <lightning-input
+                        class="field-control"
+                        label="Fee Head Tag"
+                        value={oneTimeFeePlanTag}
+                        onchange={handleOneTimeFeePlanTagChange}
+                        placeholder="e.g., Annual_2025">
+                    </lightning-input>
+
+                    <lightning-input
+                        class="field-control"
+                        label="Amount"
+                        type="number"
+                        step="0.01"
+                        required
+                        value={oneTimeAmount}
+                        onchange={handleOneTimeAmountChange}>
+                    </lightning-input>
+
+                    <lightning-input
+                        class="field-control"
+                        label="Start Date"
+                        type="date"
+                        value={oneTimeStartDate}
+                        onchange={handleOneTimeStartDateChange}>
+                    </lightning-input>
+
+                    <lightning-record-picker
+                        class="field-control"
+                        object-api-name="Ken_Bank_Account_Master__c"
+                        label="Remittance (Optional override)"
+                        value={oneTimeRemittanceOverrideId}
+                        placeholder="Search remittance account..."
+                        onchange={handleOneTimeRemittanceOverrideChange}>
+                    </lightning-record-picker>
+
+                    <lightning-input
+                        class="field-control"
+                        label="Due Date"
+                        type="date"
+                        required
+                        value={oneTimeDueDate}
+                        onchange={handleOneTimeDueDateChange}>
+                    </lightning-input>
+
+                    <lightning-record-picker
+                        class="field-control"
+                        object-api-name="Payment_Schedule__c"
+                        label="Installment (Optional)"
+                        value={oneTimeInstallmentId}
+                        placeholder="Search installment plan..."
+                        onchange={handleOneTimeInstallmentChange}>
+                    </lightning-record-picker>
+
+                    <lightning-record-picker
+                        class="field-control"
+                        object-api-name="Ken_Fee_Type__c"
+                        label="Penalty Plan (Optional)"
+                        value={oneTimePenaltyPlanId}
+                        placeholder="Search penalty plan..."
+                        onchange={handleOneTimePenaltyPlanChange}>
+                    </lightning-record-picker>
+                </div>
+            </section>
+
+            <div class="action-bar">
+                <lightning-button
+                    class="btn-outline"
+                    label="Save Draft"
+                    variant="neutral"
+                    onclick={handleSaveDraft}
+                    disabled={isSaveDraftDisabled}>
+                </lightning-button>
+                <lightning-button
+                    class="btn-primary"
+                    label="Activate"
+                    variant="brand"
+                    onclick={handleActivate}
+                    disabled={isActivateDisabled}>
+                </lightning-button>
+            </div>
+        </template>
+    </div>
+</template>

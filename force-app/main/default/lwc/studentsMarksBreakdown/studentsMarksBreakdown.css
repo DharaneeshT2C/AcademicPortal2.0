@@ -1,0 +1,147 @@
+:host {
+    --primary-color: #3061ff;
+    --secondary-color: #eaefff;
+}
+
+.marks-page {
+    background: #ffffff;
+    height: calc(100vh - 153px);
+    overflow-y: scroll;
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.marks-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 16px;
+    flex: 1;
+}
+
+.page-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 500;
+    color: #333b49;
+}
+
+.course-meta {
+    margin-top: 18px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--secondary-color, #eaefff) 28%, #ffffff);
+    padding: 16px 24px;
+    display: grid;
+    grid-template-columns: 1.1fr 1.4fr 0.5fr 1.9fr;
+    gap: 12px;
+}
+
+.course-meta p {
+    margin: 0;
+    font-size: 16px;
+    color: #535b69;
+    white-space: nowrap;
+}
+
+.course-meta strong {
+    font-weight: 600;
+    color: #2f3643;
+}
+
+.table-wrap {
+    margin-top: 22px;
+    border: 1px solid #d8dee8;
+    border-radius: 14px;
+    overflow: auto;
+}
+
+.marks-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 760px;
+}
+
+.marks-table th {
+    text-align: left;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333b49;
+    padding: 22px 14px 16px;
+    border-bottom: 1px solid #d8dee8;
+}
+
+.marks-table td {
+    padding: 22px 14px;
+    font-size: 16px;
+    color: #6a7280;
+}
+
+.grade-footer {
+    height: 62px;
+    margin-top: 10px;
+    background: #ffffff;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 34px;
+    padding: 0 22px;
+    border-top: 1px solid #E6E6E8;
+}
+
+.grade-footer p {
+    margin: 0;
+    font-size: 16px;
+    color: #626a78;
+}
+
+.grade-footer strong {
+    font-size: 18px;
+    color: #2f3643;
+}
+
+@media (max-width: 1280px) {
+    .course-meta {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .marks-page {
+        padding: 10px;
+    }
+
+    .marks-card {
+        padding: 12px;
+    }
+
+    .page-title,
+    .marks-table th,
+    .marks-table td,
+    .grade-footer p {
+        font-size: 14px;
+    }
+
+    .course-meta {
+        grid-template-columns: 1fr;
+        padding: 12px;
+    }
+
+    .course-meta p {
+        font-size: 14px;
+        white-space: normal;
+    }
+
+    .grade-footer {
+        height: auto;
+        min-height: 52px;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 12px 20px;
+        padding: 10px 12px;
+    }
+
+    .grade-footer strong {
+        font-size: 16px;
+    }
+}

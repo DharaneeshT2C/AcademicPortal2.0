@@ -1,0 +1,83 @@
+<template>
+    <section class="modulePanel">
+        <div class="toolbar">
+            <div class="toolbarLeft">
+                <button class="btn btnSecondary" type="button">
+                    <lightning-icon class="buttonIcon" icon-name="utility:filterList" size="x-small" alternative-text="Filters"></lightning-icon>
+                    <span>Filters</span>
+                </button>
+            </div>
+            <div class="toolbarRight">
+                <button class="btn btnSecondary" type="button">Export</button>
+            </div>
+        </div>
+
+        <div class="metricsGrid">
+            <template for:each={metrics} for:item="metric">
+                <article key={metric.id} class="metricCard">
+                    <p class="metricLabel">{metric.label}</p>
+                    <p class={metric.valueClass}>{metric.value}</p>
+                </article>
+            </template>
+        </div>
+
+        <section class="card tableCard">
+            <header class="sectionHeader">
+                <h2 class="sectionTitle">Scholarship Financial Transactions</h2>
+            </header>
+            <template if:true={isLoading}>
+                <div class="loadingState">
+                    <lightning-spinner alternative-text="Loading scholarship transactions" size="small"></lightning-spinner>
+                </div>
+            </template>
+            <template if:true={errorMessage}>
+                <div class="errorBanner" role="alert">{errorMessage}</div>
+            </template>
+            <div class="tableWrap">
+                <table class="dataTable">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Programme</th>
+                            <th>Scholarship Name</th>
+                            <th>Amount Deducted</th>
+                            <th>Applied Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template if:true={hasRows}>
+                            <template for:each={scholarshipRows} for:item="row">
+                                <tr key={row.id}>
+                                    <td>
+                                        <div class="studentCell">
+                                            <span class="studentName">{row.studentName}</span>
+                                            <span class="studentId">{row.studentId}</span>
+                                        </div>
+                                    </td>
+                                    <td>{row.programme}</td>
+                                    <td>
+                                        <div class="scholarshipCell">
+                                            <span class="scholarshipName">{row.scholarshipName}</span>
+                                            <span class={row.typeClass}>{row.scholarshipType}</span>
+                                        </div>
+                                    </td>
+                                    <td class="amountCell">{row.amountDeducted}</td>
+                                    <td>{row.appliedDate}</td>
+                                    <td>
+                                        <span class={row.statusClass}>{row.status}</span>
+                                    </td>
+                                </tr>
+                            </template>
+                        </template>
+                        <template if:true={showEmptyState}>
+                            <tr>
+                                <td class="emptyState" colspan="6">No scholarship transactions found.</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </section>
+</template>

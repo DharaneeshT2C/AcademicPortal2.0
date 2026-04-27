@@ -1,0 +1,130 @@
+<template>
+    <div class="schedule-backdrop">
+        <section class="schedule-modal" role="dialog" aria-modal="true" aria-label="Enrollment Schedule">
+            <header class="schedule-header">
+                <h2>Enrolment Schedule</h2>
+            </header>
+
+            <div class="schedule-body">
+                <div class="schedule-grid-wrap">
+                    <table class="schedule-grid" aria-label="Weekly Enrollment Schedule">
+                        <thead>
+                            <tr>
+                                <th class="time-col"></th>
+                                <th>Sunday</th>
+                                <th>Monday</th>
+                                <th>Tuesday</th>
+                                <th>Wednesday</th>
+                                <th>Thursday</th>
+                                <th>Friday</th>
+                                <th>Saturday</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th class="time-col">10 AM</th>
+                                <td></td>
+                                <td>
+                                    <article class="class-card">
+                                        <p class="class-title">Data Structures and Algor...</p>
+                                        <p class="class-meta">CS304 &nbsp;·&nbsp; 3 credits</p>
+                                        <p class="class-faculty">Prof Michael Chen</p>
+                                    </article>
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <th class="time-col">11 AM</th>
+                                <td></td>
+                                <td></td>
+                                <td>
+                                    <article class="class-card">
+                                        <p class="class-title">Computer Networks</p>
+                                        <p class="class-meta">CS304 &nbsp;·&nbsp; 3 credits</p>
+                                        <p class="class-faculty">Prof Michael Chen</p>
+                                    </article>
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <th class="time-col">12 AM</th>
+                                <td></td>
+                                <td>
+                                    <article class="class-card">
+                                        <p class="class-title">Operating Systems</p>
+                                        <p class="class-meta">CS304 &nbsp;·&nbsp; 3 credits</p>
+                                        <p class="class-faculty">Prof Michael Chen</p>
+                                    </article>
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <th class="time-col">1 PM</th>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>
+                                    <article class="class-card">
+                                        <p class="class-title">Fundamentals of Artificial...</p>
+                                        <p class="class-meta">CS304 &nbsp;·&nbsp; 3 credits</p>
+                                        <p class="class-faculty">Prof Michael Chen</p>
+                                    </article>
+                                </td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <th class="time-col">2 PM</th>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>
+                                    <article class="class-card">
+                                        <p class="class-title">Data Structures and Algor...</p>
+                                        <p class="class-meta">CS304 &nbsp;·&nbsp; 3 credits</p>
+                                        <p class="class-faculty">Prof Michael Chen</p>
+                                    </article>
+                                </td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <th class="time-col">3 PM</th>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>
+                                    <article class="class-card">
+                                        <p class="class-title">Fundamentals of Artificial...</p>
+                                        <p class="class-meta">CS304 &nbsp;·&nbsp; 3 credits</p>
+                                        <p class="class-faculty">Prof Michael Chen</p>
+                                    </article>
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <footer class="schedule-footer">
+                <button type="button" class="close-button" onclick={handleClose}>Close</button>
+            </footer>
+        </section>
+    </div>
+</template>

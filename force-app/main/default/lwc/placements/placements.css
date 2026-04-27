@@ -1,0 +1,43 @@
+:host { font-family: var(--font-family, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif); }
+.page { width: 100%; }
+.page-title { font-size: 20px; font-weight: 600; margin-bottom: 24px; letter-spacing: -0.02em; }
+
+.hero-banner { background: radial-gradient(ellipse at 50% 0%, #1E3A5F 0%, #1A2F5E 30%, #111827 100%); border-radius: var(--radius-xl); padding: 52px 44px; text-align: center; color: #fff; position: relative; overflow: hidden; margin-bottom: 24px; }
+.hero-banner::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px); background-size: 20px 20px; pointer-events: none; }
+.hero-banner::after { content: ''; position: absolute; bottom: 0; right: 0; width: 50%; height: 50%; background: radial-gradient(ellipse at bottom right, rgba(0,0,0,0.2), transparent 70%); pointer-events: none; }
+.hero-dots { display: none; }
+.hero-subtitle { font-size: 14px; opacity: 0.85; margin-bottom: 8px; font-weight: 500; }
+.hero-title { font-size: 30px; font-weight: 700; margin-bottom: 24px; letter-spacing: -0.02em; line-height: 38px; }
+.btn-hero { padding: 14px 32px; background: #fff; color: #4338CA; border: none; border-radius: var(--radius-sm); font-size: 14px; font-family: inherit; cursor: pointer; font-weight: 600; transition: transform 200ms ease-out, box-shadow 200ms ease-out; box-shadow: var(--shadow-md); }
+.btn-hero:hover { transform: scale(1.02) translateY(-1px); box-shadow: var(--shadow-lg); }
+
+.placement-grid { display: grid; grid-template-columns: 1fr 340px; gap: 24px; }
+.main-col { min-width: 0; }
+.right-col { display: flex; flex-direction: column; gap: 16px; }
+.card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); transition: all 0.2s ease; }
+.card:hover { box-shadow: var(--shadow-md); }
+.section-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; letter-spacing: -0.01em; }
+
+.instructions-header { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+.instructions-header c-icon { color: var(--primary); }
+.instructions-header .section-title { margin-bottom: 0; }
+.sub-heading { font-size: 14px; font-weight: 600; margin-bottom: 8px; margin-top: 20px; }
+.sub-heading:first-of-type { margin-top: 0; }
+.inst-list { padding-left: 20px; margin-bottom: 0; }
+.inst-list li { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; line-height: 1.6; }
+
+.resources-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.resource-chip { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; border: 1px solid var(--border); border-radius: var(--radius-full); font-size: 12px; cursor: pointer; transition: all 0.2s ease; font-weight: 500; }
+.resource-chip:hover { border-color: var(--primary); background: var(--primary-light); transform: translateY(-1px); }
+.resource-chip c-icon { color: var(--primary); }
+
+.career-compass-card { background: linear-gradient(145deg, #1E3A8A 0%, #1D4ED8 50%, #3B82F6 100%); border-radius: var(--radius-lg); padding: 28px; color: #fff; position: relative; min-height: 180px; overflow: hidden; cursor: pointer; transition: all 0.2s ease; }
+.career-compass-card:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(59, 79, 224, 0.3); }
+.career-compass-card::before { content: ''; position: absolute; top: -20px; right: -20px; width: 100px; height: 100px; background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px); background-size: 10px 10px; border-radius: 50%; }
+.compass-arrow { position: absolute; top: 18px; right: 18px; width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+.compass-arrow c-icon { color: #fff; }
+.compass-title { font-size: 18px; font-weight: 600; margin-bottom: 14px; letter-spacing: -0.01em; }
+.compass-subtitle { font-size: 14px; opacity: 0.8; margin-bottom: 4px; }
+.compass-desc { font-size: 14px; opacity: 0.8; }
+
+@media (max-width: 1024px) { .placement-grid { grid-template-columns: 1fr; } }

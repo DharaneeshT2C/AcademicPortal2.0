@@ -1,0 +1,403 @@
+<template>
+    <div class="split-shell">
+        <div class="split-card">
+            <!-- <div class="split-hero">
+                <div class="hero-icon" aria-hidden="true">
+                    <lightning-icon icon-name="utility:split" size="small"></lightning-icon>
+                </div>
+                <div>
+                    <div class="hero-title">Course Offering Split</div>
+                    <div class="hero-subtitle">Materialize real offerings from placeholder imports.</div>
+                </div>
+            </div> -->
+
+            <div class="split-body">
+                <lightning-tabset>
+                    <lightning-tab label="Create Course Offering">
+                        <div class="section-card">
+                            <div class="section-title">Selection</div>
+                            <div class="slds-grid slds-wrap slds-gutters">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-5">
+                                    <lightning-combobox label="Academic Term" value={termId} options={termOptions}
+                                        onchange={handleTermChange} disabled={isTermLocked}></lightning-combobox>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-5">
+                                    <lightning-combobox label="Academic Session" value={sessionId}
+                                        options={sessionOptions} onchange={handleSessionChange}
+                                        disabled={isSessionDisabled}></lightning-combobox>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-5">
+                                    <lightning-combobox label="Default Course Offering" value={offeringId}
+                                        options={offeringOptions} onchange={handleOfferingChange}
+                                        disabled={isOfferingDisabled}></lightning-combobox>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-5">
+                                    <lightning-combobox label="Course Offering Type" value={userType}
+                                        options={userTypeOptions} onchange={handleUserTypeChange}></lightning-combobox>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-5">
+                                    <lightning-combobox label="Enrollment Type" value={enrollmentType}
+                                        options={enrollmentTypeOptions}
+                                        onchange={handleEnrollmentTypeChange}></lightning-combobox>
+                                </div>
+                            </div>
+                        </div>
+
+                        <template if:true={showSessionOfferingsSection}>
+                            <div class="section-card">
+                                <div class="section-title">Session Course Offerings</div>
+                                <template if:true={showBulkSelectionWidget}>
+                                    <div class="slds-grid slds-wrap slds-gutters slds-grid_vertical-align-end slds-m-bottom_small">
+                                        <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-3">
+                                            <div class="combined-summary">
+                                                <span class="summary-pill">Selected offerings: {selectedOfferingsCount}</span>
+                                            </div>
+                                            <div class="action-bar slds-m-bottom_small">
+                                                <lightning-button label="Proceed" variant="brand" onclick={handleProceedBulk}
+                                                    disabled={isProceedBulkDisabled}></lightning-button>
+                                            </div>
+                                        </div>
+                                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3 slds-m-left_auto">
+                                            <lightning-combobox label="Course Type Filter" value={bulkCourseType}
+                                                options={bulkCourseTypeOptions}
+                                                onchange={handleBulkCourseTypeChange}>
+                                            </lightning-combobox>
+                                        </div>
+                                    </div>
+                                </template>
+                                <div class="table-shell">
+                                    <table class="slds-table slds-table_fixed-layout">
+                                        <thead>
+                                            <tr>
+                                                <template if:true={showBulkSelectionWidget}>
+                                                    <th class="checkbox-cell">
+                                                        <lightning-input
+                                                            type="checkbox"
+                                                            variant="label-hidden"
+                                                            checked={isAllDisplayedSelected}
+                                                            onchange={handleSelectAllOfferingsChange}>
+                                                        </lightning-input>
+                                                    </th>
+                                                </template>
+                                                <th>Course Offering Name</th>
+                                                <th>Course Number</th>
+                                                <th>Course Name</th>
+                                                <th>Course Type</th>
+
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={displayedSessionOfferings} for:item="o">
+                                                <tr key={o.Id}>
+                                                    <template if:true={showBulkSelectionWidget}>
+                                                        <td class="checkbox-cell">
+                                                            <lightning-input type="checkbox" variant="label-hidden"
+                                                                data-id={o.Id} checked={o.isSelected}
+                                                                onchange={handleOfferingSelectionChange}></lightning-input>
+                                                        </td>
+                                                    </template>
+                                                    <td class="offering-name-cell">
+                                                        <div class="offering-name-link">
+                                                            <lightning-formatted-url value={o.recordUrl}
+                                                                label={o.Name}
+                                                                target="_self"></lightning-formatted-url>
+                                                        </div>
+                                                    </td>
+                                                    <td>{o.courseNumber}</td>
+                                                    <td>{o.courseName}</td>
+                                                    <td>{o.courseType}</td>
+
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template if:true={showNoOfferingsMessage}>
+                            <div class="section-card">
+                                <div class="summary-muted">No placeholder course offerings found for the selected
+                                    academic session.</div>
+                            </div>
+                        </template>
+
+                        <template if:true={plans.length}>
+                            <div class="section-card">
+                                <div class="section-title">Program Plans</div>
+                                <div class="table-shell">
+                                    <table class="slds-table slds-table_fixed-layout">
+                                        <thead>
+                                            <tr>
+                                                <th>Program Plan</th>
+                                                <template if:true={showOfferingCountColumn}>
+                                                    <th>Course Offering Count</th>
+                                                </template>
+                                                <template if:true={showSectionsColumn}>
+                                                    <th>Sections</th>
+                                                </template>
+                                                <template if:true={showCapacityColumn}>
+                                                    <th>Capacity</th>
+                                                </template>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={plans} for:item="p" for:index="index">
+                                                <tr key={p.planId}>
+                                                    <td>{p.planName}</td>
+                                                    <template if:true={showOfferingCountColumn}>
+                                                        <td>
+                                                            <lightning-input type="number" min="1" data-index={index}
+                                                                value={p.offeringCount}
+                                                                onchange={handlePlanOfferingCountChange}></lightning-input>
+                                                        </td>
+                                                    </template>
+                                                    <template if:true={showSectionsColumn}>
+                                                        <td>
+                                                            <lightning-dual-listbox
+                                                                source-label="Available"
+                                                                selected-label="Selected"
+                                                                data-index={index}
+                                                                options={p.sectionOptions}
+                                                                value={p.selectedSections}
+                                                                onchange={handlePlanSectionsChange}
+                                                                disabled={disablePlanInputs}>
+                                                            </lightning-dual-listbox>
+                                                        </td>
+                                                    </template>
+                                                    <template if:true={showCapacityColumn}>
+                                                        <td>
+                                                            <lightning-input type="number" min="1" data-index={index}
+                                                                value={p.capacity} onchange={handlePlanCapacityChange}
+                                                                disabled={disablePlanInputs}></lightning-input>
+                                                        </td>
+                                                    </template>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template if:true={isCombinedMode}>
+                            <div class="section-card combined-card">
+                                <div class="section-title combined-title">Combined Group</div>
+                                <div class="combined-summary">
+                                    <span class="summary-pill">Selected plans: {combinedSelectedCount}</span>
+                                    <span class="summary-muted">Choose plans to combine and set shared
+                                        course offering count/capacity.</span>
+                                </div>
+                                <div class="slds-grid slds-wrap slds-gutters">
+                                    <div class="slds-col slds-size_1-of-1">
+                                        <lightning-checkbox-group label="Program Plans to Combine"
+                                            options={combinedPlanOptions} value={combinedPlanIds}
+                                            onchange={handleCombinedPlanSelectionChange}></lightning-checkbox-group>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                                        <lightning-input label="Combined Group Name" value={combinedGroupName}
+                                            onchange={handleCombinedGroupNameChange}></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                                        <lightning-input type="number" min="1" label="Course Offering Count"
+                                            value={combinedOfferingCount}
+                                            onchange={handleCombinedOfferingCountChange}></lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                                        <lightning-input type="number" min="1" label="Capacity" value={combinedCapacity}
+                                            onchange={handleCombinedCapacityChange}></lightning-input>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <div class="action-bar">
+                            <lightning-button variant="brand" label="Create Offerings" onclick={handleCreateOfferings}
+                                disabled={isCreateDisabled}></lightning-button>
+                        </div>
+                    </lightning-tab>
+
+                    <lightning-tab label="View Course Offering">
+                        <div class="section-card">
+                            <div class="section-title">Selection</div>
+                            <div class="slds-grid slds-wrap slds-gutters">
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3">
+                                    <lightning-combobox label="Academic Term" value={viewTermId} options={termOptions}
+                                        onchange={handleViewTermChange} disabled={isTermLocked}></lightning-combobox>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3">
+                                    <lightning-combobox label="Academic Session" value={viewSessionId}
+                                        options={viewSessionOptions} onchange={handleViewSessionChange}
+                                        disabled={isViewSessionDisabled}></lightning-combobox>
+                                </div>
+                                <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-3">
+                                    <lightning-combobox label="Enrollment Type" value={viewEnrollmentType}
+                                        options={viewEnrollmentTypeOptions}
+                                        onchange={handleViewEnrollmentTypeChange}></lightning-combobox>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-card">
+                            <div class="section-title">Active Planned Offerings</div>
+                            <template if:true={viewOfferings.length}>
+                                <div class="table-shell">
+                                    <table class="slds-table slds-table_fixed-layout">
+                                        <thead>
+                                            <tr>
+                                                <th>Course Offering Name</th>
+                                                <th>Course Number</th>
+                                                <th>Course Name</th>
+                                                <th>Enrollment Capacity</th>
+                                                <th>Enrollee Count</th>
+                                                <th>Course Type</th>
+                                                <th>Offering Type</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={viewOfferings} for:item="o">
+                                                <tr key={o.id}>
+                                                    <td class="offering-name-cell">
+                                                        <div class="offering-name-link">
+                                                            <lightning-formatted-url value={o.recordUrl}
+                                                                label={o.courseOfferingName}
+                                                                target="_self"></lightning-formatted-url>
+                                                        </div>
+                                                    </td>
+                                                    <td>{o.courseNumber}</td>
+                                                    <td>{o.courseName}</td>
+                                                    <td>{o.enrollmentCapacity}</td>
+                                                    <td>
+                                                        <template if:true={o.hasParticipants}>
+                                                            <lightning-button variant="base" label={o.enrolleeCount}
+                                                                data-id={o.id} data-name={o.courseOfferingName}
+                                                                onclick={handleEnrolleeClick}></lightning-button>
+                                                        </template>
+                                                        <template if:false={o.hasParticipants}>
+                                                            {o.enrolleeCount}
+                                                        </template>
+                                                    </td>
+                                                    <td>{o.courseType}</td>
+                                                    <td>{o.offeringType}</td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </template>
+                            <template if:true={showViewEmptyMessage}>
+                                <div class="summary-muted">No active planned offerings found for the selected session.
+                                </div>
+                            </template>
+                        </div>
+                    </lightning-tab>
+
+                    <lightning-tab label="Import Course Offering">
+                        <c-course-offering-bulk-import
+                            record-id={contextTermId}
+                            onrefreshimport={handleCourseOfferingImportRefresh}>
+                        </c-course-offering-bulk-import>
+                    </lightning-tab>
+
+                    <lightning-tab label="Import Course Offering Participant">
+                        <c-cop-bulk-import
+                            record-id={contextTermId}
+                            onrefreshimport={handleCourseOfferingImportRefresh}>
+                        </c-cop-bulk-import>
+                    </lightning-tab>
+                </lightning-tabset>
+            </div>
+        </div>
+    </div>
+
+    <template if:true={showBulkSplitModal}>
+        <section role="dialog" tabindex="-1" aria-modal="true" class="slds-modal slds-fade-in-open workspace-modal">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 class="slds-text-heading_medium">Bulk Split Course Offerings</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <lightning-combobox label="Course Offering Type" value={bulkUserType} options={bulkUserTypeOptions}
+                        onchange={handleBulkUserTypeChange}></lightning-combobox>
+                    <template if:true={isBulkIndividualMode}>
+                        <div class="slds-grid slds-wrap slds-gutters slds-m-top_small">
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <lightning-input type="number" min="1" label="Course Offering Count"
+                                    value={bulkOfferingCount}
+                                    onchange={handleBulkOfferingCountChange}></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <lightning-input type="number" min="1" label="Capacity" value={bulkCapacity}
+                                    onchange={handleBulkCapacityChange}></lightning-input>
+                            </div>
+                        </div>
+                    </template>
+                    <template if:true={isBulkSectionMode}>
+                        <div class="slds-grid slds-wrap slds-gutters slds-m-top_small">
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <lightning-input type="number" min="1" label="Sections" value={bulkSections}
+                                    onchange={handleBulkSectionsChange}></lightning-input>
+                            </div>
+                            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                                <lightning-input type="number" min="1" label="Capacity" value={bulkCapacity}
+                                    onchange={handleBulkCapacityChange}></lightning-input>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" variant="neutral" class="slds-m-right_small"
+                        onclick={handleCloseBulkSplitModal}></lightning-button>
+                    <lightning-button label="Bulk Split" variant="brand" onclick={handleBulkSplitConfirm}
+                        disabled={isBulkSplitDisabled}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <template if:true={showParticipantsModal}>
+        <section role="dialog" tabindex="-1" aria-modal="true" class="slds-modal slds-fade-in-open workspace-modal">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 class="slds-text-heading_medium">Participants - {selectedParticipantOfferingName}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <template if:true={participants.length}>
+                        <div class="table-shell">
+                            <table class="slds-table slds-table_fixed-layout">
+                                <thead>
+                                    <tr>
+                                        <th>Participant</th>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={participants} for:item="p">
+                                        <tr key={p.participantId}>
+                                            <td>
+                                                <lightning-formatted-url value={p.participantRecordUrl}
+                                                    label={p.participantName} target="_self"></lightning-formatted-url>
+                                            </td>
+                                            <td>{p.participantEmail}</td>
+                                            <td>{p.participationStatus}</td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
+                    <template if:false={participants.length}>
+                        <div class="summary-muted">No participant records found for this course offering.</div>
+                    </template>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Close" variant="neutral"
+                        onclick={handleCloseParticipantsModal}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

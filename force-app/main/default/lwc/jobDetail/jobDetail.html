@@ -1,0 +1,403 @@
+<template>
+    <template lwc:if={showToast}>
+        <c-toast message={toastMessage} variant={toastVariant} onclose={handleToastClose}></c-toast>
+    </template>
+    <div class="job-detail-page">
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <button class="bc-link" onclick={handleBack}>Placements</button>
+            <span class="bc-sep">›</span>
+            <button class="bc-link" onclick={handleBack}>All Jobs</button>
+            <span class="bc-sep">›</span>
+            <span class="bc-current">{jobTitle}</span>
+        </div>
+
+        <!-- Demo controls -->
+        <div class="demo-toolbar">
+            <span class="demo-label">Demo State:</span>
+            <template for:each={demoStates} for:item="ds">
+                <button key={ds.key} class={ds.cls} data-state={ds.key} onclick={handleDemoSwitch}>{ds.label}</button>
+            </template>
+        </div>
+
+        <!-- Job Header Card -->
+        <div class="job-header-card">
+            <div class="job-header-top">
+                <div class="company-logo-lg" style={logoStyle}>{companyInitial}</div>
+                <div class="job-header-info">
+                    <div class="job-company-sub">{companyName} | Mumbai, India</div>
+                    <h1 class="job-title-h1">{jobTitle}</h1>
+                    <div class="skills-match-link">
+                        <span class="match-icon-svg">⊟</span>
+                        <span class="match-text">{skillsMatchText}</span>
+                    </div>
+                </div>
+                <div class="job-header-right">
+                    <div class="header-icon-row">
+                        <button class={bookmarkBtnClass} title={bookmarkBtnTitle} onclick={handleToggleBookmark}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                        </button>
+                        <button class="btn-icon-sq" title="Share" onclick={handleShareJob}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tags row -->
+            <div class="job-tags-row">
+                <template for:each={tags} for:item="tag">
+                    <span key={tag.key} class="tag-pill">
+                        <span class="tag-pin">📍</span>{tag.label}
+                    </span>
+                </template>
+                <span class="eligible-text">You are eligible to apply for this job</span>
+            </div>
+            <template lwc:if={isNotEligible}>
+                <div class="not-eligible-banner">You are not eligible to apply for this job, as it requires a minimum CGPA of 9.0</div>
+            </template>
+
+            <!-- Salary + Apply row -->
+            <div class="salary-apply-row">
+                <span class="job-salary-big">{salary}</span>
+                <div class="apply-area">
+                    <span class="close-date">Application Closes on {job.applicationCloseDate}</span>
+                    <template lwc:if={canApply}>
+                        <button class="btn-apply" onclick={handleApply}>Apply</button>
+                    </template>
+                    <template lwc:if={isShortlisted}>
+                        <span class="shortlisted-badge">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            Shortlisted
+                        </span>
+                    </template>
+                    <template lwc:if={isNotEligible}>
+                        <button class="btn-raise-query" onclick={handleOpenQuery}>Raise A Query</button>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- Application Process -->
+        <div class="section-card">
+            <h3 class="section-title">Application Process</h3>
+            <div class="process-stepper">
+                <template for:each={applicationStages} for:item="stage">
+                    <div key={stage.id} class="stepper-step">
+                        <div class="step-dot-row">
+                            <div class={stage.leftLineClass}></div>
+                            <div class={stage.dotClass}></div>
+                            <div class={stage.rightLineClass}></div>
+                        </div>
+                        <div class={stage.cardClass}>
+                            <div class="step-stage-name">{stage.stage}</div>
+                            <div class="step-stage-date">{stage.date}</div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Current Stage Panel — Shortlisted: Book Slot -->
+            <template lwc:if={isBookSlotState}>
+                <div class="stage-panel">
+                    <div class="stage-panel-left">
+                        <h4 class="stage-panel-title">Initial Screening</h4>
+                        <p class="stage-panel-desc">Please choose your preferred time slot for the technical interview.</p>
+                        <button class="btn-book-slot" onclick={handleBookSlot}>Book Slot</button>
+                    </div>
+                    <div class="stage-panel-right">
+                        <div class="congrats-banner">
+                            <div class="congrats-icon">🎉</div>
+                            <div class="congrats-content">
+                                <div class="congrats-title">Congratulations</div>
+                                <div class="congrats-sub">You have been shortlisted for the Technical Interview</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Current Stage Panel — Scheduled: Join Meet -->
+            <template lwc:if={isScheduledState}>
+                <div class="stage-panel">
+                    <div class="stage-panel-left">
+                        <h4 class="stage-panel-title">Initial screening</h4>
+                        <p class="stage-scheduled-time">Interview scheduled at 8th Oct 2026, 10:00 pm IST</p>
+                        <button class="btn-join-meet" onclick={handleJoinMeet}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15 10l4.553-2.276A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>
+                            Join Meet
+                        </button>
+                        <p class="meet-note">The meeting link will be activated 15 minutes before your interview.</p>
+                    </div>
+                    <div class="stage-panel-right">
+                        <div class="prep-tips-card">
+                            <h5 class="tips-title">Preparation tips</h5>
+                            <ol class="tips-ol">
+                                <li>Review resume &amp; job description</li>
+                                <li>Practice communication &amp; intro pitch</li>
+                                <li>Know your notice period &amp; expected CTC</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Current Stage Panel — In Review -->
+            <template lwc:if={isInReviewState}>
+                <div class="stage-panel">
+                    <div class="stage-panel-left">
+                        <h4 class="stage-panel-title">Technical Interview</h4>
+                        <p class="stage-completed-text">Completed on 12th Oct, 2026</p>
+                    </div>
+                    <div class="stage-panel-right">
+                        <div class="in-review-card">
+                            <div class="in-review-header">
+                                <span class="in-review-badge">In Review</span>
+                            </div>
+                            <p class="in-review-desc">Your 1st round initial screening is currently under review</p>
+                            <div class="in-review-illustration">
+                                <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                                    <rect x="12" y="8" width="40" height="48" rx="4" fill="#FDE68A" opacity="0.6"/>
+                                    <rect x="18" y="18" width="28" height="3" rx="1.5" fill="#D97706"/>
+                                    <rect x="18" y="25" width="20" height="3" rx="1.5" fill="#D97706" opacity="0.7"/>
+                                    <rect x="18" y="32" width="24" height="3" rx="1.5" fill="#D97706" opacity="0.5"/>
+                                    <circle cx="44" cy="44" r="10" fill="#F59E0B"/>
+                                    <path d="M40 44l3 3 6-6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- About the Job -->
+        <div class="section-card">
+            <h3 class="section-title">About the Job</h3>
+            <p class="job-description">{job.description}</p>
+        </div>
+
+        <!-- Key Responsibilities -->
+        <div class="section-card">
+            <h3 class="section-title">Key Responsibilities</h3>
+            <ol class="responsibilities-list">
+                <template for:each={keyResponsibilities} for:item="resp">
+                    <li key={resp.key}>{resp.text}</li>
+                </template>
+            </ol>
+
+            <h3 class="section-title skills-section-title">Skill(s) Required</h3>
+            <div class="skill-chips-row">
+                <template for:each={skillChips} for:item="chip">
+                    <span key={chip.key} class="skill-chip">{chip.label}</span>
+                </template>
+            </div>
+
+            <template lwc:if={hasCertCards}>
+                <p class="cert-promo-text">Earn certifications in these skills and increase chances of getting hired</p>
+                <div class="cert-cards-row">
+                    <template for:each={certCards} for:item="cert">
+                        <div key={cert.id} class="cert-card">
+                            <div class="cert-icon" style={cert.iconStyle}>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                            </div>
+                            <div class="cert-info">
+                                <div class="cert-title">{cert.title}</div>
+                                <div class="cert-duration">{cert.durationText}</div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </div>
+
+        <!-- Company Details -->
+        <div class="section-card">
+            <h3 class="section-title">Company Details</h3>
+            <div class="company-details-row">
+                <div class="company-logo-md" style={logoStyle}>{companyInitial}</div>
+                <div class="company-details-info">
+                    <div class="company-details-name">{companyName}</div>
+                    <div class="company-details-meta">
+                        <a href={job.website} class="company-website-link">{job.website}</a>
+                        <span class="meta-sep">·</span>
+                        <span class="meta-item">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            Chennai, India
+                        </span>
+                        <span class="meta-sep">·</span>
+                        <span class="meta-item alumni-text">{job.alumniCount} Alumni Working here</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- APPLY MODAL -->
+    <template lwc:if={showApplyModal}>
+        <div class="modal-overlay" onclick={handleCloseApply}>
+            <div class="modal-box" onclick={stopProp}>
+                <div class="modal-header">
+                    <h3 class="modal-title">Apply to {companyName}</h3>
+                    <button class="modal-close" onclick={handleCloseApply}>✕</button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-sub">Be Sure to Include an Updated Resume</p>
+                    <div class="resume-list">
+                        <template for:each={resumes} for:item="res">
+                            <div key={res.id} class={res.cls} data-id={res.id} onclick={handleSelectResume}>
+                                <div class="pdf-icon-red">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                </div>
+                                <div class="resume-info">
+                                    <div class="resume-name">{res.name}</div>
+                                    <div class="resume-date">{res.date}</div>
+                                </div>
+                                <button class="btn-download-sm" title="Download" data-id={res.id} onclick={handleDownloadResume}>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                </button>
+                                <div class={res.radioClass}></div>
+                            </div>
+                        </template>
+                    </div>
+                    <template lwc:if={hasSelectedResume}>
+                        <div class="resume-preview-box">
+                            <div class="resume-preview-inner">
+                                <div class="resume-preview-lines">
+                                    <div class="rp-header-block"></div>
+                                    <div class="rp-line rp-line-wide"></div>
+                                    <div class="rp-line rp-line-half"></div>
+                                    <div class="rp-divider"></div>
+                                    <div class="rp-line rp-line-full"></div>
+                                    <div class="rp-line rp-line-3q"></div>
+                                    <div class="rp-line rp-line-half"></div>
+                                    <div class="rp-line rp-line-full"></div>
+                                    <div class="rp-line rp-line-3q"></div>
+                                    <div class="rp-divider"></div>
+                                    <div class="rp-line rp-line-wide"></div>
+                                    <div class="rp-line rp-line-full"></div>
+                                    <div class="rp-line rp-line-half"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-outline" onclick={handleCloseApply}>Upload Resume</button>
+                    <button class="btn-primary" onclick={handleSubmitApplication}>Apply Using This Resume</button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- APPLIED SUCCESS MODAL -->
+    <template lwc:if={showSuccessModal}>
+        <div class="modal-overlay" onclick={handleCloseSuccess}>
+            <div class="modal-box modal-sm" onclick={stopProp}>
+                <div class="success-modal-body">
+                    <div class="success-icon">🎉</div>
+                    <h3 class="success-title">You've Applied!</h3>
+                    <p class="success-msg">You have applied for the job successfully. You will be intimated further if you are shortlisted.</p>
+                    <div class="success-actions">
+                        <button class="btn-outline" onclick={handleCloseSuccess}>Close</button>
+                        <button class="btn-primary" onclick={handleAfterApply}>Explore Similar Jobs</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- INTERVIEW SLOT MODAL -->
+    <template lwc:if={showSlotModal}>
+        <div class="modal-overlay" onclick={handleCloseSlot}>
+            <div class="modal-box modal-wide" onclick={stopProp}>
+                <div class="modal-header">
+                    <h3 class="modal-title">Select Interview Slot</h3>
+                    <button class="modal-close" onclick={handleCloseSlot}>✕</button>
+                </div>
+                <div class="modal-body slot-modal-body">
+                    <div class="slot-left">
+                        <div class="cal-nav-row">
+                            <button class="cal-nav-btn" onclick={handleCalPrev}>‹</button>
+                            <span class="cal-month-label">{calMonth}</span>
+                            <button class="cal-nav-btn" onclick={handleCalNext}>›</button>
+                        </div>
+                        <div class="cal-grid">
+                            <template for:each={calWeekDays} for:item="wd">
+                                <div key={wd.key} class="cal-weekday">{wd.label}</div>
+                            </template>
+                            <template for:each={calDays} for:item="cd">
+                                <template lwc:if={cd.isEmpty}>
+                                    <div key={cd.key} class="cal-day cal-day-empty"></div>
+                                </template>
+                                <template lwc:else>
+                                    <button key={cd.key} class={cd.cls} data-date={cd.date} onclick={handleSelectCalDate}>{cd.label}</button>
+                                </template>
+                            </template>
+                        </div>
+                        <div class="cal-legend">
+                            <span class="legend-dot legend-dot-gray"></span>
+                            <span class="legend-label">Available Dates</span>
+                        </div>
+                    </div>
+                    <div class="slot-right">
+                        <p class="slot-section-label">Immediately Available Slots</p>
+                        <template for:each={slotGroups} for:item="group">
+                            <div key={group.key} class="slot-period-section">
+                                <div class="slot-period-row">
+                                    <template for:each={group.slots} for:item="sl">
+                                        <button key={sl.key} class={sl.cls} data-time={sl.time} onclick={handleSelectSlotTime}>
+                                            <span class={sl.periodClass}>{sl.period}</span>
+                                            <span class="slot-time-label">{sl.time}</span>
+                                            <template lwc:if={sl.isSelected}>
+                                                <span class="slot-check-icon">✓</span>
+                                            </template>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                        <div class="slot-note-section">
+                            <div class="slot-note-header">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                <span class="slot-note-title">Please Note:</span>
+                            </div>
+                            <ul class="slot-note-list">
+                                <li>Slots are subject to availability and may change.</li>
+                                <li>Once booked, you cannot cancel within 24 hours.</li>
+                                <li>Ensure your calendar is updated before booking.</li>
+                                <li>A confirmation email will be sent upon booking.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer modal-footer-right">
+                    <button class="btn-primary" onclick={handleConfirmSlot}>Book Slot</button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- QUERY MODAL -->
+    <template lwc:if={showQueryModal}>
+        <div class="modal-overlay" onclick={handleCloseQuery}>
+            <div class="modal-box modal-sm" onclick={stopProp}>
+                <div class="modal-header">
+                    <h3 class="modal-title">Raise A Query</h3>
+                    <button class="modal-close" onclick={handleCloseQuery}>✕</button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-desc">Tell the placements team what you'd like to clarify about this job.</p>
+                    <textarea class="query-textarea" rows="4" oninput={handleQueryInput} value={queryText} placeholder="e.g. Is the eligibility GPA cutoff different for off-campus applicants?"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-outline" onclick={handleCloseQuery}>Cancel</button>
+                    <button class="btn-primary" onclick={handleSubmitQuery}>Submit</button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+</template>

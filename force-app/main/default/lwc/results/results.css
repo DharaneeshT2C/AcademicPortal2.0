@@ -1,0 +1,59 @@
+:host { font-family: var(--font-family, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif); }
+.page { width: 100%; }
+.page-title { font-size: 20px; font-weight: 600; margin-bottom: 24px; letter-spacing: -0.02em; }
+
+.results-top { display: grid; grid-template-columns: 1fr 280px; gap: 24px; margin-bottom: 24px; align-items: start; }
+.main-col { min-width: 0; }
+.card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); }
+.section-title { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+
+/* Chart */
+.chart-card { }
+.chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 8px; }
+.chart-meta { font-size: 13px; color: var(--text-secondary); }
+.chart-meta strong { color: var(--text-primary); font-variant-numeric: tabular-nums; font-weight: 700; }
+
+.line-chart-container { display: flex; gap: 8px; }
+.chart-y-axis { display: flex; flex-direction: column; justify-content: space-between; font-size: 11px; color: var(--text-muted); padding-bottom: 28px; min-width: 24px; text-align: right; font-variant-numeric: tabular-nums; }
+.chart-area { flex: 1; position: relative; min-height: 228px; }
+.chart-grid-lines { position: absolute; top: 0; left: 0; right: 0; bottom: 28px; display: flex; flex-direction: column; justify-content: space-between; }
+.grid-line { border-bottom: 1px dashed var(--border-light); }
+.line-svg { width: 100%; height: 200px; position: relative; z-index: 1; }
+.chart-line { filter: drop-shadow(0 2px 6px rgba(16,185,129,0.35)); }
+.chart-x-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); padding-top: 8px; font-weight: 500; }
+
+/* Grade card sidebar — Figma dark indigo gradient */
+.grade-card { background: linear-gradient(145deg, #1e1b4b 0%, #312e81 35%, #4338CA 70%, #4F46E5 100%); border-radius: var(--radius-xl); padding: 32px 24px; color: #fff; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; overflow: hidden; min-height: 300px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 8px 32px rgba(67,56,202,0.3); }
+.grade-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(67,56,202,0.4); }
+.grade-card::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px); background-size: 18px 18px; pointer-events: none; }
+.grade-card::after { content: ''; position: absolute; top: -40px; right: -40px; width: 160px; height: 160px; border-radius: 50%; background: radial-gradient(circle, rgba(167,139,250,0.2) 0%, transparent 70%); pointer-events: none; }
+.grade-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.01em; position: relative; z-index: 1; }
+.grade-subtitle { font-size: 12px; opacity: 0.7; margin-bottom: 20px; position: relative; z-index: 1; }
+.grade-illustration { flex: 1; display: flex; align-items: center; justify-content: center; opacity: 0.4; position: relative; z-index: 1; }
+.grade-illustration c-icon { color: #fff; }
+.btn-grade { padding: 11px 22px; background: rgba(255,255,255,0.92); color: #312e81; border: none; border-radius: var(--radius-full); font-size: 13px; font-family: inherit; cursor: pointer; margin-top: 20px; font-weight: 600; transition: all 0.2s ease; position: relative; z-index: 1; white-space: nowrap; }
+.btn-grade:hover { background: #fff; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+
+/* Marks table */
+.marks-section { margin-bottom: 0; }
+.marks-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+.marks-meta { font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.marks-meta strong { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.semester-select { padding: 6px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; font-family: inherit; transition: border-color 0.15s; }
+.semester-select:hover { border-color: var(--primary); }
+.current-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; padding: 4px 12px; border-radius: var(--radius-full); background: #f0fdf4; color: #16a34a; font-weight: 600; }
+
+.marks-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.marks-table th { text-align: left; padding: 12px 14px; border-bottom: 2px solid var(--border); color: var(--primary); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.03em; white-space: nowrap; background: #FAFBFF; }
+.marks-table td { padding: 16px 14px; border-bottom: 1px solid var(--border-light); font-variant-numeric: tabular-nums; }
+.marks-table tr:last-child td { border-bottom: none; }
+.marks-table tbody tr:nth-child(even) td { background: #FAFBFF; }
+.marks-table tr { cursor: pointer; transition: background 0.15s; }
+.marks-table tr:hover td { background: #EEF2FF !important; }
+.marks-table c-icon { color: var(--primary); cursor: pointer; vertical-align: middle; }
+.grade-a { color: var(--primary); font-weight: 700; font-size: 14px; }
+.grade-b { color: #16a34a; font-weight: 700; font-size: 14px; }
+.grade-f { color: var(--danger); font-weight: 700; font-size: 14px; }
+
+@media (max-width: 1024px) { .results-top { grid-template-columns: 1fr; } }
+@media (max-width: 768px) { .marks-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; } }

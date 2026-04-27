@@ -1,0 +1,83 @@
+<template>
+    <section class="modulePanel">
+        <div class="toolbar">
+            <div class="toolbarLeft">
+                <button class="btn btnSecondary" type="button">
+                    <lightning-icon class="buttonIcon" icon-name="utility:filterList" size="x-small" alternative-text="Filters"></lightning-icon>
+                    <span>Filters</span>
+                </button>
+            </div>
+            <div class="toolbarRight">
+                <button class="btn btnSecondary" type="button">Export</button>
+                <button class="btn btnPrimary" type="button">Record Payment</button>
+            </div>
+        </div>
+
+        <div class="metricsGrid">
+            <template for:each={metrics} for:item="metric">
+                <article key={metric.id} class="metricCard">
+                    <p class="metricLabel">{metric.label}</p>
+                    <p class={metric.valueClass}>{metric.value}</p>
+                </article>
+            </template>
+        </div>
+
+        <section class="card tableCard">
+            <header class="sectionHeader">
+                <h2 class="sectionTitle">Student Payment Transactions</h2>
+            </header>
+            <template if:true={isLoading}>
+                <div class="loadingState">
+                    <lightning-spinner alternative-text="Loading student transactions" size="small"></lightning-spinner>
+                </div>
+            </template>
+            <template if:true={errorMessage}>
+                <div class="errorBanner" role="alert">{errorMessage}</div>
+            </template>
+            <div class="tableWrap">
+                <table class="dataTable">
+                    <thead>
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>Student Name</th>
+                            <th>Programme</th>
+                            <th>Payment Mode</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Payment Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template if:true={hasRows}>
+                            <template for:each={transactionRows} for:item="row">
+                                <tr key={row.id}>
+                                    <td>
+                                        <button class="tableLink" type="button">{row.transactionId}</button>
+                                    </td>
+                                    <td>
+                                        <div class="studentCell">
+                                            <span class="studentName">{row.studentName}</span>
+                                            <span class="studentId">{row.studentId}</span>
+                                        </div>
+                                    </td>
+                                    <td>{row.programme}</td>
+                                    <td>{row.paymentMode}</td>
+                                    <td class="amountCell">{row.amount}</td>
+                                    <td>
+                                        <span class={row.statusClass}>{row.status}</span>
+                                    </td>
+                                    <td>{row.paymentDate}</td>
+                                </tr>
+                            </template>
+                        </template>
+                        <template if:true={showEmptyState}>
+                            <tr>
+                                <td class="emptyState" colspan="7">No student transactions found.</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </section>
+</template>

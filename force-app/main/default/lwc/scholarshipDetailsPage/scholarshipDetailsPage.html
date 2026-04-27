@@ -1,0 +1,282 @@
+<template>
+    <div class="page">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <button type="button" class="crumb-btn" onclick={handleBackToMasterData}>Master Data</button>
+            <span class="sep">&gt;</span>
+            <button type="button" class="crumb-btn" onclick={handleBackToScholarships}>Scholarships</button>
+            <span class="sep">&gt;</span>
+            <span class="crumb-current">{scholarshipName}</span>
+        </nav>
+
+        <template if:true={isLoading}>
+            <div class="loading-wrap">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={isLoading}>
+            <header class="record-header">
+                <div class="title-area">
+                    <div class="title-row">
+                        <h1 class="page-title">{headerTitle}</h1>
+                        <span class={statusBadgeClass}>{statusLabel}</span>
+                        <span class="lock-badge">{lockText}</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-text">Created by {createdByName}</span>
+                        <span class="meta-text">Last modified {lastModifiedRelative}</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <lightning-button
+                        label="Edit"
+                        icon-name="utility:edit"
+                        onclick={handleEdit}
+                        disabled={isEditDisabled}>
+                    </lightning-button>
+                    <lightning-button
+                        label="Clone"
+                        icon-name="utility:copy"
+                        onclick={handleClone}>
+                    </lightning-button>
+                    <button type="button" class="icon-action-btn" disabled aria-label="More actions">
+                        <lightning-icon icon-name="utility:threedots_vertical" size="x-small"></lightning-icon>
+                    </button>
+                </div>
+            </header>
+
+            <section class="workflow-card">
+                <div class="lifecycle">
+                    <div class={draftStageClass}><span class="lifecycle-dot">1</span><span>Draft</span></div>
+                    <div class="lifecycle-line"></div>
+                    <div class={reviewStageClass}><span class="lifecycle-dot">2</span><span>Under Review</span></div>
+                    <div class="lifecycle-line"></div>
+                    <div class={activeStageClass}><span class={activeDotClass}>3</span><span>Active</span></div>
+                    <div class="lifecycle-line"></div>
+                    <div class={archivedStageClass}><span class="lifecycle-dot">4</span><span>Archived</span></div>
+                </div>
+            </section>
+
+            <template if:true={showActiveBanner}>
+                <div class="warning-banner">
+                    <div class="warning-title">Active Record - Locked</div>
+                    <p class="warning-text">{activeRecordMessage}</p>
+                </div>
+            </template>
+
+            <div class="tabs-card">
+                <div class="tabs">
+                    <button type="button" class={detailsTabClass} data-tab="details" onclick={handleTabClick}>Details</button>
+                    <button type="button" class={eligibilityTabClass} data-tab="eligibility" onclick={handleTabClick}>Eligibility</button>
+                    <button type="button" class={usageTabClass} data-tab="usage" onclick={handleTabClick}>Usage</button>
+                    <button type="button" class={versionTabClass} data-tab="versionHistory" onclick={handleTabClick}>Version History</button>
+                    <button type="button" class={auditTabClass} data-tab="auditLog" onclick={handleTabClick}>Audit Log</button>
+                </div>
+            </div>
+
+            <template if:true={isDetailsTab}>
+                <section class="card">
+                    <h2 class="card-title">Scholarship Information</h2>
+                    <div class="grid two-col">
+                        <div class="field-item">
+                            <div class="label">Scholarship Name</div>
+                            <div class="value">{scholarshipName}</div>
+                        </div>
+                        <div class="field-item">
+                            <div class="label">Version</div>
+                            <div class="value">{versionLabel}</div>
+                        </div>
+                        <div class="field-item">
+                            <div class="label">Status</div>
+                            <div class="value"><span class={statusBadgeClass}>{statusLabel}</span></div>
+                        </div>
+                        <div class="field-item">
+                            <div class="label">Type</div>
+                            <div class="value">{recordData.type}</div>
+                        </div>
+                        <div class="field-item">
+                            <div class="label">Mode</div>
+                            <div class="value">{recordData.mode}</div>
+                        </div>
+                        <div class="field-item">
+                            <div class="label">Value</div>
+                            <div class="value">{valueText}</div>
+                        </div>
+                        <div class="field-item">
+                            <div class="label">Created Date</div>
+                            <div class="value">{createdDateText}</div>
+                        </div>
+                        <div class="field-item">
+                            <div class="label">Activated Date</div>
+                            <div class="value">{activatedDateText}</div>
+                        </div>
+                        <div class="field-item">
+                            <div class="label">Created By</div>
+                            <div class="value">{recordData.createdByName}</div>
+                        </div>
+                        <div class="field-item">
+                            <div class="label">Description</div>
+                            <div class="value">{recordData.description}</div>
+                        </div>
+                    </div>
+                </section>
+            </template>
+
+            <template if:true={isEligibilityTab}>
+                <section class="card">
+                    <h2 class="card-title">Eligibility Mapping</h2>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Connection Name</th>
+                                <th>Linked Level</th>
+                                <!-- <th>Linked Record</th> -->
+                                <!-- <th>Institute</th> -->
+                                <th>Program Plan</th>
+                                <th>Fee Head</th>
+                                <th>Category</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template if:true={hasEligibilityRows}>
+                                <template for:each={eligibilityRows} for:item="row">
+                                    <tr key={row.rowKey}>
+                                        <td>{row.connectionName}</td>
+                                        <td>{row.linkedLevel}</td>
+                                        <!-- <td>{row.linkedRecordName}</td> -->
+                                        <!-- <td>{row.instituteName}</td> -->
+                                        <td>{row.learningProgramPlanName}</td>
+                                        <td>{row.masterFeeHeadName}</td>
+                                        <td>{row.categoryName}</td>
+                                    </tr>
+                                </template>
+                            </template>
+                            <template if:false={hasEligibilityRows}>
+                                <tr>
+                                    <td colspan="7" class="empty">No eligibility mappings available.</td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </section>
+            </template>
+
+            <template if:true={isUsageTab}>
+                <section class="card">
+                    <h2 class="card-title">Usage Metrics</h2>
+                    <div class="usage-metrics">
+                        <div class="metric-card">
+                            <div class="label">Students Assigned</div>
+                            <div class="metric-value">{recordData.studentsAssigned}</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="label">Programmes</div>
+                            <div class="metric-value">{recordData.programmes}</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="label">Assignment Rules</div>
+                            <div class="metric-value">{recordData.assignmentRules}</div>
+                        </div>
+                    </div>
+
+                    <div class="sub-title">Programmes Using This Scholarship</div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Programme</th>
+                                <th>Batch</th>
+                                <th>Status</th>
+                                <th>Students</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template if:true={hasUsageRows}>
+                                <template for:each={usageRows} for:item="row">
+                                    <tr key={row.rowKey}>
+                                        <td>{row.programme}</td>
+                                        <td>{row.batch}</td>
+                                        <td><span class={row.statusClass}>{row.status}</span></td>
+                                        <td>{row.students}</td>
+                                    </tr>
+                                </template>
+                            </template>
+                            <template if:false={hasUsageRows}>
+                                <tr>
+                                    <td colspan="4" class="empty">No usage records available.</td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </section>
+            </template>
+
+            <template if:true={isVersionTab}>
+                <section class="card">
+                    <h2 class="card-title">Version History</h2>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Version</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Created By</th>
+                                <th>Change Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template if:true={hasVersionRows}>
+                                <template for:each={versionRows} for:item="row">
+                                    <tr key={row.rowKey}>
+                                        <td>{row.version}</td>
+                                        <td><span class={row.statusClass}>{row.status}</span></td>
+                                        <td>{row.dateLabel}</td>
+                                        <td>{row.createdBy}</td>
+                                        <td>{row.changeReason}</td>
+                                    </tr>
+                                </template>
+                            </template>
+                            <template if:false={hasVersionRows}>
+                                <tr>
+                                    <td colspan="5" class="empty">No version history available.</td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </section>
+            </template>
+
+            <template if:true={isAuditTab}>
+                <section class="card">
+                    <h2 class="card-title">Audit Trail</h2>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Action</th>
+                                <th>User</th>
+                                <th>Date &amp; Time</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template if:true={hasAuditRows}>
+                                <template for:each={auditRows} for:item="row">
+                                    <tr key={row.rowKey}>
+                                        <td>{row.action}</td>
+                                        <td>{row.userName}</td>
+                                        <td>{row.dateTimeLabel}</td>
+                                        <td>{row.details}</td>
+                                    </tr>
+                                </template>
+                            </template>
+                            <template if:false={hasAuditRows}>
+                                <tr>
+                                    <td colspan="4" class="empty">No audit entries available.</td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </section>
+            </template>
+        </template>
+    </div>
+</template>

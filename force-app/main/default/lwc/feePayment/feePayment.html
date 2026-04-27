@@ -1,0 +1,121 @@
+<template>
+    <template lwc:if={showToast}>
+        <c-toast message={toastMessage} variant={toastVariant} onclose={handleToastClose}></c-toast>
+    </template>
+    <template lwc:if={showPayModal}>
+        <div class="modal-overlay" onclick={handleClosePayModal}>
+            <div class="modal-box" onclick={stopProp}>
+                <div class="modal-header">
+                    <div>
+                        <h3 class="modal-title">Make Payment</h3>
+                        <p class="modal-sub">Select the installment to pay</p>
+                    </div>
+                    <button class="modal-close" onclick={handleClosePayModal}>&#x2715;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="pay-fee-summary">
+                        <div class="pay-row"><span>Total Pending</span><strong>INR {formattedPending}</strong></div>
+                        <div class="pay-row"><span>Due Date</span><strong>Apr 30, 2026</strong></div>
+                    </div>
+                    <div class="pay-method-row">
+                        <label class="pay-method-label">Payment Method</label>
+                        <select class="field-select">
+                            <option>Net Banking</option>
+                            <option>UPI</option>
+                            <option>Debit / Credit Card</option>
+                            <option>Demand Draft</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-cancel" onclick={handleClosePayModal}>Cancel</button>
+                    <button class="btn-primary-sm" onclick={handleConfirmPayment}>Proceed to Pay</button>
+                </div>
+            </div>
+        </div>
+    </template>
+    <div class="page">
+        <div class="page-header">
+            <h2 class="page-title">Fee Payment</h2>
+            <p class="breadcrumb">Home &gt; Fee Payment</p>
+        </div>
+        <div class="tabs-row">
+            <div class="tabs">
+                <button class="tab active">Fee Payment</button>
+                <button class="tab" onclick={handleViewPlan}>Fee Plan</button>
+                <button class="tab" onclick={handleInvoices}>Invoices</button>
+                <button class="tab" onclick={handleTransactions}>Transaction History</button>
+                <button class="tab" onclick={handleRefunds}>Refunds</button>
+            </div>
+        </div>
+        <div class="fee-grid">
+            <div class="main-col">
+                <div class="card summary-card">
+                    <div class="summary-header">
+                        <div class="summary-title-row">
+                            <h3 class="program-name">{data.program}</h3>
+                            <span class="status-ongoing"><c-icon name="circle" size="8"></c-icon> Ongoing</span>
+                        </div>
+                        <button class="btn-primary" onclick={handleMakePayments}>Make Payments</button>
+                    </div>
+                    <div class="summary-metrics">
+                        <div class="summary-metric">
+                            <p class="metric-label">Total Amount Paid</p>
+                            <p class="metric-value">INR {formattedTotalPaid}<span class="metric-of"> of INR {formattedTotalPaidOf}</span></p>
+                        </div>
+                        <div class="summary-metric">
+                            <p class="metric-label">Total Pending</p>
+                            <p class="metric-value">INR {formattedPending}<span class="metric-of"> of INR {formattedPendingOf}</span></p>
+                        </div>
+                        <div class="summary-metric">
+                            <p class="metric-label">Total Fee Amount</p>
+                            <p class="metric-value large">INR {formattedFeeAmount}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="payment-status-bar">
+                    <c-icon name="check_circle" size="24"></c-icon>
+                    <div class="status-bar-content">
+                        <div class="status-bar-title"><strong>Payment Status</strong> <span class="on-track-badge">On Track</span></div>
+                        <p class="status-msg">{data.paymentStatusMessage}</p>
+                    </div>
+                    <div class="status-bar-illustration"><c-icon name="account_balance_wallet" size="48"></c-icon></div>
+                </div>
+                <div class="card">
+                    <div class="plan-header"><h3 class="section-title">Your Current Plan</h3><button class="btn-outline" onclick={handleViewPlan}>View Plan</button></div>
+                    <table class="fee-table">
+                        <thead><tr><th>Fee Item</th><th>Due Date</th><th>Currency</th><th>Total Amount</th><th>Tax</th><th>TDS</th><th>Total Payable</th><th>Status</th></tr></thead>
+                        <tbody>
+                            <template for:each={currentFees} for:item="fee">
+                                <tr key={fee.item}><td>{fee.item}</td><td>{fee.dueDate}</td><td>{fee.currency}</td><td>{fee.totalPayable}</td><td>8,000</td><td>8,000</td><td>{fee.totalPayable}</td><td><span class={fee.feeStatusClass}>{fee.status}</span></td></tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="right-col">
+                <div class="card">
+                    <div class="card-header"><h3 class="section-title">Invoices</h3><button class="btn-outline" onclick={handleInvoices}>View All</button></div>
+                    <template for:each={data.invoices} for:item="inv">
+                        <div key={inv.id} class="invoice-item">
+                            <div class="inv-info"><p class="inv-name">{inv.particulars}</p><p class="inv-id">{inv.invoiceId}</p></div>
+                            <template lwc:if={inv.invoice}><button class="icon-btn" onclick={handleDownloadInvoice}><c-icon name="download" size="20"></c-icon></button></template>
+                            <template lwc:else><span class="not-available">Not Available</span></template>
+                        </div>
+                    </template>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3 class="section-title">Transaction History</h3><button class="btn-outline" onclick={handleRefunds}>Refunds</button></div>
+                    <template for:each={formattedTransactions} for:item="txn">
+                        <div key={txn.id} class="txn-item">
+                            <div class="txn-info"><p class="txn-id">{txn.id}</p><p class="txn-date">{txn.date}</p></div>
+                            <span class={txn.txnStatusClass}>{txn.status}</span>
+                            <template lwc:if={txn.isFailed}><button class="btn-retry-sm" onclick={handleRetryTransaction}>Retry</button></template>
+                        </div>
+                    </template>
+                    <button class="btn-primary full-width" onclick={handleTransactions}>View All Transaction</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

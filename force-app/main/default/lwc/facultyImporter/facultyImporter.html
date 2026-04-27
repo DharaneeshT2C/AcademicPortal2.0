@@ -1,0 +1,92 @@
+<template>
+    <div class="import-controls slds-p-around_small">
+        <div class="file-area">
+            <div class="file-card">
+                <div class="file-icon" aria-hidden="true">
+                    <lightning-icon icon-name="doctype:csv" size="small"></lightning-icon>
+                </div>
+                <div class="file-meta">
+                    <div class="file-title">Upload CSV</div>
+                    <div class="file-subtitle">Use the template to avoid mapping errors.</div>
+                </div>
+                <div class="file-actions">
+                    <input id="facultyFileInput" class="hidden-input" type="file" accept=".csv"
+                        onchange={handleFileChange} />
+                    <label for="facultyFileInput" class="file-button">Choose file</label>
+                </div>
+            </div>
+            <div class="file-status">
+                <span class="file-name">{fileName}</span>
+                <span class="row-count" if:true={rows.length}>{rows.length} rows</span>
+            </div>
+        </div>
+
+        <div class="controls-right">
+            <div class="controls-row">
+                <div class="actions">
+                    <lightning-button label="Download Template" icon-name="utility:download"
+                        onclick={handleDownloadTemplate}></lightning-button>
+                    <lightning-button label="Download Failed" icon-name="utility:download"
+                        onclick={handleDownloadFailed} disabled={failedDownloadDisabled}></lightning-button>
+                    <lightning-button label="Import" variant="brand" icon-name="utility:upload" onclick={handleImport}
+                        disabled={importDisabled}></lightning-button>
+                </div>
+            </div>
+            <template if:true={jobId}>
+                <div class="batch-status">
+                    Status: {jobStatus} • Processed {processedDisplay}/{totalRecords} • Errors {failedCount}
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <template if:true={rows.length}>
+        <div class="preview slds-m-top_medium">
+            <div class="preview-header">
+                <div class="preview-title">Preview</div>
+                <div class="preview-meta">Showing {displayedRows.length} of {filteredRows.length}</div>
+            </div>
+            <template if:true={file}>
+                <div class="preview-controls">
+                    <div class="search-group">
+                        <lightning-icon icon-name="utility:search" size="x-small" class="search-icon"></lightning-icon>
+                        <input class="search-input" type="search" placeholder="Search..."
+                            oninput={handleSearchChange} />
+                    </div>
+                    <div class="page-size-group">
+                        <label class="page-size-label">Rows:</label>
+                        <select class="page-size-select" onchange={handlePageSizeChange} value={pageSize}>
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                        </select>
+                    </div>
+                </div>
+            </template>
+            <div class="sort-status" if:true={sortActive}>Sorted by {sortStatusText}</div>
+            <table class="preview-table">
+                <thead>
+                    <tr>
+                        <template for:each={previewHeaders} for:item="h">
+                            <th key={h.field} data-field={h.field} class="sortable" onclick={handleSort}>{h.label}</th>
+                        </template>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={previewRowValues} for:item="rowVals">
+                        <tr key={rowVals.rowKey}>
+                            <template for:each={rowVals.cells} for:item="cell">
+                                <td key={cell.key}>{cell.value}</td>
+                            </template>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+            <div class="pagination">
+                <button class="page-btn" onclick={handlePrevPage} disabled={prevDisabled}>Prev</button>
+                <span class="page-info">Page {currentPage} of {totalPages}</span>
+                <button class="page-btn" onclick={handleNextPage} disabled={nextDisabled}>Next</button>
+            </div>
+        </div>
+    </template>
+</template>

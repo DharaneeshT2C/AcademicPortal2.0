@@ -1,0 +1,646 @@
+<template>
+    <template if:true={isThemeLoading}>
+        <div class="curriculum-shell skeleton-shell" aria-busy="true">
+            <div class="curriculum-card skeleton-card">
+                <div class="curriculum-hero skeleton-hero">
+                    <div class="skeleton-icon skeleton-shimmer" aria-hidden="true"></div>
+                    <div class="skeleton-hero-text">
+                        <div class="skeleton-line skeleton-shimmer w-45"></div>
+                        <div class="skeleton-line skeleton-shimmer w-75"></div>
+                    </div>
+                </div>
+
+                <div class="curriculum-body skeleton-body">
+                    <div class="skeleton-section">
+                        <div class="skeleton-section-title skeleton-shimmer w-20"></div>
+                        <div class="skeleton-fields">
+                            <div class="skeleton-field skeleton-shimmer"></div>
+                            <div class="skeleton-field skeleton-shimmer"></div>
+                            <div class="skeleton-field skeleton-shimmer"></div>
+                            <div class="skeleton-field skeleton-shimmer"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton-content skeleton-shimmer"></div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template if:false={isThemeLoading}>
+        <div class="curriculum-shell">
+            <div class="curriculum-card">
+                <div class="curriculum-header">
+                    <div class="curriculum-hero">
+                        <div class="hero-icon" aria-hidden="true">
+                            <lightning-icon icon-name="standard:education" size="small"></lightning-icon>
+                        </div>
+                        <div class="hero-copy">
+                            <div class="hero-title">Curriculum Setup</div>
+                            <div class="hero-subtitle">Configure enrollment requirements by period and pathway with
+                                metadata-driven types.</div>
+                        </div>
+                    </div>
+
+                    <div class="section-card selection-card">
+                        <div class="section-heading">
+                            <div>
+                                <div class="section-kicker">Configuration</div>
+                                <div class="section-title">Selection</div>
+                            </div>
+                            <p class="section-description">Choose the program plan and pathway before configuring
+                                period-level enrollment rules.</p>
+                        </div>
+                        <div class="slds-grid slds-wrap slds-gutters">
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-4">
+                                <div class="program-selector">
+                                    <lightning-input type="search" label="Learning Program"
+                                        placeholder="Search or select a program" value={programSearchKey}
+                                        onfocus={handleProgramInputFocus} onclick={handleProgramInputFocus}
+                                        onchange={handleProgramSearchChange} onblur={handleProgramInputBlur}>
+                                    </lightning-input>
+                                    <template if:true={isProgramDropdownOpen}>
+                                        <div class="program-selector-dropdown">
+                                            <template if:true={hasFilteredProgramOptions}>
+                                                <ul class="program-selector-list" role="listbox">
+                                                    <template for:each={filteredProgramOptions} for:item="program">
+                                                        <li key={program.value} class="program-selector-item"
+                                                            data-value={program.value}
+                                                            onmousedown={handleProgramOptionSelect} role="option">
+                                                            {program.label}
+                                                        </li>
+                                                    </template>
+                                                </ul>
+                                            </template>
+                                            <template if:false={hasFilteredProgramOptions}>
+                                                <div class="program-selector-empty">No matching programs found.</div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-4">
+                                <lightning-combobox label="Learning Program Plan" value={selectedProgramPlan}
+                                    options={programPlanOptions} onchange={handleProgramPlanChange}
+                                    disabled={isProgramPlanDisabled}>
+                                </lightning-combobox>
+                            </div>
+
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-4">
+                                <lightning-combobox label="Pathway Type" value={selectedPathwayType}
+                                    options={pathwayTypeOptions} onchange={handlePathwayTypeChange}
+                                    disabled={isPathwayTypeDisabled}>
+                                </lightning-combobox>
+                            </div>
+
+                            <div class="slds-col slds-size_1-of-1 slds-large-size_1-of-4">
+                                <lightning-combobox label="Pathway Name" value={selectedPathwayTemplate}
+                                    options={pathwayTemplateOptions} onchange={handlePathwayTemplateChange}
+                                    disabled={isPathwayNameDisabled}>
+                                </lightning-combobox>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="selection-spotlight">
+                        <div class="selection-chip-grid">
+                            <div class="selection-chip">
+                                <span class="selection-chip-label">Program</span>
+                                <span class="selection-chip-value">{selectedProgramLabel}</span>
+                            </div>
+                            <div class="selection-chip">
+                                <span class="selection-chip-label">Plan</span>
+                                <span class="selection-chip-value">{selectedProgramPlanLabel}</span>
+                            </div>
+                            <template for:each={curriculumSummaryCards} for:item="card">
+                                <article key={card.key} class="summary-card">
+                                    <div class="summary-label">{card.label}</div>
+                                    <div class="summary-value">{card.value}</div>
+                                    <div class="summary-caption">{card.caption}</div>
+                                </article>
+                            </template>
+                        </div>
+                    </div>
+
+
+                </div>
+
+                <div class="curriculum-body">
+                    <div class="workspace-grid">
+                        <div class="workspace-main">
+                            <div class="section-card">
+                                <div class="section-heading">
+                                    <div>
+                                        <div class="section-kicker">Workspace</div>
+                                        <div class="section-title">Curriculum Periods</div>
+                                    </div>
+                                    <p class="section-description">Open a period, switch enrollment types, and manage
+                                        direct courses or grouped rules.</p>
+                                </div>
+
+                                <template if:true={academicSessions.length}>
+                                    <template for:each={academicSessions} for:item="session">
+                                        <div key={session.Id} class="session-card">
+                                            <div data-id={session.Id} onclick={handleToggleSemester}
+                                                class={session.cssClass}>
+                                                <div
+                                                    class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+                                                    <div class="slds-grid slds-grid_vertical-align-center">
+                                                        <lightning-icon icon-name={session.iconName} size="x-small"
+                                                            class="slds-m-right_small">
+                                                        </lightning-icon>
+                                                        <span class="slds-text-title_bold">{session.displayType}</span>
+                                                    </div>
+                                                    <span
+                                                        class="session-state">{session.activeEnrollmentType.label}</span>
+                                                </div>
+                                            </div>
+
+                                            <template if:true={session.isExpanded}>
+                                                <div class="session-content">
+                                                    <template if:true={session.hasCycleOptions}>
+                                                        <div class="cycle-selector-row">
+                                                            <div class="cycle-selector-label">
+                                                                <lightning-icon icon-name="utility:routing_offline"
+                                                                    size="xx-small"
+                                                                    class="cycle-icon"></lightning-icon>
+                                                                <span>Cycle</span>
+                                                            </div>
+                                                            <lightning-combobox variant="label-hidden" label="Cycle"
+                                                                value={session.selectedCycleName}
+                                                                options={session.cycleOptions}
+                                                                placeholder="All Cycles (no filter)"
+                                                                data-semester-id={session.Id}
+                                                                onchange={handleSessionCycleChange}>
+                                                            </lightning-combobox>
+                                                        </div>
+                                                    </template>
+
+                                                    <div class="enrollment-tab-row">
+                                                        <div class="tab-row-header">
+                                                            <p class="tab-row-title">Enrollment Types</p>
+                                                            <p class="tab-row-subtitle">Switch views per period. New
+                                                                metadata records appear here automatically.</p>
+                                                        </div>
+                                                        <div class="enrollment-tab-list">
+                                                            <template for:each={session.enrollmentTypes}
+                                                                for:item="type">
+                                                                <lightning-button key={type.key} label={type.label}
+                                                                    variant={type.buttonVariant}
+                                                                    class={type.buttonClass}
+                                                                    data-semester-id={session.Id}
+                                                                    data-type-key={type.key}
+                                                                    onclick={handleEnrollmentTypeClick}>
+                                                                </lightning-button>
+                                                            </template>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="type-panel">
+                                                        <div class="type-panel-header">
+                                                            <div>
+                                                                <div class="type-panel-title">
+                                                                    {session.activeEnrollmentType.label}</div>
+                                                                <div class="type-panel-subtitle">
+                                                                    Manage direct courses and group-based course rules
+                                                                    for this enrollment type.
+                                                                </div>
+                                                            </div>
+
+                                                            <div>
+                                                                <template
+                                                                    if:true={session.activeEnrollmentType.allowsGroupedCourses}>
+                                                                    <lightning-button label="Create Group"
+                                                                        icon-name="utility:add" variant="outline-brand"
+                                                                        data-semester-id={session.Id}
+                                                                        data-type-key={session.activeEnrollmentType.key}
+                                                                        onclick={handleCreateGroupClick}>
+                                                                    </lightning-button>
+                                                                </template>
+                                                                <template
+                                                                    if:true={session.activeEnrollmentType.allowsDirectCourses}>
+                                                                    <lightning-button label="Add Course"
+                                                                        icon-name="utility:add" variant="outline-brand"
+                                                                        data-semester-id={session.Id}
+                                                                        data-type-key={session.activeEnrollmentType.key}
+                                                                        onclick={handleAddCourseClick}>
+                                                                    </lightning-button>
+                                                                </template>
+                                                            </div>
+                                                        </div>
+
+                                                        <template if:true={session.activeEnrollmentType.allowsDirectCourses}>
+                                                            <template
+                                                                if:true={session.activeEnrollmentType.filteredCourses.length}>
+                                                                <div class="added-courses-container">
+                                                                    <div class="added-courses-title">Added Courses</div>
+                                                                    <div class="added-courses-list">
+                                                                        <template
+                                                                            for:each={session.activeEnrollmentType.filteredCourses}
+                                                                            for:item="course">
+                                                                            <div key={course.id}
+                                                                                class="added-course-row">
+                                                                                <span
+                                                                                    class="course-code">{course.code}</span>
+                                                                                <span
+                                                                                    class="course-name">{course.name}</span>
+                                                                                <template if:true={course.creditLabel}>
+                                                                                    <span class="course-credit">{course.creditLabel}</span>
+                                                                                </template>
+                                                                                <span
+                                                                                    class={course.badgeClass}>{course.typeLabel}</span>
+                                                                                <template if:true={course.cycleName}>
+                                                                                    <span class="course-cycle-pill">{course.cycleName}</span>
+                                                                                </template>
+                                                                            </div>
+                                                                        </template>
+                                                                    </div>
+                                                                </div>
+                                                            </template>
+
+                                                            <template
+                                                                if:false={session.activeEnrollmentType.filteredCourses.length}>
+                                                                <div class="empty-state">
+                                                                    No direct courses added for this enrollment type in
+                                                                    {session.displayType}.
+                                                                </div>
+                                                            </template>
+                                                        </template>
+
+                                                        <template if:true={session.activeEnrollmentType.allowsGroupedCourses}>
+                                                            <template
+                                                                if:true={session.activeEnrollmentType.groups.length}>
+                                                                <div class="group-list">
+                                                                    <template
+                                                                        for:each={session.activeEnrollmentType.groups}
+                                                                        for:item="group">
+                                                                        <article key={group.groupId} class="group-card">
+                                                                            <div class="group-card-header">
+                                                                                <div>
+                                                                                    <div class="group-name">{group.name}
+                                                                                    </div>
+                                                                                    <div class="group-meta">
+                                                                                        {session.activeEnrollmentType.label}
+                                                                                        group</div>
+                                                                                    <template
+                                                                                        if:true={group.ruleSummary}>
+                                                                                        <div class="group-rule">
+                                                                                            {group.ruleSummary}</div>
+                                                                                    </template>
+                                                                                </div>
+                                                                                <lightning-button label="Add Course"
+                                                                                    variant="outline-brand"
+                                                                                    data-semester-id={session.Id}
+                                                                                    data-type-key={session.activeEnrollmentType.key}
+                                                                                    data-group-id={group.groupId}
+                                                                                    onclick={handleAddCourseToGroup}>
+                                                                                </lightning-button>
+                                                                            </div>
+
+                                                                            <template if:true={group.filteredGroupCourses.length}>
+                                                                                <div class="added-courses-list">
+                                                                                    <template for:each={group.filteredGroupCourses}
+                                                                                        for:item="course">
+                                                                                        <div key={course.id}
+                                                                                            class="added-course-row">
+                                                                                            <span
+                                                                                                class="course-code">{course.code}</span>
+                                                                                            <span
+                                                                                                class="course-name">{course.name}</span>
+                                                                                            <template if:true={course.creditLabel}>
+                                                                                                <span class="course-credit">{course.creditLabel}</span>
+                                                                                            </template>
+                                                                                            <span
+                                                                                                class={course.badgeClass}>{course.typeLabel}</span>
+                                                                                            <template if:true={course.cycleName}>
+                                                                                                <span class="course-cycle-pill">{course.cycleName}</span>
+                                                                                            </template>
+                                                                                        </div>
+                                                                                    </template>
+                                                                                </div>
+                                                                            </template>
+
+                                                                            <template if:false={group.filteredGroupCourses.length}>
+                                                                                <div
+                                                                                    class="empty-state group-empty-state">
+                                                                                    No courses added to this group yet.
+                                                                                </div>
+                                                                            </template>
+                                                                        </article>
+                                                                    </template>
+                                                                </div>
+                                                            </template>
+
+                                                            <template
+                                                                if:false={session.activeEnrollmentType.groups.length}>
+                                                                <div class="empty-state">
+                                                                    No groups created for this enrollment type in
+                                                                    {session.displayType}.
+                                                                </div>
+                                                            </template>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </template>
+
+                                <template if:false={academicSessions.length}>
+                                    <div class="empty-state setup-empty-state">
+                                        Select a learning program plan and pathway to generate curriculum periods.
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <aside class="workspace-sidebar">
+                            <div class="section-card sticky-panel">
+                                <div class="sidebar-header">
+                                    <div>
+                                        <div class="section-kicker">Metadata</div>
+                                        <div class="section-title sidebar-title">Enrollment Types</div>
+                                        <p class="sidebar-subtitle">Manage the metadata-backed types rendered in every
+                                            curriculum period.</p>
+                                    </div>
+                                    <lightning-button label="Add" icon-name="utility:add" variant="brand"
+                                        onclick={openEnrollmentTypeModal}>
+                                    </lightning-button>
+                                </div>
+
+                                <div class="type-admin-list">
+                                    <template for:each={enrollmentTypeCards} for:item="type">
+                                        <article key={type.key} class={type.cardClass}>
+                                            <div class="type-admin-card-top">
+                                                <span class={type.pillClass}>{type.label}</span>
+                                                <span class="type-mode">{type.modeLabel}</span>
+                                            </div>
+                                            <div class="type-admin-card-copy">
+                                                API Name: {type.key}
+                                            </div>
+                                            <div class="type-admin-card-copy">
+                                                Nature: {type.natureLabel}
+                                            </div>
+                                        </article>
+                                    </template>
+                                </div>
+
+                                <div class="section-card sticky-panel slds-m-top_medium">
+                                    <div class="sidebar-header">
+                                        <div>
+                                            <div class="section-kicker">Configuration</div>
+                                            <div class="section-title sidebar-title">Academic Cycles</div>
+                                            <p class="sidebar-subtitle">Define cycles (e.g. Physics Cycle, Chemistry
+                                                Cycle) for the selected program plan. Cycles are used during student
+                                                import.</p>
+                                        </div>
+                                        <lightning-button label="Add" icon-name="utility:add" variant="brand"
+                                            onclick={openCycleModal} disabled={isCycleAddDisabled}>
+                                        </lightning-button>
+                                    </div>
+
+                                    <template if:true={hasCycles}>
+                                        <div class="type-admin-list">
+                                            <template for:each={academicCycles} for:item="cycle">
+                                                <article key={cycle.key} class={cycle.cardClass}>
+                                                    <div class="type-admin-card-top">
+                                                        <span class={cycle.pillClass}>{cycle.label}</span>
+                                                    </div>
+                                                    <template if:true={cycle.description}>
+                                                        <div class="type-admin-card-copy">
+                                                            {cycle.description}
+                                                        </div>
+                                                    </template>
+                                                    <div class="type-admin-card-copy">
+                                                        Plan: {cycle.programPlanName}
+                                                    </div>
+                                                </article>
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <template if:false={hasCycles}>
+                                        <div class="empty-state">
+                                            <template if:true={selectedProgramPlan}>
+                                                No cycles defined for this program plan yet.
+                                            </template>
+                                            <template if:false={selectedProgramPlan}>
+                                                Select a program plan to manage cycles.
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <template if:true={showCycleModal}>
+            <section role="dialog" tabindex="-1" aria-modal="true"
+                class="slds-modal slds-fade-in-open curriculum-modal">
+                <div class="slds-modal__container modal-compact">
+                    <header class="slds-modal__header">
+                        <h2 class="slds-text-heading_medium">Add Academic Cycle</h2>
+                    </header>
+
+                    <div class="slds-modal__content slds-p-around_medium modal-stack">
+                        <lightning-input label="Cycle Name" value={newCycleName}
+                            placeholder="e.g. Physics Cycle" onchange={handleCycleNameChange}>
+                        </lightning-input>
+
+                        <lightning-textarea label="Description (optional)" value={newCycleDescription}
+                            placeholder="Describe what this cycle covers" onchange={handleCycleDescriptionChange}>
+                        </lightning-textarea>
+
+                        <p class="type-mode-helper">
+                            This cycle will be linked to the currently selected program plan
+                            and will appear as an option during student import.
+                        </p>
+                    </div>
+
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cancel" onclick={closeCycleModal}>
+                        </lightning-button>
+
+                        <lightning-button label="Save" variant="brand" onclick={saveCycle}>
+                        </lightning-button>
+                    </footer>
+                </div>
+            </section>
+
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+
+        <template if:true={showCategoryModal}>
+            <section role="dialog" tabindex="-1" aria-modal="true"
+                class="slds-modal slds-fade-in-open curriculum-modal">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <h2 class="slds-text-heading_medium">{activeGroupModalTitle}</h2>
+                    </header>
+
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <lightning-input label={activeGroupModalLabel} value={groupNameInput}
+                            onchange={handleCategoryInput}>
+                        </lightning-input>
+                    </div>
+
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cancel" onclick={closeCategoryModal}>
+                        </lightning-button>
+
+                        <lightning-button label="Save" variant="brand" onclick={saveCategory}>
+                        </lightning-button>
+                    </footer>
+                </div>
+            </section>
+
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+
+        <template if:true={showEnrollmentTypeModal}>
+            <section role="dialog" tabindex="-1" aria-modal="true"
+                class="slds-modal slds-fade-in-open curriculum-modal">
+                <div class="slds-modal__container modal-compact">
+                    <header class="slds-modal__header">
+                        <h2 class="slds-text-heading_medium">Add Enrollment Type</h2>
+                    </header>
+
+                    <div class="slds-modal__content slds-p-around_medium modal-stack">
+                        <lightning-input label="Enrollment Type Name" value={newEnrollmentTypeName}
+                            onchange={handleEnrollmentTypeNameChange}>
+                        </lightning-input>
+
+                        <lightning-combobox label="Course Management Mode" value={newEnrollmentTypeCourseManagementMode}
+                            options={enrollmentTypeModeOptions} onchange={handleEnrollmentTypeModeChange}>
+                        </lightning-combobox>
+
+                        <lightning-combobox label="Requirement Nature" value={newEnrollmentTypeRequirementNature}
+                            options={requirementNatureOptions}
+                            onchange={handleEnrollmentTypeRequirementNatureChange}>
+                        </lightning-combobox>
+
+                        <p class="type-mode-helper">{activeEnrollmentTypeModeText}</p>
+                    </div>
+
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cancel" onclick={closeEnrollmentTypeModal}>
+                        </lightning-button>
+
+                        <lightning-button label="Save" variant="brand" onclick={saveEnrollmentType}>
+                        </lightning-button>
+                    </footer>
+                </div>
+            </section>
+
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+
+        <template if:true={showRuleModal}>
+            <section class="slds-modal slds-fade-in-open curriculum-modal">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <h2 class="slds-text-heading_medium">Select Course Selection Rule</h2>
+                    </header>
+
+                    <div class="slds-modal__content slds-p-around_medium">
+                        <lightning-radio-group label="Rule Type" options={ruleOptions} value={ruleType}
+                            onchange={handleRuleTypeChange}>
+                        </lightning-radio-group>
+
+                        <template if:true={isCountRule}>
+                            <lightning-input type="number" label="Minimum Courses" value={minCourses}
+                                onchange={handleMinChange}>
+                            </lightning-input>
+
+                            <lightning-input type="number" label="Maximum Courses" value={maxCourses}
+                                onchange={handleMaxChange}>
+                            </lightning-input>
+                        </template>
+
+                        <template if:true={isCreditRule}>
+                            <lightning-input type="number" label="Maximum Credits Allowed" value={maxCredits}
+                                onchange={handleCreditChange}>
+                            </lightning-input>
+                        </template>
+                    </div>
+
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cancel" onclick={closeRuleModal}>
+                        </lightning-button>
+
+                        <lightning-button variant="brand" label="Continue" onclick={proceedToCoursePicker}>
+                        </lightning-button>
+                    </footer>
+                </div>
+            </section>
+
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+
+        <template if:true={showCourseModal}>
+            <section role="dialog" tabindex="-1" aria-modal="true"
+                class="slds-modal slds-fade-in-open curriculum-modal">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <h2 class="slds-text-heading_medium">Add Courses</h2>
+                    </header>
+
+                    <div class="slds-modal__content slds-p-around_medium course-modal-content">
+                        <template if:true={activeCycleName}>
+                            <div class="course-modal-cycle-badge">
+                                Adding to cycle: <strong>{activeCycleName}</strong>
+                            </div>
+                        </template>
+                        <div class="search-container">
+                            <lightning-input type="search" variant="label-hidden"
+                                placeholder="Search by Course Name or Course Code" value={searchKey}
+                                onchange={handleCourseSearch}>
+                            </lightning-input>
+                        </div>
+
+                        <template if:true={isCourseListTrimmed}>
+                            <div class="course-list-helper">
+                                Showing the first 100 courses. Search to narrow the list and load more results.
+                            </div>
+                        </template>
+
+                        <div class="course-list-container">
+                            <template for:each={filteredCourses} for:item="course">
+                                <div key={course.Id} class={course.rowClass}>
+                                    <lightning-input type="checkbox" variant="label-hidden" data-course-id={course.Id}
+                                        checked={course.isChecked} disabled={course.isAlreadyAddedToActiveTarget}
+                                        onchange={handleCourseSelection}>
+                                    </lightning-input>
+
+                                    <span class="course-text">
+                                        {course.CourseNumber} - {course.Name}
+                                    </span>
+
+                                    <template if:true={course.isAlreadyAddedToActiveTarget}>
+                                        <span class="course-status-tag">Already Added</span>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <template if:false={filteredCourses.length}>
+                                <div class="slds-text-color_weak slds-m-top_medium">
+                                    No courses found
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <footer class="slds-modal__footer">
+                        <lightning-button label="Cancel" onclick={closeCourseModal}></lightning-button>
+                        <lightning-button label="Done" variant="brand" onclick={handleDoneClick}></lightning-button>
+                    </footer>
+                </div>
+            </section>
+
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </template>
+    </template>
+</template>

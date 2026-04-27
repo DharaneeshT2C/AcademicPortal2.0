@@ -1,0 +1,53 @@
+<template>
+    <section class="help-modal-backdrop" role="dialog" aria-modal="true" aria-label="Get Help">
+        <div class="help-modal">
+            <h3>Get Help</h3>
+            <div class="help-divider"></div>
+
+            <label class="field-label" for="help-description">Description of the issue (Optional)</label>
+            <div class="description-wrap">
+                <textarea
+                    id="help-description"
+                    class="modal-textarea"
+                    name="description"
+                    value={description}
+                    placeholder="Enter description"
+                    oninput={handleFieldChange}>
+                </textarea>
+                <button type="button" class="auto-create-button" onclick={handleAutoCreate}>Auto-Create Form Now</button>
+            </div>
+
+            <label class="field-label required" for="help-type">Choose Issue Type</label>
+            <select id="help-type" class="modal-input" name="issueType" value={issueType} onchange={handleFieldChange}>
+                <template for:each={issueOptions} for:item="option">
+                    <option key={option} value={option}>{option}</option>
+                </template>
+            </select>
+
+            <label class="field-label required" for="help-subject">Issue Subject</label>
+            <input
+                id="help-subject"
+                class="modal-input"
+                type="text"
+                name="subject"
+                value={subject}
+                placeholder="Enter issue subject"
+                oninput={handleFieldChange} />
+
+            <p class="field-label upload-label">Upload Supporting Document (Optional)</p>
+            <label class="upload-box" for="support-document">
+                <input id="support-document" class="upload-input" type="file" accept=".png,.jpg,.jpeg,.pdf" onchange={handleFileSelect} />
+                <p><span>Click to upload</span> or drag and drop</p>
+                <p>PNG, JPG or PDF (Max 5 MB)</p>
+                <template if:true={fileName}>
+                    <p class="file-name">{fileName}</p>
+                </template>
+            </label>
+
+            <div class="modal-actions">
+                <button type="button" class="cancel-button" onclick={handleClose}>Cancel</button>
+                <button type="button" class="modal-submit-button" onclick={handleSubmit}>Submit</button>
+            </div>
+        </div>
+    </section>
+</template>

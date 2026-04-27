@@ -1,0 +1,198 @@
+/* ═══════════════════════════════════════════════════════════════
+   Grade Schema List — clean table view
+   Matches Evaluation Schema table style
+   Colors from ExamManagementTheme__c via CSS vars, no blue fallbacks
+═══════════════════════════════════════════════════════════════ */
+
+:host {
+    display: block;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+.gsl-wrap { background: transparent; }
+
+/* ── Header ──────────────────────────────────────────────────── */
+.gsl-header {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; padding: 0 0 1.25rem;
+}
+
+.gsl-title {
+    font-size: 1.05rem; font-weight: 700; margin: 0 0 0.2rem;
+    color: var(--brand-text, #182330);
+    -webkit-text-fill-color: initial; background: none;
+}
+
+.gsl-subtitle {
+    font-size: 0.825rem;
+    color: var(--brand-text-secondary, #556476);
+    margin: 0;
+}
+
+/* ── Create Button ───────────────────────────────────────────── */
+.gsl-btn-primary {
+    background: var(--brand-btn-bg, #374151);
+    color: var(--brand-btn-text, #ffffff);
+    border: none; border-radius: 8px;
+    padding: 0.48rem 1.15rem; font-size: 0.875rem; font-weight: 600;
+    cursor: pointer; white-space: nowrap; flex-shrink: 0; font-family: inherit;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+    position: relative; overflow: hidden;
+}
+.gsl-btn-primary::after { display: none; }
+.gsl-btn-primary:hover {
+    background: var(--brand-btn-hover-bg, #1f2937);
+    box-shadow: 0 3px 8px rgba(15, 23, 42, 0.15);
+}
+
+/* ── Table Container ─────────────────────────────────────────── */
+.gsl-table-wrap {
+    background: var(--brand-surface, #ffffff);
+    border: 1px solid var(--brand-border, #dce5ef);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.06);
+}
+
+/* ── Column Header Row ───────────────────────────────────────── */
+.gsl-table-head {
+    display: flex;
+    align-items: center;
+    background: var(--brand-bg-soft, #f7f9fc);
+    border-bottom: 1px solid var(--brand-border, #dce5ef);
+}
+
+.gsl-th {
+    padding: 0.75rem 1rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--brand-text-secondary, #556476);
+    white-space: nowrap;
+}
+
+/* ── Data Row ────────────────────────────────────────────────── */
+.gsl-table-row {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--brand-border, #edf2f8);
+    transition: background 0.15s ease;
+}
+.gsl-table-row:last-child { border-bottom: none; }
+.gsl-table-row:hover { background: var(--brand-bg-soft, #f9fbfe); }
+
+.gsl-td {
+    padding: 0.95rem 1rem;
+    font-size: 0.875rem;
+    color: var(--brand-text, #182330);
+}
+
+/* ── Column widths ───────────────────────────────────────────── */
+.gsl-col-name     { flex: 2; min-width: 0; }
+.gsl-col-relative { flex: 1; }
+.gsl-col-absolute { flex: 1; }
+.gsl-col-total    { flex: 1; }
+.gsl-col-status   { flex: 1; }
+.gsl-col-action   { flex: 0 0 80px; text-align: right; }
+
+/* ── Name cell ───────────────────────────────────────────────── */
+.gsl-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 0;
+}
+
+.gsl-row-icon {
+    flex-shrink: 0;
+    width: 30px; height: 30px;
+    background: var(--brand-secondary, #f1f4f8);
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--brand-text-secondary, #556476);
+}
+
+.gsl-name-text {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--brand-text, #182330);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Status badge ────────────────────────────────────────────── */
+.gsl-active-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.2rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid transparent;
+}
+
+.gsl-active-badge--on {
+    background: #e8f7ee;
+    color: #166738;
+    border-color: #b7e4c7;
+}
+
+.gsl-active-badge--off {
+    background: var(--brand-bg-soft, #f1f4f8);
+    color: var(--brand-text-secondary, #556476);
+    border-color: var(--brand-border, #d6deea);
+}
+
+/* ── View button ─────────────────────────────────────────────── */
+.gsl-view-btn {
+    background: transparent;
+    border: 1px solid var(--brand-border, #dce5ef);
+    border-radius: 6px;
+    padding: 0.28rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--brand-text-secondary, #556476);
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+    white-space: nowrap;
+}
+.gsl-view-btn:hover {
+    border-color: var(--brand-primary, #374151);
+    color: var(--brand-primary, #374151);
+    background: var(--brand-secondary, #f1f4f8);
+}
+
+/* ── Empty state ─────────────────────────────────────────────── */
+.gsl-empty {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 3.5rem 2rem; text-align: center;
+    background: var(--brand-surface, #ffffff);
+    border: 1px solid var(--brand-border, #dce5ef);
+    border-radius: 12px;
+}
+
+.gsl-empty-icon {
+    width: 52px; height: 52px;
+    background: var(--brand-secondary, #f1f4f8);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--brand-text-secondary, #556476);
+    margin-bottom: 1rem;
+}
+
+.gsl-empty-text {
+    font-size: 0.975rem; font-weight: 700;
+    color: var(--brand-text, #182330); margin: 0 0 0.35rem;
+}
+
+.gsl-empty-sub {
+    font-size: 0.825rem;
+    color: var(--brand-text-secondary, #556476);
+    margin: 0 0 1.25rem; max-width: 300px; line-height: 1.5;
+}

@@ -1,0 +1,176 @@
+<template>
+    <div class="page">
+        <template if:true={notification}>
+            <section class={notification.containerClass} role="alert" aria-live="assertive">
+                <div class="noticeContent">
+                    <div class="noticeIconWrap">
+                        <lightning-icon icon-name={notification.iconName} size="x-small"></lightning-icon>
+                    </div>
+                    <div class="noticeCopy">
+                        <div class="noticeTitle">{notification.title}</div>
+                        <p class="noticeMessage">{notification.message}</p>
+                    </div>
+                </div>
+                <button type="button" class="noticeDismiss" onclick={dismissNotification} aria-label="Dismiss message">
+                    <lightning-icon icon-name="utility:close" size="x-small"></lightning-icon>
+                </button>
+            </section>
+        </template>
+
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <button type="button" class="crumb-btn" onclick={handleGoToMasterData}>Master Data</button>
+            <span class="sep">&gt;</span>
+            <button type="button" class="crumb-btn" onclick={handleGoToInstallmentPlans}>Installment Plans</button>
+            <span class="sep">&gt;</span>
+            <span class="crumb-current">{crumbActionLabel}</span>
+        </nav>
+
+        <header class="page-header">
+            <h1 class="page-title">{pageTitle}</h1>
+            <div class="header-actions">
+                <lightning-button class="btn-neutral" label="Cancel" onclick={handleCancel} disabled={isSaving}></lightning-button>
+                <lightning-button class="btn-outline" label="Save Draft" onclick={handleSaveDraft} disabled={isSaving}></lightning-button>
+                <lightning-button class="btn-primary" variant="brand" label="Activate" onclick={handleActivate} disabled={isSaving}></lightning-button>
+            </div>
+        </header>
+
+        <template if:true={isLoading}>
+            <div class="loading-card">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={isLoading}>
+            <section class="form-card">
+                <h2 class="section-title">Installment Plan Information</h2>
+
+                <div class="form-grid info-grid">
+                    <lightning-input
+                        class="field-control"
+                        label="Installment Plan Name"
+                        data-field="planName"
+                        value={planName}
+                        onchange={handleHeaderFieldChange}
+                        required>
+                    </lightning-input>
+
+                    <lightning-input
+                        class="field-control"
+                        type="text"
+                        label="Installment Code"
+                        data-field="installmentCode"
+                        value={installmentCode}
+                        onchange={handleHeaderFieldChange}
+                        required>
+                    </lightning-input>
+
+                    <div class="status-field">
+                        <lightning-combobox
+                            class="field-control"
+                            label="Status"
+                            data-field="status"
+                            value={status}
+                            options={statusOptions}
+                            onchange={handleHeaderFieldChange}
+                            required>
+                        </lightning-combobox>
+                        <span class={statusBadgeClass}>{status}</span>
+                    </div>
+
+                    <lightning-input
+                        class="field-control"
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.01"
+                        label="Additional Fee %"
+                        data-field="installmentFeePercentage"
+                        value={installmentFeePercentage}
+                        onchange={handleHeaderFieldChange}>
+                    </lightning-input>
+                </div>
+
+                <div class="add-installment-row">
+                    <lightning-button
+                        class="btn-primary"
+                        label="Add Installment"
+                        icon-name="utility:add"
+                        variant="brand"
+                        onclick={handleAddInstallment}>
+                    </lightning-button>
+                </div>
+            </section>
+
+            <section class="form-card">
+                <h2 class="section-title">Installment Schedule</h2>
+
+                <template if:true={hasInstallmentRows}>
+                    <div class="installment-list">
+                        <template for:each={installmentRows} for:item="row">
+                            <article key={row.key} class="installment-card">
+                                <div class="installment-head">
+                                    <h3 class="installment-title">Installment {row.order}</h3>
+                                    <lightning-button-icon
+                                        class="row-delete-btn"
+                                        icon-name="utility:delete"
+                                        variant="bare"
+                                        alternative-text="Delete installment row"
+                                        title="Delete installment row"
+                                        data-row-key={row.key}
+                                        onclick={handleDeleteInstallmentRow}>
+                                    </lightning-button-icon>
+                                </div>
+
+                                <div class="row-grid">
+                                    <lightning-input
+                                        class="field-control"
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        step="0.01"
+                                        label="% of Total Applicable"
+                                        data-row-key={row.key}
+                                        data-field="percentage"
+                                        value={row.percentage}
+                                        onchange={handleRowFieldChange}>
+                                    </lightning-input>
+
+                                    <lightning-input
+                                        class="field-control"
+                                        type="date"
+                                        label="Installment Start Date"
+                                        data-row-key={row.key}
+                                        data-field="startDate"
+                                        value={row.startDate}
+                                        onchange={handleRowFieldChange}>
+                                    </lightning-input>
+
+                                    <lightning-input
+                                        class="field-control"
+                                        type="number"
+                                        min="0"
+                                        step="1"
+                                        label="Due in Days from Start"
+                                        data-row-key={row.key}
+                                        data-field="dueDays"
+                                        value={row.dueDays}
+                                        onchange={handleRowFieldChange}>
+                                    </lightning-input>
+                                </div>
+                            </article>
+                        </template>
+                    </div>
+
+                    <div class="totals-row">
+                        <span>Total Installment %: <strong>{totalInstallmentPercentage}%</strong></span>
+                    </div>
+                </template>
+            </section>
+
+            <footer class="page-footer">
+                <lightning-button class="btn-neutral" label="Cancel" onclick={handleCancel} disabled={isSaving}></lightning-button>
+                <lightning-button class="btn-primary" variant="brand" label="Save" onclick={handleFooterSave} disabled={isSaving}></lightning-button>
+            </footer>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,28 @@
+<template>
+  <div class="section-card">
+    <div class="section-title">Student Enrollment Screen</div>
+
+    <template if:true={isLoading}>
+      <lightning-spinner size="small" alternative-text="Loading enrollments"></lightning-spinner>
+    </template>
+
+    <template if:true={errorMessage}>
+      <div class="error-text slds-m-top_small">{errorMessage}</div>
+    </template>
+
+    <template if:true={hasRows}>
+      <div class="table-wrap slds-m-top_small">
+        <lightning-datatable
+          key-field="enrollmentId"
+          data={rows}
+          columns={columns}
+          hide-checkbox-column
+        ></lightning-datatable>
+      </div>
+    </template>
+
+    <template if:true={showEmptyState}>
+      <div class="empty-state slds-m-top_small">No Academic Term Enrollment records found for this term.</div>
+    </template>
+  </div>
+</template>

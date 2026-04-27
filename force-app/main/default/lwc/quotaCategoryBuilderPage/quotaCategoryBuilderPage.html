@@ -1,0 +1,82 @@
+<template>
+    <div class="page">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <button type="button" class="crumb-btn" onclick={navigateToMasterData}>Master Data</button>
+            <span class="sep">&gt;</span>
+            <button type="button" class="crumb-btn" onclick={navigateToQuotaCategories}>Quota &amp; Categories</button>
+            <span class="sep">&gt;</span>
+            <span class="crumb-current">{actionLabel}</span>
+        </nav>
+
+        <header class="builderHeader">
+            <div class="titleBlock">
+                <h1 class="pageTitle">{pageTitle}</h1>
+            </div>
+            <div class="headerActions">
+                <lightning-button class="btnNeutral" label="Cancel" onclick={handleCancel} disabled={isSaving}></lightning-button>
+                <lightning-button class="btnPrimary" variant="brand" label="Save" onclick={handleSave} disabled={isSaving}></lightning-button>
+            </div>
+        </header>
+
+        <template if:true={isLoading}>
+            <div class="loadingWrap">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={isLoading}>
+            <section class="formCard">
+                <h2 class="sectionTitle">Category Details</h2>
+
+                <div class="formGrid">
+                    <lightning-input
+                        name="categoryName"
+                        label="Category Name"
+                        value={categoryName}
+                        required
+                        onchange={handleInputChange}>
+                    </lightning-input>
+
+                    <lightning-combobox
+                        name="categoryType"
+                        label="Category Type"
+                        value={categoryType}
+                        options={categoryTypeOptions}
+                        required
+                        placeholder="Select an option"
+                        onchange={handleInputChange}>
+                    </lightning-combobox>
+
+                    <lightning-combobox
+                        name="currencyCode"
+                        label="Currency"
+                        value={currencyCode}
+                        options={currencyOptions}
+                        placeholder="Select an option"
+                        onchange={handleInputChange}>
+                    </lightning-combobox>
+
+                    <lightning-input
+                        name="regulatorySource"
+                        label="Regulatory Source"
+                        value={regulatorySource}
+                        onchange={handleInputChange}>
+                    </lightning-input>
+
+                    <div class="statusWrap">
+                        <span class="statusLabel">Status</span>
+                        <lightning-input
+                            class="statusToggle"
+                            type="toggle"
+                            name="isActive"
+                            checked={isActive}
+                            message-toggle-active="Active"
+                            message-toggle-inactive="Inactive"
+                            onchange={handleInputChange}>
+                        </lightning-input>
+                    </div>
+                </div>
+            </section>
+        </template>
+    </div>
+</template>

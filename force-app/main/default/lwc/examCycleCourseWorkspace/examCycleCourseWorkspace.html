@@ -1,0 +1,733 @@
+<template>
+    <div class="ws-wrap">
+        <div class="ws-header">
+            <div class="ws-breadcrumb">
+                <button class="ws-link" onclick={handleBack}>Exam Cycle</button>
+                <span class="ws-sep">›</span>
+                <span>{cycleName}</span>
+            </div>
+            <h2 class="ws-title">{cycleName}</h2>
+            <p class="ws-meta">{termId}</p>
+        </div>
+
+        <div class="ws-tabs">
+            <button class={masterCourseTabClass} data-tab="masterCourse" onclick={handleTabClick}>Master Course</button>
+            <button class={examPlanningTabClass} data-tab="examPlanning" onclick={handleTabClick}>Exam Planning</button>
+            <button class={resultsTabClass} data-tab="results" onclick={handleTabClick}>Results</button>
+            <button class={marksCardTabClass} data-tab="marksCard" onclick={handleTabClick}>Marks Card</button>
+            <button class={transcriptsTabClass} data-tab="transcripts" onclick={handleTabClick}>Transcripts</button>
+        </div>
+
+        <template lwc:if={isMasterCourseTab}>
+            <c-exam-cycle-course-mapping
+                cycle-id={cycleId}
+                cycle-name={cycleName}
+                term-id={termId}
+                grade-schemas={gradeSchemas}
+                onback={handleBack}
+            ></c-exam-cycle-course-mapping>
+        </template>
+
+        <template lwc:elseif={isExamPlanningTab}>
+            <template lwc:if={isPlanningListView}>
+                <div class="plan-header">
+                    <h3 class="plan-title">Exam Planning</h3>
+                    <button class="btn-primary" onclick={handleOpenCreatePlan}>+ New Plan</button>
+                </div>
+
+                <template lwc:if={plansError}>
+                    <div class="placeholder">{plansError}</div>
+                </template>
+
+                <template lwc:if={hasPlans}>
+                    <div class="plan-cards">
+                        <template for:each={planningCards} for:item="card">
+                            <button key={card.id} class="plan-card" data-id={card.id} onclick={handlePlanCardClick}>
+                                <span class={card.statusClass}>{card.status}</span>
+                                <h4>{card.name}</h4>
+                                <p><span>Exam Type:</span> {card.examType}</p>
+                                <p><span>Start:</span> {card.startDate}</p>
+                                <p><span>End:</span> {card.endDate}</p>
+                            </button>
+                        </template>
+                    </div>
+                </template>
+                <template lwc:else>
+                    <div class="placeholder">No exam plans yet. Click + New Plan to create one.</div>
+                </template>
+            </template>
+
+            <template lwc:else>
+                <div class="plan-detail-head">
+                    <div>
+                        <div class="ws-breadcrumb">
+                            <span>Exam Cycle</span>
+                            <span class="ws-sep">›</span>
+                            <span>Exam Planning</span>
+                            <span class="ws-sep">›</span>
+                            <span>{selectedPlanName}</span>
+                        </div>
+                        <h3 class="plan-title">{selectedPlanName}</h3>
+                        <p class="ws-meta">{selectedPlanDateLine}</p>
+                    </div>
+                    <button class="btn-ghost" onclick={handleBackToPlans}>Back to Plans</button>
+                </div>
+
+                <div class="ws-tabs ws-tabs--inner">
+                    <button class={planExamsTabClass} data-subtab="exams" onclick={handlePlanningSubTabClick}>Exams</button>
+                    <button class={planEnrollmentTabClass} data-subtab="enrollment" onclick={handlePlanningSubTabClick}>Enrolment Window</button>
+                    <button class={planScheduleTabClass} data-subtab="schedule" onclick={handlePlanningSubTabClick}>Schedule</button>
+                    <button class={planSeatingTabClass} data-subtab="seating" onclick={handlePlanningSubTabClick}>Seating Plan</button>
+                    <button class={planQuestionPaperTabClass} data-subtab="questionPaper" onclick={handlePlanningSubTabClick}>Question Paper</button>
+                    <button class={planInvigilatorTabClass} data-subtab="invigilator" onclick={handlePlanningSubTabClick}>Invigilator</button>
+                    <button class={planBundlingTabClass} data-subtab="bundling" onclick={handlePlanningSubTabClick}>Bundling</button>
+                    <button class={planEvaluatorTabClass} data-subtab="evaluator" onclick={handlePlanningSubTabClick}>Evaluator</button>
+                </div>
+
+                <div class="panel">
+                    <template lwc:if={isPlanExamsTab}>
+                        <template lwc:if={examRowsError}>
+                            <div class="placeholder">{examRowsError}</div>
+                        </template>
+                        <template lwc:elseif={hasExamRows}>
+                            <div class="panel-title">Exams</div>
+                            <table class="grid">
+                                <thead>
+                                    <tr><th>Course Code</th><th>Course</th><th>Enrollment</th><th>Question Paper</th><th>Schedule</th><th>Seating Plan</th><th>Invigilator</th><th>Marks Entry</th></tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={planExamRows} for:item="row">
+                                        <tr key={row.id}>
+                                            <td>{row.code}</td>
+                                            <td>{row.course}</td>
+                                            <td>
+                                                <span class="status-cell">
+                                                    <template lwc:if={row.enrollmentStatus.showIcon}>
+                                                        <span class={row.enrollmentStatus.iconClass}></span>
+                                                    </template>
+                                                    <span class={row.enrollmentStatus.pillClass}>{row.enrollmentStatus.label}</span>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="status-cell">
+                                                    <template lwc:if={row.questionPaperStatus.showIcon}>
+                                                        <span class={row.questionPaperStatus.iconClass}></span>
+                                                    </template>
+                                                    <span class={row.questionPaperStatus.pillClass}>{row.questionPaperStatus.label}</span>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="status-cell">
+                                                    <template lwc:if={row.scheduleStatus.showIcon}>
+                                                        <span class={row.scheduleStatus.iconClass}></span>
+                                                    </template>
+                                                    <span class={row.scheduleStatus.pillClass}>{row.scheduleStatus.label}</span>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="status-cell">
+                                                    <template lwc:if={row.seatingPlanStatus.showIcon}>
+                                                        <span class={row.seatingPlanStatus.iconClass}></span>
+                                                    </template>
+                                                    <span class={row.seatingPlanStatus.pillClass}>{row.seatingPlanStatus.label}</span>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="status-cell">
+                                                    <template lwc:if={row.invigilatorStatus.showIcon}>
+                                                        <span class={row.invigilatorStatus.iconClass}></span>
+                                                    </template>
+                                                    <span class={row.invigilatorStatus.pillClass}>{row.invigilatorStatus.label}</span>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="status-cell">
+                                                    <template lwc:if={row.marksEntryStatus.showIcon}>
+                                                        <span class={row.marksEntryStatus.iconClass}></span>
+                                                    </template>
+                                                    <span class={row.marksEntryStatus.pillClass}>{row.marksEntryStatus.label}</span>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </template>
+                        <template lwc:else>
+                            <div class="placeholder">No examinations found for this plan yet.</div>
+                        </template>
+                    </template>
+
+                    <template lwc:elseif={isPlanEnrollmentTab}>
+                        <div class="panel-actions">
+                            <button class="btn-primary" onclick={handleStartEnrollment} disabled={isStartEnrollmentDisabled}>+ Start Enrollment</button>
+                        </div>
+                        <template lwc:if={enrollmentProgramsError}>
+                            <div class="placeholder">{enrollmentProgramsError}</div>
+                        </template>
+                        <template lwc:elseif={hasEnrollmentRows}>
+                            <table class="grid">
+                                <thead>
+                                    <tr><th></th><th>Program Code</th><th>Program</th><th>Students</th><th>Start Date</th><th>End Date</th><th>Eligibility Criteria</th><th>Status</th></tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={enrollmentRows} for:item="row">
+                                        <tr key={row.id}>
+                                            <td><input type="checkbox" checked={row.isSelected} data-id={row.id} onchange={handleProgramSelect}></td>
+                                            <td>{row.code}</td><td>{row.program}</td><td>{row.students}</td><td>{row.startDate}</td><td>{row.endDate}</td><td><button class="btn-mini" data-id={row.id} onclick={handleViewEligibility}>View</button></td><td>{row.status}</td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </template>
+                        <template lwc:else>
+                            <div class="placeholder">No programs found for this plan yet.</div>
+                        </template>
+                    </template>
+
+                    <template lwc:elseif={isPlanScheduleTab}>
+                        <table class="grid">
+                            <thead>
+                                <tr><th>Course Code</th><th>Course</th><th>Enrolled Students</th><th>Date</th><th>Time</th><th>Duration</th><th>Hall</th></tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={scheduleRows} for:item="row">
+                                    <tr key={row.id}>
+                                        <td>{row.code}</td><td>{row.course}</td><td>{row.students}</td><td>{row.date}</td><td>{row.time}</td><td>{row.duration}</td><td>{row.hall}</td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </template>
+
+                    <template lwc:elseif={isPlanSeatingTab}>
+                        <table class="grid">
+                            <thead>
+                                <tr><th>Venue</th><th>Course Code</th><th>Course</th><th>Date</th><th>Capacity</th><th>Assigned</th><th>Actions</th></tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={seatingRows} for:item="row">
+                                    <tr key={row.id}>
+                                        <td>{row.venue}</td><td>{row.code}</td><td>{row.course}</td><td>{row.date}</td><td>{row.capacity}</td><td>{row.assigned}</td><td><button class="btn-mini">Download</button></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </template>
+
+                    <template lwc:elseif={isPlanQuestionPaperTab}>
+                        <table class="grid">
+                            <thead>
+                                <tr><th>Course Code</th><th>Course</th><th>Paper Type</th><th>Assigned Faculty</th><th>Moderator</th><th>Submission Status</th><th>Approval Status</th><th>Actions</th></tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={questionPaperRows} for:item="row">
+                                    <tr key={row.id}>
+                                        <td>{row.code}</td><td>{row.course}</td><td>{row.type}</td><td>{row.faculty}</td><td>{row.moderator}</td><td>{row.submission}</td><td>{row.approval}</td><td><button class="btn-mini">{row.actionLabel}</button></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </template>
+
+                    <template lwc:elseif={isPlanInvigilatorTab}>
+                        <div class="placeholder">Invigilator assignment is ready for integration.</div>
+                    </template>
+
+                    <template lwc:elseif={isPlanBundlingTab}>
+                        <table class="grid">
+                            <thead>
+                                <tr><th>Course Code</th><th>Course</th><th>Exam Date</th><th>Time</th><th>Submitted Sheets</th><th>Total Enrolled</th></tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={bundlingRows} for:item="row">
+                                    <tr key={row.id}>
+                                        <td>{row.code}</td><td>{row.course}</td><td>{row.date}</td><td>{row.time}</td><td>{row.submitted}</td><td>{row.total}</td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </template>
+
+                    <template lwc:elseif={isPlanEvaluatorTab}>
+                        <table class="grid">
+                            <thead>
+                                <tr><th>Course Code</th><th>Course</th><th>Evaluator</th><th>Role</th><th>Contact</th><th>Assigned Scripts</th><th>Bundles</th><th>Moderator</th><th>Actions</th></tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={evaluatorRows} for:item="row">
+                                    <tr key={row.id}>
+                                        <td>{row.code}</td><td>{row.course}</td><td>{row.evaluator}</td><td>{row.role}</td><td>{row.contact}</td><td>{row.scripts}</td><td>{row.bundles}</td><td>{row.moderator}</td><td><button class="btn-mini">Configure</button></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </template>
+                </div>
+            </template>
+        </template>
+
+        <template lwc:elseif={isResultsTab}>
+            <div class="placeholder">Results screen will be integrated in next step.</div>
+        </template>
+        <template lwc:elseif={isMarksCardTab}>
+            <div class="placeholder">Marks Card screen will be integrated in next step.</div>
+        </template>
+        <template lwc:elseif={isTranscriptsTab}>
+            <div class="placeholder">Transcripts screen will be integrated in next step.</div>
+        </template>
+    </div>
+
+    <template lwc:if={showEnrollmentModal}>
+        <div class="modal-backdrop"></div>
+        <section class="modal">
+            <header class="modal-head">
+                <h3>Enrollment Intake Settings</h3>
+                <button class="modal-close" onclick={handleCloseEnrollmentModal}>×</button>
+            </header>
+            <div class="modal-body">
+                <div class="intake-program-card">
+                    <p class="intake-program-title">{selectedProgramLabel}</p>
+                    <p class="intake-program-sub">{selectedProgramYear}</p>
+                </div>
+
+                <div class="intake-section">
+                    <p class="intake-section-title">Enrollment Dates</p>
+                    <div class="intake-two-col">
+                        <lightning-input
+                            label="Starts On *"
+                            type="datetime-local"
+                            value={enrollmentDraft.startOn}
+                            data-field="startOn"
+                            onchange={handleEnrollmentFieldChange}
+                        ></lightning-input>
+                        <lightning-input
+                            label="Ends On *"
+                            type="datetime-local"
+                            value={enrollmentDraft.endsOn}
+                            data-field="endsOn"
+                            onchange={handleEnrollmentFieldChange}
+                        ></lightning-input>
+                    </div>
+                    <lightning-input
+                        class="field-gap"
+                        label="Late Fine Starts Applying"
+                        type="datetime-local"
+                        value={enrollmentDraft.lateFineOn}
+                        data-field="lateFineOn"
+                        onchange={handleEnrollmentFieldChange}
+                    ></lightning-input>
+                </div>
+
+                <div class="intake-section">
+                    <p class="intake-section-title">Fee Settings</p>
+                    <div class="toggle-row">
+                        <span>Use same criteria for Regular &amp; Backlog</span>
+                        <lightning-input
+                            type="toggle"
+                            variant="label-hidden"
+                            checked={enrollmentDraft.sameFeeCriteria}
+                            data-field="sameFeeCriteria"
+                            onchange={handleEnrollmentFieldChange}
+                        ></lightning-input>
+                    </div>
+
+                    <template lwc:if={showSingleFeeSection}>
+                        <lightning-combobox
+                            class="field-gap"
+                            label="Fee Criteria"
+                            value={enrollmentDraft.feeCriteria}
+                            data-field="feeCriteria"
+                            onchange={handleEnrollmentFieldChange}
+                            options={feeCriteriaOptions}
+                        ></lightning-combobox>
+                        <template lwc:if={showSingleFeeDetails}>
+                            <div class="intake-two-col field-gap">
+                                <lightning-combobox
+                                    label="Fee Type"
+                                    value={enrollmentDraft.feeTypeId}
+                                    data-field="feeTypeId"
+                                    onchange={handleEnrollmentFieldChange}
+                                    options={feeTypeOptions}
+                                    placeholder="Select Fee Type"
+                                ></lightning-combobox>
+                                <lightning-input
+                                    type="number"
+                                    label="Exam Fee"
+                                    value={enrollmentDraft.examFee}
+                                    data-field="examFee"
+                                    onchange={handleEnrollmentFieldChange}
+                                    step="0.01"
+                                    min="0"
+                                ></lightning-input>
+                            </div>
+                        </template>
+                    </template>
+
+                    <template lwc:if={showSplitFeeSections}>
+                        <div class="fee-subsection field-gap">
+                            <p class="fee-subsection-title">Regular</p>
+                            <lightning-combobox
+                                label="Regular Fee Criteria"
+                                value={enrollmentDraft.regularFeeCriteria}
+                                data-field="regularFeeCriteria"
+                                onchange={handleEnrollmentFieldChange}
+                                options={feeCriteriaOptions}
+                            ></lightning-combobox>
+                            <template lwc:if={showRegularFeeDetails}>
+                                <div class="intake-two-col field-gap">
+                                    <lightning-combobox
+                                        label="Regular Fee Type"
+                                        value={enrollmentDraft.regularFeeTypeId}
+                                        data-field="regularFeeTypeId"
+                                        onchange={handleEnrollmentFieldChange}
+                                        options={feeTypeOptions}
+                                        placeholder="Select Fee Type"
+                                    ></lightning-combobox>
+                                    <lightning-input
+                                        type="number"
+                                        label="Regular Exam Fee"
+                                        value={enrollmentDraft.regularExamFee}
+                                        data-field="regularExamFee"
+                                        onchange={handleEnrollmentFieldChange}
+                                        step="0.01"
+                                        min="0"
+                                    ></lightning-input>
+                                </div>
+                            </template>
+                        </div>
+
+                        <div class="fee-subsection field-gap">
+                            <p class="fee-subsection-title">Backlog</p>
+                            <lightning-combobox
+                                label="Backlog Fee Criteria"
+                                value={enrollmentDraft.backlogFeeCriteria}
+                                data-field="backlogFeeCriteria"
+                                onchange={handleEnrollmentFieldChange}
+                                options={feeCriteriaOptions}
+                            ></lightning-combobox>
+                            <template lwc:if={showBacklogFeeDetails}>
+                                <div class="intake-two-col field-gap">
+                                    <lightning-combobox
+                                        label="Backlog Fee Type"
+                                        value={enrollmentDraft.backlogFeeTypeId}
+                                        data-field="backlogFeeTypeId"
+                                        onchange={handleEnrollmentFieldChange}
+                                        options={feeTypeOptions}
+                                        placeholder="Select Fee Type"
+                                    ></lightning-combobox>
+                                    <lightning-input
+                                        type="number"
+                                        label="Backlog Exam Fee"
+                                        value={enrollmentDraft.backlogExamFee}
+                                        data-field="backlogExamFee"
+                                        onchange={handleEnrollmentFieldChange}
+                                        step="0.01"
+                                        min="0"
+                                    ></lightning-input>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="intake-section">
+                    <p class="intake-section-title">Auto Enrollment Settings</p>
+                    <div class="check-group">
+                        <label class="inline-check">
+                            <input
+                                type="checkbox"
+                                checked={enrollmentDraft.allowBacklog}
+                                data-field="allowBacklog"
+                                onchange={handleEnrollmentFieldChange}
+                            />
+                            <span>Allow Enrollment for Backlog Courses</span>
+                        </label>
+                        <div class="radio-group">
+                            <template for:each={backlogRadioOptions} for:item="opt">
+                                <label key={opt.value} class="inline-check">
+                                    <input
+                                        type="radio"
+                                        name="backlogMode"
+                                        value={opt.value}
+                                        checked={opt.checked}
+                                        disabled={opt.disabled}
+                                        data-field="backlogMode"
+                                        onchange={handleEnrollmentFieldChange}
+                                    />
+                                    <span>{opt.label}</span>
+                                </label>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="check-group">
+                        <label class="inline-check">
+                            <input
+                                type="checkbox"
+                                checked={enrollmentDraft.allowRegular}
+                                data-field="allowRegular"
+                                onchange={handleEnrollmentFieldChange}
+                            />
+                            <span>Allow Enrollment for Regular Courses</span>
+                        </label>
+                        <div class="radio-group">
+                            <template for:each={regularRadioOptions} for:item="opt">
+                                <label key={opt.value} class="inline-check">
+                                    <input
+                                        type="radio"
+                                        name="regularMode"
+                                        value={opt.value}
+                                        checked={opt.checked}
+                                        disabled={opt.disabled}
+                                        data-field="regularMode"
+                                        onchange={handleEnrollmentFieldChange}
+                                    />
+                                    <span>{opt.label}</span>
+                                </label>
+                            </template>
+                        </div>
+                    </div>
+
+                    <lightning-textarea
+                        class="field-gap"
+                        label="Student Declaration"
+                        value={enrollmentDraft.declaration}
+                        data-field="declaration"
+                        onchange={handleEnrollmentFieldChange}
+                        placeholder="Enter student declaration text..."
+                    ></lightning-textarea>
+
+                    <p class="intake-note">Student will have to submit this declaration before submitting the exam form</p>
+                </div>
+
+                <template lwc:if={enrollmentSaveError}>
+                    <div class="plan-form-error">{enrollmentSaveError}</div>
+                </template>
+            </div>
+            <footer class="modal-foot">
+                <button class="btn-ghost" onclick={handleCloseEnrollmentModal} disabled={isSavingEnrollment}>Cancel</button>
+                <button class="btn-primary" onclick={handleSaveEnrollment} disabled={isSavingEnrollment}>
+                    <template lwc:if={isSavingEnrollment}>Saving…</template>
+                    <template lwc:else>Start Enrollment</template>
+                </button>
+            </footer>
+        </section>
+    </template>
+
+    <template lwc:if={showCriteriaViewModal}>
+        <div class="modal-backdrop" onclick={handleCloseCriteriaView}></div>
+        <section class="modal" role="dialog" aria-modal="true">
+            <header class="modal-head">
+                <h3>Eligibility Criteria</h3>
+                <button class="modal-close" onclick={handleCloseCriteriaView} aria-label="Close">×</button>
+            </header>
+            <div class="modal-body">
+                <template lwc:if={isLoadingCriteria}>
+                    <div class="placeholder">Loading…</div>
+                </template>
+                <template lwc:elseif={criteriaViewError}>
+                    <div class="placeholder">{criteriaViewError}</div>
+                </template>
+                <template lwc:elseif={hasCriteriaView}>
+                    <template lwc:if={criteriaView.programPlanName}>
+                        <div class="criteria-program-card">
+                            <p class="criteria-program-label">Program</p>
+                            <p class="criteria-program-value">{criteriaView.programPlanName}</p>
+                        </div>
+                    </template>
+
+                    <section class="criteria-section">
+                        <h4 class="criteria-section-title">Enrollment Dates</h4>
+                        <div class="criteria-grid">
+                            <div class="criteria-row">
+                                <span class="criteria-label">Starts On</span>
+                                <span class="criteria-value">{criteriaView.startOn}</span>
+                            </div>
+                            <div class="criteria-row">
+                                <span class="criteria-label">Ends On</span>
+                                <span class="criteria-value">{criteriaView.endsOn}</span>
+                            </div>
+                            <template lwc:if={criteriaView.lateFineOn}>
+                                <div class="criteria-row">
+                                    <span class="criteria-label">Late Fine Starts Applying</span>
+                                    <span class="criteria-value">{criteriaView.lateFineOn}</span>
+                                </div>
+                            </template>
+                        </div>
+                    </section>
+
+                    <section class="criteria-section">
+                        <h4 class="criteria-section-title">Fee Settings</h4>
+                        <div class="criteria-grid">
+                            <div class="criteria-row">
+                                <span class="criteria-label">Use same criteria for Regular &amp; Backlog</span>
+                                <span class="criteria-value">{criteriaViewSameFeeLabel}</span>
+                            </div>
+                            <template lwc:if={criteriaViewShowSingleFee}>
+                                <div class="criteria-row">
+                                    <span class="criteria-label">Fee Criteria</span>
+                                    <span class="criteria-value">{criteriaView.feeCriteria}</span>
+                                </div>
+                                <template lwc:if={criteriaViewShowSingleFeeDetails}>
+                                    <div class="criteria-row">
+                                        <span class="criteria-label">Fee Type</span>
+                                        <span class="criteria-value">{criteriaView.feeTypeName}</span>
+                                    </div>
+                                    <div class="criteria-row">
+                                        <span class="criteria-label">Exam Fee</span>
+                                        <span class="criteria-value">{criteriaView.examFee}</span>
+                                    </div>
+                                </template>
+                            </template>
+                        </div>
+
+                        <template lwc:if={criteriaViewShowSplitFees}>
+                            <div class="criteria-subsection">
+                                <p class="criteria-subsection-title">Regular</p>
+                                <div class="criteria-grid">
+                                    <div class="criteria-row">
+                                        <span class="criteria-label">Regular Fee Criteria</span>
+                                        <span class="criteria-value">{criteriaView.regularFeeCriteria}</span>
+                                    </div>
+                                    <template lwc:if={criteriaViewShowRegularFeeDetails}>
+                                        <div class="criteria-row">
+                                            <span class="criteria-label">Regular Fee Type</span>
+                                            <span class="criteria-value">{criteriaView.regularFeeTypeName}</span>
+                                        </div>
+                                        <div class="criteria-row">
+                                            <span class="criteria-label">Regular Exam Fee</span>
+                                            <span class="criteria-value">{criteriaView.regularExamFee}</span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <div class="criteria-subsection">
+                                <p class="criteria-subsection-title">Backlog</p>
+                                <div class="criteria-grid">
+                                    <div class="criteria-row">
+                                        <span class="criteria-label">Backlog Fee Criteria</span>
+                                        <span class="criteria-value">{criteriaView.backlogFeeCriteria}</span>
+                                    </div>
+                                    <template lwc:if={criteriaViewShowBacklogFeeDetails}>
+                                        <div class="criteria-row">
+                                            <span class="criteria-label">Backlog Fee Type</span>
+                                            <span class="criteria-value">{criteriaView.backlogFeeTypeName}</span>
+                                        </div>
+                                        <div class="criteria-row">
+                                            <span class="criteria-label">Backlog Exam Fee</span>
+                                            <span class="criteria-value">{criteriaView.backlogExamFee}</span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </section>
+
+                    <template lwc:if={hasAutoEnrollmentSettings}>
+                        <section class="criteria-section">
+                            <h4 class="criteria-section-title">Auto Enrollment Settings</h4>
+                            <div class="criteria-grid">
+                                <template lwc:if={criteriaView.backlogMode}>
+                                    <div class="criteria-row">
+                                        <span class="criteria-label">Enrollment for Backlog Courses</span>
+                                        <span class="criteria-value">{criteriaView.backlogMode}</span>
+                                    </div>
+                                </template>
+                                <template lwc:if={criteriaView.regularMode}>
+                                    <div class="criteria-row">
+                                        <span class="criteria-label">Enrollment for Regular Courses</span>
+                                        <span class="criteria-value">{criteriaView.regularMode}</span>
+                                    </div>
+                                </template>
+                            </div>
+                        </section>
+                    </template>
+
+                    <template lwc:if={criteriaView.declaration}>
+                        <section class="criteria-section">
+                            <h4 class="criteria-section-title">Student Declaration</h4>
+                            <p class="criteria-declaration">{criteriaView.declaration}</p>
+                        </section>
+                    </template>
+                </template>
+            </div>
+            <footer class="modal-foot">
+                <button class="btn-primary" onclick={handleCloseCriteriaView}>Close</button>
+            </footer>
+        </section>
+    </template>
+
+    <template lwc:if={showCreatePlanModal}>
+        <div class="modal-backdrop" onclick={handleCloseCreatePlan}></div>
+        <section class="modal modal--sm" role="dialog" aria-modal="true">
+            <header class="modal-head">
+                <h3>Create New Exam Plan</h3>
+                <button class="modal-close" onclick={handleCloseCreatePlan} aria-label="Close">×</button>
+            </header>
+            <div class="modal-body">
+                <div class="create-plan-field">
+                    <div class="create-plan-label">Plan Name <span class="required-star">*</span></div>
+                    <lightning-input
+                        label="Plan Name"
+                        variant="label-hidden"
+                        required
+                        placeholder="e.g., Semester 1 Final Exams 2026"
+                        value={newPlan.name}
+                        data-field="name"
+                        onchange={handleNewPlanFieldChange}
+                    ></lightning-input>
+                </div>
+                <div class="create-plan-field field-gap">
+                    <div class="create-plan-label">Exam Type</div>
+                    <lightning-combobox
+                        label="Exam Type"
+                        variant="label-hidden"
+                        placeholder="Select Exam Type"
+                        value={newPlan.assessment}
+                        options={assessmentOptions}
+                        data-field="assessment"
+                        onchange={handleNewPlanFieldChange}
+                    ></lightning-combobox>
+                </div>
+                <div class="intake-two-col field-gap">
+                    <div class="create-plan-field">
+                        <div class="create-plan-label">Start Date <span class="required-star">*</span></div>
+                        <lightning-input
+                            type="date"
+                            label="Start Date"
+                            variant="label-hidden"
+                            required
+                            value={newPlan.startDate}
+                            data-field="startDate"
+                            onchange={handleNewPlanFieldChange}
+                        ></lightning-input>
+                    </div>
+                    <div class="create-plan-field">
+                        <div class="create-plan-label">End Date <span class="required-star">*</span></div>
+                        <lightning-input
+                            type="date"
+                            label="End Date"
+                            variant="label-hidden"
+                            required
+                            value={newPlan.endDate}
+                            data-field="endDate"
+                            onchange={handleNewPlanFieldChange}
+                        ></lightning-input>
+                    </div>
+                </div>
+                <template lwc:if={planSaveError}>
+                    <div class="plan-form-error">{planSaveError}</div>
+                </template>
+            </div>
+            <footer class="modal-foot">
+                <button class="btn-ghost" onclick={handleCloseCreatePlan} disabled={isSavingPlan}>Cancel</button>
+                <button class="btn-primary" onclick={handleCreatePlan} disabled={isSavingPlan}>
+                    <template lwc:if={isSavingPlan}>Creating…</template>
+                    <template lwc:else>Create Plan</template>
+                </button>
+            </footer>
+        </section>
+    </template>
+</template>

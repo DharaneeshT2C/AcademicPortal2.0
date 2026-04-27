@@ -1,0 +1,343 @@
+<template>
+    <div class="dash-shell">
+        <section class="dash-header">
+            <div class="dash-copy">
+                <h1 class="dash-title">Dashboard</h1>
+                <p class="dash-subtitle">Operational overview of selected hostel cycle and window activity</p>
+            </div>
+
+            <div class="dash-filters">
+                <label class="dash-filter-card">
+                    <span class="dash-filter-label">Cycle</span>
+                    <select class="dash-select" value={selectedCycleId} onchange={handleCycleChange}>
+                        <template if:false={hasCycleOptions}>
+                            <option value="">No cycle selected</option>
+                        </template>
+                        <template for:each={cycleSelectOptions} for:item="option">
+                            <option key={option.value} value={option.value} selected={option.isSelected}>{option.label}</option>
+                        </template>
+                    </select>
+                </label>
+
+                <label class="dash-filter-card">
+                    <span class="dash-filter-label">Window</span>
+                    <select class="dash-select" value={selectedWindowId} onchange={handleWindowChange}>
+                        <option value="" selected={isWindowPlaceholderSelected}>No window selected</option>
+                        <template for:each={windowSelectOptions} for:item="option">
+                            <option key={option.id} value={option.id} selected={option.isSelected}>{option.label}</option>
+                        </template>
+                    </select>
+                </label>
+            </div>
+        </section>
+
+        <template if:true={isLoadingSummary}>
+            <section class="dash-loading">
+                <lightning-spinner size="medium" alternative-text="Loading dashboard metrics"></lightning-spinner>
+            </section>
+        </template>
+
+        <template if:true={hasSelectedWindow}>
+            <template if:false={isLoadingSummary}>
+                <section class="dash-grid">
+                    <template for:each={metricCards} for:item="card">
+                        <article key={card.key} class={card.className}>
+                            <div class="dash-card-kicker">{card.label}</div>
+                            <div class="dash-card-value">{card.value}</div>
+                            <div class="dash-card-helper">{card.helper}</div>
+                        </article>
+                    </template>
+                </section>
+
+                <section class="dash-insights-grid">
+                    <article class="dash-panel dash-panel--wide dash-panel--soft dash-panel--category">
+                        <div class="dash-panel-head">
+                            <h2 class="dash-panel-title">Occupancy By Category</h2>
+                        </div>
+                        <div class="dash-panel-body">
+                            <template if:true={hasCategoryOccupancy}>
+                                <div class="dash-category-list">
+                                    <template for:each={categoryOccupancyRows} for:item="item">
+                                        <div key={item.key} class="dash-category-row">
+                                            <div class="dash-category-top">
+                                                <span class="dash-category-name">{item.label}</span>
+                                                <div class="dash-category-values">
+                                                    <span class="dash-category-count">{item.valueLabel}</span>
+                                                    <span class="dash-category-percent">({item.percentageLabel})</span>
+                                                </div>
+                                            </div>
+                                            <div class="dash-progress-track">
+                                                <div class="dash-progress-fill" style={item.barStyle}></div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                            <template if:false={hasCategoryOccupancy}>
+                                <div class="dash-panel-empty">No room category occupancy data.</div>
+                            </template>
+                        </div>
+                    </article>
+
+                    <article class="dash-panel dash-panel--compact dash-panel--soft dash-panel--allocation">
+                        <div class="dash-panel-head">
+                            <h2 class="dash-panel-title">Allocation Breakdown</h2>
+                        </div>
+                        <div class="dash-panel-body dash-panel-body--centered">
+                            <template if:true={hasAllocationBreakdown}>
+                                <div class="dash-donut-shell">
+                                    <div class="dash-donut" style={allocationChartStyle}>
+                                        <div class="dash-donut-hole"></div>
+                                    </div>
+                                </div>
+
+                                <div class="dash-legend">
+                                    <template for:each={allocationBreakdownItems} for:item="item">
+                                        <div key={item.key} class="dash-legend-item">
+                                            <span class="dash-legend-dot" style={item.swatchStyle}></span>
+                                            <span class="dash-legend-label">{item.label}</span>
+                                            <span class="dash-legend-value">{item.countLabel}</span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                            <template if:false={hasAllocationBreakdown}>
+                                <div class="dash-panel-empty">No allocated records for this window.</div>
+                            </template>
+                        </div>
+                    </article>
+                </section>
+
+                <section class="dash-reports-grid">
+                    <article class="dash-report-panel dash-report-panel--registration">
+                        <div class="dash-panel-head dash-panel-head--split">
+                            <h2 class="dash-panel-title">Category-wise Registration</h2>
+                            <button
+                                class="dash-link-btn dash-link-btn--report"
+                                type="button"
+                                data-section="categoryRegistration"
+                                onclick={handleViewReports}
+                            >
+                                View Reports
+                            </button>
+                        </div>
+                        <div class="dash-panel-body dash-panel-body--report">
+                            <template if:true={hasCategoryRegistrations}>
+                                <div class="dash-report-list">
+                                    <template for:each={categoryRegistrationPreviewRows} for:item="item">
+                                        <div key={item.key} class="dash-report-row">
+                                            <div class="dash-report-row-head">
+                                                <div class="dash-report-row-title">{item.label}</div>
+                                                <div class="dash-report-row-meta">{item.registeredCountLabel}</div>
+                                            </div>
+                                            <div class="dash-report-track">
+                                                <div
+                                                    class="dash-report-fill dash-report-fill--registration"
+                                                    style={item.registeredStyle}
+                                                ></div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                            <template if:false={hasCategoryRegistrations}>
+                                <div class="dash-panel-empty">No category registration data.</div>
+                            </template>
+                        </div>
+                    </article>
+
+                    <template for:each={dashboardFinanceReportCards} for:item="item">
+                        <article key={item.key} class={item.className}>
+                            <div class="dash-panel-head dash-panel-head--split">
+                                <h2 class="dash-panel-title">{item.title}</h2>
+                                <button
+                                    class="dash-link-btn dash-link-btn--report"
+                                    type="button"
+                                    data-section={item.reportSection}
+                                    onclick={handleViewReports}
+                                >
+                                    View Reports
+                                </button>
+                            </div>
+                            <div class="dash-panel-body dash-panel-body--centered dash-panel-body--report-finance">
+                                <div class="dash-report-donut-shell">
+                                    <div class={item.donutClassName} style={item.donutStyle}>
+                                        <div class="dash-report-donut-hole">
+                                            <div class="dash-report-donut-label">{item.label}</div>
+                                            <div class="dash-report-donut-value">{item.amountLabel}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class={item.helperClassName}>{item.helper}</div>
+                            </div>
+                        </article>
+                    </template>
+
+                    <article class="dash-report-panel dash-report-panel--occupancy">
+                        <div class="dash-panel-head dash-panel-head--split">
+                            <h2 class="dash-panel-title">Category-wise Occupancy</h2>
+                            <button
+                                class="dash-link-btn dash-link-btn--report"
+                                type="button"
+                                data-section="categoryOccupancy"
+                                onclick={handleViewReports}
+                            >
+                                View Reports
+                            </button>
+                        </div>
+                        <div class="dash-panel-body dash-panel-body--report dash-panel-body--report-chart">
+                            <template if:true={hasCategoryOccupancyChart}>
+                                <div class="dash-report-chart">
+                                    <div class="dash-report-axis">
+                                        <span>100%</span>
+                                        <span>75%</span>
+                                        <span>50%</span>
+                                        <span>25%</span>
+                                        <span>0%</span>
+                                    </div>
+
+                                    <div class="dash-report-plot">
+                                        <div class="dash-report-grid-line dash-report-grid-line--top"></div>
+                                        <div class="dash-report-grid-line dash-report-grid-line--upper"></div>
+                                        <div class="dash-report-grid-line dash-report-grid-line--middle"></div>
+                                        <div class="dash-report-grid-line dash-report-grid-line--lower"></div>
+                                        <div class="dash-report-grid-line dash-report-grid-line--bottom"></div>
+
+                                        <div class="dash-report-bars">
+                                            <template for:each={categoryOccupancyChartItems} for:item="item">
+                                                <div key={item.key} class="dash-report-bar-group">
+                                                    <div class="dash-report-bar-values">
+                                                        <span>{item.occupiedPercentageLabel}</span>
+                                                        <span>{item.availablePercentageLabel}</span>
+                                                    </div>
+                                                    <div class="dash-report-bar-stack">
+                                                        <div
+                                                            class="dash-report-bar dash-report-bar--occupied"
+                                                            style={item.occupiedStyle}
+                                                            title={item.occupiedBedsLabel}
+                                                        ></div>
+                                                        <div
+                                                            class="dash-report-bar dash-report-bar--available"
+                                                            style={item.availableStyle}
+                                                            title={item.availableBedsLabel}
+                                                        ></div>
+                                                    </div>
+                                                    <div class="dash-report-bar-caption" title={item.categoryName}>
+                                                        {item.shortLabel}
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="dash-report-legend">
+                                    <div class="dash-report-legend-item">
+                                        <span class="dash-report-legend-dot dash-report-legend-dot--occupied"></span>
+                                        <span class="dash-report-legend-label">Occupied</span>
+                                    </div>
+                                    <div class="dash-report-legend-item">
+                                        <span class="dash-report-legend-dot dash-report-legend-dot--available"></span>
+                                        <span class="dash-report-legend-label">Available</span>
+                                    </div>
+                                </div>
+                            </template>
+                            <template if:false={hasCategoryOccupancyChart}>
+                                <div class="dash-panel-empty">No category occupancy data.</div>
+                            </template>
+                        </div>
+                    </article>
+                </section>
+            </template>
+        </template>
+
+        <template if:true={hasSelectedCycle}>
+            <section class="dash-overview-wrap">
+                <article class="dash-panel">
+                    <div class="dash-panel-head dash-panel-head--split">
+                        <h2 class="dash-panel-title">Window Performance Overview</h2>
+                        <button class="dash-link-btn" type="button" onclick={handleViewCycle}>
+                            View Cycle
+                        </button>
+                    </div>
+
+                    <div class="dash-panel-body dash-panel-body--table">
+                        <template if:true={isLoadingWindowPerformance}>
+                            <div class="dash-panel-loading">
+                                <lightning-spinner size="small" alternative-text="Loading cycle windows"></lightning-spinner>
+                            </div>
+                        </template>
+
+                        <template if:false={isLoadingWindowPerformance}>
+                            <template if:true={hasWindowPerformanceRows}>
+                                <div class="dash-table-wrap">
+                                    <table class="dash-table">
+                                        <colgroup>
+                                            <col class="dash-table-col dash-table-col--window" />
+                                            <col class="dash-table-col dash-table-col--type" />
+                                            <col class="dash-table-col dash-table-col--metric" />
+                                            <col class="dash-table-col dash-table-col--metric" />
+                                            <col class="dash-table-col dash-table-col--metric" />
+                                            <col class="dash-table-col dash-table-col--status" />
+                                        </colgroup>
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Window Name</th>
+                                                <th scope="col">Allotment Type</th>
+                                                <th scope="col" class="dash-table-head--metric">Applications</th>
+                                                <th scope="col" class="dash-table-head--metric">Allocated</th>
+                                                <th scope="col" class="dash-table-head--metric">Pending</th>
+                                                <th scope="col" class="dash-table-head--status">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={windowPerformanceRows} for:item="item">
+                                                <tr key={item.key}>
+                                                    <td class="dash-table-cell dash-table-cell--name">{item.windowName}</td>
+                                                    <td class="dash-table-cell dash-table-cell--type">
+                                                        <span class={item.allotmentTypeClass}>{item.allotmentType}</span>
+                                                    </td>
+                                                    <td class="dash-table-cell dash-table-cell--metric">
+                                                        <div class="dash-table-center">
+                                                            <span class="dash-table-value">{item.applicationsLabel}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="dash-table-cell dash-table-cell--metric">
+                                                        <div class="dash-table-center">
+                                                            <span class="dash-table-value">{item.allocatedLabel}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="dash-table-cell dash-table-cell--metric">
+                                                        <div class="dash-table-center">
+                                                            <span class={item.pendingClass}>{item.pendingLabel}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td class="dash-table-cell dash-table-cell--status">
+                                                        <div class="dash-table-center">
+                                                            <span class={item.statusClass}>{item.status}</span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </template>
+
+                            <template if:false={hasWindowPerformanceRows}>
+                                <div class="dash-panel-empty">No windows found for this hostel cycle.</div>
+                            </template>
+                        </template>
+                    </div>
+                </article>
+            </section>
+        </template>
+
+        <template if:true={showEmptyState}>
+            <section class="dash-empty">
+                <div class="dash-empty-title">No window selected</div>
+                <div class="dash-empty-copy">Create or choose a hostel window to view dashboard metrics.</div>
+            </section>
+        </template>
+    </div>
+</template>

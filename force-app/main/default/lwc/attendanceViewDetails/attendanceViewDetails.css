@@ -1,0 +1,460 @@
+:host {
+    --primary-color: #3061ff;
+    --secondary-color: #eaefff;
+}
+
+.attendance-view-shell {
+    min-height: calc(100vh - 153px);
+}
+
+.course-summary-card {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.course-meta {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.course-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #2f3644;
+}
+
+.course-title span {
+    font-weight: 400;
+    color: #4d5665;
+}
+
+.course-subtitle {
+    margin: 8px 0 0;
+    font-size: 14px;
+    color: #2f3644;
+}
+
+.summary-metrics {
+    display: flex;
+    gap: 10px;
+}
+
+.metric-box {
+    min-width: 176px;
+    background: #edf1f6;
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.metric-label {
+    font-size: 12px;
+    color: #5f6777;
+}
+
+.metric-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2f3644;
+}
+
+.attendance-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 16px;
+    height : calc(75vh - 30px)
+}
+
+.attendance-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 500;
+    color: #383f4a;
+}
+
+.head-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.info-chip {
+    border: 1px solid color-mix(in srgb, var(--primary-color, #3061ff) 18%, #cfd6e2);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--secondary-color, #eaefff) 82%, #ffffff);
+    color: var(--primary-color, #3061ff);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 7px 10px;
+    line-height: 1;
+}
+
+.semester-wrap {
+    height: 36px;
+    min-width: 240px;
+    border: 0.5px solid #B2B3B7;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+     gap: 8px;
+    padding: 0 12px;
+}
+
+.semester-select {
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    font-weight: 500;
+    color: #2f3644;
+    outline: none;
+    appearance: none;
+    padding-right: 4px;
+    min-width: 125px;
+}
+
+.current-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--primary-color, #4d74f6);
+    border-radius: 999px;
+    padding: 4px 8px;
+    color: #2f3644;
+    font-size: 14px;
+    line-height: 1;
+    background: #ffffff;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #e25454;
+}
+
+.caret {
+    color: #697182;
+    font-size: 20px;
+    line-height: 1;
+    margin-left: auto;
+}
+
+.help-btn {
+    height: 36px;
+    border: 1px solid var(--primary-color, #3061ff);
+    border-radius: 9px;
+    background: transparent;
+    color: #2f3644;
+    font-size: 16px;
+    padding: 0 16px;
+}
+
+.tab-row {
+    margin-top: 14px;
+    background: color-mix(in srgb, var(--secondary-color, #eaefff) 92%, #ffffff);
+    border-radius: 8px 8px 0 0;
+    padding: 10px 12px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.tabs {
+    display: inline-flex;
+    gap: 18px;
+}
+
+.tab {
+    border: none;
+    background: transparent;
+    padding: 0 0 10px;
+    color: #3d4655;
+    font-size: 16px;
+}
+
+.tab.active {
+    border-bottom: 2px solid var(--primary-color, #3f68f0);
+    font-weight: 600;
+}
+
+.date-chip {
+    margin-bottom: 8px;
+    border: 1px solid #bec6d4;
+    border-radius: 10px;
+    background: #FFF;
+    min-width: 320px;
+    height: 38px;
+    padding: 0 12px 0 16px;
+    font-size: 14px;
+    color: #3f4653;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.calendar-icon {
+    --slds-c-icon-color-foreground-default: #a3a8b1;
+}
+
+.table-card {
+    border: 1px solid #d8dee8;
+    border-radius: 10px;
+    background: #ffffff;
+    padding: 10px 0 0;
+    margin-top: 12px;
+}
+
+.mobile-card-list {
+    display: none;
+}
+
+.table-scroll {
+    overflow: auto;
+}
+
+.attendance-table {
+    width: 100%;
+    min-width: 1180px;
+    border-collapse: collapse;
+}
+
+.attendance-table th {
+    text-align: left;
+    padding: 10px 10px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #213a8c;
+    border-bottom: 1px solid #d8dee8;
+    white-space: nowrap;
+}
+
+.attendance-table td {
+    padding: 14px 10px;
+    color: #4d5563;
+    font-size: 14px;
+}
+
+.tiny-caret {
+    font-size: 12px;
+    color: #7e8796;
+    margin-left: 6px;
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.status-completed {
+    background: #deeadf;
+    border-color: #b8d4bc;
+    color: #2f3644;
+}
+
+.status-pending {
+    background: #f4eddc;
+    border-color: #e8d2a0;
+    color: #2f3644;
+}
+
+.view-btn {
+    height: 38px;
+    border: 1px solid var(--primary-color, #3f68f0);
+    border-radius: 10px;
+    background: transparent;
+    color: #3e4654;
+    font-size: 16px;
+    padding: 0 16px;
+}
+
+.progress-placeholder {
+    display: inline-block;
+    width: 12px;
+}
+
+.week-range-wrap {
+    margin-top: 14px;
+    border: 1px solid #d8dee8;
+    border-radius: 12px;
+    min-height: 66px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+}
+
+.range-nav {
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--secondary-color, #eaefff) 80%, #dce3f2);
+    color: var(--primary-color, #3f68f0);
+    font-size: 30px;
+    line-height: 1;
+    padding: 0;
+}
+
+.range-label {
+    color: #3d4655;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+@media (max-width: 1280px) {
+    .course-summary-card,
+    .attendance-head {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .summary-metrics,
+    .head-controls {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 768px) {
+    .attendance-view-shell {
+        padding-bottom: 12px;
+    }
+
+    .attendance-card {
+        height: auto;
+        padding: 12px;
+    }
+
+    .head-controls {
+        gap: 8px;
+    }
+
+    .semester-wrap {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .help-btn {
+        width: 100%;
+    }
+
+    .tab-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        padding: 10px;
+    }
+
+    .tabs {
+        width: 100%;
+        justify-content: space-around;
+        gap: 8px;
+    }
+
+    .tab {
+        font-size: 14px;
+    }
+
+    .date-chip {
+        margin-bottom: 0;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .week-range-wrap {
+        min-height: 52px;
+        gap: 10px;
+    }
+
+    .range-nav {
+        width: 34px;
+        height: 34px;
+        font-size: 22px;
+    }
+
+    .range-label {
+        font-size: 14px;
+    }
+
+    .table-card {
+        display: none;
+    }
+
+    .mobile-card-list {
+        margin-top: 10px;
+        display: grid;
+        gap: 10px;
+    }
+
+    .mobile-card {
+        border: 1px solid #d8dee8;
+        border-radius: 12px;
+        background: #ffffff;
+        padding: 12px;
+    }
+
+    .mobile-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .mobile-date {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #2f3644;
+    }
+
+    .mobile-day {
+        margin: 4px 0 0;
+        font-size: 14px;
+        color: #5d6674;
+    }
+
+    .mobile-grid {
+        margin-top: 10px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px 10px;
+    }
+
+    .mobile-grid p {
+        margin: 0;
+        font-size: 14px;
+        color: #4d5563;
+    }
+
+    .mobile-grid p span {
+        color: #2f3644;
+        font-weight: 600;
+    }
+
+    .mobile-view-btn {
+        margin-top: 10px;
+        width: 100%;
+        height: 36px;
+        font-size: 14px;
+    }
+}

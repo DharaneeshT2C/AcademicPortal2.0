@@ -1,0 +1,38 @@
+<template>
+    <template lwc:if={isDownloadSuccessOpen}>
+        <section class="modal-backdrop" role="presentation">
+            <article class="download-success-modal" role="status" aria-live="polite">
+                <div class="dl-icon-wrap">
+                    <div class="dl-icon-inner">
+                        <span class="dl-check">&#10003;</span>
+                    </div>
+                </div>
+                <h3 class="dl-title">Downloaded Successfully</h3>
+                <p class="dl-subtitle">Your Grade card has been downloaded successfully!</p>
+            </article>
+        </section>
+    </template>
+
+    <section class="grade-cards-page">
+        <div class="grade-cards-grid">
+            <template for:each={gradeCards} for:item="card">
+                <article key={card.id} class="grade-card">
+                    <div class="card-body">
+                        <h3 class="semester-title">{card.label}</h3>
+                        <p class="credits-text">Major Credits: <strong>{card.credits}</strong></p>
+                    </div>
+                    <div class="card-footer">
+                        <template lwc:if={card.available}>
+                            <button type="button" class="download-btn" data-id={card.id} onclick={handleDownload}>
+                                Download Grade Card
+                            </button>
+                        </template>
+                        <template lwc:else>
+                            <button type="button" class="na-btn" disabled>Not Available</button>
+                        </template>
+                    </div>
+                </article>
+            </template>
+        </div>
+    </section>
+</template>

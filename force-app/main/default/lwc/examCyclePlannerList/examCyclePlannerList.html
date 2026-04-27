@@ -1,0 +1,125 @@
+<template>
+    <div class="ecp-wrap">
+
+        <!-- Page Header -->
+        <div class="ecp-page-header">
+            <div>
+                <h2 class="ecp-page-title">Exam Cycle</h2>
+                <p class="ecp-page-subtitle">Manage courses, planning, results, and student records</p>
+            </div>
+            <button class="ecp-btn-primary" onclick={handleAddNew}>+ Add New Cycle</button>
+        </div>
+
+        <!-- Loading / Error -->
+        <template lwc:if={isLoading}>
+            <div class="ecp-loading">Loading exam cycles…</div>
+        </template>
+        <template lwc:elseif={hasError}>
+            <div class="ecp-error">{errorMessage}</div>
+        </template>
+
+        <!-- Table Card -->
+        <template lwc:else>
+            <div class="ecp-table-card">
+                <div class="ecp-table-card-header">
+                    <h3 class="ecp-table-card-title">Exam Cycles</h3>
+                    <p class="ecp-table-card-sub">View and manage all exam cycles</p>
+                </div>
+
+                <div class="ecp-table-wrap">
+                    <div class="ecp-table-head">
+                        <div class="ecp-th ecp-col-name">Cycle Name</div>
+                        <div class="ecp-th ecp-col-year">Academic Year</div>
+                        <div class="ecp-th ecp-col-term">Academic Term</div>
+                        <div class="ecp-th ecp-col-start">Start Date</div>
+                        <div class="ecp-th ecp-col-end">End Date</div>
+                    </div>
+
+                    <template lwc:if={hasRows}>
+                        <template for:each={filteredRows} for:item="row">
+                            <div key={row.id} class="ecp-table-row" data-id={row.id} onclick={handleRowClick}>
+                                <div class="ecp-td ecp-col-name ecp-name-bold">{row.name}</div>
+                                <div class="ecp-td ecp-col-year ecp-text-muted">{row.academicYear}</div>
+                                <div class="ecp-td ecp-col-term ecp-text-muted">{row.term}</div>
+                                <div class="ecp-td ecp-col-start ecp-text-muted">{row.startDate}</div>
+                                <div class="ecp-td ecp-col-end ecp-text-muted">{row.endDate}</div>
+                            </div>
+                        </template>
+                    </template>
+                    <template lwc:else>
+                        <div class="ecp-empty">No exam cycles found. Create one to get started.</div>
+                    </template>
+                </div>
+            </div>
+        </template>
+
+    </div>
+
+    <!-- Create New Cycle Modal -->
+    <template lwc:if={showCreateModal}>
+        <div class="ecp-backdrop" onclick={handleCloseModal}></div>
+        <div class="ecp-modal" role="dialog" aria-modal="true">
+            <div class="ecp-modal-header">
+                <h3 class="ecp-modal-title">Create New Exam Cycle</h3>
+                <button class="ecp-modal-close" onclick={handleCloseModal} aria-label="Close">&#x2715;</button>
+            </div>
+            <div class="ecp-modal-body">
+                <div class="ecp-field">
+                    <label class="ecp-label">Cycle Name <span class="ecp-required">*</span></label>
+                    <input
+                        type="text"
+                        class="ecp-input"
+                        placeholder="e.g., Spring 2026"
+                        value={newCycle.name}
+                        data-field="name"
+                        oninput={handleFieldChange}
+                    />
+                </div>
+                <div class="ecp-field">
+                    <label class="ecp-label">Academic Term <span class="ecp-required">*</span></label>
+                    <div class="ecp-lookup" onclick={handleLookupContainerClick}>
+                        <input
+                            type="text"
+                            class="ecp-input"
+                            placeholder="Search academic terms..."
+                            value={termSearchInput}
+                            onfocus={handleTermSearchFocus}
+                            oninput={handleTermSearch}
+                        />
+                        <template lwc:if={showTermDropdown}>
+                            <ul class="ecp-lookup-list">
+                                <template lwc:if={hasFilteredTerms}>
+                                    <template for:each={filteredTerms} for:item="term">
+                                        <li
+                                            key={term.id}
+                                            class="ecp-lookup-item"
+                                            data-id={term.id}
+                                            data-name={term.name}
+                                            onclick={handleTermSelect}
+                                        >
+                                            {term.name}
+                                        </li>
+                                    </template>
+                                </template>
+                                <template lwc:else>
+                                    <li class="ecp-lookup-empty">No academic terms found</li>
+                                </template>
+                            </ul>
+                        </template>
+                    </div>
+                </div>
+                <template lwc:if={saveError}>
+                    <div class="ecp-inline-error">{saveError}</div>
+                </template>
+            </div>
+            <div class="ecp-modal-footer">
+                <button class="ecp-btn-ghost" onclick={handleCloseModal} disabled={isSaving}>Cancel</button>
+                <button class="ecp-btn-primary" onclick={handleSaveCycle} disabled={isSaving}>
+                    <template lwc:if={isSaving}>Creating…</template>
+                    <template lwc:else>Create Cycle</template>
+                </button>
+            </div>
+        </div>
+    </template>
+
+</template>

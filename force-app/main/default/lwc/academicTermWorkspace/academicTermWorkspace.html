@@ -1,0 +1,79 @@
+<template>
+  <div class="workspace-shell">
+    <div class="workspace-card">
+      <div class="workspace-hero">
+        <div class="hero-icon" aria-hidden="true">
+          <lightning-icon icon-name="standard:education" size="small"></lightning-icon>
+        </div>
+        <div>
+          <div class="hero-title">{termName}</div>
+          <div class="hero-subtitle">Academic Term Workspace</div>
+        </div>
+      </div>
+
+      <div class="highlights-panel">
+        <div class="highlights-top">
+          <div class="highlights-name-wrap">
+            <div class="highlights-name">{termName}</div>
+            <span class={statusClass}>{statusLabel}</span>
+          </div>
+          <div class="highlights-actions">
+    <lightning-button-group>
+        <lightning-button label="Edit" variant="neutral" icon-name="utility:edit"
+            onclick={handleEditAcademicTerm}></lightning-button>
+        <lightning-button label="Clone" variant="neutral" icon-name="utility:copy"
+            onclick={handleCloneAcademicTerm}></lightning-button>
+        <lightning-button label="Delete" variant="neutral" icon-name="utility:delete"
+            onclick={handleDeleteAcademicTerm}></lightning-button>
+    </lightning-button-group>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<template if:true={showDeleteModal}>
+    <c-confirm-delete-modal
+        record-name={termName}
+        object-label="academic term"
+        oncancel={handleDeleteCancel}
+        onconfirm={handleDeleteConfirm}>
+    </c-confirm-delete-modal>
+</template>
+        </div>
+
+        <div class="highlights-grid">
+          <div class="metric">
+            <div class="metric-label">Academic Year</div>
+            <template if:true={hasAcademicYear}>
+              <div class="metric-value">
+                <lightning-formatted-url value={academicYearUrl} label={academicYearLabel}
+                  target="_self"></lightning-formatted-url>
+              </div>
+            </template>
+            <template if:false={hasAcademicYear}>
+              <div class="metric-value">{academicYearLabel}</div>
+            </template>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Season</div>
+            <div class="metric-value">{seasonLabel}</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Start Date</div>
+            <div class="metric-value">{startDateLabel}</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">End Date</div>
+            <div class="metric-value">{endDateLabel}</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Start Year</div>
+            <div class="metric-value">{startYearLabel}</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">End Year</div>
+            <div class="metric-value">{endYearLabel}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>

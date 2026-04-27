@@ -1,0 +1,132 @@
+<template>
+    <lightning-modal-header label={modalTitle}></lightning-modal-header>
+
+    <lightning-modal-body class="modalBody">
+        <p class="intro">Configure remittance account details</p>
+
+        <div class="fieldBlock">
+            <lightning-input
+                data-id="accountName"
+                name="accountName"
+                label="Account Name"
+                value={accountName}
+                placeholder="e.g., SBI Main Account"
+                required
+                onchange={handleFieldInput}
+            ></lightning-input>
+        </div>
+
+        <div class="fieldBlock">
+            <lightning-input
+                data-id="bankName"
+                name="bankName"
+                label="Bank"
+                value={bankName}
+                placeholder="e.g., State Bank of India"
+                required
+                onchange={handleFieldInput}
+            ></lightning-input>
+        </div>
+
+        <div class="grid">
+            <div class="fieldBlock">
+                <lightning-input
+                    data-id="accountNumber"
+                    name="accountNumber"
+                    label="Account Number"
+                    value={accountNumber}
+                    placeholder="1234567890"
+                    required
+                    onchange={handleFieldInput}
+                ></lightning-input>
+            </div>
+
+            <div class="fieldBlock">
+                <lightning-input
+                    data-id="ledgerCode"
+                    name="ledgerCode"
+                    label="Ledger Code"
+                    value={ledgerCode}
+                    placeholder="SBI-MAIN-001"
+                    required
+                    onchange={handleFieldInput}
+                ></lightning-input>
+            </div>
+        </div>
+
+        <div class="fieldBlock">
+            <lightning-combobox
+                name="linkedLevel"
+                label="Linked Level"
+                value={linkedLevel}
+                placeholder="Select linked level"
+                options={linkedLevelOptions}
+                required
+                onchange={handleFieldInput}
+            ></lightning-combobox>
+        </div>
+
+        <div class="fieldBlock">
+            <lightning-dual-listbox
+                name="linkedEntityIds"
+                label={linkedEntityLabel}
+                source-label="Available"
+                selected-label="Selected"
+                options={linkedEntityOptions}
+                value={selectedLinkedEntityIds}
+                disabled={isLinkedEntityDisabled}
+                required
+                onchange={handleFieldInput}
+            ></lightning-dual-listbox>
+        </div>
+
+        <div class="fieldBlock">
+            <lightning-input
+                name="merchantId1"
+                label="Merchant ID 1"
+                value={merchantId1}
+                onchange={handleFieldInput}
+            ></lightning-input>
+        </div>
+
+        <div class="fieldBlock">
+            <lightning-input
+                name="merchantId2"
+                label="Merchant ID 2"
+                value={merchantId2}
+                onchange={handleFieldInput}
+            ></lightning-input>
+        </div>
+
+        <div class="fieldBlock">
+            <lightning-input
+                name="merchantId3"
+                label="Merchant ID 3"
+                value={merchantId3}
+                onchange={handleFieldInput}
+            ></lightning-input>
+        </div>
+
+        <div class="checkboxRow">
+            <lightning-input
+                type="checkbox"
+                name="isActive"
+                label="Active"
+                checked={isActive}
+                onchange={handleFieldInput}
+            ></lightning-input>
+        </div>
+    </lightning-modal-body>
+
+    <lightning-modal-footer>
+        <div class="footerActions">
+            <lightning-button label="Cancel" onclick={handleCancel} disabled={isSaving}></lightning-button>
+            <lightning-button
+                variant="brand"
+                label="Create Account"
+                onclick={handleSave}
+                disabled={isSaving}
+            ></lightning-button>
+        </div>
+    </lightning-modal-footer>
+</template>

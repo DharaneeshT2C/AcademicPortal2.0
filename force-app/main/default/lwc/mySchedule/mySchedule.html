@@ -1,0 +1,225 @@
+<template>
+    <section class={pageClass}>
+        <div class="content-grid">
+            <section class="calendar-column">
+                <header class="topbar">
+                    <nav class="view-tabs" aria-label="Calendar views">
+                        <button type="button" class={dayTabClass} data-view="day" onclick={handleViewChange}>
+                            Day
+                        </button>
+                        <button type="button" class={weekTabClass} data-view="week" onclick={handleViewChange}>
+                            Week
+                        </button>
+                        <button type="button" class={monthTabClass} data-view="month" onclick={handleViewChange}>
+                            Month
+                        </button>
+                    </nav>
+
+                    <div class="topbar-actions">
+                        <label class="date-control">
+                            <span class="date-label">{displayDateLabel}</span>
+                            <input
+                                type="date"
+                                value={selectedDate}
+                                class="date-input-hidden"
+                                onchange={handleDateChange}
+                            />
+                            <lightning-icon icon-name="utility:event" size="x-small" class="date-icon"></lightning-icon>
+                        </label>
+                        <button type="button" class="call-btn" onclick={openScheduleCallModal}>Schedule a Call</button>
+                    </div>
+                </header>
+
+                <template lwc:if={hasLibraryError}>
+                    <div class="calendar-error">Unable to load FullCalendar static resource.</div>
+                </template>
+
+                <div class="calendar-shell">
+                    <div class="calendar-root" lwc:dom="manual"></div>
+                </div>
+            </section>
+
+            <aside class="sidebar-column">
+                <article class="sidebar-card">
+                    <header class="sidebar-head">Leave / Swap</header>
+
+                    <div class="scroll-zone">
+                        <template for:each={leaveCards} for:item="item">
+                            <section key={item.id} class="leave-item">
+                                <div class="leave-row">
+                                    <h4 class="leave-title">{item.title}</h4>
+                                    <span class="status-pill">{item.status}</span>
+                                </div>
+                                <p class="leave-subtitle">{item.subtitle}</p>
+                                <p class="leave-meta">{item.meta}</p>
+                            </section>
+                        </template>
+                    </div>
+
+                    <footer class="sidebar-actions">
+                        <button type="button" class="ghost-btn" onclick={navigateToAttendanceSummary}>View All</button>
+                        <button type="button" class="primary-btn">Request for Leave</button>
+                    </footer>
+                </article>
+
+                <article class="sidebar-card">
+                    <header class="sidebar-head">One-on-One</header>
+
+                    <div class="scroll-zone">
+                        <template for:each={oneOnOneCards} for:item="item">
+                            <section key={item.id} class={item.cardClass}>
+                                <h4 class="one-title">{item.name}</h4>
+                                <p class="one-meta">{item.schedule}</p>
+                                <p class="one-topic">{item.topic}</p>
+                                <p class="one-note">{item.note}</p>
+
+                                <template lwc:if={item.showActions}>
+                                    <div class="one-actions">
+                                        <button type="button" class="ghost-btn">Ignore</button>
+                                        <button type="button" class="primary-btn">Accept</button>
+                                    </div>
+                                </template>
+                            </section>
+                        </template>
+                    </div>
+                </article>
+            </aside>
+        </div>
+
+        <template lwc:if={isScheduleCallModalOpen}>
+            <section class="call-modal-backdrop" role="dialog" aria-modal="true" aria-label="Schedule a call">
+                <article class="call-modal">
+                    <header class="call-modal-head">
+                        <h3 class="call-modal-title">Schedule a Call</h3>
+                    </header>
+
+                    <div class="call-form-grid">
+                        <label class="field-group">
+                            <span class="field-label">Choose Class</span>
+                            <span class="select-wrap">
+                                <select class="field-input field-select">
+                                    <option>Select</option>
+                                    <option>AP304</option>
+                                    <option>CS304</option>
+                                    <option>ECE-II</option>
+                                </select>
+                            </span>
+                        </label>
+
+                        <label class="field-group">
+                            <span class="field-label">Choose Student</span>
+                            <span class="select-wrap">
+                                <select class="field-input field-select">
+                                    <option>Select</option>
+                                    <option>Rajesh Kumar</option>
+                                    <option>Aravind Kumar</option>
+                                </select>
+                            </span>
+                        </label>
+
+                        <label class="field-group">
+                            <span class="field-label">Title<span class="required">*</span></span>
+                            <input type="text" class="field-input" placeholder="Enter Title" />
+                        </label>
+
+                        <label class="field-group">
+                            <span class="field-label">Select Date</span>
+                            <span class="icon-input-wrap">
+                                <input type="date" class="field-input" />
+                                <lightning-icon
+                                    icon-name="utility:event"
+                                    size="x-small"
+                                    class="field-trailing-icon"
+                                ></lightning-icon>
+                            </span>
+                        </label>
+
+                        <label class="field-group">
+                            <span class="field-label">Select Time</span>
+                            <span class="icon-input-wrap">
+                                <input type="time" class="field-input" />
+                                <lightning-icon
+                                    icon-name="utility:clock"
+                                    size="x-small"
+                                    class="field-trailing-icon"
+                                ></lightning-icon>
+                            </span>
+                        </label>
+
+                        <label class="field-group">
+                            <span class="field-label field-label-spacer">&nbsp;</span>
+                            <span class="icon-input-wrap">
+                                <input type="time" class="field-input" />
+                                <lightning-icon
+                                    icon-name="utility:clock"
+                                    size="x-small"
+                                    class="field-trailing-icon"
+                                ></lightning-icon>
+                            </span>
+                        </label>
+                    </div>
+
+                    <section class="full-width-block">
+                        <p class="field-label">Add Description (Optional)</p>
+                        <div class="editor-shell">
+                            <textarea class="editor-area" placeholder="Add a brief description"></textarea>
+                            <footer class="editor-foot">
+                                <div class="editor-tools">B &nbsp; I &nbsp; ≡ &nbsp; ☰</div>
+                                <button type="button" class="ai-link">Continue writing with AI</button>
+                            </footer>
+                        </div>
+                    </section>
+
+                    <section class="full-width-block">
+                        <p class="field-label">How would you like to Meet?<span class="required">*</span></p>
+                        <div class="meet-mode-row">
+                            <label class="radio-line">
+                                <input
+                                    type="radio"
+                                    name="meetMode"
+                                    value="online"
+                                    checked={isOnlineMode}
+                                    onchange={handleMeetModeChange}
+                                />
+                                <span>Online</span>
+                            </label>
+                            <label class="radio-line">
+                                <input
+                                    type="radio"
+                                    name="meetMode"
+                                    value="inPerson"
+                                    checked={isInPersonMode}
+                                    onchange={handleMeetModeChange}
+                                />
+                                <span>In-person</span>
+                            </label>
+                        </div>
+                        <input
+                            type="text"
+                            class="field-input"
+                            placeholder={meetLinkPlaceholder}
+                            disabled={isInPersonMode}
+                        />
+                    </section>
+
+                    <footer class="call-modal-actions">
+                        <button type="button" class="ghost-btn" onclick={closeScheduleCallModal}>Cancel</button>
+                        <button type="button" class="primary-btn" onclick={sendScheduleRequest}>Send Request</button>
+                    </footer>
+                </article>
+            </section>
+        </template>
+
+        <template lwc:if={isCallRequestedModalOpen}>
+            <section class="call-modal-backdrop" role="status" aria-live="polite">
+                <article class="call-success-modal">
+                    <div class="call-success-icon-shell">
+                        <span class="call-success-icon" aria-hidden="true">✓</span>
+                    </div>
+                    <p class="call-success-title">Call Requested!</p>
+                    <p class="call-success-body">Your call request has been sent successfully</p>
+                </article>
+            </section>
+        </template>
+    </section>
+</template>

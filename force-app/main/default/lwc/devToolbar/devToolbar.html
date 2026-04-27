@@ -1,0 +1,37 @@
+<template>
+    <div class="dev-toolbar">
+        <span class="tb-label">DEV</span>
+        <div class="tb-sep"></div>
+
+        <div class="tb-group">
+            <button class={viewAutoClass}    data-mode="auto"    onclick={handleViewModeClick}>Auto</button>
+            <button class={viewMobileClass}  data-mode="mobile"  onclick={handleViewModeClick}>Mobile</button>
+            <button class={viewDesktopClass} data-mode="desktop" onclick={handleViewModeClick}>Desktop</button>
+        </div>
+
+        <div class="tb-sep"></div>
+
+        <div class="tb-group">
+            <button class={brandKenClass} data-brand="ken" onclick={handleBrandClick}>KU</button>
+            <button class={brandSmuClass} data-brand="smu" onclick={handleBrandClick}>SMU</button>
+        </div>
+
+        <div class="tb-sep"></div>
+
+        <div class="tb-group">
+            <button class={stageStartingClass} data-stage="starting" onclick={handleStageClick}>Starting</button>
+            <button class={stageMiddleClass}   data-stage="middle"   onclick={handleStageClick}>Middle</button>
+            <button class={stageEndingClass}   data-stage="ending"   onclick={handleStageClick}>Ending</button>
+        </div>
+
+        <template lwc:if={showPathButtons}>
+            <div class="tb-sep"></div>
+            <div class="tb-group">
+                <button class={pathPlacementsClass}       data-path="placements"       onclick={handlePathClick}>Placements</button>
+                <button class={pathHigherStudiesClass}    data-path="higher-studies"   onclick={handlePathClick}>Higher Studies</button>
+                <button class={pathEntrepreneurshipClass} data-path="entrepreneurship" onclick={handlePathClick}>Entrepreneurship</button>
+                <button class={pathExploringClass}        data-path="exploring"        onclick={handlePathClick}>Exploring</button>
+            </div>
+        </template>
+    </div>
+</template>

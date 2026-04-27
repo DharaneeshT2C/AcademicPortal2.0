@@ -1,0 +1,317 @@
+<template>
+    <div class="ecm-wrap">
+
+        <!-- Breadcrumb + Title -->
+        <div class="ecm-page-header">
+            <div class="ecm-breadcrumb">
+                <button class="ecm-breadcrumb-link" onclick={handleBack}>Exam Cycle</button>
+                <span class="ecm-breadcrumb-sep">›</span>
+                <span class="ecm-breadcrumb-current">{cycleName}</span>
+            </div>
+            <h2 class="ecm-page-title">{cycleName}</h2>
+            <p class="ecm-page-meta">{cycleMetaLine}</p>
+        </div>
+
+        <!-- Loading / Error -->
+        <template lwc:if={isLoading}>
+            <div class="ecm-state-msg">Loading courses…</div>
+        </template>
+        <template lwc:elseif={hasError}>
+            <div class="ecm-state-msg ecm-state-error">{errorMessage}</div>
+        </template>
+
+        <template lwc:else>
+            <template lwc:if={isCourseDetailView}>
+                <div class="ecm-course-detail">
+                    <div class="ecm-detail-topbar">
+                        <div class="ecm-breadcrumb">
+                            <button class="ecm-breadcrumb-link" onclick={handleBackToCourseList}>Master Course</button>
+                            <span class="ecm-breadcrumb-sep">›</span>
+                            <span class="ecm-breadcrumb-current">{selectedCourseName}</span>
+                        </div>
+                        <button class="ecm-btn-ghost-sm" onclick={handleBackToCourseList}>Back to Master Course</button>
+                    </div>
+
+                    <div class="ecm-course-tabs-wrap">
+                        <button class={courseMasterTabClass} data-detail-tab="masterCourse" onclick={handleCourseDetailTabClick}>Master Course</button>
+                        <button class={courseOfferingTabClass} data-detail-tab="courseOffering" onclick={handleCourseDetailTabClick}>Course Offerings</button>
+                    </div>
+
+                    <div class="ecm-table-card">
+                        <div class="ecm-filter-bar">
+                            <div class="ecm-filter-field">
+                                <label>Academic Session</label>
+                                <select value={selectedAcademicSessionId} onchange={handleAcademicSessionFilterChange}>
+                                    <template for:each={academicSessionOptions} for:item="option">
+                                        <option key={option.value} value={option.value}>{option.label}</option>
+                                    </template>
+                                </select>
+                            </div>
+                            <div class="ecm-filter-field">
+                                <label>Enrollment Type</label>
+                                <select value={selectedEnrollmentType} onchange={handleEnrollmentTypeFilterChange}>
+                                    <template for:each={enrollmentTypeOptions} for:item="option">
+                                        <option key={option.value} value={option.value}>{option.label}</option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="ecm-table-wrap">
+                            <div class="ecm-offering-head">
+                                <div class="ecm-th ecm-offering-col-name">Active Program Offerings</div>
+                                <div class="ecm-th ecm-offering-col-code">Course Number</div>
+                                <div class="ecm-th ecm-offering-col-course">Course Name</div>
+                                <div class="ecm-th ecm-offering-col-cap">Enrollment Capacity</div>
+                                <div class="ecm-th ecm-offering-col-count">Filled In Count</div>
+                                <div class="ecm-th ecm-offering-col-mode">Course Type</div>
+                                <div class="ecm-th ecm-offering-col-session">Session Type</div>
+                            </div>
+
+                            <template lwc:if={isCourseOfferingsLoading}>
+                                <div class="ecm-state-msg">Loading course offerings...</div>
+                            </template>
+                            <template lwc:elseif={hasCourseOfferings}>
+                                <template for:each={courseOfferingRows} for:item="offering">
+                                    <div key={offering.id} class="ecm-offering-row">
+                                        <div class="ecm-td ecm-offering-col-name">{offering.programOffering}</div>
+                                        <div class="ecm-td ecm-offering-col-code">{offering.courseNumber}</div>
+                                        <div class="ecm-td ecm-offering-col-course">{offering.courseName}</div>
+                                        <div class="ecm-td ecm-offering-col-cap">{offering.enrollmentCapacity}</div>
+                                        <div class="ecm-td ecm-offering-col-count">{offering.filledInCount}</div>
+                                        <div class="ecm-td ecm-offering-col-mode">{offering.courseType}</div>
+                                        <div class="ecm-td ecm-offering-col-session">{offering.sessionType}</div>
+                                    </div>
+                                </template>
+                            </template>
+                            <template lwc:else>
+                                <div class="ecm-empty">No course offerings found for selected filters.</div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <template lwc:else>
+
+            <!-- Action Bar — always visible -->
+            <div class="ecm-action-bar">
+                <div class="ecm-action-left">
+                    <button class="ecm-filter-button" type="button">
+                        <span class="ecm-filter-icon" aria-hidden="true"></span>
+                        <span>Filter</span>
+                    </button>
+                    <template lwc:if={hasSelection}>
+                        <span class="ecm-selection-count">{selectedCount} selected</span>
+                    </template>
+                </div>
+                <div class="ecm-action-right">
+                    <button class="ecm-btn-ghost-sm" onclick={handleBulkUnmapEval}>Un-map Eval Schema</button>
+                    <button class="ecm-btn-ghost-sm" onclick={handleBulkUnmapGrade}>Un-map Grade Schema</button>
+                    <button class="ecm-btn-ghost-sm" onclick={handleBulkMapGrade}>Map Grade Schema</button>
+                    <button class="ecm-btn-primary-sm" onclick={handleBulkMapEval}>+ Map Eval Schema</button>
+                </div>
+            </div>
+
+            <!-- Toast notification -->
+            <template lwc:if={showSelectionToast}>
+                <div class="ecm-toast">
+                    Please select at least one course to proceed.
+                </div>
+            </template>
+
+            <!-- Table -->
+            <div class="ecm-table-card">
+                <div class="ecm-table-wrap">
+
+                    <!-- Column Headers -->
+                    <div class="ecm-table-head">
+                        <div class="ecm-th ecm-col-check">
+                            <input
+                                type="checkbox"
+                                class="ecm-checkbox"
+                                checked={allSelected}
+                                onchange={handleSelectAll}
+                                onclick={stopEvent}
+                                aria-label="Select all"
+                            />
+                        </div>
+                        <div class="ecm-th ecm-col-code">Course Code</div>
+                        <div class="ecm-th ecm-col-name">Course Name</div>
+                        <div class="ecm-th ecm-col-students">Students</div>
+                        <div class="ecm-th ecm-col-evalschema">Evaluation Schema</div>
+                        <div class="ecm-th ecm-col-gradeschema">Letter Grading</div>
+                        <div class="ecm-th ecm-col-action"></div>
+                    </div>
+
+                    <!-- Rows -->
+                    <template lwc:if={hasCourses}>
+                        <template for:each={displayedCourses} for:item="course">
+                            <div key={course.id} class={course.rowClass} data-id={course.id} onclick={handleCourseClick}>
+                                <div class="ecm-td ecm-col-check">
+                                    <input
+                                        type="checkbox"
+                                        class="ecm-checkbox"
+                                        checked={course.isSelected}
+                                        data-id={course.id}
+                                        onchange={handleCheckboxChange}
+                                        onclick={stopEvent}
+                                        aria-label="Select row"
+                                    />
+                                </div>
+                                <div class="ecm-td ecm-col-code ecm-mono">{course.courseCode}</div>
+                                <div class="ecm-td ecm-col-name">
+                                    <button class="ecm-course-link" data-id={course.id} onclick={handleCourseClick}>{course.courseName}</button>
+                                </div>
+                                <div class="ecm-td ecm-col-students">{course.enrolledStudents}</div>
+                                <div class="ecm-td ecm-col-evalschema">
+                                    <template lwc:if={course.hasEvalSchema}>
+                                        <span class="ecm-schema-badge">{course.evaluationSchemaName}</span>
+                                    </template>
+                                    <template lwc:else>
+                                        <span class="ecm-not-mapped">—</span>
+                                    </template>
+                                </div>
+                                <div class="ecm-td ecm-col-gradeschema">
+                                    <template lwc:if={course.hasGradeSchema}>
+                                        <span class="ecm-schema-badge">{course.gradeSchemaName}</span>
+                                    </template>
+                                    <template lwc:else>
+                                        <span class="ecm-not-mapped">—</span>
+                                    </template>
+                                </div>
+
+                                <!-- 3-dot action menu -->
+                                <div class="ecm-td ecm-col-action">
+                                    <div class="ecm-menu-wrap">
+                                        <button
+                                            class="ecm-three-dot"
+                                            data-id={course.id}
+                                            onclick={handleMenuToggle}
+                                            aria-label="Row actions"
+                                        >⋮</button>
+                                        <template lwc:if={course.menuOpen}>
+                                            <div class="ecm-dropdown">
+                                                <button class="ecm-dropdown-item" data-id={course.id} onclick={handleRowMapEval}>
+                                                    Map Evaluation Schema
+                                                </button>
+                                                <button class="ecm-dropdown-item" data-id={course.id} onclick={handleRowUnmapEval}>
+                                                    Unmap Evaluation Schema
+                                                </button>
+                                                <div class="ecm-dropdown-divider"></div>
+                                                <button class="ecm-dropdown-item" data-id={course.id} onclick={handleRowMapGrade}>
+                                                    Map Grade Schema
+                                                </button>
+                                                <button class="ecm-dropdown-item" data-id={course.id} onclick={handleRowUnmapGrade}>
+                                                    Unmap Grade Schema
+                                                </button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </template>
+                    </template>
+                    <template lwc:else>
+                        <div class="ecm-empty">No courses found for this exam cycle.</div>
+                    </template>
+
+                </div>
+            </div>
+            </template>
+        </template>
+
+    </div>
+
+    <!-- Map Evaluation Schema Modal -->
+    <template lwc:if={showMapEvalModal}>
+        <div class="ecm-overlay" onclick={handleCloseEvalModal}></div>
+        <div class="ecm-modal" role="dialog" aria-modal="true">
+            <div class="ecm-modal-header">
+                <h3 class="ecm-modal-title">Map Evaluation Schema</h3>
+                <button class="ecm-modal-close" onclick={handleCloseEvalModal} aria-label="Close">&#x2715;</button>
+            </div>
+            <p class="ecm-modal-subhead">Mapping <strong>{mappingCount}</strong> course(s)</p>
+            <div class="ecm-modal-search-wrap">
+                <svg class="ecm-modal-search-icon" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd"/>
+                </svg>
+                <input
+                    type="text"
+                    class="ecm-modal-search-input"
+                    placeholder="Search evaluation schemas…"
+                    value={evalSchemaSearchTerm}
+                    oninput={handleEvalSchemaSearch}
+                />
+            </div>
+            <div class="ecm-schema-list">
+                <template lwc:if={hasFilteredEvalSchemas}>
+                    <template for:each={filteredEvalSchemas} for:item="schema">
+                        <div key={schema.id} class={schema.itemClass} data-id={schema.id} onclick={handleEvalSchemaItemClick} role="radio" tabindex="0" onkeydown={handleEvalSchemaItemKey}>
+                            <div class="ecm-schema-radio">
+                                <template lwc:if={schema.isSelected}>
+                                    <div class="ecm-schema-radio-dot"></div>
+                                </template>
+                            </div>
+                            <span class="ecm-schema-name">{schema.name}</span>
+                        </div>
+                    </template>
+                </template>
+                <template lwc:else>
+                    <div class="ecm-schema-empty">No schemas match your search.</div>
+                </template>
+            </div>
+            <div class="ecm-modal-footer">
+                <button class="ecm-btn-ghost-modal" onclick={handleCloseEvalModal}>Cancel</button>
+                <button class="ecm-btn-primary-modal" onclick={handleApplyEvalSchema} disabled={evalApplyDisabled}>Apply</button>
+            </div>
+        </div>
+    </template>
+
+    <!-- Map Grade Schema Modal -->
+    <template lwc:if={showMapGradeModal}>
+        <div class="ecm-overlay" onclick={handleCloseGradeModal}></div>
+        <div class="ecm-modal" role="dialog" aria-modal="true">
+            <div class="ecm-modal-header">
+                <h3 class="ecm-modal-title">Map Grade Schema</h3>
+                <button class="ecm-modal-close" onclick={handleCloseGradeModal} aria-label="Close">&#x2715;</button>
+            </div>
+            <p class="ecm-modal-subhead">Mapping <strong>{mappingCount}</strong> course(s)</p>
+            <div class="ecm-modal-search-wrap">
+                <svg class="ecm-modal-search-icon" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd"/>
+                </svg>
+                <input
+                    type="text"
+                    class="ecm-modal-search-input"
+                    placeholder="Search grade schemas…"
+                    value={gradeSchemaSearchTerm}
+                    oninput={handleGradeSchemaSearch}
+                />
+            </div>
+            <div class="ecm-schema-list">
+                <template lwc:if={hasFilteredGradeSchemas}>
+                    <template for:each={filteredGradeSchemas} for:item="schema">
+                        <div key={schema.id} class={schema.itemClass} data-id={schema.id} onclick={handleGradeSchemaItemClick} role="radio" tabindex="0" onkeydown={handleGradeSchemaItemKey}>
+                            <div class="ecm-schema-radio">
+                                <template lwc:if={schema.isSelected}>
+                                    <div class="ecm-schema-radio-dot"></div>
+                                </template>
+                            </div>
+                            <span class="ecm-schema-name">{schema.name}</span>
+                        </div>
+                    </template>
+                </template>
+                <template lwc:else>
+                    <div class="ecm-schema-empty">No grade schemas match your search.</div>
+                </template>
+            </div>
+            <div class="ecm-modal-footer">
+                <button class="ecm-btn-ghost-modal" onclick={handleCloseGradeModal}>Cancel</button>
+                <button class="ecm-btn-primary-modal" onclick={handleApplyGradeSchema} disabled={gradeApplyDisabled}>Apply</button>
+            </div>
+        </div>
+    </template>
+
+</template>

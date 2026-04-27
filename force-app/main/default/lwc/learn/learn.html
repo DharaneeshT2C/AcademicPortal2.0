@@ -1,0 +1,91 @@
+<template>
+    <div class="page">
+        <h2 class="page-title">Learn</h2>
+        <div class="tabs-bar">
+            <template for:each={formattedPrograms} for:item="prog">
+                <button key={prog.name} class={prog.tabClass} data-prog={prog.name} onclick={handleProgramSwitch}>{prog.name}</button>
+            </template>
+            <div class="tab-spacer"></div>
+            <select class="semester-select" onchange={handleSemesterChange}>
+                <template for:each={semesterOptions} for:item="opt">
+                    <option key={opt.value} value={opt.value} selected={opt.selected}>{opt.label}</option>
+                </template>
+            </select>
+        </div>
+
+        <template lwc:if={hasResults}>
+            <div class="courses-grid">
+                <template for:each={filteredCourses} for:item="course">
+                    <button key={course.id} class={course.cardClass} type="button" data-id={course.id} onclick={handleCourseClick}>
+                        <c-course-thumbnail theme={course.thumbTheme} is-current={course.isCurrent}></c-course-thumbnail>
+                        <div class="course-content">
+                            <h4 class="course-name">{course.name}</h4>
+                            <p class="course-code">{course.code} | {course.credits} credits</p>
+                            <p class="course-instructor"><c-icon name="person" size="16"></c-icon> {course.instructor}</p>
+                            <p class="course-location"><c-icon name="location_on" size="16"></c-icon> {course.location}</p>
+                            <div class="course-tags">
+                                <template for:each={course.formattedTags} for:item="tag">
+                                    <span key={tag.key} class={tag.tagClass}>{tag.label}</span>
+                                </template>
+                            </div>
+                        </div>
+                    </button>
+                </template>
+            </div>
+        </template>
+
+        <template lwc:else>
+            <div class="empty-card">
+                <c-icon name="info" size="32"></c-icon>
+                <p>{emptyMessage}</p>
+            </div>
+        </template>
+
+        <template lwc:if={showCourseDetail}>
+            <div class="modal-backdrop" onclick={handleCloseDetail}>
+                <div class="modal" onclick={stopPropagation}>
+                    <div class="modal-header">
+                        <div>
+                            <h3>{_selectedCourse.name}</h3>
+                            <p class="modal-sub">{_selectedCourse.code} · {_selectedCourse.credits} credits</p>
+                        </div>
+                        <button class="icon-btn" onclick={handleCloseDetail} aria-label="Close">
+                            <c-icon name="close" size="20"></c-icon>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <template lwc:if={hasDetailError}>
+                            <div class="error-banner">{_detailError}</div>
+                        </template>
+                        <div class="detail-grid">
+                            <div class="detail-row"><span>Instructor</span><strong>{_selectedCourse.instructor}</strong></div>
+                            <template lwc:if={_selectedCourse.location}>
+                                <div class="detail-row"><span>Location</span><strong>{_selectedCourse.location}</strong></div>
+                            </template>
+                            <template lwc:if={_selectedCourse.program}>
+                                <div class="detail-row"><span>Program</span><strong>{_selectedCourse.program}</strong></div>
+                            </template>
+                            <template lwc:if={_selectedCourse.semester}>
+                                <div class="detail-row"><span>Semester</span><strong>{_selectedCourse.semester}</strong></div>
+                            </template>
+                            <template lwc:if={_selectedCourse.progressPct}>
+                                <div class="detail-row"><span>Progress</span><strong>{_selectedCourse.progressPct}%</strong></div>
+                            </template>
+                            <template lwc:if={_selectedCourse.currentModuleTitle}>
+                                <div class="detail-row"><span>Current module</span><strong>{_selectedCourse.currentModuleTitle}</strong></div>
+                            </template>
+                        </div>
+                        <div class="detail-tags">
+                            <template for:each={detailTags} for:item="t">
+                                <span key={t.key} class={t.tagClass}>{t.label}</span>
+                            </template>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-outline" onclick={handleCloseDetail}>Close</button>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

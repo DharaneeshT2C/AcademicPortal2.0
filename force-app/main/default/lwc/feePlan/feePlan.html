@@ -1,0 +1,58 @@
+<template>
+    <template lwc:if={showToast}>
+        <c-toast message={toastMessage} variant={toastVariant} onclose={handleToastClose}></c-toast>
+    </template>
+    <div class="page">
+        <div class="page-header">
+            <h2 class="page-title">Fee Plan</h2>
+            <p class="breadcrumb">Home &gt; Fee Payment</p>
+        </div>
+        <div class="tabs-row">
+            <div class="tabs">
+                <button class="tab" onclick={goFeePayment}>Fee Payment</button>
+                <button class="tab active">Fee Plan</button>
+                <button class="tab" onclick={goInvoices}>Invoices</button>
+                <button class="tab" onclick={goTransactions}>Transaction History</button>
+                <button class="tab" onclick={goRefunds}>Refunds</button>
+            </div>
+        </div>
+        <template for:each={formattedSemesters} for:item="sem">
+            <div key={sem.name} class="card semester-card">
+                <div class="semester-header">
+                    <h3 class="semester-title">{sem.name}</h3>
+                    <div class="semester-meta">
+                        <span>Total Fee Amount: <strong>{sem.formattedAmount}/-</strong></span>
+                        <c-icon name={sem.expandIcon} size="20"></c-icon>
+                    </div>
+                </div>
+                <template lwc:if={sem.hasFees}>
+                    <table class="fee-table">
+                        <thead><tr><th>Fee Item</th><th>Due Date</th><th>Currency</th><th>Total Amount</th><th>Concession</th><th>Tax</th><th>TDS</th><th>Total Payable</th><th>Status</th></tr></thead>
+                        <tbody>
+                            <template for:each={planItems} for:item="item">
+                                <tr key={item.item} class="parent-row">
+                                    <td>
+                                        <template lwc:if={item.hasChildren}><c-icon name="expand_more" size="18"></c-icon></template>
+                                        <strong>{item.item}</strong>
+                                    </td>
+                                    <td>{item.dueDate}</td><td>{item.currency}</td><td>{item.totalAmount}</td><td>{item.concession}</td><td>{item.tax}</td><td>{item.tds}</td><td>{item.totalPayable}</td>
+                                    <td><template lwc:if={item.status}><span class="status-pill">{item.status}</span></template></td>
+                                </tr>
+                                <template lwc:if={item.hasChildren}>
+                                    <template for:each={item.formattedChildren} for:item="child">
+                                        <tr key={child.item} class="child-row">
+                                            <td class="indent">{child.item}</td><td>{child.dueDate}</td><td>{child.currency}</td><td>{child.totalAmount}</td><td>{child.concession}</td><td>{child.tax}</td><td>{child.tds}</td><td>{child.totalPayable}</td><td></td>
+                                        </tr>
+                                    </template>
+                                </template>
+                            </template>
+                        </tbody>
+                    </table>
+                    <div class="download-row">
+                        <button class="btn-download" data-sem={sem.name} onclick={handleDownloadFeePlan}><c-icon name="download" size="16"></c-icon> Download Fee Plan</button>
+                    </div>
+                </template>
+            </div>
+        </template>
+    </div>
+</template>

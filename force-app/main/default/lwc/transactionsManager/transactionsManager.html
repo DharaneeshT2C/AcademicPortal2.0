@@ -1,0 +1,79 @@
+<template>
+    <section class="page">
+        <header class="moduleHeader">
+            <div class="titleWrap">
+                <span class="iconWrap" aria-hidden="true">
+                    <lightning-icon icon-name="utility:moneybag" size="small" alternative-text="Transactions"></lightning-icon>
+                </span>
+                <div>
+                    <h1 class="title">Transactions</h1>
+                    <p class="subtitle">
+                        Track student payments, refunds, and scholarship financial adjustments.
+                    </p>
+                </div>
+            </div>
+        </header>
+
+        <div class="tabs" role="tablist" aria-label="Transactions module tabs">
+            <button
+                type="button"
+                role="tab"
+                id="tab-student-transactions"
+                data-tab="studentTransactions"
+                class={studentTabClass}
+                aria-controls="panel-student-transactions"
+                aria-selected={isStudentTab}
+                tabindex={studentTabIndex}
+                onclick={handleTabClick}
+                onkeydown={handleTabKeydown}>
+                Student Transactions
+            </button>
+            <button
+                type="button"
+                role="tab"
+                id="tab-refunds-manager"
+                data-tab="refundsManager"
+                class={refundsTabClass}
+                aria-controls="panel-refunds-manager"
+                aria-selected={isRefundsTab}
+                tabindex={refundsTabIndex}
+                onclick={handleTabClick}
+                onkeydown={handleTabKeydown}>
+                Refunds
+            </button>
+            <button
+                type="button"
+                role="tab"
+                id="tab-scholarship-transactions"
+                data-tab="scholarshipTransactions"
+                class={scholarshipTabClass}
+                aria-controls="panel-scholarship-transactions"
+                aria-selected={isScholarshipTab}
+                tabindex={scholarshipTabIndex}
+                onclick={handleTabClick}
+                onkeydown={handleTabKeydown}>
+                Scholarship Transactions
+            </button>
+        </div>
+
+        <div class="tabPanel">
+            <template if:true={isStudentTab}>
+                <section id="panel-student-transactions" role="tabpanel" aria-labelledby="tab-student-transactions">
+                    <c-student-transactions></c-student-transactions>
+                </section>
+            </template>
+
+            <template if:true={isRefundsTab}>
+                <section id="panel-refunds-manager" role="tabpanel" aria-labelledby="tab-refunds-manager">
+                    <c-refunds-manager></c-refunds-manager>
+                </section>
+            </template>
+
+            <template if:true={isScholarshipTab}>
+                <section id="panel-scholarship-transactions" role="tabpanel" aria-labelledby="tab-scholarship-transactions">
+                    <c-scholarship-transactions></c-scholarship-transactions>
+                </section>
+            </template>
+        </div>
+    </section>
+</template>

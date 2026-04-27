@@ -1,0 +1,628 @@
+<template>
+    <div class="page">
+        <template if:true={notification}>
+            <section class={notification.containerClass} role="alert" aria-live="assertive">
+                <div class="noticeContent">
+                    <div class="noticeIconWrap">
+                        <lightning-icon icon-name={notification.iconName} size="x-small"></lightning-icon>
+                    </div>
+                    <div class="noticeCopy">
+                        <div class="noticeTitle">{notification.title}</div>
+                        <p class="noticeMessage">{notification.message}</p>
+                    </div>
+                </div>
+                <button type="button" class="noticeDismiss" onclick={dismissNotification} aria-label="Dismiss message">
+                    <lightning-icon icon-name="utility:close" size="x-small"></lightning-icon>
+                </button>
+            </section>
+        </template>
+
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <button type="button" class="crumb-btn" onclick={handleGoToMasterData}>Master Data</button>
+            <span class="sep">&gt;</span>
+            <button type="button" class="crumb-btn" onclick={handleGoToProgrammeFeePublishing}>Fee Structures & Fee Types</button>
+            <span class="sep">&gt;</span>
+            <span class="crumb-current">{crumbActionLabel}</span>
+        </nav>
+
+        <header class="page-header">
+            <h1 class="page-title">{pageTitle}</h1>
+            <div class="header-actions">
+                <lightning-button class="btn-neutral" label="Cancel" onclick={handleCancel} disabled={isSaving}></lightning-button>
+                <lightning-button
+                    class="btn-outline"
+                    label="Save Draft"
+                    variant="neutral"
+                    onclick={handleSaveDraft}
+                    disabled={isSaveDraftDisabled}>
+                </lightning-button>
+                <lightning-button
+                    class="btn-primary"
+                    label="Activate"
+                    variant="brand"
+                    onclick={handleActivate}
+                    disabled={isActivateDisabled}>
+                </lightning-button>
+            </div>
+        </header>
+
+        <template if:true={isSaving}>
+            <div class="saving-banner">Saving changes...</div>
+        </template>
+
+        <template if:true={isLoading}>
+            <div class="loading-card">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={isLoading}>
+            <section class="form-card">
+                <div class="card-head">
+                    <h2 class="section-title">Context</h2>
+                </div>
+
+                <div class="form-grid two-col-grid">
+                    <template if:true={isFeeTypeMode}>
+                        <div class="field-control field-span-two linked-mapping-shell">
+                            <div class="linked-mapping-table">
+                                <template for:each={feeTypeLinkedMappings} for:item="mapping">
+                                    <article key={mapping.key} class="linked-mapping-row">
+                                        <div class="linked-mapping-head">
+                                            <h3 class="linked-mapping-title">Link Level {mapping.rowIndex}</h3>
+                                            <lightning-button-icon
+                                                icon-name="utility:delete"
+                                                alternative-text="Remove link level"
+                                                title="Remove link level"
+                                                variant="bare"
+                                                data-key={mapping.key}
+                                                onclick={handleRemoveLinkedLevel}
+                                                disabled={mapping.removeDisabled}>
+                                            </lightning-button-icon>
+                                        </div>
+
+                                        <div class="form-grid two-col-grid">
+                                            <lightning-combobox
+                                                class="field-control"
+                                                label="Link Level"
+                                                value={mapping.linkedLevel}
+                                                options={mapping.availableLinkedLevelOptions}
+                                                placeholder="Select link level"
+                                                data-key={mapping.key}
+                                                onchange={handleLinkedLevelChange}>
+                                            </lightning-combobox>
+
+                                            <template if:true={mapping.isLearningProgramPlan}>
+                                                <lightning-record-picker
+                                                    class="field-control"
+                                                    data-key={mapping.key}
+                                                    label="Learning Program Plan"
+                                                    object-api-name="LearningProgramPlan"
+                                                    value={mapping.linkedEntityId}
+                                                    placeholder="Search learning program plan..."
+                                                    onchange={handleLearningProgramPlanChange}>
+                                                </lightning-record-picker>
+                                            </template>
+
+                                            <template if:true={mapping.isLearningProgram}>
+                                                <lightning-record-picker
+                                                    class="field-control"
+                                                    data-key={mapping.key}
+                                                    label="Learning Program"
+                                                    object-api-name="LearningProgram"
+                                                    value={mapping.linkedEntityId}
+                                                    placeholder="Search learning program..."
+                                                    onchange={handleLearningProgramChange}>
+                                                </lightning-record-picker>
+                                            </template>
+
+                                            <template if:true={mapping.isInstitute}>
+                                                <lightning-record-picker
+                                                    class="field-control"
+                                                    data-key={mapping.key}
+                                                    label="Institute"
+                                                    object-api-name="Account"
+                                                    value={mapping.linkedEntityId}
+                                                    filter={instituteAccountFilter}
+                                                    placeholder="Search institute..."
+                                                    onchange={handleInstituteChange}>
+                                                </lightning-record-picker>
+                                            </template>
+                                        </div>
+                                    </article>
+                                </template>
+                            </div>
+                            <div class="linked-mapping-actions">
+                                <lightning-button
+                                    class="btn-outline"
+                                    label="Add Link Level"
+                                    icon-name="utility:add"
+                                    onclick={handleAddLinkedLevel}
+                                    disabled={isAddLinkedLevelDisabled}>
+                                </lightning-button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template if:false={isFeeTypeMode}>
+                        <lightning-record-picker
+                            class="field-control"
+                            label="Learning Program Plan"
+                            object-api-name="LearningProgramPlan"
+                            value={programmeId}
+                            required
+                            placeholder="Search learning program plan..."
+                            onchange={handleProgrammeChange}>
+                        </lightning-record-picker>
+                    </template>
+
+                    <template if:true={showFeeCategoryPicklist}>
+                        <lightning-combobox
+                            class="field-control"
+                            label="Fee Category"
+                            required
+                            value={feeCategory}
+                            options={feeTypeCategoryOptions}
+                            onchange={handleFeeCategoryChange}>
+                        </lightning-combobox>
+                    </template>
+                    <template if:true={showFeeCategoryReadOnly}>
+                        <lightning-input
+                            class="field-control"
+                            label="Fee Category"
+                            value={feeCategoryReadOnlyLabel}
+                            disabled>
+                        </lightning-input>
+                    </template>
+
+                    <lightning-input
+                        class="field-control"
+                        label="Batch / Intake"
+                        required={isBatchIntakeRequired}
+                        value={batchIntake}
+                        onchange={handleBatchChange}
+                        disabled={isBatchAutoFilled}
+                        placeholder="e.g., 2025-26">
+                    </lightning-input>
+
+                    <lightning-input
+                        class="field-control"
+                        label="Activation Date"
+                        type="date"
+                        required
+                        value={activationDate}
+                        onchange={handleActivationDateChange}>
+                    </lightning-input>
+
+                    <lightning-combobox
+                        class="field-control"
+                        label="Frequency"
+                        required
+                        value={frequency}
+                        options={frequencyOptions}
+                        onchange={handleFrequencyChange}>
+                    </lightning-combobox>
+
+                    <template if:true={isTermWise}>
+                        <lightning-combobox
+                            class="field-control"
+                            label="Term System"
+                            required
+                            value={termSystem}
+                            options={termSystemOptions}
+                            onchange={handleTermSystemChange}>
+                        </lightning-combobox>
+                    </template>
+
+                    <div class="status-field">
+                        <span class="field-label">Status</span>
+                        <span class="status-pill" data-status="Draft">Draft</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="form-card">
+                <div class="card-head card-head-stacked">
+                    <h2 class="section-title">Global Financial Mapping</h2>
+                    <p class="section-subtitle">Term-level values can override these defaults.</p>
+                </div>
+
+                <div class="form-grid single-col-grid">
+                    <div class="dual-list-shell">
+                        <lightning-dual-listbox
+                            class="dual-list-control"
+                            name="remittanceAccounts"
+                            label="Remittance Accounts"
+                            required
+                            source-label="Available Accounts"
+                            selected-label="Selected Accounts"
+                            value={selectedRemittanceIds}
+                            options={remittanceOptions}
+                            onchange={handleRemittanceAccountsChange}>
+                        </lightning-dual-listbox>
+                        <template if:true={selectedRemittanceMerchantIds}>
+                            <p class="helper-text">
+                                <strong>Available Merchant IDs:</strong> {selectedRemittanceMerchantIds}
+                            </p>
+                        </template>
+                    </div>
+
+                    <lightning-textarea
+                        class="field-control notes-field"
+                        label="Notes"
+                        value={notes}
+                        onchange={handleNotesChange}
+                        placeholder="Add any additional notes...">
+                    </lightning-textarea>
+                </div>
+            </section>
+
+            <template if:true={isOneTime}>
+                <section class="form-card">
+                    <div class="card-head">
+                        <h2 class="section-title">Fee Configuration</h2>
+                    </div>
+
+                    <div class="form-grid two-col-grid">
+                        <template if:true={isFeeTypeMode}>
+                            <lightning-combobox
+                                class="field-control"
+                                label="Fee Head"
+                                required
+                                value={oneTimeFeeHeadId}
+                                options={feeHeadOptions}
+                                onchange={handleOneTimeFeeHeadChange}>
+                            </lightning-combobox>
+                        </template>
+                        <template if:false={isFeeTypeMode}>
+                            <lightning-record-picker
+                                class="field-control"
+                                object-api-name="Ken_Fee_Set__c"
+                                label="Fee Plan"
+                                required
+                                value={oneTimeFeePlanId}
+                                placeholder="Search fee plan..."
+                                onchange={handleOneTimeFeePlanChange}>
+                            </lightning-record-picker>
+                        </template>
+
+                        <template if:true={isFeeTypeMode}>
+                            <lightning-record-picker
+                                class="field-control"
+                                label="Category"
+                                object-api-name="Category__c"
+                                value={oneTimeCategoryId}
+                                placeholder="Search category..."
+                                onchange={handleOneTimeCategoryChange}>
+                            </lightning-record-picker>
+
+                            <lightning-record-picker
+                                class="field-control"
+                                label="Quota"
+                                object-api-name="Quota__c"
+                                value={oneTimeQuotaId}
+                                filter={oneTimeQuotaFilter}
+                                placeholder="Search quota..."
+                                onchange={handleOneTimeQuotaChange}>
+                            </lightning-record-picker>
+                        </template>
+
+                        <lightning-input
+                            class="field-control"
+                            label={feeTagLabel}
+                            value={oneTimeFeePlanTag}
+                            onchange={handleOneTimeFeePlanTagChange}
+                            placeholder="e.g., Annual_2025">
+                        </lightning-input>
+
+                        <template if:true={isFeeTypeMode}>
+                            <lightning-input
+                                class="field-control"
+                                label="Amount"
+                                type="number"
+                                step="0.01"
+                                required
+                                value={oneTimeAmount}
+                                onchange={handleOneTimeAmountChange}>
+                            </lightning-input>
+                        </template>
+
+                        <lightning-input
+                            class="field-control"
+                            label="Start Date"
+                            type="date"
+                            value={oneTimeStartDate}
+                            onchange={handleOneTimeStartDateChange}>
+                        </lightning-input>
+
+                        <lightning-record-picker
+                            class="field-control"
+                            object-api-name="Ken_Bank_Account_Master__c"
+                            label="Remittance (Optional override)"
+                            value={oneTimeRemittanceOverrideId}
+                            placeholder="Search remittance account..."
+                            onchange={handleOneTimeRemittanceOverrideChange}>
+                        </lightning-record-picker>
+
+                        <lightning-input
+                            class="field-control"
+                            label="Due Date"
+                            type="date"
+                            required
+                            value={oneTimeDueDate}
+                            onchange={handleOneTimeDueDateChange}>
+                        </lightning-input>
+
+                        <lightning-record-picker
+                            class="field-control"
+                            object-api-name="Payment_Schedule__c"
+                            label="Installment (Optional)"
+                            value={oneTimeInstallmentId}
+                            placeholder="Search installment plan..."
+                            onchange={handleOneTimeInstallmentChange}>
+                        </lightning-record-picker>
+
+                        <lightning-record-picker
+                            class="field-control"
+                            object-api-name="Ken_Fee_Type__c"
+                            label="Penalty Plan (Optional)"
+                            value={oneTimePenaltyPlanId}
+                            placeholder="Search penalty plan..."
+                            onchange={handleOneTimePenaltyPlanChange}>
+                        </lightning-record-picker>
+                    </div>
+                </section>
+            </template>
+
+            <template if:true={showConfigRowsSection}>
+                <section class="form-card">
+                    <div class="card-head card-head-inline">
+                        <div>
+                            <h2 class="section-title">{configSectionTitle}</h2>
+                            <p class="section-subtitle">{configRowsHint}</p>
+                        </div>
+                        <lightning-button
+                            class="btn-primary"
+                            label="Preview All"
+                            icon-name="utility:preview"
+                            variant="brand"
+                            onclick={handlePreviewTerms}>
+                        </lightning-button>
+                    </div>
+
+                    <div class="config-table-scroll">
+                        <div class="config-table-wrap">
+                            <table class="config-table config-table-builder">
+                            <thead>
+                                <tr>
+                                    <th class="col-primary">{configPrimaryLabel}</th>
+                                    <th>{feeConfigurationLabel}</th>
+                                    <template if:true={isFeeTypeMode}>
+                                        <th>Category</th>
+                                        <th>Quota</th>
+                                    </template>
+                                    <template if:true={isFeeTypeMode}>
+                                        <th>Amount</th>
+                                    </template>
+                                    <th>Fee Assignment Trigger Point</th>
+                                    <th>Start Date</th>
+                                    <th>Due Date</th>
+                                    <th>Installment</th>
+                                    <th>Penalty Plan</th>
+                                    <th class="col-status">Status</th>
+                                    <th class="col-preview">Preview</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={termRows} for:item="term">
+                                    <tr key={term.key}>
+                                        <td class="col-primary">{term.termLabel}</td>
+                                        <td>
+                                            <template if:true={isFeeTypeMode}>
+                                                <lightning-combobox
+                                                    variant="label-hidden"
+                                                    value={term.feeHeadId}
+                                                    options={feeConfigurationOptions}
+                                                    data-row-key={term.key}
+                                                    data-field="feeHeadId"
+                                                    onchange={handleTermFieldChange}>
+                                                </lightning-combobox>
+                                            </template>
+                                            <template if:false={isFeeTypeMode}>
+                                                <lightning-record-picker
+                                                    class="table-record-picker"
+                                                    variant="label-hidden"
+                                                    object-api-name="Ken_Fee_Set__c"
+                                                    label="Fee Plan"
+                                                    value={term.feePlanId}
+                                                    placeholder="Search fee plan..."
+                                                    data-row-key={term.key}
+                                                    data-field="feePlanId"
+                                                    onchange={handleTermFieldChange}>
+                                                </lightning-record-picker>
+                                            </template>
+                                        </td>
+                                        <template if:true={isFeeTypeMode}>
+                                            <td>
+                                                <lightning-record-picker
+                                                    object-api-name="Category__c"
+                                                    label="Category"
+                                                    variant="label-hidden"
+                                                    value={term.categoryId}
+                                                    placeholder="Search category..."
+                                                    data-row-key={term.key}
+                                                    data-field="categoryId"
+                                                    onchange={handleTermFieldChange}>
+                                                </lightning-record-picker>
+                                            </td>
+                                            <td>
+                                                <lightning-record-picker
+                                                    object-api-name="Quota__c"
+                                                    label="Quota"
+                                                    variant="label-hidden"
+                                                    value={term.quotaId}
+                                                    filter={term.quotaFilter}
+                                                    placeholder="Search quota..."
+                                                    data-row-key={term.key}
+                                                    data-field="quotaId"
+                                                    onchange={handleTermFieldChange}>
+                                                </lightning-record-picker>
+                                            </td>
+                                        </template>
+                                        <template if:true={isFeeTypeMode}>
+                                            <td>
+                                                <lightning-input
+                                                    type="number"
+                                                    step="0.01"
+                                                    variant="label-hidden"
+                                                    value={term.amount}
+                                                    data-row-key={term.key}
+                                                    data-field="amount"
+                                                    onchange={handleTermFieldChange}>
+                                                </lightning-input>
+                                            </td>
+                                        </template>
+                                        <td>
+                                            <lightning-combobox
+                                                variant="label-hidden"
+                                                value={term.feeAssignmentTriggerPoint}
+                                                options={feeAssignmentTriggerPointOptions}
+                                                data-row-key={term.key}
+                                                data-field="feeAssignmentTriggerPoint"
+                                                onchange={handleTermFieldChange}>
+                                            </lightning-combobox>
+                                        </td>
+                                        <td>
+                                            <lightning-input
+                                                type="date"
+                                                variant="label-hidden"
+                                                value={term.startDate}
+                                                data-row-key={term.key}
+                                                data-field="startDate"
+                                                onchange={handleTermFieldChange}>
+                                            </lightning-input>
+                                        </td>
+                                        <td>
+                                            <lightning-input
+                                                type="date"
+                                                variant="label-hidden"
+                                                value={term.dueDate}
+                                                data-row-key={term.key}
+                                                data-field="dueDate"
+                                                onchange={handleTermFieldChange}>
+                                            </lightning-input>
+                                        </td>
+                                        <td>
+                                            <lightning-record-picker
+                                                class="table-record-picker"
+                                                variant="label-hidden"
+                                                object-api-name="Payment_Schedule__c"
+                                                label="Installment"
+                                                value={term.installmentId}
+                                                placeholder="Search installment plan..."
+                                                data-row-key={term.key}
+                                                data-field="installmentId"
+                                                onchange={handleTermFieldChange}>
+                                            </lightning-record-picker>
+                                        </td>
+                                        <td>
+                                            <lightning-record-picker
+                                                class="table-record-picker"
+                                                variant="label-hidden"
+                                                object-api-name="Ken_Fee_Type__c"
+                                                label="Penalty Plan"
+                                                value={term.penaltyPlanId}
+                                                placeholder="Search penalty plan..."
+                                                data-row-key={term.key}
+                                                data-field="penaltyPlanId"
+                                                onchange={handleTermFieldChange}>
+                                            </lightning-record-picker>
+                                        </td>
+                                        <td class="col-status"><span class="row-status">{term.status}</span></td>
+                                        <td class="col-preview">
+                                            <lightning-button
+                                                class="btn-outline row-preview-btn"
+                                                label="Preview"
+                                                icon-name="utility:preview"
+                                                icon-position="left"
+                                                variant="neutral"
+                                                data-row-key={term.key}
+                                                onclick={handlePreviewTermRow}>
+                                            </lightning-button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </template>
+        </template>
+    </div>
+
+    <template if:true={isPreviewOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open preview-modal">
+            <div class="slds-modal__container preview-modal__container">
+                <header class="slds-modal__header preview-modal__header">
+                    <lightning-button-icon
+                        icon-name="utility:close"
+                        variant="bare-inverse"
+                        alternative-text="Close"
+                        class="slds-modal__close"
+                        onclick={closePreview}>
+                    </lightning-button-icon>
+                    <h2 class="slds-text-heading_medium preview-title">{previewTitle}</h2>
+                    <p class="preview-summary">{previewSummary}</p>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium preview-content">
+                    <template if:true={hasPreviewRows}>
+                        <div class="preview-table-wrap">
+                            <table class="config-table preview-table">
+                                <thead>
+                                    <tr>
+                                        <th>{configPrimaryLabel}</th>
+                                        <th>{feeConfigurationLabel}</th>
+                                        <th>Fee Assignment Trigger Point</th>
+                                        <th>Start Date</th>
+                                        <th>Due Date</th>
+                                        <th>Student Category</th>
+                                        <th>Fee Head</th>
+                                        <th>Amount</th>
+                                        <th>Remittance</th>
+                                        <th>Installment</th>
+                                        <th>Penalty Plan</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={previewRows} for:item="previewRow">
+                                        <tr key={previewRow.previewKey}>
+                                            <td>{previewRow.configLabel}</td>
+                                            <td>{previewRow.feePlanName}</td>
+                                            <td>{previewRow.feeAssignmentTriggerPointName}</td>
+                                            <td>{previewRow.startDate}</td>
+                                            <td>{previewRow.dueDate}</td>
+                                            <td>{previewRow.studentCategory}</td>
+                                            <td>{previewRow.feeHeadName}</td>
+                                            <td>{previewRow.amount}</td>
+                                            <td>{previewRow.remittanceAccountName}</td>
+                                            <td>{previewRow.installmentName}</td>
+                                            <td>{previewRow.penaltyPlanName}</td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </template>
+                    <template if:false={hasPreviewRows}>
+                        <p class="empty-preview">No rows found for selected configuration.</p>
+                    </template>
+                </div>
+                <footer class="slds-modal__footer preview-footer">
+                    <lightning-button class="btn-neutral" label="Close" onclick={closePreview}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open preview-backdrop"></div>
+    </template>
+</template>

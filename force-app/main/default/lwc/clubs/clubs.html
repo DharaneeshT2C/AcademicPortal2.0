@@ -1,0 +1,285 @@
+<template>
+    <template lwc:if={showToast}>
+        <c-toast message={toastMessage} variant={toastVariant} onclose={handleToastClose}></c-toast>
+    </template>
+
+    <!-- Create Club Modal -->
+    <template lwc:if={showCreateModal}>
+        <div class="modal-overlay" onclick={handleCloseCreate}>
+            <div class="modal-box" onclick={stopProp}>
+                <div class="modal-header">
+                    <div>
+                        <h3 class="modal-title">Create a Club</h3>
+                        <p class="modal-sub">Start your own community on campus</p>
+                    </div>
+                    <button class="modal-close" onclick={handleCloseCreate}>&#x2715;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-field">
+                        <label class="field-label">Club Name <span class="field-required">*</span></label>
+                        <input type="text" class="field-input" placeholder="e.g. Robotics Club" onchange={handleClubNameChange} />
+                    </div>
+                    <div class="modal-field">
+                        <label class="field-label">Category</label>
+                        <select class="field-select" onchange={handleClubCategoryChange}>
+                            <option value="Cultural">Cultural</option>
+                            <option value="Technical">Technical</option>
+                            <option value="Sports">Sports</option>
+                            <option value="Social">Social</option>
+                            <option value="Academic">Academic</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="modal-field">
+                        <label class="field-label">Description <span class="field-hint">(max 300 chars)</span></label>
+                        <textarea class="field-textarea" placeholder="Describe the purpose and activities of your club..." onchange={handleClubDescChange}></textarea>
+                    </div>
+                    <div class="modal-field">
+                        <label class="field-label">Cover Image</label>
+                        <div class="file-upload-wrap">
+                            <c-icon name="cloud_upload" size="22"></c-icon>
+                            <span class="file-upload-text">Click to upload or drag and drop</span>
+                            <span class="file-upload-hint">PNG, JPG up to 5MB</span>
+                        </div>
+                    </div>
+                    <div class="modal-field">
+                        <label class="field-label">Privacy</label>
+                        <select class="field-select" onchange={handleClubPrivacyChange}>
+                            <option value="Public">Public — Anyone can join</option>
+                            <option value="Private">Private — Invite only</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-cancel" onclick={handleCloseCreate}>Cancel</button>
+                    <button class="btn-primary-sm" onclick={handleConfirmCreate}>Create Club</button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Club Detail Modal -->
+    <template lwc:if={showClubDetail}>
+        <div class="modal-overlay" onclick={handleCloseDetail}>
+            <div class="modal-box detail-modal-box" onclick={stopProp}>
+                <div class="detail-hero">
+                    <img src={detailClubImage} alt={detailClubName} class="detail-hero-img" />
+                    <button class="modal-close detail-close" onclick={handleCloseDetail}>&#x2715;</button>
+                </div>
+                <div class="detail-body">
+                    <h3 class="detail-name">{detailClubName}</h3>
+                    <p class="detail-members-count">{detailClubMembers} members</p>
+                    <p class="detail-desc">{detailClubDesc}</p>
+                    <div class="detail-members-row">
+                        <div class="detail-avatars">
+                            <template for:each={detailMembers} for:item="m">
+                                <span key={m.id} class={m.cls}>{m.initial}</span>
+                            </template>
+                        </div>
+                        <span class="detail-members-label">Active members this week</span>
+                    </div>
+                </div>
+                <div class="detail-footer">
+                    <button class="btn-cancel" onclick={handleCloseDetail}>Close</button>
+                    <button class={joinBtnClass} onclick={handleJoinClub}>{joinBtnLabel}</button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <div class="page">
+        <div class="page-header">
+            <button class="btn-back" onclick={handleBack}><c-icon name="arrow_back" size="18"></c-icon> Campus Life</button>
+            <h2 class="page-title">Discover Clubs</h2>
+        </div>
+        <div class="clubs-layout">
+            <div class="main-col">
+
+                <!-- Filter Panel -->
+                <template lwc:if={showFilterPanel}>
+                    <div class="filter-panel card">
+                        <div class="filter-panel-header">
+                            <span class="filter-panel-title">Filter Clubs</span>
+                            <button class="modal-close" onclick={handleFilterToggle}>&#x2715;</button>
+                        </div>
+                        <div class="filter-row">
+                            <div class="filter-field">
+                                <label class="field-label">Category</label>
+                                <select class="field-select" onchange={handleCategoryFilter}>
+                                    <option value="">All Categories</option>
+                                    <option value="Cultural">Cultural</option>
+                                    <option value="Technical">Technical</option>
+                                    <option value="Sports">Sports</option>
+                                    <option value="Social">Social</option>
+                                    <option value="Academic">Academic</option>
+                                </select>
+                            </div>
+                            <div class="filter-field">
+                                <label class="field-label">Sort by</label>
+                                <select class="field-select" onchange={handleSortChange}>
+                                    <option value="popular">Most Popular</option>
+                                    <option value="newest">Newest</option>
+                                    <option value="alpha">Alphabetical</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="filter-footer">
+                            <button class="btn-cancel" onclick={handleResetFilter}>Reset</button>
+                            <button class="btn-primary-sm" onclick={handleApplyFilter}>Apply Filters</button>
+                        </div>
+                    </div>
+                </template>
+
+                <div class="discover-section card">
+                    <div class="discover-header">
+                        <h3 class="section-title">Discover</h3>
+                        <div class="search-actions">
+                            <div class="search-bar">
+                                <c-icon name="search" size="18"></c-icon>
+                                <input type="text" placeholder="Search clubs..." class="search-input" oninput={handleSearch} />
+                                <c-icon name="mic" size="18"></c-icon>
+                            </div>
+                            <button class={filterBtnClass} onclick={handleFilterToggle}>
+                                <c-icon name="filter_list" size="18"></c-icon> Filters
+                            </button>
+                        </div>
+                    </div>
+                    <div class="clubs-grid">
+                        <template for:each={discoverClubs} for:item="club">
+                            <div key={club.id} class="club-card" onclick={handleClubClick} data-id={club.id}>
+                                <div class="club-image-wrap">
+                                    <img src={club.image} alt={club.name} class="club-bg-img" />
+                                    <template lwc:if={club.isPrivate}><span class="private-badge">Private</span></template>
+                                </div>
+                                <div class="club-content">
+                                    <h4 class="club-name">{club.name}</h4>
+                                    <p class="club-members">{club.members} members</p>
+                                    <template lwc:if={club.friends}>
+                                        <div class="club-friends-row">
+                                            <div class="friends-avatars">
+                                                <template for:each={friendAvatarsA} for:item="av">
+                                                    <img key={av} src={av} alt="" class="f-avatar-img" />
+                                                </template>
+                                            </div>
+                                            <span class="friends-text">{club.friends}</span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="suggested-section">
+                    <div class="suggested-header">
+                        <h3 class="section-title">Suggested for You ({suggestedCount})</h3>
+                        <span class="admin-badge">Created by Admin</span>
+                        <div class="carousel-nav">
+                            <button class={prevBtnClass} onclick={handleCarouselPrev}><c-icon name="chevron_left" size="20"></c-icon></button>
+                            <button class={nextBtnClass} onclick={handleCarouselNext}><c-icon name="chevron_right" size="20"></c-icon></button>
+                        </div>
+                    </div>
+                    <div class="carousel-viewport">
+                        <div class="carousel-track" style={carouselStyle}>
+                            <template for:each={suggested} for:item="club">
+                                <div key={club.id} class="club-card carousel-card" onclick={handleClubClick} data-id={club.id}>
+                                    <div class="club-image-wrap">
+                                        <img src={club.image} alt={club.name} class="club-bg-img" />
+                                    </div>
+                                    <div class="club-content">
+                                        <h4 class="club-name">{club.name}</h4>
+                                        <p class="club-members">{club.members} members</p>
+                                        <template lwc:if={club.friends}>
+                                            <div class="club-friends-row">
+                                                <div class="friends-avatars">
+                                                    <template for:each={friendAvatarsB} for:item="av">
+                                                        <img key={av} src={av} alt="" class="f-avatar-img" />
+                                                    </template>
+                                                </div>
+                                                <span class="friends-text">{club.friends}</span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <template lwc:if={hasPrivate}>
+                    <div class="private-section card">
+                        <div class="private-header">
+                            <h3 class="section-title">Private Clubs</h3>
+                            <span class="private-meta">Invite only</span>
+                        </div>
+                        <div class="clubs-grid">
+                            <template for:each={privateClubs} for:item="club">
+                                <div key={club.id} class="club-card" onclick={handleClubClick} data-id={club.id}>
+                                    <div class="club-image-wrap club-image-private">
+                                        <img src={club.image} alt={club.name} class="club-bg-img" />
+                                        <span class="private-badge">Private</span>
+                                        <div class="private-overlay"></div>
+                                    </div>
+                                    <div class="club-content">
+                                        <h4 class="club-name">{club.name}</h4>
+                                        <p class="club-members">{club.members} members</p>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <div class="right-col">
+                <div class="card sidebar-card">
+                    <h3 class="section-title">Clubs Joined</h3>
+                    <template lwc:if={hasJoinedClubs}>
+                        <div class="joined-list">
+                            <template for:each={joinedClubs} for:item="club">
+                                <div key={club.id} class="joined-item">
+                                    <img src={club.image} alt={club.name} class="joined-thumb" />
+                                    <div class="joined-info">
+                                        <p class="joined-name">{club.name}</p>
+                                        <p class="joined-members">{club.members} members</p>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                    <template lwc:else>
+                        <div class="empty-state">
+                            <div class="empty-illus">&#128101;</div>
+                            <p class="empty-sub">You haven't joined any clubs yet</p>
+                            <button class="btn-empty-cta" onclick={handleDiscover}>Discover Clubs</button>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="card sidebar-card">
+                    <h3 class="section-title">Created Clubs</h3>
+                    <template lwc:if={hasCreatedClubs}>
+                        <div class="created-list">
+                            <template for:each={createdClubs} for:item="club">
+                                <div key={club.id} class="created-item">
+                                    <div class="created-info">
+                                        <p class="created-name">{club.name}</p>
+                                        <p class="created-cat">{club.category} &bull; {club.privacy}</p>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                        <button class="btn-empty-cta" style="margin-top:12px;width:100%" onclick={handleCreate}>+ Create Another</button>
+                    </template>
+                    <template lwc:else>
+                        <div class="empty-state">
+                            <div class="empty-illus">&#127959;</div>
+                            <p class="empty-sub">You haven't created any clubs yet</p>
+                            <button class="btn-empty-cta" onclick={handleCreate}>Create a Club</button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

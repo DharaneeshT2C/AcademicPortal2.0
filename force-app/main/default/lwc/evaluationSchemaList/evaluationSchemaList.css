@@ -1,0 +1,186 @@
+/* ═══════════════════════════════════════════════════════════════
+   Evaluation Schema List — clean table view
+   Matches: ID / NAME / WEIGHTAGE / TYPE / STATUS / action style
+   Colors from ExamManagementTheme__c via CSS vars, no blue fallbacks
+═══════════════════════════════════════════════════════════════ */
+
+:host {
+    display: block;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+.esl-wrap { background: transparent; }
+
+/* ── Header ──────────────────────────────────────────────────── */
+.esl-header {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; padding: 0 0 1.25rem;
+}
+
+.esl-title {
+    font-size: 1.05rem; font-weight: 700; margin: 0 0 0.2rem;
+    color: var(--brand-text, #182330);
+    -webkit-text-fill-color: initial; background: none;
+}
+
+.esl-subtitle {
+    font-size: 0.825rem;
+    color: var(--brand-text-secondary, #556476);
+    margin: 0;
+}
+
+/* ── Create Button ───────────────────────────────────────────── */
+.esl-btn-primary {
+    background: var(--brand-btn-bg, #374151);
+    color: var(--brand-btn-text, #ffffff);
+    border: none; border-radius: 8px;
+    padding: 0.48rem 1.15rem; font-size: 0.875rem; font-weight: 600;
+    cursor: pointer; white-space: nowrap; flex-shrink: 0; font-family: inherit;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+.esl-btn-primary:hover {
+    background: var(--brand-btn-hover-bg, #1f2937);
+    box-shadow: 0 3px 8px rgba(15, 23, 42, 0.15);
+}
+
+/* ── Table Container ─────────────────────────────────────────── */
+.esl-table-wrap {
+    background: var(--brand-surface, #ffffff);
+    border: 1px solid var(--brand-border, #dce5ef);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.06);
+}
+
+/* ── Column Header Row ───────────────────────────────────────── */
+.esl-table-head {
+    display: flex;
+    align-items: center;
+    background: var(--brand-bg-soft, #f7f9fc);
+    border-bottom: 1px solid var(--brand-border, #dce5ef);
+}
+
+.esl-th {
+    padding: 0.75rem 1rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--brand-text-secondary, #556476);
+    white-space: nowrap;
+}
+
+/* ── Data Row ────────────────────────────────────────────────── */
+.esl-table-row {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--brand-border, #edf2f8);
+    transition: background 0.15s ease;
+}
+.esl-table-row:last-child { border-bottom: none; }
+.esl-table-row:hover { background: var(--brand-bg-soft, #f9fbfe); }
+
+.esl-td {
+    padding: 0.95rem 1rem;
+    font-size: 0.875rem;
+    color: var(--brand-text, #182330);
+}
+
+/* ── Column widths ───────────────────────────────────────────── */
+.esl-col-name    { flex: 2; min-width: 0; }
+.esl-col-total   { flex: 1; }
+.esl-col-passing { flex: 1; }
+.esl-col-courses { flex: 1; }
+.esl-col-status  { flex: 1; }
+.esl-col-action  { flex: 0 0 80px; text-align: right; }
+
+/* ── Name cell ───────────────────────────────────────────────── */
+.esl-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    min-width: 0;
+}
+
+.esl-row-icon {
+    flex-shrink: 0;
+    width: 30px; height: 30px;
+    background: var(--brand-secondary, #f1f4f8);
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--brand-text-secondary, #556476);
+}
+
+.esl-name-text {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--brand-text, #182330);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.esl-desc-text {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--brand-text-secondary, #758398);
+    margin-top: 0.1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Status pill ─────────────────────────────────────────────── */
+.esl-status-pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.2rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid transparent;
+}
+
+.esl-status-active {
+    background: #e8f7ee;
+    color: #166738;
+    border-color: #b7e4c7;
+}
+
+.esl-status-inactive {
+    background: var(--brand-bg-soft, #f1f4f8);
+    color: var(--brand-text-secondary, #556476);
+    border-color: var(--brand-border, #d6deea);
+}
+
+/* ── View button ─────────────────────────────────────────────── */
+.esl-view-btn {
+    background: transparent;
+    border: 1px solid var(--brand-border, #dce5ef);
+    border-radius: 6px;
+    padding: 0.28rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--brand-text-secondary, #556476);
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+    white-space: nowrap;
+}
+.esl-view-btn:hover {
+    border-color: var(--brand-primary, #374151);
+    color: var(--brand-primary, #374151);
+    background: var(--brand-secondary, #f1f4f8);
+}
+
+/* ── Empty state ─────────────────────────────────────────────── */
+.esl-empty {
+    padding: 3rem 1.5rem; text-align: center;
+    color: var(--brand-text-secondary, #556476); font-size: 0.875rem;
+    background: var(--brand-surface, #ffffff);
+    border: 1px solid var(--brand-border, #dce5ef);
+    border-radius: 12px;
+}

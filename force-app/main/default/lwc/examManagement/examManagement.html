@@ -1,0 +1,180 @@
+<template>
+    <div class="em-wrap">
+        <!-- Page Header + Tabs -->
+        <div class="em-page-header">
+            <div class="em-page-header-inner">
+                <h1 class="em-page-title">Exam Management</h1>
+            </div>
+            <nav class="em-tabs-bar">
+                <button class={dashboardTabClass} onclick={handleTabClick} data-tab="dashboard">
+                    Dashboard
+                </button>
+                <button class={masterDataTabClass} onclick={handleTabClick} data-tab="masterData">
+                    Exam Master Data
+                </button>
+                <button class={examCycleTabClass} onclick={handleTabClick} data-tab="examCycle">
+                    Exam Cycle
+                </button>
+                <button class={historicalDataTabClass} onclick={handleTabClick} data-tab="historicalData">
+                    Historical Data
+                </button>
+            </nav>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="em-content">
+
+            <!-- Dashboard -->
+            <template lwc:if={isDashboardTab}>
+                <div class="em-placeholder">
+                    <h2 class="em-placeholder-title">Dashboard</h2>
+                    <p class="em-placeholder-copy">Dashboard content will be added in a future release.</p>
+                </div>
+            </template>
+
+            <!-- Exam Master Data -->
+            <template lwc:elseif={isMasterDataTab}>
+
+                <!-- Master Data Sub-tabs -->
+                <div class="em-master-tabs-wrap">
+                    <nav class="em-master-tabs">
+                        <button class={evalSchemaTabClass} data-target="schema" onclick={handleMasterCardClick}>
+                            Evaluation Schema
+                        </button>
+                        <button class={gradeSchemaTabClass} data-target="grade" onclick={handleMasterCardClick}>
+                            Grade Schema
+                        </button>
+                        <button class="em-master-tab-btn em-master-tab-btn--disabled" disabled>
+                            Policy Rules
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Evaluation Schema -->
+                <template lwc:if={isSchemaTab}>
+                    <template lwc:if={isSchemaListView}>
+                        <c-evaluation-schema-list
+                            schemas={schemaRecords}
+                            oncreateschema={handleCreateSchema}
+                            onschemaselected={handleSchemaSelected}
+                        ></c-evaluation-schema-list>
+                    </template>
+                    <template lwc:elseif={isSchemaDetailView}>
+                        <c-evaluation-schema-detail
+                            schema-id={selectedSchemaId}
+                            schema-records={schemaRecords}
+                            onback={handleSchemaBackToList}
+                            oneditschema={handleEditSchema}
+                            ondeleteschema={handleDeleteSchema}
+                        ></c-evaluation-schema-detail>
+                    </template>
+                    <template lwc:elseif={isSchemaWizardView}>
+                        <c-evaluation-schema-wizard
+                            schema-record={editingSchemaRecord}
+                            onsaveschema={handleSaveSchema}
+                            oncancelwizard={handleCancelWizard}
+                        ></c-evaluation-schema-wizard>
+                    </template>
+                </template>
+
+                <!-- Grade Schema -->
+                <template lwc:elseif={isGradeTab}>
+                    <template lwc:if={isGradeListView}>
+                        <c-grade-schema-list
+                            schemas={gradeSchemaRecords}
+                            oncreateschema={handleCreateGradeSchema}
+                            onschemaselected={handleGradeSchemaSelected}
+                        ></c-grade-schema-list>
+                    </template>
+                    <template lwc:elseif={isGradeWizardView}>
+                        <c-grade-schema-wizard
+                            schema-record={editingGradeSchemaRecord}
+                            onsaveschema={handleSaveGradeSchema}
+                            oncancelwizard={handleCancelGradeWizard}
+                        ></c-grade-schema-wizard>
+                    </template>
+                </template>
+
+                <!-- Policy Rules (placeholder) -->
+                <template lwc:elseif={isPolicyTab}>
+                    <div class="em-placeholder">
+                        <h2 class="em-placeholder-title">Policy Rules</h2>
+                        <p class="em-placeholder-copy">Policy rules module will be added in a future release.</p>
+                    </div>
+                </template>
+
+            </template>
+
+            <!-- Exam Cycle -->
+            <template lwc:elseif={isExamCycleTab}>
+                <template lwc:if={isPlannerListView}>
+                    <c-exam-cycle-planner-list
+                        oncycleclicked={handleCycleClicked}
+                    ></c-exam-cycle-planner-list>
+                </template>
+                <template lwc:else>
+                    <c-exam-cycle-course-workspace
+                        cycle-id={selectedCycleId}
+                        cycle-name={selectedCycleName}
+                        term-id={selectedTermId}
+                        grade-schemas={gradeSchemaRecords}
+                        onback={handlePlannerBack}
+                    ></c-exam-cycle-course-workspace>
+                </template>
+            </template>
+
+            <!-- Historical Data -->
+            <template lwc:elseif={isHistoricalDataTab}>
+                <div class="em-placeholder">
+                    <h2 class="em-placeholder-title">Historical Data</h2>
+                    <p class="em-placeholder-copy">Historical data content will be added in a future release.</p>
+                </div>
+            </template>
+
+        </div>
+    </div>
+
+    <!-- Create Cycle Modal -->
+    <template lwc:if={showCreateCycleModal}>
+        <div class="em-backdrop" onclick={handleCloseCreateModal}></div>
+        <div class="em-modal" role="dialog" aria-modal="true">
+            <div class="em-modal-header">
+                <h2 class="em-modal-title">Create Exam Cycle</h2>
+                <button class="em-modal-close-btn" onclick={handleCloseCreateModal} aria-label="Close">&#x2715;</button>
+            </div>
+            <div class="em-modal-body">
+                <lightning-input
+                    label="Cycle Name"
+                    value={newCycleDraft.name}
+                    data-field="name"
+                    onchange={handleNewCycleInputChange}
+                    required
+                ></lightning-input>
+                <div class="em-field-gap">
+                    <lightning-input
+                        label="Term"
+                        value={newCycleDraft.term}
+                        data-field="term"
+                        onchange={handleNewCycleInputChange}
+                        required
+                    ></lightning-input>
+                </div>
+                <div class="em-field-gap">
+                    <lightning-combobox
+                        label="Type"
+                        value={newCycleDraft.type}
+                        options={cycleTypeOptions}
+                        data-field="type"
+                        onchange={handleNewCycleInputChange}
+                        required
+                    ></lightning-combobox>
+                </div>
+            </div>
+            <div class="em-modal-footer">
+                <button class="em-btn em-btn-ghost" onclick={handleCloseCreateModal}>Cancel</button>
+                <button class="em-btn em-btn-primary" onclick={handleSaveCreateCycle}>Create Cycle</button>
+            </div>
+        </div>
+    </template>
+
+</template>

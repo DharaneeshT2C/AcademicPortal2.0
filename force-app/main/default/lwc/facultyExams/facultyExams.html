@@ -1,0 +1,188 @@
+<template>
+    <div class="dashboard-page">
+        <div class="grid-top">
+            <section class="panel panel-invigilation">
+                <div class="panel-head-row">
+                    <h2 class="panel-title">Invigilation Schedule</h2>
+                    <button
+                        class="btn btn-outline"
+                        type="button"
+                        aria-label="Go to invigilation schedule"
+                        onclick={navigateToInvigilation}
+                    >
+                        View more
+                    </button>
+                </div>
+                <div class="invigilation-grid">
+                    <template for:each={invigilationSchedules} for:item="schedule">
+                        <article class="invigilation-card" key={schedule.id}>
+                            <p class="room-title">{schedule.room}</p>
+                            <div class="meta-row">
+                                <span class="meta-text">{schedule.dateTime}</span>
+                                <span class="pill duration-pill">
+                                    <span class="duration-value">{schedule.duration}</span>
+                                    <svg class="duration-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true" focusable="false">
+                                        <path d="M6.99156 1.16406C3.77156 1.16406 1.16406 3.7774 1.16406 6.9974C1.16406 10.2174 3.77156 12.8307 6.99156 12.8307C10.2174 12.8307 12.8307 10.2174 12.8307 6.9974C12.8307 3.7774 10.2174 1.16406 6.99156 1.16406ZM6.9974 11.6641C4.41906 11.6641 2.33073 9.57573 2.33073 6.9974C2.33073 4.41906 4.41906 2.33073 6.9974 2.33073C9.57573 2.33073 11.6641 4.41906 11.6641 6.9974C11.6641 9.57573 9.57573 11.6641 6.9974 11.6641Z" fill="#1A358C"/>
+                                        <path d="M7.28906 4.08594H6.41406V7.58594L9.47656 9.42344L9.91406 8.70594L7.28906 7.14844V4.08594Z" fill="#1A358C"/>
+                                    </svg>
+                                </span>
+                            </div>
+                            <div class="exam-box">
+                                <p class="exam-title">{schedule.examTitle}</p>
+                                <p class="exam-subtitle">{schedule.subject}</p>
+                                <p class="exam-semester">{schedule.semester}</p>
+                            </div>
+                            <template lwc:if={schedule.showActions}>
+                                <div class="inv-actions">
+                                    <button class="btn btn-outline" type="button" data-id={schedule.id} onclick={openRequestModal}>Request Substitute</button>
+                                    <button class="btn btn-primary" type="button" data-id={schedule.id} onclick={openAcceptModal}>Accept</button>
+                                </div>
+                            </template>
+                            <template lwc:if={schedule.showSubstituteRequested}>
+                                <p class="substitute-banner">Substitute Requested</p>
+                            </template>
+                        </article>
+                    </template>
+                </div>
+            </section>
+
+            <section class="panel panel-setup">
+                <div class="panel-head-row">
+                    <h2 class="panel-title">Setup Question Paper</h2>
+                    <button
+                        class="icon-nav-button icon-nav-button-setup"
+                        type="button"
+                        aria-label="Go to question paper setup"
+                        onclick={navigateToQuestionPaperSetup}
+                    >
+                        <img src={rightArrowUrl} class="arrow-image" alt="" aria-hidden="true" />
+                    </button>
+                </div>
+                <template for:each={questionPapers} for:item="paper">
+                    <article class="mini-card" key={paper.id}>
+                        <div class="mini-head">
+                            <p class="mini-title">{paper.title}</p>
+                            <p class="mini-sem">{paper.semester}</p>
+                        </div>
+                        <p class="mini-subtitle">{paper.type}</p>
+                        <div class="setup-actions">
+                            <button class="btn btn-outline" type="button">Upload</button>
+                            <button class="btn btn-primary" type="button" onclick={navigateToQuestionPaperSetup}>Setup</button>
+                        </div>
+                    </article>
+                </template>
+            </section>
+
+            <section class="panel panel-evaluation">
+                <div class="panel-head-row">
+                    <h2 class="panel-title">Evaluation Requests</h2>
+                    <button
+                        class="icon-nav-button icon-nav-button-evaluation"
+                        type="button"
+                        aria-label="Go to evaluation page"
+                        onclick={navigateToEvaluation}
+                    >
+                        <img src={rightArrowUrl} class="arrow-image" alt="" aria-hidden="true" />
+                    </button>
+                </div>
+                <div class="stack">
+                    <template for:each={evaluationRequests} for:item="item">
+                        <article class="mini-card" key={item.id}>
+                            <div class="mini-head">
+                                <p class="mini-title">{item.title}</p>
+                                <p class="mini-sem">{item.semester}</p>
+                            </div>
+                            <p class="mini-subtitle">{item.type}</p>
+                            <button class="btn btn-primary full-width" type="button" onclick={navigateToEvaluationBooklets}>Evaluate</button>
+                        </article>
+                    </template>
+                </div>
+            </section>
+        </div>
+
+        <div class="grid-bottom">
+            <section class="panel grade-panel">
+                <div class="header-row">
+                    <h2 class="title">Grade Distribution by Class</h2>
+                    <div class="filters">
+                        <div class="select-wrap">
+                            <select class="filter-select class-select" onchange={handleClassChange}>
+                                <template for:each={classOptions} for:item="option">
+                                    <option key={option.value} value={option.value}>{option.label}</option>
+                                </template>
+                            </select>
+                        </div>
+                        <div class="select-wrap">
+                            <select class="filter-select semester-select" onchange={handleSemesterChange}>
+                                <template for:each={semesterOptions} for:item="option">
+                                    <option key={option.value} value={option.value}>{option.label}</option>
+                                </template>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas class="faculty-exams-chart"></canvas>
+                </div>
+                <template lwc:if={errorMessage}>
+                    <p class="error-text">{errorMessage}</p>
+                </template>
+            </section>
+
+            <section class="panel upcoming-panel">
+                <div class="upcoming-header">
+                    <h2 class="panel-title">Upcoming Exam Schedule</h2>
+                    <button type="button" class="btn btn-outline btn-view">View More</button>
+                </div>
+                <div class="separator"></div>
+                <p class="upcoming-date">18th December 2023</p>
+                <div class="stack upcoming-stack">
+                    <template for:each={upcomingExams} for:item="exam">
+                        <article class="upcoming-card" key={exam.id}>
+                            <div class="upcoming-head">
+                                <div>
+                                    <p class="upcoming-title">{exam.title}</p>
+                                    <p class="upcoming-sem">{exam.semester}</p>
+                                </div>
+                                <span class="pill duration-alt">{exam.duration}</span>
+                            </div>
+                            <p class="upcoming-time">O {exam.time}</p>
+                        </article>
+                    </template>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <template lwc:if={showRequestModal}>
+        <section class="modal-backdrop" onclick={closeAllModals}>
+            <div class="modal-card request-modal" onclick={handleModalContainerClick}>
+                <h3 class="modal-title">Request for a substitute</h3>
+                <label class="modal-label" for="substitute-reason">Reason</label>
+                <textarea
+                    id="substitute-reason"
+                    class="modal-textarea"
+                    placeholder="Add reason for request"
+                    onchange={handleReasonChange}
+                ></textarea>
+                <div class="modal-actions">
+                    <button class="btn btn-outline modal-cancel" type="button" onclick={closeAllModals}>Cancel</button>
+                    <button class="btn btn-primary modal-primary" type="button" onclick={submitSubstituteRequest}>Raise Request</button>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template lwc:if={showAcceptModal}>
+        <section class="modal-backdrop" onclick={closeAllModals}>
+            <div class="modal-card accept-modal" onclick={handleModalContainerClick}>
+                <p class="accept-message">Are you sure you want to accept this request?</p>
+                <div class="modal-actions">
+                    <button class="btn btn-outline modal-cancel" type="button" onclick={closeAllModals}>Cancel</button>
+                    <button class="btn btn-primary modal-primary" type="button" onclick={confirmAcceptRequest}>Accept Request</button>
+                </div>
+            </div>
+        </section>
+    </template>
+
+</template>

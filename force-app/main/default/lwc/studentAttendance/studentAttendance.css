@@ -1,0 +1,8 @@
+:host {
+    display: block;
+}
+
+.student-attendance-module {
+    height: calc(100vh - 153px);
+    overflow: hidden;
+}

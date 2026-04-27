@@ -1,0 +1,164 @@
+:host { font-family: var(--font-family, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif); }
+.page { width: 100%; }
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+}
+.page-header-left { display: flex; flex-direction: column; gap: 2px; }
+.page-title { font-size: 22px; font-weight: 600; letter-spacing: -0.01em; color: var(--text-primary); }
+.page-subtitle { font-size: 13px; color: var(--text-muted); }
+.current-date { font-size: 13px; color: var(--text-muted); font-variant-numeric: tabular-nums; font-weight: 500; }
+
+.schedule-wrap {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+}
+
+.schedule-inner {
+    display: flex;
+    overflow-y: auto;
+    max-height: 680px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+/* Time labels column */
+.time-col {
+    width: 80px;
+    flex-shrink: 0;
+    padding-top: 8px;
+}
+.time-cell {
+    height: 60px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 4px 12px 0 0;
+}
+.time-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    line-height: 14px;
+}
+
+/* Events column — the timeline */
+.events-col {
+    flex: 1;
+    position: relative;
+    /* Grid lines via background-image (no pseudo-elements needed) */
+    background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 59px,
+        #F1F5F9 59px,
+        #F1F5F9 60px
+    );
+    background-size: 100% 60px;
+    background-position-y: 8px;
+    padding-top: 8px;
+}
+
+/* Current time indicator */
+.current-time-bar {
+    position: absolute;
+    left: 0;
+    right: 16px;
+    height: 2px;
+    background: #EF4444;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+}
+.current-time-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #EF4444;
+    margin-left: -4px;
+    flex-shrink: 0;
+}
+
+/* Event blocks */
+.event-block {
+    position: absolute;
+    left: 8px;
+    right: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    z-index: 2;
+    cursor: pointer;
+    transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+    min-height: 48px;
+}
+.event-block:hover {
+    transform: translateX(2px);
+    box-shadow: var(--shadow-md);
+    z-index: 5;
+}
+
+.event-inner {
+    height: 100%;
+    padding: 10px 14px;
+    border-left: 3px solid transparent;
+}
+.event-blue .event-inner  { border-left-color: #4F46E5; }
+.event-green .event-inner { border-left-color: #059669; }
+.event-amber .event-inner { border-left-color: #D97706; }
+.event-violet .event-inner{ border-left-color: #7C3AED; }
+.event-sky .event-inner   { border-left-color: #0284C7; }
+.event-rose .event-inner  { border-left-color: #E11D48; }
+
+.event-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+.event-sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+.event-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+.event-loc {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+.event-loc c-icon { flex-shrink: 0; }
+
+/* Event color variants */
+.event-blue  { background: #EEF2FF; border-color: #4F46E5; }
+.event-green { background: #D1FAE5; border-color: #059669; }
+.event-amber { background: #FEF3C7; border-color: #D97706; }
+.event-violet{ background: #EDE9FE; border-color: #7C3AED; }
+.event-sky   { background: #E0F2FE; border-color: #0284C7; }
+.event-rose  { background: #FFE4E6; border-color: #E11D48; }
+
+@media (max-width: 768px) {
+    .time-col { width: 60px; }
+    .time-cell { padding: 4px 8px 0 0; }
+}

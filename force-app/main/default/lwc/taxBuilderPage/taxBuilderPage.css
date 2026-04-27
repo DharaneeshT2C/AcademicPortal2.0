@@ -1,0 +1,183 @@
+:host {
+    display: block;
+    font-family: Inter, Roboto, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --tbp-brand: #0b6bcb;
+    --tbp-brand-soft: rgba(11, 107, 203, 0.14);
+    --tbp-bg-page: #f5f8fc;
+    --tbp-bg-surface: #ffffff;
+    --tbp-border: #dce5ef;
+    --tbp-border-strong: #c7d5e4;
+    --tbp-text-primary: #182330;
+    --tbp-text-secondary: #556476;
+    --tbp-text-muted: #758398;
+    --tbp-shadow-soft: 0 2px 4px rgba(15, 23, 42, 0.06);
+}
+
+.page {
+    min-height: calc(100vh - 128px);
+    background:
+        radial-gradient(circle at top right, rgba(11, 107, 203, 0.1), transparent 35%),
+        var(--tbp-bg-page);
+    border-radius: 16px;
+    padding: 24px;
+    color: var(--tbp-text-primary);
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--tbp-text-muted);
+    margin-bottom: 8px;
+}
+
+.crumb-btn {
+    background: transparent;
+    border: 0;
+    color: var(--tbp-brand);
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+}
+
+.crumb-btn:hover {
+    text-decoration: underline;
+}
+
+.crumb-current {
+    color: var(--tbp-text-secondary);
+    font-weight: 600;
+}
+
+.sep {
+    color: #a1adba;
+    margin: 0 8px;
+}
+
+.builderHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--tbp-border);
+}
+
+.pageTitle {
+    margin: 0;
+    font-size: 24px;
+    line-height: 1.25;
+    font-weight: 700;
+    color: var(--tbp-text-primary);
+}
+
+.pageSubtitle {
+    margin: 8px 0 0;
+    font-size: 14px;
+    color: var(--tbp-text-secondary);
+}
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btnNeutral {
+    --slds-c-button-radius-border: 10px;
+    --slds-c-button-color-border: var(--tbp-border-strong);
+    --slds-c-button-color-background: #ffffff;
+    --slds-c-button-text-color: var(--tbp-text-secondary);
+}
+
+.btnPrimary {
+    --slds-c-button-brand-radius-border: 10px;
+    --slds-c-button-brand-color-background: var(--tbp-brand);
+    --slds-c-button-brand-color-border: var(--tbp-brand);
+}
+
+.loadingWrap {
+    margin-top: 24px;
+    border: 1px solid var(--tbp-border);
+    border-radius: 12px;
+    background: var(--tbp-bg-surface);
+    box-shadow: var(--tbp-shadow-soft);
+    padding: 40px;
+}
+
+.formCard {
+    margin-top: 24px;
+    border: 1px solid var(--tbp-border);
+    border-radius: 12px;
+    background: var(--tbp-bg-surface);
+    box-shadow: var(--tbp-shadow-soft);
+    padding: 24px;
+}
+
+.sectionTitle {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--tbp-text-muted);
+}
+
+.formGrid {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 16px;
+}
+
+.fieldSpan2 {
+    grid-column: 1 / -1;
+}
+
+.formCard lightning-input,
+.formCard lightning-combobox {
+    --slds-c-input-radius-border: 10px;
+    --slds-c-input-color-border: var(--tbp-border-strong);
+    --slds-c-input-color-background: #ffffff;
+    --slds-c-input-shadow: none;
+    --slds-c-input-spacing-block-start: 0.5rem;
+    --slds-c-input-spacing-block-end: 0.5rem;
+    --slds-c-input-label-font-size: 0.75rem;
+    --slds-c-input-label-font-weight: 700;
+    --slds-c-input-label-color: var(--tbp-text-muted);
+    --slds-c-combobox-label-font-size: 0.75rem;
+    --slds-c-combobox-label-font-weight: 700;
+    --slds-c-combobox-label-color: var(--tbp-text-muted);
+}
+
+button:focus-visible,
+.crumb-btn:focus-visible,
+.headerActions :focus-visible,
+.formCard :focus-visible {
+    outline: 3px solid var(--tbp-brand-soft);
+    outline-offset: 2px;
+}
+
+@media (max-width: 1024px) {
+    .page {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 720px) {
+    .builderHeader {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .formGrid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .fieldSpan2 {
+        grid-column: auto;
+    }
+}

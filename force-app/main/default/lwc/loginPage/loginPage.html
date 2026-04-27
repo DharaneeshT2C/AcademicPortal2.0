@@ -1,0 +1,189 @@
+<template>
+    <div class="login-shell">
+        <!-- Left panel: always visible -->
+        <div class="login-left" style={bgStyle}>
+            <span class="institute-name-overlay">Name of the Institute</span>
+            <div class="left-footer">
+                <h1 class="left-tagline">Your Learning, Simplified</h1>
+                <p class="left-dots">Learn &bull; Track &bull; Grow</p>
+            </div>
+        </div>
+
+        <!-- Right panel -->
+        <div class="login-right">
+
+            <!-- ── LOGIN CARD ── -->
+            <template if:true={isLoginView}>
+                <div class="login-card">
+                    <p class="card-institute">Name of the Institute</p>
+                    <h2 class="card-title">Student Login</h2>
+                    <p class="card-subtitle">Stay on track with your learning</p>
+
+                    <div class="form-group">
+                        <label class="form-label" for="studentId">Student ID</label>
+                        <input id="studentId" class="form-input" type="text" placeholder="Enter your student ID"
+                            value={studentId} onchange={handleStudentIdChange} />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="loginPassword">Password</label>
+                        <div class="input-wrap">
+                            <input id="loginPassword" class="form-input" type={loginPasswordType}
+                                placeholder="Enter password" value={loginPassword} onchange={handleLoginPasswordChange} />
+                            <button class="eye-btn" type="button" onclick={toggleLoginPassword} aria-label="Toggle password">
+                                <template if:true={showLoginPassword}><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg></template>
+                                <template if:false={showLoginPassword}><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></template>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <label class="remember-label">
+                            <input class="remember-check" type="checkbox" checked={rememberMe} onchange={handleRememberMe} />
+                            Remember Me
+                        </label>
+                        <span class="forgot-text">Forgot Password? <button class="link-btn" type="button" onclick={goToReset}>Reset</button></span>
+                    </div>
+
+                    <button class="login-btn" type="button" onclick={handleLogin} disabled={isLoginDisabled}>{loginButtonLabel}</button>
+                    <template if:true={loginError}>
+                        <p class="login-error">{loginError}</p>
+                    </template>
+                    <p class="help-text">Need Help? <button class="link-btn" type="button" onclick={openGetHelp}>Contact Admin.</button></p>
+                </div>
+            </template>
+
+            <!-- ── RESET PASSWORD CARD ── -->
+            <template if:true={isResetView}>
+                <div class="login-card">
+                    <div class="reset-logo-wrap">
+                        <!-- <img src={kenLogoUrl} alt="Institution Logo" class="reset-logo" /> -->
+                        <span class="reset-logo-label">Institution Logo</span>
+                    </div>
+
+                    <h2 class="card-title">Reset Password</h2>
+
+                    <div class="form-group reset-fields">
+                        <div class="form-group">
+                            <label class="form-label" for="newPwd">New Password</label>
+                            <div class="input-wrap">
+                                <input id="newPwd" class="form-input" type={newPwdType}
+                                    placeholder="Enter your new password" value={newPassword} onchange={handleNewPwdChange} />
+                                <button class="eye-btn" type="button" onclick={toggleNewPwd} aria-label="Toggle">
+                                    <template if:true={showNewPwd}><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg></template>
+                                    <template if:false={showNewPwd}><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></template>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="confirmPwd">Re-enter New Password</label>
+                            <div class="input-wrap">
+                                <input id="confirmPwd" class="form-input" type={confirmPwdType}
+                                    placeholder="Re-enter your new password" value={confirmPassword} onchange={handleConfirmPwdChange} />
+                                <button class="eye-btn" type="button" onclick={toggleConfirmPwd} aria-label="Toggle">
+                                    <template if:true={showConfirmPwd}><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg></template>
+                                    <template if:false={showConfirmPwd}><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></template>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="login-btn" type="button" onclick={handleResetSubmit}>Submit</button>
+                    <p class="back-to-login-wrap">
+                        <button class="link-btn back-link" type="button" onclick={goToLogin}>Back to Login</button>
+                    </p>
+                </div>
+            </template>
+
+            <div class="powered-by">
+                <span>Powered by</span>
+                <img src={kenLogoUrl} alt="KEN" class="powered-logo" />
+            </div>
+        </div>
+    </div>
+
+    <!-- ── GET HELP MODAL ── -->
+    <template if:true={isGetHelpOpen}>
+        <div class="modal-backdrop" onclick={handleBackdropClick}>
+            <div class="modal-box" onclick={stopProp}>
+                <h2 class="modal-title">Get Help</h2>
+                <div class="modal-divider"></div>
+
+                <div class="form-group">
+                    <label class="form-label">Description of the Issue (Optional)</label>
+                    <div class="textarea-wrap">
+                        <textarea class="form-textarea" placeholder="Enter description"
+                            onchange={handleHelpDescChange}></textarea>
+                        <button class="auto-create-btn" type="button">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                            Auto-Create Form Now
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Choose Issue Type <span class="required">*</span></label>
+                    <div class="select-wrap">
+                        <select class="form-select" onchange={handleIssueTypeChange}>
+                            <template for:each={issueTypeOptions} for:item="opt">
+                                <option key={opt.value} value={opt.value} selected={opt.selected}>{opt.label}</option>
+                            </template>
+                        </select>
+                        <span class="select-caret">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Issue Subject <span class="required">*</span></label>
+                    <input class="form-input" type="text" placeholder="Enter issue subject"
+                        value={helpIssueSubject} onchange={handleIssueSubjectChange} />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Upload Supporting Document (Optional)</label>
+                    <div class="upload-zone" ondragover={handleDragOver} ondrop={handleDrop}>
+                        <input type="file" class="file-input" accept=".png,.jpg,.pdf" onchange={handleFileChange} />
+                        <p class="upload-text"><span class="link-btn">Click to upload</span> or drag and drop</p>
+                        <p class="upload-hint">PNG, JPG or PDF (Max 5 MB)</p>
+                        <template if:true={uploadedFileName}>
+                            <p class="uploaded-name">{uploadedFileName}</p>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="cancel-btn" type="button" onclick={closeGetHelp}>Cancel</button>
+                    <button class="submit-btn" type="button" onclick={handleHelpSubmit}>Submit</button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- ── REQUEST SUBMITTED SUCCESS ── -->
+    <template if:true={showRequestSubmitted}>
+        <div class="success-overlay">
+            <div class="success-card">
+                <div class="success-icon-wrap">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <h3 class="success-title">Request Submitted!</h3>
+                <p class="success-subtitle">We will get back to you shortly.</p>
+            </div>
+        </div>
+    </template>
+
+    <!-- ── PASSWORD UPDATED SUCCESS ── -->
+    <template if:true={showPasswordUpdated}>
+        <div class="success-overlay">
+            <div class="success-card">
+                <div class="success-icon-wrap">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <h3 class="success-title">Password Updated!</h3>
+            </div>
+        </div>
+    </template>
+</template>

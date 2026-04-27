@@ -1,0 +1,177 @@
+<template>
+    <section class="all-booklets-page">
+        <article class="subject-summary-card">
+            <div>
+                <h2 class="subject-title">Network Analysis & Synthesis</h2>
+                <p class="subject-meta">12 papers <span class="meta-separator">|</span> Theory</p>
+            </div>
+            <span class="due-pill">Due Date: 20-08-2025</span>
+        </article>
+
+        <article class="booklets-card">
+            <header class="booklets-head">
+                <h3 class="booklets-title">All booklets</h3>
+                <div class="head-actions">
+                    <label class="search-wrap" for="booklet-search">
+                        <lightning-icon icon-name="utility:search" size="x-small" class="search-icon"></lightning-icon>
+                        <input
+                            id="booklet-search"
+                            type="search"
+                            class="search-input"
+                            placeholder="Search by booklet ID"
+                            value={searchKey}
+                            oninput={handleSearch}
+                        />
+                    </label>
+                    <button type="button" class="secondary-action" onclick={handleOpenMarksEvaluation}>{evaluationActionLabel}</button>
+                    <button
+                        type="button"
+                        class={submitButtonClass}
+                        disabled={isSubmitDisabled}
+                        onclick={handleSubmitBundle}
+                    >
+                        Submit Bundle
+                    </button>
+                </div>
+            </header>
+
+            <div class="table-wrap">
+                <table class="booklet-table" aria-label="All booklets table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Booklet ID</th>
+                            <th scope="col">Bar code</th>
+                            <th scope="col">Total marks (100)</th>
+                            <th scope="col">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={filteredBooklets} for:item="booklet">
+                            <tr key={booklet.id}>
+                                <td>{booklet.bookletId}</td>
+                                <td>
+                                    <div class="barcode-wrap" aria-label="Barcode">
+                                        <span class="barcode-bars" aria-hidden="true"></span>
+                                        <span class="barcode-digits">81 896 5669 W63</span>
+                                    </div>
+                                </td>
+                                <td>{booklet.totalMarks}</td>
+                                <td>
+                                    <span class={booklet.statusClass}>{booklet.status}</span>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mobile-booklet-cards" aria-label="All booklets cards">
+                <template lwc:if={hasFilteredBooklets}>
+                    <template for:each={filteredBooklets} for:item="booklet">
+                        <article key={booklet.id} class="booklet-mobile-card">
+                            <div class="booklet-mobile-head">
+                                <p class="booklet-mobile-id">{booklet.bookletId}</p>
+                                <span class={booklet.statusClass}>{booklet.status}</span>
+                            </div>
+                            <div class="booklet-mobile-row">
+                                <span class="mobile-label">Bar code</span>
+                                <div class="barcode-wrap" aria-label="Barcode">
+                                    <span class="barcode-bars" aria-hidden="true"></span>
+                                    <span class="barcode-digits">81 896 5669 W63</span>
+                                </div>
+                            </div>
+                            <div class="booklet-mobile-row">
+                                <span class="mobile-label">Total marks (100)</span>
+                                <span class="mobile-value">{booklet.totalMarks}</span>
+                            </div>
+                        </article>
+                    </template>
+                </template>
+                <template lwc:if={hasNoFilteredBooklets}>
+                    <p class="mobile-empty">No booklets found.</p>
+                </template>
+            </div>
+        </article>
+
+        <template lwc:if={isDecisionModalOpen}>
+            <section class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Submit bundle confirmation">
+                <article class="submit-modal">
+                    <header class="modal-title-wrap">
+                        <template lwc:if={showWarningIcon}>
+                            <span class="modal-warning-icon" aria-hidden="true">!</span>
+                        </template>
+                        <h3 class="modal-title">{decisionModalTitle}</h3>
+                    </header>
+
+                    <template lwc:if={isFullyEvaluatedModal}>
+                        <div class="modal-content">
+                            <p class="modal-text">
+                                {fullyEvaluatedLead}
+                            </p>
+                            <p class="modal-text">Do you want to confirm submission?</p>
+                        </div>
+                    </template>
+
+                    <template lwc:if={isPartialOnlyModal}>
+                        <div class="modal-content">
+                            <p class="modal-text">
+                                Some booklets are only partially evaluated. If you submit now, only the marks you've
+                                entered will be saved. Unmarked questions will remain blank.
+                            </p>
+                            <p class="modal-text">Do you want to continue?</p>
+                        </div>
+                    </template>
+
+                    <template lwc:if={isPendingOnlyModal}>
+                        <div class="modal-content">
+                            <p class="modal-text">
+                                {pendingCountLabel} are still pending evaluation. If you submit now, those booklets
+                                will be submitted with no marks (0).
+                            </p>
+                            <p class="modal-text">Are you sure you want to continue?</p>
+                        </div>
+                    </template>
+
+                    <template lwc:if={isNotFullyEvaluatedModal}>
+                        <div class="modal-content">
+                            <p class="modal-text">Your bundle includes:</p>
+                            <ul class="modal-list">
+                                <li>Completed: {completedCount}</li>
+                                <li>Partially evaluated: {partialCount}</li>
+                                <li>Pending: {pendingCount}</li>
+                            </ul>
+
+                            <p class="modal-text">If you submit now:</p>
+                            <ul class="modal-list">
+                                <li>Partially evaluated booklets will count missing marks as '0'.</li>
+                                <li>Pending booklets will be submitted with no marks.</li>
+                            </ul>
+
+                            <p class="modal-text">Do you want to continue?</p>
+                        </div>
+                    </template>
+
+                    <footer class="modal-actions">
+                        <button type="button" class="modal-secondary-btn" onclick={closeDecisionModal}>
+                            {secondaryDecisionButtonLabel}
+                        </button>
+                        <button type="button" class="modal-primary-btn" onclick={confirmSubmitBundle}>
+                            {primaryDecisionButtonLabel}
+                        </button>
+                    </footer>
+                </article>
+            </section>
+        </template>
+
+        <template lwc:if={isSuccessModalOpen}>
+            <section class="modal-backdrop" role="status" aria-live="polite">
+                <article class="submit-success-modal">
+                    <div class="success-icon-shell">
+                        <span class="success-icon" aria-hidden="true">✓</span>
+                    </div>
+                    <p class="success-message">Bundle submitted successfully!<span class="success-star">*</span></p>
+                </article>
+            </section>
+        </template>
+    </section>
+</template>

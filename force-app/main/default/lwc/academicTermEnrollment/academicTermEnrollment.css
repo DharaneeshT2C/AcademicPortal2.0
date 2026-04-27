@@ -1,0 +1,389 @@
+.enrollment-shell {
+  background: linear-gradient(180deg, #eef4fc 0%, #f6f9fd 100%);
+  min-height: 87vh;
+  padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+.enrollment-card {
+  background: #ffffff;
+  border-radius: 28px;
+  border: none;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.1);
+  overflow: visible;
+  min-height: 100%;
+}
+
+.enrollment-hero {
+  display: flex;
+  align-items: center;
+  gap: 0.95rem;
+  padding: 1.35rem 1.5rem 1rem;
+  border-bottom: 1px solid #e6ebf2;
+  background: linear-gradient(180deg, #ffffff 0%, #f9fbfe 100%);
+  color: #18263a;
+}
+
+.hero-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #f4f8fd 0%, #edf4fb 100%);
+  border: 1px solid #d4e0ed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88);
+}
+
+.hero-icon lightning-icon {
+  --slds-c-icon-color-foreground: var(--theme-primary, #ed6a01);
+  --slds-c-icon-color-foreground-default: var(--theme-primary, #ed6a01);
+}
+
+.hero-title {
+  font-size: clamp(1.18rem, 1.45vw, 1.5rem);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.hero-subtitle {
+  font-size: 0.92rem;
+  color: #5f7087;
+}
+
+.hero-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.enrollment-body {
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.enrollment-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 0.96fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.controls-column,
+.results-column {
+  min-width: 0;
+}
+
+.controls-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.section-card {
+  border: 1px solid #dbe5f0;
+  border-radius: 20px;
+  padding: 1rem 1rem 1.1rem;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.section-card-compact {
+  min-height: 0;
+}
+
+.section-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding-bottom: 0.8rem;
+  margin-bottom: 0.9rem;
+  border-bottom: 1px solid #e7edf5;
+}
+
+.field-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1b2a3f;
+  margin: 0;
+}
+
+.section-subtitle {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #6a7b92;
+}
+
+.results-card {
+  min-height: 100%;
+}
+
+.results-header {
+  border-bottom: 1px solid #e7edf5;
+  padding-bottom: 0.8rem;
+  margin-bottom: 0.9rem;
+}
+
+.results-heading-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.results-title {
+  margin: 0;
+}
+
+.results-subtitle {
+  margin-top: 0.4rem;
+}
+
+.results-icon {
+  flex: 0 0 auto;
+  --slds-c-icon-color-foreground: var(--theme-primary, #ed6a01);
+  --slds-c-icon-color-foreground-default: var(--theme-primary, #ed6a01);
+}
+
+.table-wrap {
+  border: 1px solid #dbe5f0;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.table-wrap .slds-scrollable_y {
+  max-height: 320px;
+}
+
+.action-bar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  padding-top: 1rem;
+}
+
+.top-divider {
+  border-top: 1px solid #e7edf5;
+}
+
+.empty-state {
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  border: 1px dashed #dbe5f0;
+  border-radius: 16px;
+}
+
+.empty-state-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  text-align: center;
+  max-width: 18rem;
+}
+
+.empty-state-icon {
+  --slds-c-icon-color-foreground: #7f8da2;
+  --slds-c-icon-color-foreground-default: #7f8da2;
+}
+
+.empty-state-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #25354d;
+}
+
+.empty-state-copy {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #6a7b92;
+}
+
+.action-button {
+  --slds-c-button-radius-border: 10px;
+}
+
+.enrollment-card lightning-input,
+.enrollment-card lightning-combobox,
+.enrollment-card lightning-datatable {
+  --slds-c-input-radius-border: 10px;
+  --slds-c-input-color-border: #d6dfeb;
+  --slds-c-input-color-background: #ffffff;
+  --slds-c-input-text-color: #17263d;
+  --slds-c-input-shadow: none;
+  --slds-c-input-color-border-focus: var(--theme-primary, #ed6a01);
+  --slds-c-input-shadow-focus: 0 0 0 3px color-mix(in srgb, var(--theme-primary, #ed6a01) 18%, #ffffff);
+  --slds-c-input-color-border-hover: #c7d3e2;
+}
+
+.enrollment-card .slds-form-element__label {
+  color: #4d5f77;
+  font-weight: 600;
+  font-size: 0.74rem;
+}
+
+.enrollment-card .slds-button_brand {
+  --slds-c-button-brand-color-background: var(--theme-primary, #ed6a01);
+  --slds-c-button-brand-color-border: var(--theme-primary, #ed6a01);
+  --slds-c-button-brand-color-background-hover: var(--theme-primary, #ed6a01);
+  --slds-c-button-brand-color-border-hover: var(--theme-primary, #ed6a01);
+  --slds-c-button-brand-color-background-active: var(--theme-primary, #ed6a01);
+  --slds-c-button-brand-color-border-active: var(--theme-primary, #ed6a01);
+  --slds-c-button-brand-shadow: none;
+  --slds-c-button-brand-shadow-focus: none;
+}
+
+.enrollment-card .slds-button_neutral {
+  --slds-c-button-radius-border: 10px;
+  --slds-c-button-shadow: none;
+  --slds-c-button-shadow-focus: none;
+}
+
+@media (max-width: 768px) {
+  .enrollment-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .enrollment-hero {
+    align-items: flex-start;
+  }
+
+  .enrollment-body {
+    padding: 1rem;
+  }
+
+  .section-card {
+    padding: 0.9rem;
+  }
+
+  .empty-state {
+    min-height: 240px;
+  }
+}
+
+/* Skeleton (theme + init loading) */
+.skeleton-shell {
+  background: linear-gradient(180deg, #eef4fc 0%, #f6f9fd 100%);
+}
+
+.skeleton-card {
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
+}
+
+.skeleton-hero {
+  background: linear-gradient(135deg, #f6f8fb 0%, #eef2f7 100%);
+  color: inherit;
+}
+
+.skeleton-hero-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  width: 100%;
+}
+
+.skeleton-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+}
+
+.skeleton-line {
+  height: 14px;
+  border-radius: 999px;
+}
+
+.skeleton-section {
+  border: 1px solid #e6e9ef;
+  border-radius: 20px;
+  padding: 1rem;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(10, 22, 40, 0.06);
+  margin-bottom: 1rem;
+}
+
+.skeleton-section-title {
+  height: 12px;
+  border-radius: 999px;
+  margin-bottom: 0.9rem;
+}
+
+.skeleton-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.skeleton-field {
+  height: 38px;
+  border-radius: 10px;
+}
+
+.skeleton-table {
+  height: 240px;
+  border-radius: 12px;
+  border: 1px solid #e6e9ef;
+}
+
+.skeleton-actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+.skeleton-btn {
+  height: 32px;
+  border-radius: 10px;
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #eef2f7 0%, #f7f9fc 35%, #eef2f7 70%);
+  background-size: 260% 100%;
+  animation: shimmer 1.05s ease-in-out infinite;
+}
+
+.w-18 {
+  width: 18%;
+}
+.w-28 {
+  width: 28%;
+}
+.w-30 {
+  width: 30%;
+}
+.w-35 {
+  width: 35%;
+}
+.w-40 {
+  width: 40%;
+}
+.w-45 {
+  width: 45%;
+}
+.w-70 {
+  width: 70%;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}

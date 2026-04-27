@@ -1,0 +1,78 @@
+:host { font-family: var(--font-family, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif); }
+.prep-hub-page { width: 100%; display: flex; flex-direction: column; gap: 18px; }
+
+.breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+.bc-link { border: none; background: none; color: var(--primary); cursor: pointer; font-size: 13px; font-family: inherit; padding: 0; }
+.bc-sep { color: var(--text-secondary); }
+.bc-current { color: var(--text-secondary); }
+
+.page-title { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+
+.tabs-bar { display: flex; gap: 0; border-bottom: 2px solid var(--border); }
+.tab-btn { padding: 10px 24px; border: none; background: none; font-size: 14px; font-weight: 500; color: var(--text-secondary); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; font-family: inherit; transition: all 0.15s; }
+.tab-btn:hover { color: var(--primary); }
+.tab-active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+
+/* Learning Toolbar */
+.learning-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.cat-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+.cat-pill { padding: 6px 14px; border: 1.5px solid var(--border); border-radius: 20px; font-size: 12px; font-weight: 500; background: #fff; cursor: pointer; font-family: inherit; transition: all 0.15s; color: var(--text-secondary); }
+.cat-pill:hover { border-color: var(--primary); color: var(--primary); }
+.cat-active { background: var(--text-primary); color: #fff; border-color: var(--text-primary); }
+.btn-filters { display: flex; align-items: center; gap: 6px; padding: 8px 16px; border: 1.5px solid var(--border); border-radius: 8px; background: #fff; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; color: var(--text-secondary); }
+.btn-filters:hover { border-color: var(--primary); color: var(--primary); }
+
+/* Resources Grid — 4 columns */
+.resources-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+
+.resource-card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 10px; position: relative; transition: all 0.2s; }
+.resource-card:hover { border-color: var(--primary); box-shadow: 0 4px 16px rgba(79,70,229,0.08); }
+
+.res-company-badge { position: absolute; top: 12px; right: 12px; width: 26px; height: 26px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+
+.res-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.5; margin: 0; padding-right: 32px; }
+
+.res-meta-row { display: flex; flex-direction: column; gap: 5px; }
+.res-meta-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-secondary); }
+
+.res-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.res-tag { padding: 3px 9px; border: 1px solid var(--primary); border-radius: 20px; font-size: 10px; font-weight: 500; color: var(--primary); background: transparent; }
+
+/* Mock Interview Grid */
+.mock-intro { }
+.mock-intro-text { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+.mock-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 4px; }
+
+.mock-card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.mock-card-header { display: flex; align-items: center; gap: 12px; }
+.company-logo-md { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 15px; font-weight: 700; flex-shrink: 0; }
+.company-logo-sm { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.mock-company-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.mock-role { font-size: 12px; color: var(--text-secondary); }
+.mock-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.mock-duration { font-size: 12px; color: var(--text-secondary); }
+.mock-attempts { font-size: 12px; color: var(--primary); font-weight: 500; }
+.btn-start-mock { padding: 10px 16px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s; width: 100%; text-align: center; }
+.btn-start-mock:hover { background: #4338CA; }
+
+/* Modal */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+.mock-detail-modal { background: #fff; border-radius: 16px; width: 820px; max-width: 96vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.detail-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 28px 0; }
+.attempt-badge { padding: 4px 14px; background: #EEF2FF; color: var(--primary); border-radius: 20px; font-size: 12px; font-weight: 600; }
+.detail-modal-body { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; padding: 24px 28px; }
+.detail-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.detail-role { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+.detail-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 16px; }
+.detail-rules { padding-left: 16px; }
+.detail-rules li { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; line-height: 1.6; }
+.detail-company-row { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+.detail-company-name { font-size: 14px; font-weight: 600; }
+.detail-steps { display: flex; flex-direction: column; gap: 16px; padding-top: 8px; }
+.detail-step { display: flex; align-items: flex-start; gap: 12px; }
+.step-icon { font-size: 24px; flex-shrink: 0; }
+.step-text { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-top: 4px; }
+.detail-modal-footer { padding: 16px 28px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; }
+
+.btn-primary { padding: 10px 24px; background: var(--primary); color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+.btn-primary:hover { background: #4338CA; }

@@ -1,0 +1,100 @@
+<template>
+    <section class="evaluation-requests-page">
+        <header class="tab-header" role="tablist" aria-label="Evaluation request status">
+            <button
+                type="button"
+                class={assignedTabClass}
+                role="tab"
+                aria-selected={isAssignedActive}
+                onclick={showAssigned}
+            >
+                Assigned
+            </button>
+            <button
+                type="button"
+                class={completedTabClass}
+                role="tab"
+                aria-selected={isCompletedActive}
+                onclick={showCompleted}
+            >
+                Completed
+            </button>
+        </header>
+
+        <div class="table-shell">
+            <table class="request-table" aria-label="Evaluation requests table">
+                <thead>
+                    <tr>
+                        <th scope="col">Bundle code</th>
+                        <th scope="col">{courseHeader}</th>
+                        <th scope="col">Course code</th>
+                        <th scope="col">Format</th>
+                        <th scope="col">Semester</th>
+                        <th scope="col">Total number of papers</th>
+                        <th scope="col">{dateHeader}</th>
+                        <template lwc:if={showActionColumn}>
+                            <th scope="col" class="action-col"></th>
+                        </template>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={displayRows} for:item="row">
+                        <tr key={row.id}>
+                            <td>{row.bundleCode}</td>
+                            <td>{row.courseName}</td>
+                            <td>{row.courseCode}</td>
+                            <td>{row.format}</td>
+                            <td>{row.semester}</td>
+                            <td>{row.totalPapers}</td>
+                            <td>{row.dateText}</td>
+                            <template lwc:if={showActionColumn}>
+                                <td class="action-cell">
+                                    <button type="button" class="card-action action-primary action-dominant" onclick={handleEvaluateClick}>Evaluate</button>
+                                </td>
+                            </template>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mobile-cards" aria-label="Evaluation requests cards">
+            <template for:each={displayRows} for:item="row">
+                <article key={row.id} class="request-card">
+                    <div class="request-card-head">
+                        <p class="request-card-code">{row.bundleCode}</p>
+                        <template lwc:if={showActionColumn}>
+                            <button type="button" class="mobile-evaluate-btn action-primary action-dominant" onclick={handleEvaluateClick}>Evaluate</button>
+                        </template>
+                        <template lwc:if={isCompletedActive}>
+                            <span class="completed-pill">Completed</span>
+                        </template>
+                    </div>
+                    <p class="request-card-course">{row.courseName}</p>
+                    <dl class="request-card-grid">
+                        <div class="request-card-item">
+                            <dt>Course code</dt>
+                            <dd>{row.courseCode}</dd>
+                        </div>
+                        <div class="request-card-item">
+                            <dt>Format</dt>
+                            <dd>{row.format}</dd>
+                        </div>
+                        <div class="request-card-item">
+                            <dt>Semester</dt>
+                            <dd>{row.semester}</dd>
+                        </div>
+                        <div class="request-card-item">
+                            <dt>Total papers</dt>
+                            <dd>{row.totalPapers}</dd>
+                        </div>
+                        <div class="request-card-item request-card-item-full">
+                            <dt>{dateHeader}</dt>
+                            <dd>{row.dateText}</dd>
+                        </div>
+                    </dl>
+                </article>
+            </template>
+        </div>
+    </section>
+</template>

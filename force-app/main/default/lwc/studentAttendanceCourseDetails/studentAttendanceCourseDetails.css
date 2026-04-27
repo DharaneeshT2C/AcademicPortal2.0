@@ -1,0 +1,67 @@
+:host { display: block; }
+.attendance-view-shell { background: #fff; border-radius: 12px; height: calc(100vh - 153px); overflow-y: auto; padding: 14px; box-sizing: border-box; }
+.top-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 20px; }
+.course-title { margin: 0; font-size: 20px; font-weight: 600; color: #2f3644; }
+.course-title span { font-weight: 500; color: #6a7280; }
+.back-btn { height: 36px; border: 1px solid #3061ff; border-radius: 8px; background: #fff; color: #2f3644; font-size: 13px; padding: 0 14px; }
+
+.course-info-card { background: #fff; border-radius: 10px; padding: 16px; border: 1px solid #d8dee8; margin-bottom: 16px; }
+.info-row { display: flex; gap: 40px; align-items: center; }
+.info-item { display: flex; flex-direction: column; gap: 4px; }
+.info-label { font-size: 12px; color: #6a7280; font-weight: 500; }
+.info-value { font-size: 16px; color: #2f3644; font-weight: 500; }
+.info-percentage { font-size: 18px; font-weight: 600; }
+.info-percentage-good { color: #22863a; }
+.info-percentage-warning { color: #cb2431; }
+
+.attendance-card { background: #fff; border-radius: 10px; padding: 12px; border: 1px solid #d8dee8; }
+.attendance-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.section-title { margin: 0; font-size: 18px; font-weight: 500; color: #383f4a; }
+.help-btn { height: 32px; border: 1px solid #3061ff; border-radius: 8px; background: transparent; color: #2f3644; font-size: 12px; padding: 0 14px; }
+.tab-row { background: #eef2ff; border-radius: 8px 8px 0 0; padding: 8px 10px 0; display: flex; justify-content: space-between; align-items: flex-end; }
+.tabs { display: inline-flex; gap: 18px; }
+.tab { border: none; background: transparent; padding: 0 0 8px; color: #3d4655; font-size: 14px; cursor: pointer; }
+.tab.active { border-bottom: 2px solid #3f68f0; font-weight: 600; }
+.date-controls { display: flex; align-items: center; gap: 8px; }
+.date-nav-btn { width: 32px; height: 32px; border: 1px solid #d8dee8; background: #fff; border-radius: 6px; cursor: pointer; color: #2f3644; font-size: 14px; }
+.date-chip { border: 1px solid #bec6d4; border-radius: 8px; background: #fff; min-width: 140px; height: 32px; padding: 0 12px; font-size: 12px; color: #3f4653; cursor: pointer; }
+
+.table-card { border: 1px solid #d8dee8; border-radius: 10px; background: #fff; margin-top: 10px; }
+.table-scroll { overflow: auto; }
+.attendance-table { width: 100%; min-width: 980px; border-collapse: collapse; }
+.attendance-table th { text-align: left; padding: 10px; font-size: 12px; font-weight: 500; color: #213a8c; border-bottom: 1px solid #d8dee8; }
+.attendance-table td { padding: 10px; color: #4d5563; font-size: 12px; }
+.status-pill { display: inline-flex; align-items: center; padding: 6px 10px; border-radius: 999px; border: 1px solid transparent; font-size: 12px; line-height: 1; }
+.status-present { background: #edf4ee; border-color: #c4d8c6; color: #426548; }
+.status-absent { background: #fbeaea; border-color: #f1bfbf; color: #7c4b4b; }
+
+.calendar-card { border: 1px solid #d8dee8; border-radius: 10px; background: #fff; margin-top: 10px; padding: 16px; }
+
+.week-header { margin-bottom: 20px; text-align: center; }
+.week-range { font-size: 14px; color: #2f3644; font-weight: 500; }
+
+.week-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; }
+.week-day-col { border: 1px solid #d8dee8; border-radius: 8px; padding: 12px; background: #fafbfc; }
+.day-header { text-align: center; margin-bottom: 12px; }
+.day-name { font-size: 14px; font-weight: 600; color: #2f3644; }
+.day-date { font-size: 12px; color: #6a7280; }
+.day-sessions { display: flex; flex-direction: column; gap: 8px; }
+.session-block { background: #fff; border: 1px solid #d8dee8; border-radius: 6px; padding: 8px; text-align: center; }
+.session-time { font-size: 12px; color: #4d5563; margin: 0 0 4px 0; display: block; }
+.session-status { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 999px; font-size: 11px; border: 1px solid transparent; }
+
+.month-header { margin-bottom: 20px; text-align: center; }
+.month-label { font-size: 14px; color: #2f3644; font-weight: 500; }
+
+.calendar-grid { border: 1px solid #d8dee8; border-radius: 8px; overflow: hidden; background: #fff; }
+.calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); background: #eef2ff; border-bottom: 1px solid #d8dee8; }
+.weekday { padding: 12px; text-align: center; font-size: 13px; font-weight: 600; color: #2f3644; }
+.calendar-dates { display: grid; grid-template-columns: repeat(7, 1fr); min-height: 600px; }
+.calendar-date { border-right: 1px solid #d8dee8; border-bottom: 1px solid #d8dee8; padding: 12px; min-height: 80px; position: relative; background: #fff; }
+.calendar-date:nth-child(7n) { border-right: none; }
+.date-number { font-size: 14px; font-weight: 500; color: #2f3644; margin-bottom: 8px; }
+.attendance-dots { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.status-dot.status-present { background: #22863a; }
+.status-dot.status-absent { background: #cb2431; }
+.more-text { font-size: 10px; color: #6a7280; }

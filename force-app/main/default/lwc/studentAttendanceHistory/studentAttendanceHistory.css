@@ -1,0 +1,35 @@
+:host { display: block; }
+.attendance-shell { background: #fff; border-radius: 14px; padding: 20px 26px 18px; height: calc(100vh - 153px); overflow-y: auto; color: #3a404d; box-sizing: border-box; }
+.top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 16px; }
+.title { margin: 0; font-size: 18px; font-weight: 500; color: #383f4a; }
+.parent-tab-row { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #d8dee8; margin-bottom: 16px; }
+.parent-tab-btn { border: 0; border-bottom: 2px solid transparent; background: transparent; color: #383f4a; font-size: 16px; font-weight: 500; padding: 10px 6px 12px; cursor: pointer; }
+.parent-tab-btn-active { color: #2a57e8; border-bottom-color: #2a57e8; }
+.top-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-bottom: 16px; }
+.semester-wrap { height: 36px; min-width: 240px; border: 1px solid #d8dee8; border-radius: 9px; display: flex; align-items: center; gap: 8px; padding: 0 12px; background: #fff; }
+.semester-select { border: none; background: transparent; font-size: 14px; color: #2f3644; outline: none; appearance: none; }
+.current-pill { display: inline-flex; align-items: center; gap: 6px; border: 1px solid #4d74f6; border-radius: 999px; padding: 3px 10px; color: #2f3644; font-size: 12px; background: #fff; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: #e25454; }
+.caret { color: #697182; font-size: 12px; }
+.help-btn { height: 36px; border: 1px solid #3f68f0; border-radius: 9px; background: transparent; color: #2f3644; font-size: 14px; padding: 0 16px; cursor: pointer; transition: all 0.2s ease; }
+.help-btn:hover { background: #f0f3ff; }
+.secondary-btn { height: 36px; border: 1px solid #3f68f0; border-radius: 9px; background: transparent; color: #2f3644; font-size: 14px; padding: 0 16px; cursor: pointer; transition: all 0.2s ease; }
+.secondary-btn:hover { background: #f0f3ff; }
+.outline-btn { height: 36px; border: 1px solid #3f68f0; border-radius: 9px; background: transparent; color: #2f3644; font-size: 14px; padding: 0 16px; cursor: pointer; transition: all 0.2s ease; }
+.outline-btn:hover { background: #f0f3ff; }
+.primary-btn { height: 36px; border: none; border-radius: 9px; background: #3f68f0; color: #fff; font-size: 14px; padding: 0 24px; cursor: pointer; transition: all 0.2s ease; font-weight: 500; }
+.primary-btn:hover { background: #3357d4; }
+.table-card { border: 1px solid #d8dee8; border-radius: 12px; background: #fff; }
+.table-scroll { overflow: auto; }
+.attendance-table { width: 100%; min-width: 980px; border-collapse: collapse; }
+.attendance-table th { text-align: left; padding: 14px 10px; font-size: 14px; font-weight: 500; color: #213a8c; border-bottom: 1px solid #d8dee8; }
+.attendance-table td { padding: 13px 10px; color: #666d7a; font-size: 14px; }
+.attendance-value { font-weight: 500; }
+.attendance-ok { color: #2f8d3f; }
+.attendance-warning { color: #ef3232; }
+.status-pill { display: inline-flex; align-items: center; padding: 8px 14px; border-radius: 999px; font-size: 12px; border: 1px solid transparent; }
+.status-on-track { background: #deeadf; border-color: #b8d4bc; color: #2f3644; }
+.status-attention { background: #f7e6e6; border-color: #e7bcbc; color: #2f3644; }
+.view-btn { height: 32px; border: 1px solid #3d67f1; border-radius: 8px; background: transparent; color: #2f3644; font-size: 12px; padding: 0 14px; cursor: pointer; }
+.leave-request-shell { min-height: 0; }
+.leave-detail-header { margin-bottom: 12px; }

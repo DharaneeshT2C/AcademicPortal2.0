@@ -1,0 +1,125 @@
+<template>
+    <section class="attendance-dashboard">
+        <div class="dashboard-grid">
+            <div class="main-column">
+                <article class="panel chart-panel classwise-panel">
+                    <div class="panel-head">
+                        <div class="title-group">
+                            <h2 class="panel-title">Class Wise Attendance</h2>
+                            <div class="legend-list">
+                                <span class="legend-chip"><span class="dot dot-good"></span>&gt;75% Good</span>
+                                <span class="legend-chip"><span class="dot dot-risk"></span>60-75% At Risk</span>
+                                <span class="legend-chip"><span class="dot dot-critical"></span>&lt;30% Critical</span>
+                            </div>
+                        </div>
+                        <div class="filters">
+                            <div class="classwise-dropdown">
+                                <template if:true={isSemesterDropdownOpen}>
+                                    <div class="sem-backdrop" onclick={closeSemesterDropdown}></div>
+                                </template>
+
+                                <div class="semester-wrap">
+                                    <button
+                                        class="semester-trigger"
+                                        type="button"
+                                        aria-haspopup="listbox"
+                                        aria-expanded={isSemesterDropdownOpen}
+                                        aria-label="Select semester"
+                                        onclick={handleSemesterDropdownToggle}
+                                    >
+                                        <span class="semester-label-text">{selectedSemesterLabel}</span>
+                                        <template if:true={selectedSemesterIsCurrent}>
+                                            <span class="current-pill"><span class="dot dot-current"></span>Current</span>
+                                        </template>
+                                        <span class="semester-caret">⌄</span>
+                                    </button>
+
+                                    <template if:true={isSemesterDropdownOpen}>
+                                        <ul class="semester-dropdown" role="listbox">
+                                            <template for:each={semesterOptionsForDropdown} for:item="option">
+                                                <li
+                                                    key={option.value}
+                                                    class="semester-option"
+                                                    role="option"
+                                                    data-value={option.value}
+                                                    onclick={handleSemesterOptionSelect}
+                                                >
+                                                    <span class="option-label">{option.label}</span>
+                                                    <template if:true={option.isCurrent}>
+                                                        <span class="current-pill"><span class="dot dot-current"></span>Current</span>
+                                                    </template>
+                                                </li>
+                                            </template>
+                                        </ul>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-wrap bar-wrap">
+                        <canvas class="attendance-bar-chart"></canvas>
+                    </div>
+                </article>
+
+                <article class="panel chart-panel trend-panel">
+                    <div class="panel-head panel-head-trend">
+                        <div>
+                            <h2 class="panel-title">Attendance Trend (Last 7 Days)</h2>
+                            <p class="panel-note">Attendance dropped by <strong>12%</strong> vs last week</p>
+                        </div>
+                        <div class="select-wrap course-wrap">
+                            <select class="panel-select" onchange={handleCourseChange}>
+                                <template for:each={courseSelectOptions} for:item="option">
+                                    <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                                </template>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="chart-wrap line-wrap">
+                        <canvas class="attendance-line-chart"></canvas>
+                    </div>
+                </article>
+            </div>
+
+            <aside class="side-column">
+                <article class="panel today-panel">
+                    <h2 class="panel-title">Today’s Attendance</h2>
+
+                    <div class="today-list">
+                        <template for:each={todayAttendances} for:item="item">
+                            <article class="today-card" key={item.id} onclick={handleTodayAttendanceClick}>
+                                <div class="today-row">
+                                    <div>
+                                        <h3 class="today-title">{item.subject} <span>|&nbsp;{item.code}</span></h3>
+                                        <p class="today-subtitle">{item.program}</p>
+                                    </div>
+                                    <img class="arrow-icon" src={rightArrowIconUrl} alt="Open" />
+                                </div>
+                                <div class="today-meta">
+                                    <span class="clock">◷</span>
+                                    <span>{item.time}</span>
+                                    <span class={item.statusClass}>{item.status}</span>
+                                </div>
+                            </article>
+                        </template>
+                    </div>
+
+                    <button class="view-history" type="button" onclick={handleViewHistory}>View History</button>
+                </article>
+
+                <article class="leave-card" style={leaveCardStyle} onclick={handleViewLeaveRequests}>
+                    <div class="leave-head">
+                        <p>View Leave Requests (3)</p>
+                        <img class="arrow-icon" src={rightArrowIconUrl} alt="Open" />
+                    </div>
+                </article>
+            </aside>
+        </div>
+
+        <template lwc:if={errorMessage}>
+            <p class="error-text">{errorMessage}</p>
+        </template>
+    </section>
+</template>

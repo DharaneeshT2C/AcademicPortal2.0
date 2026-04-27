@@ -1,0 +1,49 @@
+<template>
+    <table>
+        <thead>
+            <tr>
+                <th>BUILDING NAME</th>
+                <th>FLOORS</th>
+                <th>WARDEN MODE</th>
+                <th>CAPACITY</th>
+                <th>ROOMS COUNT</th>
+                <th>STATUS</th>
+                <th>ACTIONS</th>
+            </tr>
+        </thead>
+        <tbody>
+            <template for:each={rows} for:item="row">
+                <tr key={row.id}>
+                    <td>
+                        <button type="button" class="name-link" data-id={row.id} onclick={handleOpen}>
+                            {row.name}
+                        </button>
+                    </td>
+                    <td>{row.floors}</td>
+                    <td>{row.wardenMode}</td>
+                    <td>{row.capacity}</td>
+                    <td>{row.roomsCount}</td>
+                    <td><span class={row.statusClass}>{row.status}</span></td>
+                    <td>
+                        <div class="actions">
+                            <button type="button" class="icon-action-btn" data-id={row.id} onclick={handleOpen} title="View">
+                                <lightning-icon icon-name="utility:preview" size="x-small" class="action-blue"></lightning-icon>
+                            </button>
+                            <button type="button" class="icon-action-btn" data-id={row.id} onclick={handleEdit} title="Edit">
+                                <lightning-icon icon-name="utility:edit" size="x-small" class="action-blue"></lightning-icon>
+                            </button>
+                            <button type="button" class="icon-action-btn" data-id={row.id} onclick={handleDelete} title="Delete">
+                                <lightning-icon icon-name="utility:delete" size="x-small" class="action-red"></lightning-icon>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </template>
+            <template if:true={isLoading}>
+                <tr>
+                    <td colspan="7">Loading buildings...</td>
+                </tr>
+            </template>
+        </tbody>
+    </table>
+</template>

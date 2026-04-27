@@ -1,0 +1,135 @@
+<template>
+    <template if:true={themeLoading}>
+        <div class="header-skeleton" aria-busy="true" aria-live="polite">
+            <div class="header-skeleton-left">
+                <div class="skeleton-line skeleton-title"></div>
+                <div class="skeleton-line skeleton-breadcrumb"></div>
+            </div>
+            <div class="header-skeleton-right">
+                <div class="skeleton-icon"></div>
+                <div class="skeleton-icon"></div>
+                <div class="skeleton-icon"></div>
+                <div class="skeleton-divider"></div>
+                <div class="skeleton-logo"></div>
+            </div>
+        </div>
+    </template>
+
+    <template if:false={themeLoading}>
+    <div class="mobile-only-header">
+        <div class="mobile-left">
+            <img src={kenLogo} class="mobile-logo" alt="Ken42 Logo" />
+        </div>
+        <div class="mobile-right">
+            <button type="button" class="mobile-notif-btn" onclick={handleNotificationClick} aria-label="Notifications">
+                 <svg width="24" height="24" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M1.38013 4.98458C1.38013 3.66259 1.90529 2.39474 2.84008 1.45995C3.77487 0.52516 5.04272 0 6.36472 0C7.68671 0 8.95456 0.52516 9.88935 1.45995C10.8241 2.39474 11.3493 3.66259 11.3493 4.98458V7.66487L12.6467 10.2597C12.7064 10.3791 12.7346 10.5118 12.7286 10.6452C12.7226 10.7786 12.6826 10.9083 12.6124 11.0219C12.5422 11.1355 12.4441 11.2292 12.3275 11.2942C12.2109 11.3592 12.0796 11.3934 11.946 11.3933H9.12333C8.96493 12.0045 8.60808 12.5457 8.1088 12.9321C7.60951 13.3185 6.99605 13.5281 6.36472 13.5281C5.73339 13.5281 5.11993 13.3185 4.62064 12.9321C4.12135 12.5457 3.7645 12.0045 3.60611 11.3933H0.783408C0.649876 11.3934 0.518556 11.3592 0.401921 11.2942C0.285286 11.2292 0.187207 11.1355 0.117001 11.0219C0.0467946 10.9083 0.00679165 10.7786 0.00079133 10.6452C-0.00520899 10.5118 0.0229926 10.3791 0.0827176 10.2597L1.38013 7.66487V4.98458ZM5.13139 11.3933C5.25639 11.6098 5.43617 11.7896 5.65266 11.9146C5.86916 12.0396 6.11474 12.1054 6.36472 12.1054C6.6147 12.1054 6.86028 12.0396 7.07677 11.9146C7.29326 11.7896 7.47304 11.6098 7.59804 11.3933H5.13139ZM6.36472 1.42417C5.42043 1.42417 4.51483 1.79928 3.84712 2.46699C3.17941 3.1347 2.8043 4.0403 2.8043 4.98458V7.66487C2.80428 7.88585 2.75285 8.1038 2.65405 8.30147L1.82091 9.96917H10.9092L10.0761 8.30147C9.97705 8.10386 9.92537 7.88591 9.92513 7.66487V4.98458C9.92513 4.0403 9.55002 3.1347 8.88231 2.46699C8.2146 1.79928 7.309 1.42417 6.36472 1.42417Z" fill="currentColor"/>
+            </svg>
+            </button>
+            <button type="button" class="mobile-menu-btn" onclick={handleMenuClick} aria-label="Menu">
+                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g clip-path="url(#clip0_10439_6499)">
+                    <path d="M4 18H20C20.55 18 21 17.55 21 17C21 16.45 20.55 16 20 16H4C3.45 16 3 16.45 3 17C3 17.55 3.45 18 4 18ZM4 13H20C20.55 13 21 12.55 21 12C21 11.45 20.55 11 20 11H4C3.45 11 3 11.45 3 12C3 12.55 3.45 13 4 13ZM3 7C3 7.55 3.45 8 4 8H20C20.55 8 21 7.55 21 7C21 6.45 20.55 6 20 6H4C3.45 6 3 6.45 3 7Z" fill="#585A64"/>
+                    </g>
+                    <defs>
+                    <clipPath id="clip0_10439_6499">
+                    <rect width="24" height="24" fill="white"/>
+                    </clipPath>
+                    </defs>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Mobile Navigation Menu Overlay -->
+    <template if:true={isMobileMenuOpen}>
+        <div class="mobile-nav-wrapper">
+            <div class="mobile-nav-header">
+                <div class="mobile-profile-info">
+                    <img src={profilePhotoUrl} alt="Profile" class="mobile-profile-pic" />
+                    <span class="mobile-profile-name">{studentName}</span>
+                </div>
+                <button class="mobile-nav-close" onclick={handleCloseMenu}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 6L6 18" stroke="#373A45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M6 6L18 18" stroke="#373A45" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+            <c-ken-navigation-menu 
+                class="mobile-embedded-menu"
+                link-set-master-label={linkSetMasterLabel}
+                add-home-menu-item=false
+                is-always-open=true>
+            </c-ken-navigation-menu>
+        </div>
+        <div class="mobile-nav-backdrop" onclick={handleCloseMenu}></div>
+    </template>
+
+    <div class="header-container">
+        <div class="header-left">
+            <div class={myFeedCardClass}>
+                <div class="header-text-content">
+                    <h1 class="page-title">{pageTitle}</h1>
+                    <template if:true={hasComputedBreadcrumbs}>
+                        <div class="breadcrumb-static">
+                            <template for:each={computedBreadcrumbs} for:item="crumb">
+                                <span class="breadcrumb-item" key={crumb.id}>
+                                    <template if:true={crumb.clickable}>
+                                        <a href={crumb.url} class={crumb.cssClass} data-url={crumb.url} data-pagename={crumb.pageName} onclick={handleBreadcrumbClick} onkeydown={handleBreadcrumbKeyDown}>{crumb.label}</a>
+                                    </template>
+                                    <template if:false={crumb.clickable}>
+                                        <span class={crumb.cssClass}>{crumb.label}</span>
+                                    </template>
+                                    <template if:true={crumb.hasNext}>
+                                        <span class="breadcrumb-separator">&gt;</span>
+                                    </template>
+                                </span>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+                <!-- <c-ken-breadcrumb onbreadcrumbvisibilitychange={handleBreadcrumbVisibilityChange}></c-ken-breadcrumb> -->
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="header-actions-card">
+                <button type="button" class="icon-button" onclick={handleCalendarClick} aria-label="Calendar">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M7.17871 10.4722H7.98228" stroke="#585A64" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M7.17871 15.2939H7.98228" stroke="#585A64" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M11.5986 10.4722H12.4022" stroke="#585A64" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M16.0186 10.4722H16.8221" stroke="#585A64" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M11.5986 15.2939H12.4022" stroke="#585A64" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M2.6753 17.6657C2.9346 19.979 4.81484 21.8157 7.13994 21.9277C8.747 22.0052 10.3887 22.0453 12.1704 22.0453C13.9522 22.0453 15.5938 22.0052 17.2008 21.9277C19.526 21.8157 21.4062 19.979 21.6655 17.6657C21.8402 16.1079 21.9834 14.5107 21.9834 12.8837C21.9834 11.2568 21.8402 9.65961 21.6655 8.10179C21.4062 5.78849 19.526 3.95178 17.2008 3.83979C15.5938 3.76239 13.9522 3.72217 12.1704 3.72217C10.3887 3.72217 8.747 3.76239 7.13994 3.83979C4.81486 3.95178 2.9346 5.78849 2.6753 8.10179C2.50068 9.65961 2.35742 11.2568 2.35742 12.8837C2.35742 14.5107 2.50068 16.1079 2.6753 17.6657Z" stroke="#585A64" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M7.58594 1.95557V5.97342" stroke="#585A64" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M16.4199 1.95557V5.97342" stroke="#585A64" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </button>
+                <button type="button" class="icon-button" aria-label="Chat">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20.5 12.5C20.5 16.92 16.92 20.5 12.5 20.5C10.51 20.5 8.68 19.79 7.28 18.6L3.5 19.5L4.4 15.72C3.21 14.32 2.5 12.5 2.5 10.5C2.5 6.08 6.08 2.5 10.5 2.5C14.92 2.5 18.5 6.08 18.5 10.5" stroke="#585A64" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+                <button type="button" class="icon-button" onclick={handleSettingsClick} aria-label="Settings">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21.345 10.7477C22.1898 11.3688 22.1898 12.6313 21.345 13.2524C19.9471 14.2799 19.2359 16.0036 19.498 17.7186C19.6568 18.7586 18.7581 19.6573 17.7181 19.4985C16.0031 19.2364 14.2794 19.9476 13.2519 21.3455C12.6308 22.1903 11.3684 22.1903 10.7473 21.3455C9.71975 19.9476 7.99609 19.2364 6.28107 19.4985C5.24109 19.6573 4.3423 18.7586 4.50119 17.7186C4.76321 16.0036 4.05214 14.2799 2.65423 13.2524C1.80927 12.6313 1.80927 11.3688 2.65423 10.7477C4.05214 9.72024 4.76321 7.99658 4.50119 6.28156C4.3423 5.24158 5.24109 4.34278 6.28107 4.50168C7.99609 4.7637 9.71975 4.05263 10.7473 2.65472C11.3684 1.80975 12.6308 1.80975 13.2519 2.65472C14.2794 4.05263 16.0031 4.7637 17.7181 4.50168C18.7581 4.34278 19.6568 5.24158 19.498 6.28156C19.2359 7.99658 19.9471 9.72024 21.345 10.7477Z" stroke="#585A64" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M11.9994 16.0833C14.6128 16.0833 16.0828 14.6132 16.0828 11.9999C16.0828 9.38653 14.6128 7.9165 11.9994 7.9165C9.38604 7.9165 7.91602 9.38653 7.91602 11.9999C7.91602 14.6132 9.38604 16.0833 11.9994 16.0833Z" stroke="#585A64" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </button>
+                <button type="button" class="icon-button notification-button" onclick={handleNotificationClick} aria-label="Notifications">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18.4789 4.28516H5.46278C4.69565 4.28516 3.95994 4.5899 3.4175 5.13234C2.87505 5.67478 2.57031 6.41049 2.57031 7.17762V14.4088C2.57031 15.1759 2.87505 15.9116 3.4175 16.4541C3.95994 16.9965 4.69565 17.3013 5.46278 17.3013H13.4171L17.7558 20.1937V17.3013H18.4789C19.246 17.3013 19.9817 16.9965 20.5242 16.4541C21.0666 15.9116 21.3713 15.1759 21.3713 14.4088V7.17762C21.3713 6.41049 21.0666 5.67478 20.5242 5.13234C19.9817 4.5899 19.246 4.28516 18.4789 4.28516Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="18" cy="6" r="3" fill="#EF4444" stroke="white" stroke-width="1.5"/>
+                    </svg>
+                </button>
+                <div class="separator"></div>
+                <div class="logo-section">
+                    <img src={kenLogo} class="ken-logo" alt="Ken42" />
+                    <span class="ken-text">Ken42</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    </template>
+</template>

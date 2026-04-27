@@ -1,0 +1,103 @@
+<template>
+    <div class="page">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <button type="button" class="crumb-btn" onclick={handleBackToMasterData}>Master Data</button>
+            <span class="sep">&gt;</span>
+            <button type="button" class="crumb-btn" onclick={handleBackToInstallmentPlans}>Installment Plans</button>
+            <span class="sep">&gt;</span>
+            <span class="crumbCurrent">{recordName}</span>
+        </nav>
+
+        <template if:true={isLoading}>
+            <div class="loadingWrap">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={isLoading}>
+            <header class="recordHeader">
+                <div class="titleArea">
+                    <div class="titleRow">
+                        <h1 class="pageTitle">{recordName}</h1>
+                        <span class={statusClass}>{statusLabel}</span>
+                        <span class="lockBadge">{lockText}</span>
+                    </div>
+                    <div class="metaRow">
+                        <span class="metaText">Last modified {lastModifiedLabel}</span>
+                    </div>
+                </div>
+                <button class="iconActionBtn" type="button" disabled aria-label="More options" aria-disabled="true">
+                    <lightning-icon icon-name="utility:threedots" size="x-small"></lightning-icon>
+                </button>
+            </header>
+
+            <section class="workflowCard">
+                <div class="workflowLabel">Workflow Status</div>
+                <div class="pfp-lifecycle">
+                    <div class={draftStageClass}><span class={draftDotClass}>1</span><span>Draft</span></div>
+                    <div class="pfp-stage-line"></div>
+                    <div class={reviewStageClass}><span class={reviewDotClass}>2</span><span>Under Review</span></div>
+                    <div class="pfp-stage-line"></div>
+                    <div class={activeStageClass}><span class={activeDotClass}>3</span><span>Active</span></div>
+                    <div class="pfp-stage-line"></div>
+                    <div class={archivedStageClass}><span class={archivedDotClass}>4</span><span>Archived</span></div>
+                </div>
+            </section>
+
+            <template if:true={showActiveBanner}>
+                <div class="warningBanner">
+                    <div class="warningHead">
+                        <lightning-icon icon-name="utility:warning" size="x-small"></lightning-icon>
+                        <div>
+                            <div class="warningTitle">Active Configuration - Locked</div>
+                            <p class="warningText">
+                                This installment plan is active. Create an amendment flow to make modifications.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <div class="tabsCard">
+                <div class="tabs">
+                    <button type="button" class={detailsTabClass} data-tab="details" onclick={handleTabClick}>Details</button>
+                    <button type="button" class={linesTabClass} data-tab="lines" onclick={handleTabClick}>Installment Lines</button>
+                </div>
+            </div>
+
+            <section class="card">
+                <h2 class="card-title">Installment Plan Information</h2>
+                <div class="grid two-col-grid">
+                    <div class="fieldItem">
+                        <div class="label">Installment Code</div>
+                        <div class="value">{recordData.installmentCode}</div>
+                    </div>
+                    <div class="fieldItem">
+                        <div class="label">Status</div>
+                        <div class="value"><span class={statusClass}>{statusLabel}</span></div>
+                    </div>
+                    <div class="fieldItem">
+                        <div class="label">No. of Installments</div>
+                        <div class="value">{recordData.installmentCount}</div>
+                    </div>
+                    <div class="fieldItem">
+                        <div class="label">Additional Fee (%)</div>
+                        <div class="value">{recordData.installmentFeePercentage}</div>
+                    </div>
+                    <div class="fieldItem">
+                        <div class="label">Start Date</div>
+                        <div class="value">{startDateLabel}</div>
+                    </div>
+                    <div class="fieldItem">
+                        <div class="label">End Date</div>
+                        <div class="value">{endDateLabel}</div>
+                    </div>
+                    <div class="fieldItem">
+                        <div class="label">Last Modified</div>
+                        <div class="value">{lastModifiedLabel}</div>
+                    </div>
+                </div>
+            </section>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,40 @@
+<template>
+    <section class="marks-page">
+        <article class="marks-card">
+            <h2 class="page-title">Marks Breakdown</h2>
+
+            <div class="course-meta">
+                <p>Course code: <span style="font-weight : 500;">MBAG MGT 103</span></p>
+                <p>Course: <span style="font-weight : 500;">Network Analysis &amp; Synthesis</span></p>
+                <p>Section: <span style="font-weight : 500;">A</span></p>
+                <p>Term: <span style="font-weight : 500;">2026 - NOV - MBAG - term 1 - Singapore</span></p>
+            </div>
+
+            <div class="table-wrap">
+                <table class="marks-table" aria-label="Marks breakdown details">
+                    <thead>
+                        <tr>
+                            <th>Components</th>
+                            <th>Maximum Marks</th>
+                            <th>Weightage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={marksRows} for:item="row">
+                            <tr key={row.id}>
+                                <td>{row.component}</td>
+                                <td>{row.maximumMarks}</td>
+                                <td>{row.weightage}</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <footer class="grade-footer">
+            <p>Composite : <strong>86/100</strong></p>
+            <p>Final grade : <strong>A</strong></p>
+        </footer>
+    </section>
+</template>

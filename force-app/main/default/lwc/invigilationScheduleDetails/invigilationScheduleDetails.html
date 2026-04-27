@@ -1,0 +1,170 @@
+<template>
+    <section class="details-page">
+        <article class="card summary-card">
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <p class="label">Program</p>
+                    <p class="value">BBA</p>
+                </div>
+                <div class="summary-item">
+                    <p class="label">Batch</p>
+                    <p class="value">2022</p>
+                </div>
+                <div class="summary-item">
+                    <p class="label">Term</p>
+                    <p class="value">2022-Jun-BBA-Term 7</p>
+                </div>
+                <div class="summary-item">
+                    <p class="label">Course</p>
+                    <p class="value">Artificial Intelligence</p>
+                </div>
+                <div class="summary-item">
+                    <p class="label">Exam</p>
+                    <p class="value">End semester exam</p>
+                </div>
+                <div class="summary-item">
+                    <p class="label">Type</p>
+                    <p class="value">Current</p>
+                </div>
+                <div class="summary-item">
+                    <p class="label">Exam mode</p>
+                    <p class="value">Online</p>
+                </div>
+                <div class="summary-item">
+                    <p class="label">Pattern</p>
+                    <p class="value">Open book</p>
+                </div>
+                <div class="summary-item">
+                    <p class="label">Date</p>
+                    <p class="value">11-01-2025</p>
+                </div>
+                <div class="summary-item">
+                    <p class="label">Format</p>
+                    <p class="value">Written</p>
+                </div>
+                <div class="summary-item">
+                    <p class="label">Start time</p>
+                    <p class="value">11:00 am</p>
+                </div>
+            </div>
+        </article>
+
+        <article class="card form-card">
+            <h2 class="section-title">Invigilation details</h2>
+
+            <div class="form-grid">
+                <div class="field-wrap">
+                    <label class="field-label" for="totalStudents">Total number of students</label>
+                    <input
+                        id="totalStudents"
+                        class="field-input"
+                        type="number"
+                        value={totalStudents}
+                        readonly
+                    />
+                </div>
+
+                <div class="field-wrap">
+                    <label class="field-label" for="studentsAbsent">Students absent</label>
+                    <input
+                        id="studentsAbsent"
+                        class="field-input"
+                        type="number"
+                        placeholder="Enter students absent"
+                        value={studentsAbsent}
+                        onchange={handleStudentsAbsentChange}
+                    />
+                </div>
+
+                <div class="field-wrap">
+                    <label class="field-label" for="uploadSheet">Upload sheet</label>
+                    <div class="upload-input-wrap">
+                        <input
+                            id="uploadSheet"
+                            class="field-input upload-text"
+                            type="text"
+                            value={fileName}
+                            placeholder="Choose file"
+                            readonly
+                        />
+                        <button class="upload-icon-btn" type="button" onclick={triggerFilePicker} aria-label="Upload sheet">
+                            <lightning-icon
+                                class="upload-icon"
+                                icon-name="utility:upload"
+                                size="xx-small"
+                                alternative-text="Upload"
+                            ></lightning-icon>
+                        </button>
+                    </div>
+                    <input class="hidden-file-input" type="file" onchange={handleFileChange} />
+                </div>
+            </div>
+
+            <template lwc:if={showMisconductDetails}>
+                <section class="misconduct-section">
+                    <h3 class="misconduct-title">Misconduct details</h3>
+
+                    <div class="form-grid">
+                        <div class="field-wrap">
+                            <label class="field-label" for="rollNumber">Student roll number</label>
+                            <input
+                                id="rollNumber"
+                                class="field-input"
+                                type="text"
+                                placeholder="Enter roll number"
+                                value={rollNumber}
+                                onchange={handleRollNumberChange}
+                            />
+                        </div>
+
+                        <div class="field-wrap">
+                            <label class="field-label" for="misconductType">Misconduct type</label>
+                            <input
+                                id="misconductType"
+                                class="field-input"
+                                type="text"
+                                placeholder="Type of misconduct"
+                                value={misconductType}
+                                onchange={handleMisconductTypeChange}
+                            />
+                        </div>
+
+                        <div class="field-wrap">
+                            <label class="field-label" for="description">Description</label>
+                            <input
+                                id="description"
+                                class="field-input"
+                                type="text"
+                                placeholder="Add description"
+                                value={description}
+                                onchange={handleDescriptionChange}
+                            />
+                        </div>
+                    </div>
+                </section>
+            </template>
+
+            <button class="add-misconduct-btn" type="button" onclick={handleAddMisconduct}>
+                <span class="add-icon">+</span>
+                <span>Add misconduct</span>
+            </button>
+
+            <div class="action-footer">
+                <button class="btn btn-outline" type="button" onclick={handleCancel}>Cancel</button>
+                <button class="btn btn-primary" type="button" onclick={handleSave}>Save</button>
+            </div>
+        </article>
+    </section>
+
+    <template lwc:if={showSuccessModal}>
+        <section class="modal-backdrop" onclick={closeSuccessModal}>
+            <div class="modal-card" onclick={stopModalClose}>
+                <div class="success-icon-wrap">
+                    <span class="success-dot">✓</span>
+                </div>
+                <p class="success-title">Details added<span class="asterisk">*</span></p>
+                <p class="success-text">Invigilation details added successfully!</p>
+            </div>
+        </section>
+    </template>
+</template>

@@ -1,0 +1,225 @@
+<template>
+    <template if:false={isThemeLoaded}>
+        <div class="skeleton-wrap">
+            <div class="skeleton-header-block"></div>
+            <div class="skeleton-row">
+                <div class="skeleton-card-large"></div>
+                <div class="skeleton-card-small"></div>
+            </div>
+        </div>
+    </template>
+    <div class={pageContainerClass}>
+        <!-- Page Title -->
+        <h2 class="page-title">Your Allotted Room</h2>
+
+        <!-- Main Content: Two Columns -->
+        <div class="main-content">
+            <!-- Left Column: Room Details -->
+            <div class="left-column">
+                <div class="card room-card">
+                    <!-- Room Header -->
+                    <div class="room-header">
+                        <div class="room-title-group">
+                            <h3 class="room-type-title">Type A Residence</h3>
+                            <p class="room-subtitle">Triple-sharing &bull; AC &bull; Attached bathroom</p>
+                        </div>
+                        <button class="btn-outline" onclick={handleViewImages}>View Images</button>
+                    </div>
+
+                    <!-- Room Info Grid -->
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-icon blue-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="7" height="7"></rect>
+                                    <rect x="14" y="3" width="7" height="7"></rect>
+                                    <rect x="3" y="14" width="7" height="7"></rect>
+                                    <rect x="14" y="14" width="7" height="7"></rect>
+                                </svg>
+                            </div>
+                            <div class="info-text">
+                                <span class="info-label">Building</span>
+                                <span class="info-value">Residence Hall B</span>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-icon blue-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                            </div>
+                            <div class="info-text">
+                                <span class="info-label">Check-in Date</span>
+                                <span class="info-value">15 June 2026</span>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-icon blue-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                </svg>
+                            </div>
+                            <div class="info-text">
+                                <span class="info-label">Room Number</span>
+                                <span class="info-value">B-305</span>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-icon blue-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M6 3h12"></path>
+                                    <path d="M6 8h12"></path>
+                                    <path d="M6 3c5 0 7 3 7 7 0 5-2 7-7 7"></path>
+                                    <path d="M9 13l4 8"></path>
+                                </svg>
+                            </div>
+                            <div class="info-text">
+                                <span class="info-label">Annual Fee</span>
+                                <span class="info-value">&#8377;1,80,000</span>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-icon blue-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                            </div>
+                            <div class="info-text">
+                                <span class="info-label">Floor</span>
+                                <span class="info-value">3rd Floor</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Roommate Details -->
+                    <div class="roommate-section">
+                        <h4 class="roommate-heading">Roommate Details</h4>
+                        <div class="roommate-chips">
+                            <template for:each={roommates} for:item="roommate">
+                                <div class="roommate-chip" key={roommate.id}>
+                                    <div class="chip-avatar">
+                                        <img src={roommate.avatar} alt={roommate.name} />
+                                    </div>
+                                    <div class="chip-info">
+                                        <span class="chip-name">{roommate.name}</span>
+                                        <span class="chip-id">{roommate.studentId}</span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Payment Details -->
+            <div class="right-column">
+                <div class="card payment-card">
+                    <h3 class="payment-title">Payment Details</h3>
+
+                    <div class="payment-rows">
+                        <div class="payment-row">
+                            <span class="payment-label">Annual Residence Fee</span>
+                            <span class="payment-amount">&#8377;60,000</span>
+                        </div>
+                        <div class="payment-row">
+                            <span class="payment-label">Security Deposit (Refundable)</span>
+                            <span class="payment-amount">&#8377;5,000</span>
+                        </div>
+                        <div class="payment-row">
+                            <span class="payment-label">Processing Fee</span>
+                            <span class="payment-amount">&#8377;500</span>
+                        </div>
+                    </div>
+
+                    <div class="payment-total">
+                        <span class="total-label">Total Amount Due</span>
+                        <span class="total-amount">&#8377;65,500</span>
+                    </div>
+                </div>
+
+                <!-- Payment Deadline Banner (Now Separate) -->
+                <div class="deadline-banner">
+                    <div class="deadline-header">
+                        <svg class="deadline-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#92702A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        <span class="deadline-text">Payment Deadline: 30 May 2025</span>
+                    </div>
+                    <p class="deadline-subtext">Complete payment within 14 days to confirm your allotment.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Important Information Banner -->
+        <div class="info-banner">
+            <h4 class="info-banner-title">Important Information</h4>
+            <ul class="info-list">
+                <template for:each={importantInfo} for:item="info">
+                    <li key={info} class="info-list-item">{info}</li>
+                </template>
+            </ul>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="btn-outline btn-download" onclick={handleDownloadLetter}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download Allotment Letter
+            </button>
+            <button class="btn-primary" onclick={handleProceedPayment}>Proceed to Payment</button>
+        </div>
+    </div>
+    <!-- Image Modal -->
+    <template if:true={showModal}>
+        <div class="modal-overlay">
+            <div class="modal-content">
+                <button class="modal-close-btn" onclick={closeModal}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1F2937" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+
+                <button class="nav-btn prev-btn" onclick={prevImage}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1F2937" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                
+                <div class="main-image-container">
+                    <!-- Changed from img to div for gradient support -->
+                    <div class="main-image" style={currentImageStyle}></div>
+                </div>
+
+                <button class="nav-btn next-btn" onclick={nextImage}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1F2937" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+
+                <div class="thumbnails-row">
+                    <template for:each={roomImages} for:item="img" for:index="index">
+                        <div key={img.id} class={img.class} onclick={handleThumbnailClick} data-index={index}>
+                            <!-- Changed from img to div for gradient support -->
+                            <div class="thumbnail-img" style={img.style}></div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </template>
+</template>

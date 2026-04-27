@@ -1,0 +1,187 @@
+<template>
+    <section class="invigilation-shell">
+        <div class="top-row">
+            <h2 class="title">Invigilation</h2>
+            <div class="filters">
+                <div class="select-wrap">
+                    <select class="filter-select">
+                        <option>Exam type</option>
+                    </select>
+                </div>
+                <div class="select-wrap">
+                    <select class="filter-select narrow">
+                        <option>Class</option>
+                    </select>
+                </div>
+                <div class="select-wrap">
+                    <select class="filter-select narrow">
+                        <option>Month</option>
+                    </select>
+                </div>
+                <div class="search-wrap">
+                    <lightning-icon
+                        class="search-icon"
+                        icon-name="utility:search"
+                        size="x-small"
+                        alternative-text="Search"
+                    ></lightning-icon>
+                    <input class="search-input" type="text" placeholder="Search" />
+                </div>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table class="inv-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Venue</th>
+                        <th>Exam type</th>
+                        <th>Class</th>
+                        <th>Subject</th>
+                        <th>Action</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={tableRows} for:item="row">
+                        <tr key={row.id}>
+                            <td>{row.date}</td>
+                            <td>{row.time}</td>
+                            <td>{row.venue}</td>
+                            <td>{row.examType}</td>
+                            <td>{row.className}</td>
+                            <td>{row.subject}</td>
+                            <td>
+                                <template lwc:if={row.showAcceptRequest}>
+                                    <div class="action-group">
+                                        <button type="button" class="btn btn-primary" onclick={openAcceptModal}>Accept</button>
+                                        <button type="button" class="btn btn-outline" onclick={openRequestModal}>Request Substitute</button>
+                                    </div>
+                                </template>
+                                <template lwc:if={row.showAddUpdate}>
+                                    <button type="button" class="btn btn-outline" onclick={navigateToInvigilationDetails}>+ Add Update</button>
+                                </template>
+                                <template lwc:if={row.showView}>
+                                    <button type="button" class="btn btn-outline" onclick={navigateToInvigilationDetails}>View</button>
+                                </template>
+                            </td>
+                            <td>
+                                <span class={row.statusClass}>{row.status}</span>
+                            </td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mobile-cards" aria-label="Invigilation cards">
+            <template for:each={tableRows} for:item="row">
+                <article key={row.id} class="inv-card">
+                    <div class="inv-card-head">
+                        <p class="inv-card-date">{row.date}</p>
+                        <span class={row.statusClass}>{row.status}</span>
+                    </div>
+                    <p class="inv-card-time">{row.time}</p>
+                    <dl class="inv-card-grid">
+                        <div class="inv-card-item">
+                            <dt>Venue</dt>
+                            <dd>{row.venue}</dd>
+                        </div>
+                        <div class="inv-card-item">
+                            <dt>Exam type</dt>
+                            <dd>{row.examType}</dd>
+                        </div>
+                        <div class="inv-card-item">
+                            <dt>Class</dt>
+                            <dd>{row.className}</dd>
+                        </div>
+                        <div class="inv-card-item">
+                            <dt>Subject</dt>
+                            <dd>{row.subject}</dd>
+                        </div>
+                    </dl>
+                    <div class="inv-card-actions">
+                        <template lwc:if={row.showAcceptRequest}>
+                            <div class="action-group">
+                                <button type="button" class="btn btn-primary" onclick={openAcceptModal}>Accept</button>
+                                <button type="button" class="btn btn-outline" onclick={openRequestModal}>Request Substitute</button>
+                            </div>
+                        </template>
+                        <template lwc:if={row.showAddUpdate}>
+                            <button type="button" class="btn btn-outline" onclick={navigateToInvigilationDetails}>+ Add Update</button>
+                        </template>
+                        <template lwc:if={row.showView}>
+                            <button type="button" class="btn btn-outline" onclick={navigateToInvigilationDetails}>View</button>
+                        </template>
+                    </div>
+                </article>
+            </template>
+        </div>
+
+        <div class="table-footer">
+            <span>Rows per page: <strong>10</strong> ▼</span>
+            <span>1-5 of 13</span>
+            <div class="footer-nav">
+                <button type="button" class="nav-btn">‹</button>
+                <button type="button" class="nav-btn">›</button>
+            </div>
+        </div>
+    </section>
+
+    <template lwc:if={showRequestModal}>
+        <section class="modal-backdrop" onclick={closeAllModals}>
+            <div class="modal-card request-modal" onclick={stopModalClose}>
+                <h3 class="modal-title">Request for a substitute</h3>
+                <label class="modal-label" for="inv-reason">Reason</label>
+                <textarea
+                    id="inv-reason"
+                    class="modal-textarea"
+                    placeholder="Add reason for request"
+                    onchange={handleReasonChange}
+                ></textarea>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline modal-cancel" onclick={closeAllModals}>Cancel</button>
+                    <button type="button" class="btn btn-primary modal-primary" onclick={submitSubstituteRequest}>Raise Request</button>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template lwc:if={showAcceptModal}>
+        <section class="modal-backdrop" onclick={closeAllModals}>
+            <div class="modal-card accept-modal" onclick={stopModalClose}>
+                <p class="accept-message">Are you sure you want to accept this request?</p>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline modal-cancel" onclick={closeAllModals}>Cancel</button>
+                    <button type="button" class="btn btn-primary modal-primary" onclick={confirmAccept}>Accept</button>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template lwc:if={showRequestSuccessModal}>
+        <section class="modal-backdrop" onclick={closeRequestSuccessModal}>
+            <div class="modal-card request-success-modal" onclick={stopModalClose}>
+                <div class="success-icon-wrap">
+                    <span class="success-icon">✓</span>
+                </div>
+                <p class="request-success-title">Substitute requested!<span class="request-success-star">*</span></p>
+                <p class="request-success-subtitle">Request for substitute raised successfully</p>
+            </div>
+        </section>
+    </template>
+
+    <template lwc:if={showAcceptSuccessModal}>
+        <section class="modal-backdrop" onclick={closeAcceptSuccessModal}>
+            <div class="modal-card request-success-modal" onclick={stopModalClose}>
+                <div class="success-icon-wrap">
+                    <span class="success-icon">✓</span>
+                </div>
+                <p class="request-success-title">Request accepted!<span class="request-success-star">*</span></p>
+                <p class="request-success-subtitle">Request has been accepted successfully</p>
+            </div>
+        </section>
+    </template>
+</template>

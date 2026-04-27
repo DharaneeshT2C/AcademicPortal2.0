@@ -1,0 +1,89 @@
+<template>
+    <div class="dashboard">
+        <section class="toolbar card">
+            <div class="toolbarLeft">
+                <button class="toolbarBtn" type="button" aria-label="Open scholarship filters">
+                    <lightning-icon icon-name="utility:filterList" size="x-small" alternative-text="Filters"></lightning-icon>
+                    <span>Filters</span>
+                </button>
+            </div>
+            <div class="toolbarRight">
+                <button class="toolbarBtn" type="button" aria-label="Export scholarship assignments">
+                    Export
+                </button>
+                <button class="toolbarBtn" type="button" aria-label="Bulk assign scholarships">
+                    Bulk Assign
+                </button>
+                <button
+                    class="toolbarBtn toolbarBtnPrimary"
+                    type="button"
+                    aria-label="Assign scholarship"
+                    onclick={handleAssignScholarship}>
+                    Assign Scholarship
+                </button>
+            </div>
+        </section>
+
+        <section class="metricsGrid" aria-label="Scholarship assignment metrics">
+            <template for:each={metrics} for:item="metric">
+                <article key={metric.key} class="metricCard card">
+                    <p class="metricLabel">{metric.label}</p>
+                    <p class={metric.valueClass}>{metric.value}</p>
+                </article>
+            </template>
+        </section>
+
+        <section class="card section">
+            <div class="sectionHeader">
+                <h2 class="sectionTitle">Scholarship Assignment Table</h2>
+            </div>
+            <template if:true={isLoading}>
+                <div class="loadingState">
+                    <lightning-spinner alternative-text="Loading scholarship assignments" size="small"></lightning-spinner>
+                </div>
+            </template>
+            <template if:true={errorMessage}>
+                <div class="errorBanner" role="alert">{errorMessage}</div>
+            </template>
+            <div class="tableWrap">
+                <table class="table" aria-label="Scholarship assignment table">
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Programme</th>
+                            <th>GPA / CGPA</th>
+                            <th>Merit Rank</th>
+                            <th>Scholarship Name</th>
+                            <th>Status</th>
+                            <th>Applied Date</th>
+                            <th>Fee Impact</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template if:true={hasAssignments}>
+                            <template for:each={assignments} for:item="assignment">
+                                <tr key={assignment.key}>
+                                    <td>{assignment.studentName}</td>
+                                    <td>{assignment.programme}</td>
+                                    <td>{assignment.gpa}</td>
+                                    <td>{assignment.rank}</td>
+                                    <td>{assignment.scholarshipName}</td>
+                                    <td>
+                                        <span class={assignment.statusClass}>{assignment.status}</span>
+                                    </td>
+                                    <td>{assignment.appliedDate}</td>
+                                    <td>{assignment.feeImpact}</td>
+                                </tr>
+                            </template>
+                        </template>
+                        <template if:true={showEmptyState}>
+                            <tr>
+                                <td colspan="8" class="emptyState">No scholarship assignments found.</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</template>

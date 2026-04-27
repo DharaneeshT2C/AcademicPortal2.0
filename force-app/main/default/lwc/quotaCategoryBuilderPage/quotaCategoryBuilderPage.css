@@ -1,0 +1,179 @@
+:host {
+    display: block;
+    font-family: Inter, Roboto, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --qcb-brand: #0b6bcb;
+    --qcb-brand-soft: rgba(11, 107, 203, 0.14);
+    --qcb-bg-page: #f5f8fc;
+    --qcb-bg-surface: #ffffff;
+    --qcb-border: #dce5ef;
+    --qcb-border-strong: #c7d5e4;
+    --qcb-text-primary: #182330;
+    --qcb-text-secondary: #556476;
+    --qcb-text-muted: #758398;
+    --qcb-shadow-soft: 0 2px 4px rgba(15, 23, 42, 0.06);
+}
+
+.page {
+    min-height: calc(100vh - 128px);
+    background:
+        radial-gradient(circle at top right, rgba(11, 107, 203, 0.1), transparent 35%),
+        var(--qcb-bg-page);
+    border-radius: 16px;
+    padding: 24px;
+    color: var(--qcb-text-primary);
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--qcb-text-muted);
+    margin-bottom: 8px;
+}
+
+.crumb-btn {
+    background: transparent;
+    border: 0;
+    color: var(--qcb-brand);
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+}
+
+.crumb-btn:hover {
+    text-decoration: underline;
+}
+
+.crumb-current {
+    color: var(--qcb-text-secondary);
+    font-weight: 600;
+}
+
+.sep {
+    color: #a1adba;
+    margin: 0 8px;
+}
+
+.builderHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--qcb-border);
+}
+
+.pageTitle {
+    margin: 0;
+    font-size: 24px;
+    line-height: 1.25;
+    font-weight: 700;
+    color: var(--qcb-text-primary);
+}
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btnNeutral {
+    --slds-c-button-radius-border: 10px;
+    --slds-c-button-color-border: var(--qcb-border-strong);
+    --slds-c-button-color-background: #ffffff;
+    --slds-c-button-text-color: var(--qcb-text-secondary);
+}
+
+.btnPrimary {
+    --slds-c-button-brand-radius-border: 10px;
+    --slds-c-button-brand-color-background: var(--qcb-brand);
+    --slds-c-button-brand-color-border: var(--qcb-brand);
+}
+
+.loadingWrap {
+    padding: 24px;
+}
+
+.formCard {
+    margin-top: 24px;
+    border: 1px solid var(--qcb-border);
+    border-radius: 12px;
+    background: var(--qcb-bg-surface);
+    box-shadow: var(--qcb-shadow-soft);
+    padding: 24px;
+}
+
+.sectionTitle {
+    margin: 0 0 16px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--qcb-text-muted);
+}
+
+.formGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 16px;
+}
+
+.formCard lightning-input,
+.formCard lightning-combobox {
+    --slds-c-input-radius-border: 10px;
+    --slds-c-input-color-border: var(--qcb-border-strong);
+    --slds-c-input-color-background: #ffffff;
+    --slds-c-input-shadow: none;
+    --slds-c-input-spacing-block-start: 0.5rem;
+    --slds-c-input-spacing-block-end: 0.5rem;
+    --slds-c-input-label-font-size: 0.75rem;
+    --slds-c-input-label-font-weight: 700;
+    --slds-c-input-label-color: var(--qcb-text-muted);
+}
+
+.statusWrap {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.statusLabel {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--qcb-text-muted);
+}
+
+.statusToggle {
+    --slds-c-checkbox-toggle-color-background: #d8e2ef;
+    --slds-c-checkbox-toggle-color-border: #d8e2ef;
+    --slds-c-checkbox-toggle-color-background-checked: #18a058;
+    --slds-c-checkbox-toggle-color-border-checked: #18a058;
+}
+
+button:focus-visible,
+.crumb-btn:focus-visible {
+    outline: 3px solid var(--qcb-brand-soft);
+    outline-offset: 2px;
+}
+
+@media (max-width: 1024px) {
+    .page {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 720px) {
+    .builderHeader {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .formGrid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,61 @@
+<template>
+    <div class="summary-card">
+
+        <!-- HEADER -->
+        <div class="summary-header">
+            <h2>{semesterLabel}</h2>
+
+            <div class="credit-badges">
+                <span class="badge total">
+                    Total credits <b>{totalCredits}</b>
+                </span>
+                <span class="badge mandatory">
+                    Mandatory credits {mandatoryCredits}/12
+                </span>
+                <span class="badge elective">
+                    Elective credits {electiveCredits}/12
+                </span>
+            </div>
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-wrapper">
+            <table class="course-table">
+                <thead>
+                    <tr>
+                        <th>Course code</th>
+                        <th>Course name</th>
+                        <th>Mode of delivery</th>
+                        <th>Credits</th>
+                        <th>Type</th>
+                        <th>Enrollment status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={allCourses} for:item="course">
+                        <tr key={course.courseOfferingId}>
+                            <td>{course.courseCode}</td>
+                            <td>{course.courseName}</td>
+                            <td>Online</td>
+                            <td>{course.credits}</td>
+                            <td>
+                                <span class={course.type}>
+                                    {course.type}
+                                </span>
+                            </td>
+                            <td>--</td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- FOOTER (BOTTOM RIGHT) -->
+        <div class="footer">
+            <button class="submit-btn" onclick={handleSubmitEnrollment}>
+                Submit enrollment request
+            </button>
+        </div>
+
+    </div>
+</template>

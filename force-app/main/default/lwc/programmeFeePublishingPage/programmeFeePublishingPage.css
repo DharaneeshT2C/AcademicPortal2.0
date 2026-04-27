@@ -1,0 +1,422 @@
+:host {
+    display: block;
+    font-family: Inter, Roboto, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --pfp-brand: #0b6bcb;
+    --pfp-brand-soft: rgba(11, 107, 203, 0.14);
+    --pfp-bg-page: #f5f8fc;
+    --pfp-bg-surface: #ffffff;
+    --pfp-bg-muted: #f7f9fc;
+    --pfp-border: #dce5ef;
+    --pfp-border-strong: #c7d5e4;
+    --pfp-text-primary: #182330;
+    --pfp-text-secondary: #556476;
+    --pfp-text-muted: #758398;
+    --pfp-success-bg: #e8f7ee;
+    --pfp-success-text: #166738;
+    --pfp-draft-bg: #f1f4f8;
+    --pfp-draft-text: #556476;
+    --pfp-archived-bg: #dde4ee;
+    --pfp-archived-text: #2e3a4a;
+    --pfp-shadow-soft: 0 2px 4px rgba(15, 23, 42, 0.06);
+    --pfp-shadow-raised: 0 10px 24px rgba(15, 23, 42, 0.1);
+}
+
+.page {
+    min-height: calc(100vh - 128px);
+    background:
+        radial-gradient(circle at top right, rgba(11, 107, 203, 0.1), transparent 35%),
+        var(--pfp-bg-page);
+    border-radius: 16px;
+    padding: 24px;
+    color: var(--pfp-text-primary);
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--pfp-text-muted);
+    margin-bottom: 8px;
+}
+
+.crumb-btn {
+    background: transparent;
+    border: 0;
+    color: var(--pfp-brand);
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+}
+
+.crumb-btn:hover {
+    text-decoration: underline;
+}
+
+.crumb-current {
+    color: var(--pfp-text-secondary);
+    font-weight: 600;
+}
+
+.sep {
+    color: #a1adba;
+    margin: 0 8px;
+}
+
+.pageHeader {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--pfp-border);
+}
+
+.pageTitle {
+    margin: 0;
+    font-size: 24px;
+    line-height: 1.25;
+    font-weight: 700;
+    color: var(--pfp-text-primary);
+}
+
+.pageMeta {
+    margin: 8px 0 0;
+    color: var(--pfp-text-muted);
+    font-size: 12px;
+}
+
+.primaryActionBtn {
+    --slds-c-button-brand-radius-border: 10px;
+    --slds-c-button-brand-spacing-block-start: 0.5rem;
+    --slds-c-button-brand-spacing-block-end: 0.5rem;
+    --slds-c-button-brand-color-background: var(--pfp-brand);
+    --slds-c-button-brand-color-border: var(--pfp-brand);
+}
+
+.modeTabs {
+    margin-top: 16px;
+    display: inline-flex;
+    border: 1px solid var(--pfp-border);
+    border-radius: 10px;
+    background: var(--pfp-bg-surface);
+    overflow: hidden;
+}
+
+.tab-btn {
+    border: 0;
+    border-right: 1px solid var(--pfp-border);
+    background: transparent;
+    color: var(--pfp-text-secondary);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+
+.tab-btn:last-child {
+    border-right: 0;
+}
+
+.tab-btn:hover {
+    background: var(--pfp-bg-muted);
+    color: var(--pfp-text-primary);
+}
+
+.tab-btn-active {
+    background: var(--pfp-brand);
+    color: #ffffff;
+}
+
+.toolbar {
+    margin-top: 24px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.view-picklist {
+    width: 240px;
+}
+
+.toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.searchInput {
+    width: min(360px, 100%);
+    --slds-c-input-radius-border: 10px;
+    --slds-c-input-color-border: var(--pfp-border);
+    --slds-c-input-color-background: var(--pfp-bg-surface);
+    --slds-c-input-shadow: none;
+    --slds-c-input-spacing-block-start: 0.5rem;
+    --slds-c-input-spacing-block-end: 0.5rem;
+}
+
+.filterBtn {
+    height: 36px;
+    border: 1px solid var(--pfp-border-strong);
+    border-radius: 10px;
+    background: var(--pfp-bg-surface);
+    color: #9aa8b8;
+    padding: 0 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: not-allowed;
+}
+
+.filterBtn lightning-icon {
+    --slds-c-icon-color-foreground-default: #9aa8b8;
+}
+
+.tableCard {
+    border: 1px solid var(--pfp-border);
+    border-radius: 12px;
+    background: var(--pfp-bg-surface);
+    box-shadow: var(--pfp-shadow-soft);
+    overflow: visible;
+}
+
+.tableScroll {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table thead th {
+    text-align: left;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--pfp-text-secondary);
+    background: var(--pfp-bg-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--pfp-border);
+}
+
+.actions-col {
+    width: 94px;
+    text-align: center;
+}
+
+.table tbody td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #edf2f8;
+    font-size: 14px;
+    color: var(--pfp-text-primary);
+}
+
+.table tbody tr {
+    transition: background-color 150ms ease;
+}
+
+.table tbody tr:hover {
+    background: #f9fbfe;
+}
+
+.bodyText {
+    color: var(--pfp-text-secondary);
+}
+
+.link-button {
+    background: transparent;
+    border: 0;
+    color: var(--pfp-brand);
+    padding: 0;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.35;
+    cursor: pointer;
+    text-align: left;
+}
+
+.link-button:hover {
+    text-decoration: underline;
+}
+
+.frequencyBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid #8ab6e6;
+    background: #f1f7ff;
+    color: var(--pfp-brand);
+    padding: 2px 10px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid transparent;
+}
+
+.badge-active {
+    background: var(--pfp-success-bg);
+    color: var(--pfp-success-text);
+    border-color: #b7e4c7;
+}
+
+.badge-draft,
+.badge-neutral {
+    background: var(--pfp-draft-bg);
+    color: var(--pfp-draft-text);
+    border-color: #d6deea;
+}
+
+.badge-archived {
+    background: var(--pfp-archived-bg);
+    color: var(--pfp-archived-text);
+    border-color: #c4cfdd;
+}
+
+.usageBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 24px;
+    border-radius: 999px;
+    border: 1px solid #8ab6e6;
+    color: var(--pfp-brand);
+    background: #f1f7ff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 0 8px;
+}
+
+.actions-cell {
+    text-align: center;
+    width: 94px;
+    position: relative;
+}
+
+.three-dot-btn {
+    --slds-c-button-color-background: transparent;
+    --slds-c-button-color-border: transparent;
+    --slds-c-icon-color-foreground-default: #607086;
+    --slds-c-button-radius-border: 8px;
+}
+
+.action-popover {
+    min-width: 136px;
+    background: var(--pfp-bg-surface);
+    border: 1px solid var(--pfp-border-strong);
+    border-radius: 10px;
+    box-shadow: var(--pfp-shadow-raised);
+    padding: 6px;
+    z-index: 20;
+}
+
+.action-popover-floating {
+    position: fixed;
+    z-index: 60;
+}
+
+.action-item {
+    display: block;
+    width: 100%;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    text-align: left;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--pfp-text-primary);
+    cursor: pointer;
+}
+
+.action-item:hover {
+    background: var(--pfp-bg-muted);
+}
+
+.action-item-danger {
+    color: #b42318;
+}
+
+.action-item-disabled {
+    color: #94a0af;
+    cursor: not-allowed;
+}
+
+.empty {
+    text-align: center;
+    color: var(--pfp-text-muted);
+    padding: 32px;
+}
+
+.loading {
+    padding: 24px;
+}
+
+button:focus-visible,
+.crumb-btn:focus-visible,
+.link-button:focus-visible,
+.action-item:focus-visible,
+.filterBtn:focus-visible,
+.tab-btn:focus-visible {
+    outline: 3px solid var(--pfp-brand-soft);
+    outline-offset: 2px;
+}
+
+@media (max-width: 1024px) {
+    .page {
+        padding: 16px;
+    }
+
+    .toolbar {
+        flex-wrap: wrap;
+    }
+
+    .view-picklist,
+    .searchInput {
+        width: 100%;
+    }
+
+    .toolbar-right {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .table {
+        min-width: 1120px;
+    }
+}
+
+@media (max-width: 640px) {
+    .pageHeader {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .modeTabs {
+        display: flex;
+        width: 100%;
+    }
+
+    .tab-btn {
+        flex: 1;
+    }
+}

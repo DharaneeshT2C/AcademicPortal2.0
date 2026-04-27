@@ -1,0 +1,84 @@
+<template>
+  <div class="course-page">
+    <!-- Header -->
+    <div class="header">
+      <div class="tabs">
+        <span class={mandatoryTabClass}>
+          Mandatory courses
+        </span>
+        <span class={electiveTabClass}>
+          Elective courses
+        </span>
+      </div>
+
+      <!-- <div class=" search">
+        <lightning-input type="search" label="Search courses" placeholder="Search" variant="label-hidden" onchange={
+          handleSearch }>
+        </lightning-input>
+      </div> -->
+    </div>
+
+    <!-- GROUPED COURSES -->
+    <!-- <div class="grid">
+      <template if:true="{groupedCourses.length}">
+        <template for:each="{groupedCourses}" for:item="group">
+          <section key="{group.templateId}" class="template-section">
+            <h2 class="template-title accordion-header" data-id="{group.templateId}" onclick="
+                {
+                  toggleAccordion;
+                }
+              ">
+              {group.templateName}({group.templateType})
+
+              <span class="accordion-icon"> {group.isOpen ? '−' : '+'} </span>
+            </h2>
+
+            <template if:true="{group.isOpen}">
+              <div class="template-grid accordion-content">
+                <template for:each="{group.courses}" for:item="course">
+                  <div key="{course.uniqueKey}" class="card">
+                    <div class="image-wrapper">
+                      <img src="{course.imageUrl}" alt="Course image" />
+
+                      <button class="add-btn" data-key="{course.uniqueKey}" onclick="
+                          {
+                            handleToggleAdd;
+                          }
+                        ">
+                        <template if:true="{course.isAdded}"> ✓ Added </template>
+                        <template if:false="{course.isAdded}"> + Add </template>
+                      </button>
+                    </div>
+
+                    <div class="content">
+                      <h3>{course.courseName}</h3>
+                      <p>Credits: {course.credits}</p>
+                      <p>Sequence: {course.sequence}</p>
+                      <p>Year: {course.year}</p>
+                      <p>Course code: {course.courseCode}</p>
+
+                      <button class="faculty-btn">Select faculty (2)</button>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </template>
+          </section>
+        </template>
+      </template>
+
+
+    </div> -->
+
+    <!-- FOOTER (UNCHANGED) -->
+    <div class="footer-actions">
+      <button>
+        Deselect all
+      </button>
+
+      <button>
+        Add selected courses
+      </button>
+    </div>
+  </div>
+</template>

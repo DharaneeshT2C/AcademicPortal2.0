@@ -1,0 +1,10 @@
+<template>
+    <div class={toastClass}>
+        <div class="toast-bar"></div>
+        <div class="toast-body">
+            <c-icon name={iconName} size="20"></c-icon>
+            <span class="toast-message">{message}</span>
+            <button class="toast-close" onclick={handleClose}>&#x2715;</button>
+        </div>
+    </div>
+</template>

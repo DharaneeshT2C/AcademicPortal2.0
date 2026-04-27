@@ -1,0 +1,191 @@
+<template>
+    <template if:true={isSkeletonLoading}>
+        <div class="enrollment-shell skeleton-shell" aria-busy="true">
+            <div class="enrollment-card skeleton-card">
+                <div class="enrollment-hero skeleton-hero">
+                    <div class="skeleton-icon skeleton-shimmer" aria-hidden="true"></div>
+                    <div class="skeleton-hero-text">
+                        <div class="skeleton-line skeleton-shimmer w-45"></div>
+                        <div class="skeleton-line skeleton-shimmer w-70"></div>
+                    </div>
+                </div>
+
+                <div class="enrollment-body skeleton-body">
+                    <div class="enrollment-grid">
+                        <div class="controls-column">
+                            <div class="skeleton-section">
+                                <div class="skeleton-section-title skeleton-shimmer w-30"></div>
+                                <div class="skeleton-fields">
+                                    <div class="skeleton-field skeleton-shimmer"></div>
+                                </div>
+                            </div>
+
+                            <div class="skeleton-section">
+                                <div class="skeleton-section-title skeleton-shimmer w-45"></div>
+                                <div class="skeleton-fields">
+                                    <div class="skeleton-field skeleton-shimmer"></div>
+                                    <div class="skeleton-field skeleton-shimmer"></div>
+                                    <div class="skeleton-field skeleton-shimmer"></div>
+                                </div>
+                            </div>
+
+                            <div class="skeleton-section">
+                                <div class="skeleton-section-title skeleton-shimmer w-40"></div>
+                                <div class="skeleton-fields">
+                                    <div class="skeleton-field skeleton-shimmer"></div>
+                                    <div class="skeleton-field skeleton-shimmer"></div>
+                                    <div class="skeleton-field skeleton-shimmer"></div>
+                                </div>
+                                <div class="skeleton-actions">
+                                    <div class="skeleton-btn skeleton-shimmer w-18"></div>
+                                    <div class="skeleton-btn skeleton-shimmer w-28"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="results-column">
+                            <div class="skeleton-section">
+                                <div class="skeleton-section-title skeleton-shimmer w-35"></div>
+                                <div class="skeleton-table skeleton-shimmer"></div>
+                                <div class="skeleton-actions top-divider">
+                                    <div class="skeleton-btn skeleton-shimmer w-28"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template if:false={isSkeletonLoading}>
+        <div class="enrollment-shell">
+            <div class="enrollment-card">
+                <div class="enrollment-hero">
+                    <div class="hero-icon" aria-hidden="true">
+                        <lightning-icon icon-name="standard:education" size="small"></lightning-icon>
+                    </div>
+                    <div class="hero-copy">
+                        <div class="hero-title">Academic Term Enrollment</div>
+                        <div class="hero-subtitle">Search and enroll students into the next academic term.</div>
+                    </div>
+                </div>
+
+                <div class="enrollment-body">
+                    <div class="enrollment-grid">
+                        <div class="controls-column">
+                            <section class="section-card section-card-compact">
+                                <div class="section-heading">
+                                    <h3 class="section-title">Institution Details</h3>
+                                    <p class="section-subtitle">Choose the institute context for the next-term enrollment
+                                        run.</p>
+                                </div>
+                                <div class="field-stack">
+                                    <lightning-combobox label="Institute" required options={instituteOptions}
+                                        value={selectedInstitute} onchange={handleInstituteChange}>
+                                    </lightning-combobox>
+                                </div>
+                            </section>
+
+                            <section class="section-card section-card-compact">
+                                <div class="section-heading">
+                                    <h3 class="section-title">Learning Program Details</h3>
+                                    <p class="section-subtitle">Select the learning program, plan, and specialization to
+                                        narrow the learner set.</p>
+                                </div>
+                                <div class="field-stack">
+                                    <lightning-combobox label="Learning Program" required options={programOptions}
+                                        value={selectedProgram} onchange={handleProgramChange} disabled={isProgramDisabled}>
+                                    </lightning-combobox>
+
+                                    <lightning-combobox label="Learning Program Plan" required options={programPlanOptions}
+                                        value={selectedProgramPlan} onchange={handleProgramPlanChange}
+                                        disabled={isProgramPlanDisabled}>
+                                    </lightning-combobox>
+
+                                    <lightning-combobox label="Learning Pathway Template"
+                                        options={programSpecializationOptions} value={selectedProgramSpecialization}
+                                        onchange={handleProgramSpecializationChange}
+                                        disabled={isProgramSpecializationDisabled}>
+                                    </lightning-combobox>
+                                </div>
+                            </section>
+
+                            <section class="section-card section-card-compact">
+                                <div class="section-heading">
+                                    <h3 class="section-title">Academic Term Details</h3>
+                                    <p class="section-subtitle">Choose the current term, next term, and class section before
+                                        searching students.</p>
+                                </div>
+                                <div class="field-stack">
+                                    <lightning-combobox label="Current Academic Term" required options={academicTermOptions}
+                                        value={selectedCurrentTerm} onchange={handleCurrentTermChange}>
+                                    </lightning-combobox>
+
+                                    <lightning-combobox label="Next Academic Term" required options={academicTermOptions}
+                                        value={selectedNextTerm} onchange={handleNextTermChange}>
+                                    </lightning-combobox>
+
+                                    <lightning-combobox label="Section" options={sectionOptions} value={selectedSection}
+                                        onchange={handleSectionChange}>
+                                    </lightning-combobox>
+                                </div>
+
+                                <div class="action-bar">
+                                    <lightning-button label="Clear" variant="neutral" onclick={handleClear}
+                                        class="action-button">
+                                    </lightning-button>
+
+                                    <lightning-button label="Search Students" variant="brand" icon-name="utility:search"
+                                        class="action-button" onclick={handleSearch}>
+                                    </lightning-button>
+                                </div>
+                            </section>
+                        </div>
+
+                        <div class="results-column">
+                            <section class="section-card results-card">
+                                <div class="results-header">
+                                    <div class="results-heading-wrap">
+                                        <lightning-icon icon-name="standard:contact" size="small" class="results-icon">
+                                        </lightning-icon>
+                                        <h3 class="section-title results-title">Students to Enroll</h3>
+                                    </div>
+                                    <p class="section-subtitle results-subtitle">Review the matching students and save the
+                                        next academic term enrollment.</p>
+                                </div>
+
+                                <template if:true={studentResults.length}>
+                                    <div class="table-wrap">
+                                        <lightning-datatable key-field="learnerProgramId" data={studentResults} selected-rows={selectedRowIds}
+                                            columns={studentColumns} onrowselection={handleRowSelection}>
+                                        </lightning-datatable>
+                                    </div>
+
+                                    <div class="action-bar top-divider">
+                                        <lightning-button label="Save Enrollment" variant="brand" class="action-button"
+                                            onclick={handleSaveEnrollment} disabled={isSaveDisabled}>
+                                        </lightning-button>
+                                    </div>
+                                </template>
+
+                                <template if:false={studentResults.length}>
+                                    <div class="empty-state">
+                                        <div class="empty-state-inner">
+                                            <lightning-icon icon-name="utility:search" size="medium"
+                                                class="empty-state-icon">
+                                            </lightning-icon>
+                                            <p class="empty-state-title">No students found</p>
+                                            <p class="empty-state-copy">Set the term and program filters, then search to see
+                                                eligible learners here.</p>
+                                        </div>
+                                    </div>
+                                </template>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+</template>

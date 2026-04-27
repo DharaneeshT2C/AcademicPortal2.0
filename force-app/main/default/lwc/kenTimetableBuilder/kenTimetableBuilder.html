@@ -1,0 +1,404 @@
+<template>
+    <section class="builder-shell">
+        <header class="builder-header">
+            <div class="header-left">
+                <button class="back-button" type="button" onclick={handleBack}>
+                    <lightning-icon icon-name="utility:back" size="x-small" alternative-text="Back"></lightning-icon>
+                    <span>Back</span>
+                </button>
+                <div class="hero-copy">
+                    <div class="eyebrow">Timetable Workspace</div>
+                    <h1>Timetable Builder</h1>
+                    <template if:true={showBuilderFilters}>
+                        <div class="builder-filters">
+                            <lightning-combobox
+                                variant="label-hidden"
+                                label="Academic Term"
+                                value={selectedAcademicTermId}
+                                options={termOptions}
+                                placeholder="Select academic term"
+                                onchange={handleTermChange}>
+                            </lightning-combobox>
+                            <lightning-combobox
+                                variant="label-hidden"
+                                label="Program Plan"
+                                value={selectedProgramPlanId}
+                                options={programPlanOptions}
+                                placeholder="Select program plan"
+                                onchange={handleProgramPlanChange}>
+                            </lightning-combobox>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <div class="legend">
+                    <span class="legend-item"><span class="dot valid"></span>Valid</span>
+                    <span class="legend-item"><span class="dot warning"></span>Warning</span>
+                    <span class="legend-item"><span class="dot error"></span>Error</span>
+                </div>
+                <button class="save-button" type="button" onclick={handleTopSave}>
+                    <lightning-icon icon-name="utility:save" size="x-small" alternative-text="Save"></lightning-icon>
+                    <span>Save Timetable</span>
+                </button>
+            </div>
+        </header>
+
+        <section class="summary-strip">
+            <div class="summary-copy">
+                <div class="section-eyebrow">Planning Summary</div>
+                <p>{summaryText}</p>
+            </div>
+            <div class="summary-stats">
+                <article class="stat-card">
+                    <span class="stat-label">Total Offerings</span>
+                    <span class="stat-value">{totalOfferings}</span>
+                </article>
+                <article class="stat-card">
+                    <span class="stat-label">Scheduled</span>
+                    <span class="stat-value success">{scheduledOfferingCount}</span>
+                </article>
+                <article class="stat-card">
+                    <span class="stat-label">Backlog</span>
+                    <span class="stat-value warning">{unscheduledCount}</span>
+                </article>
+                <article class="stat-card">
+                    <span class="stat-label">Conflicts</span>
+                    <span class="stat-value danger">{conflictCount}</span>
+                </article>
+            </div>
+        </section>
+
+        <template if:true={isLoading}>
+            <section class="loading-state">Loading timetable builder...</section>
+        </template>
+
+        <template if:true={loadError}>
+            <section class="loading-state error">{loadError}</section>
+        </template>
+
+        <template if:true={hasDataView}>
+            <div class="builder-layout">
+                <aside class="workspace-panel backlog-panel">
+                    <div class="panel-header">
+                        <div>
+                            <div class="section-eyebrow">Backlog</div>
+                            <h2>Unscheduled Course Offerings</h2>
+                        </div>
+                        <span class="badge">{unscheduledCount}</span>
+                    </div>
+
+                    <div class="backlog-scroll">
+                    <div class="backlog-list">
+                        <template for:each={backlogOfferings} for:item="offering">
+                            <article
+                                key={offering.id}
+                                class={offering.tone}
+                                draggable={offering.isDraggable}
+                                data-offering-id={offering.id}
+                                data-locked={offering.timetableLocked}
+                                ondragstart={handleBacklogDragStart}
+                                ondragend={handleDragEnd}>
+                                <div class="offering-card">
+                                    <div class="offering-head">
+                                        <div>
+                                            <h3>{offering.courseCode}</h3>
+                                            <p>{offering.name}</p>
+                                        </div>
+                                        <span class="type-pill">{offering.type}</span>
+                                    </div>
+                                    <div class="offering-meta">
+                                        <span>{offering.facultyName}</span>
+                                        <span>{offering.sessionName}</span>
+                                    </div>
+                                    <template if:true={offering.lockLabel}>
+                                        <div class="template-chip lock-chip">{offering.lockLabel}</div>
+                                    </template>
+                                    <template if:true={offering.templateName}>
+                                        <div class="template-chip">Template: {offering.templateName}</div>
+                                    </template>
+                                    <template if:true={offering.hasTemplateEntries}>
+                                        <div class="planned-list">
+                                            <template for:each={offering.templateEntries} for:item="entry">
+                                                <span key={entry.entryKey} class="planned-chip">{entry.dayName} {entry.startTime}-{entry.endTime}</span>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            </article>
+                        </template>
+
+                        <template if:false={hasBacklogOfferings}>
+                            <div class="empty-panel">All course offerings in this term already have schedules.</div>
+                        </template>
+                    </div>
+                    </div>
+                </aside>
+
+                <section class="workspace-panel grid-panel">
+                    <div class="panel-header">
+                        <div>
+                            <div class="section-eyebrow">Grid</div>
+                            <h2>Weekly Timetable</h2>
+                        </div>
+                        <p class="panel-caption">Drag an unscheduled offering to a day/time cell or open any scheduled chip to edit all its weekday rows.</p>
+                    </div>
+
+                    <div class="grid-scroll">
+                        <table class="timetable-grid">
+                            <thead>
+                                <tr>
+                                    <th class="time-column" scope="col">Time</th>
+                                    <template for:each={days} for:item="day">
+                                        <th key={day} scope="col">{day}</th>
+                                    </template>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={gridRows} for:item="row">
+                                    <tr key={row.time}>
+                                        <th class="time-column" scope="row">{row.timeLabel}</th>
+                                        <template for:each={row.slots} for:item="slot">
+                                            <template if:true={slot.render}>
+                                                <td key={slot.slotKey} rowspan={slot.rowSpan}>
+                                                    <div
+                                                        class={slot.slotClass}
+                                                        style={slot.slotStyle}
+                                                        data-slot-key={slot.slotKey}
+                                                        ondragover={handleCellDragOver}
+                                                        ondragenter={handleCellDragEnter}
+                                                        ondragleave={handleCellDragLeave}
+                                                        ondrop={handleCellDrop}>
+                                                        <template if:true={slot.hasEntries}>
+                                                            <div class="slot-stack">
+                                                                <template for:each={slot.entries} for:item="entry">
+                                                                    <button
+                                                                        key={entry.entryKey}
+                                                                        class={entry.cardClass}
+                                                                        type="button"
+                                                                        data-offering-id={entry.courseOfferingId}
+                                                                        data-day-name={entry.dayName}
+                                                                        data-start-time={entry.startTime}
+                                                                        data-locked={entry.timetableLocked}
+                                                                        onclick={handleEditScheduled}>
+                                                                        <strong>{entry.courseCode}</strong>
+                                                                        <template if:true={entry.type}>
+                                                                            <span class={entry.typePillClass}>{entry.type}</span>
+                                                                        </template>
+                                                                        <template if:true={entry.facultyName}>
+                                                                            <span>{entry.facultyName}</span>
+                                                                        </template>
+                                                                        <span>{entry.startTime} - {entry.endTime}</span>
+                                                                        <template if:true={entry.roomLabel}>
+                                                                            <span>{entry.roomLabel}</span>
+                                                                        </template>
+                                                                    </button>
+                                                                </template>
+                                                            </div>
+                                                        </template>
+                                                        <template if:false={slot.hasEntries}>
+                                                            <span class="drop-label">Drop here</span>
+                                                        </template>
+                                                    </div>
+                                                </td>
+                                            </template>
+                                        </template>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <aside class="workspace-panel validation-panel">
+                    <div class="panel-header">
+                        <div>
+                            <div class="section-eyebrow">Validation</div>
+                            <h2>Schedule Readiness</h2>
+                        </div>
+                    </div>
+
+                    <section class="validation-block">
+                        <h3>Hard Constraints</h3>
+                        <template if:true={hasTopConflicts}>
+                            <template for:each={topConflicts} for:item="conflict">
+                                <div key={conflict} class="validation-card error-card">{conflict}</div>
+                            </template>
+                        </template>
+                        <template if:false={hasTopConflicts}>
+                            <div class="validation-card success-card">No faculty conflicts found in the current timetable.</div>
+                        </template>
+                    </section>
+
+                    <section class="validation-block">
+                        <h3>Warnings</h3>
+                        <template if:true={hasTopWarnings}>
+                            <template for:each={topWarnings} for:item="warning">
+                                <div key={warning} class="validation-card warning-card">{warning}</div>
+                            </template>
+                        </template>
+                        <template if:false={hasTopWarnings}>
+                            <div class="validation-card neutral-card">No backlog warnings right now.</div>
+                        </template>
+                    </section>
+
+                    <section class="validation-block">
+                        <h3>Suggestions</h3>
+                        <template if:true={hasTopSuggestions}>
+                            <template for:each={topSuggestions} for:item="suggestion">
+                                <div key={suggestion} class="validation-card info-card">{suggestion}</div>
+                            </template>
+                        </template>
+                    </section>
+                </aside>
+            </div>
+        </template>
+    </section>
+
+    <template if:true={isEditorOpen}>
+        <section class="modal-shell" role="dialog" aria-modal="true" aria-labelledby="schedule-editor-title">
+            <div class="modal-card">
+                <header class="modal-header">
+                    <div>
+                        <div class="section-eyebrow">Edit Schedule</div>
+                        <h2 id="schedule-editor-title">{editorTitle}</h2>
+                        <template if:true={editorOffering}>
+                            <p>{editorOffering.courseCode} • {editorOffering.facultyName}</p>
+                        </template>
+                    </div>
+                    <button class="icon-button" type="button" onclick={handleCloseEditor}>
+                        <lightning-icon icon-name="utility:close" size="x-small" alternative-text="Close"></lightning-icon>
+                    </button>
+                </header>
+
+                <div class="modal-body">
+                    <template if:true={hasScheduleTemplateOptions}>
+                        <div class="template-banner">
+                            <div class="template-banner-grid">
+                                <label>
+                                    <span>Schedule Template</span>
+                                    <lightning-combobox
+                                        variant="label-hidden"
+                                        value={editorTemplateId}
+                                        options={scheduleTemplateOptions}
+                                        placeholder="Select a schedule template"
+                                        onchange={handleTemplateSelection}>
+                                    </lightning-combobox>
+                                </label>
+                                <label>
+                                    <span>Frequency (RRULE)</span>
+                                    <input
+                                        type="text"
+                                        value={editorTemplateRecurrencePattern}
+                                        onchange={handleTemplateRecurrenceChange}
+                                        placeholder="RRULE:FREQ=WEEKLY;INTERVAL=1" />
+                                </label>
+                                <label>
+                                    <span>Start Date</span>
+                                    <input type="date" value={editorTemplateStartDate} onchange={handleTemplateStartDateChange} />
+                                </label>
+                                <label>
+                                    <span>End Date</span>
+                                    <input type="date" value={editorTemplateEndDate} onchange={handleTemplateEndDateChange} />
+                                </label>
+                            </div>
+                            <template if:true={editorTemplateName}>
+                                <div class="template-banner-copy">Selected template: {editorTemplateName}. Rows are applied automatically.</div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <div class="editor-grid-scroll">
+                    <div class="editor-grid">
+                        <template for:each={editorRows} for:item="draft">
+                            <div key={draft.id} class="draft-row">
+                                <label>
+                                    <span>Day</span>
+                                    <lightning-combobox
+                                        variant="label-hidden"
+                                        data-row-id={draft.id}
+                                        data-field="dayName"
+                                        value={draft.dayName}
+                                        options={draft.dayOptions}
+                                        onchange={handleDraftChange}>
+                                    </lightning-combobox>
+                                </label>
+
+                                <label>
+                                    <span>Start</span>
+                                    <lightning-combobox
+                                        variant="label-hidden"
+                                        data-row-id={draft.id}
+                                        data-field="startTime"
+                                        value={draft.startTime}
+                                        options={draft.startOptions}
+                                        onchange={handleDraftChange}>
+                                    </lightning-combobox>
+                                </label>
+
+                                <label>
+                                    <span>End</span>
+                                    <lightning-combobox
+                                        variant="label-hidden"
+                                        data-row-id={draft.id}
+                                        data-field="endTime"
+                                        value={draft.endTime}
+                                        options={draft.endOptions}
+                                        onchange={handleDraftChange}>
+                                    </lightning-combobox>
+                                </label>
+
+                                <label>
+                                    <span>Room</span>
+                                    <lightning-combobox
+                                        variant="label-hidden"
+                                        data-row-id={draft.id}
+                                        data-field="room"
+                                        value={draft.room}
+                                        options={draft.roomOptions}
+                                        onchange={handleDraftChange}>
+                                    </lightning-combobox>
+                                </label>
+
+                                <button class="remove-button" type="button" data-row-id={draft.id} onclick={handleRemoveRow}>Remove</button>
+
+                                <template if:true={draft.rowError}>
+                                    <div class="inline-error">{draft.rowError}</div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                    </div>
+
+                    <button class="secondary-button" type="button" onclick={handleAddRow} disabled={isSaving}>Add Day/Time Row</button>
+
+                    <template if:true={hasEditorConflicts}>
+                        <div class="conflict-panel">
+                            <h3>Faculty Conflicts</h3>
+                            <template for:each={editorConflicts} for:item="conflict">
+                                <div key={conflict} class="validation-card error-card">{conflict}</div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <template if:true={hasEditorElectiveWarnings}>
+                        <div class="conflict-panel">
+                            <h3>Elective Alignment Warnings</h3>
+                            <template for:each={editorElectiveWarnings} for:item="warning">
+                                <div key={warning} class="validation-card warning-card">{warning}</div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+
+                <footer class="modal-footer">
+                    <button class="ghost-button" type="button" onclick={handleCloseEditor} disabled={isSaving}>Cancel</button>
+                    <button class="ghost-button danger-button" type="button" onclick={handleClearSchedule} disabled={isSaving}>Clear Schedule</button>
+                    <button class="brand-button" type="button" onclick={handleSaveOffering} disabled={editorHasBlockingIssues}>Save Schedule</button>
+                </footer>
+            </div>
+        </section>
+        <div class="modal-backdrop"></div>
+    </template>
+</template>

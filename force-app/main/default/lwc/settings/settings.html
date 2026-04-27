@@ -1,0 +1,63 @@
+<template>
+    <div class="page">
+        <h2 class="page-title">Settings</h2>
+        <div class="settings-grid">
+            <div class="card profile-card">
+                <div class="profile-section"><div class="avatar"><c-icon name="person" size="20"></c-icon></div><div><h3 class="profile-name">{student.FirstName} {student.LastName}</h3><p class="profile-id">{student.StudentId}</p><p class="profile-email">{student.Email}</p></div></div>
+            </div>
+            <div class="card">
+                <h3 class="section-title">Personal Details</h3>
+                <div class="detail-grid">
+                    <div class="detail-item"><span class="detail-label">Full Name</span><span class="detail-value">{student.FirstName} {student.LastName}</span></div>
+                    <div class="detail-item"><span class="detail-label">Student ID</span><span class="detail-value">{student.StudentId}</span></div>
+                    <div class="detail-item"><span class="detail-label">Email</span><span class="detail-value">{student.Email}</span></div>
+                    <div class="detail-item"><span class="detail-label">Phone</span><span class="detail-value">{student.Phone}</span></div>
+                    <div class="detail-item"><span class="detail-label">Date of Birth</span><span class="detail-value">{student.DateOfBirth}</span></div>
+                    <div class="detail-item"><span class="detail-label">Gender</span><span class="detail-value">{student.Gender}</span></div>
+                    <div class="detail-item"><span class="detail-label">Blood Group</span><span class="detail-value">{student.BloodGroup}</span></div>
+                    <div class="detail-item"><span class="detail-label">Aadhar Number</span><span class="detail-value">{student.AadharNumber}</span></div>
+                </div>
+            </div>
+            <div class="card">
+                <h3 class="section-title">Address</h3>
+                <div class="detail-grid">
+                    <div class="detail-item"><span class="detail-label">House No</span><span class="detail-value">{student.CurrentAddress.house}</span></div>
+                    <div class="detail-item"><span class="detail-label">Street</span><span class="detail-value">{student.CurrentAddress.street}</span></div>
+                    <div class="detail-item"><span class="detail-label">Suburb</span><span class="detail-value">{student.CurrentAddress.suburb}</span></div>
+                    <div class="detail-item"><span class="detail-label">City</span><span class="detail-value">{student.CurrentAddress.city}</span></div>
+                </div>
+            </div>
+            <div class="card">
+                <h3 class="section-title">Guardian Details</h3>
+                <div class="detail-grid">
+                    <div class="detail-item"><span class="detail-label">Name</span><span class="detail-value">{student.Guardian.name}</span></div>
+                    <div class="detail-item"><span class="detail-label">Relationship</span><span class="detail-value">{student.Guardian.relationship}</span></div>
+                    <div class="detail-item"><span class="detail-label">Phone</span><span class="detail-value">{student.Guardian.phone}</span></div>
+                    <div class="detail-item"><span class="detail-label">Email</span><span class="detail-value">{student.Guardian.email}</span></div>
+                </div>
+            </div>
+            <div class="card">
+                <h3 class="section-title">Account Settings</h3>
+                <div class="account-actions">
+                    <div class="account-action-item">
+                        <div class="account-action-text">
+                            <p class="action-label">Password</p>
+                            <p class="action-desc">Update your login password</p>
+                        </div>
+                        <button class="btn-outline-sm" onclick={handleResetPassword}>Reset Password</button>
+                    </div>
+                    <div class="account-action-item">
+                        <div class="account-action-text">
+                            <p class="action-label">Need Help?</p>
+                            <p class="action-desc">Reach out to the academic admin team</p>
+                        </div>
+                        <button class="btn-outline-sm" onclick={handleContactAdmin}>Contact Admin</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <template lwc:if={showToast}>
+        <c-toast message={toastMessage} variant={toastVariant} onclose={handleToastClose}></c-toast>
+    </template>
+</template>

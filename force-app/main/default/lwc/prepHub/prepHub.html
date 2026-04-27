@@ -1,0 +1,138 @@
+<template>
+    <div class="prep-hub-page">
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <button class="bc-link" onclick={handleBack}>Home</button>
+            <span class="bc-sep">›</span>
+            <button class="bc-link" onclick={handleBack}>Placements</button>
+            <span class="bc-sep">›</span>
+            <span class="bc-current">Interview Prep Hub</span>
+        </div>
+
+        <h2 class="page-title">Interview Prep Hub</h2>
+
+        <!-- Tabs -->
+        <div class="tabs-bar">
+            <button class={learningTabClass} data-tab="learning" onclick={handleTabSwitch}>Learning</button>
+            <button class={mockTabClass} data-tab="mock-interview" onclick={handleTabSwitch}>Mock Interview</button>
+        </div>
+
+        <!-- LEARNING TAB -->
+        <template lwc:if={isLearning}>
+            <div class="learning-toolbar">
+                <div class="cat-pills">
+                    <template for:each={categoryPills} for:item="p">
+                        <button key={p.key} class={p.cls} data-cat={p.key} onclick={handleCategorySwitch}>{p.label}</button>
+                    </template>
+                </div>
+                <button class="btn-filters" onclick={handleToggleFilters}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+                    Filters
+                </button>
+            </div>
+
+            <div class="resources-grid">
+                <template for:each={filteredResources} for:item="res">
+                    <div key={res.id} class="resource-card">
+                        <!-- Company badge top-right -->
+                        <div class="res-company-badge" style={res.badgeStyle}>{res.companyInitial}</div>
+
+                        <h4 class="res-title">{res.title}</h4>
+
+                        <div class="res-meta-row">
+                            <div class="res-meta-item">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                <span>{res.duration}</span>
+                            </div>
+                            <div class="res-meta-item">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                <span>{res.type}</span>
+                            </div>
+                        </div>
+
+                        <div class="res-tags">
+                            <template for:each={res.tagItems} for:item="tag">
+                                <span key={tag.key} class="res-tag">{tag.label}</span>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </template>
+
+        <!-- MOCK INTERVIEW TAB -->
+        <template lwc:if={isMockInterview}>
+            <div class="mock-intro">
+                <p class="mock-intro-text">Practice your interview skills with AI-powered mock interviews from top companies.</p>
+            </div>
+            <div class="mock-grid">
+                <template for:each={mockInterviewList} for:item="mock">
+                    <div key={mock.id} class="mock-card">
+                        <div class="mock-card-header">
+                            <div class="company-logo-md" style={mock.logoStyle}>{mock.companyInitial}</div>
+                            <div class="mock-card-info">
+                                <div class="mock-company-name">{mock.company}</div>
+                                <div class="mock-role">{mock.role}</div>
+                            </div>
+                        </div>
+                        <div class="mock-meta">
+                            <span class="mock-duration">⏱ {mock.duration}</span>
+                            <span class="mock-attempts">{mock.attemptsText}</span>
+                        </div>
+                        <button class="btn-start-mock" data-id={mock.id} onclick={handleStartMock}>Start Mock →</button>
+                    </div>
+                </template>
+            </div>
+        </template>
+
+    </div>
+
+    <!-- Mock Interview Detail Modal -->
+    <template lwc:if={showMockDetail}>
+        <div class="modal-overlay" onclick={handleCloseMockDetail}>
+            <div class="mock-detail-modal" onclick={stopProp}>
+                <div class="detail-modal-header">
+                    <button class="bc-link" onclick={handleCloseMockDetail}>← Go Back</button>
+                    <div class="attempt-badge">Attempt: {selectedInterviewData.attempts}/{selectedInterviewData.maxAttempts}</div>
+                </div>
+                <div class="detail-modal-body">
+                    <div class="detail-left">
+                        <p class="detail-label">AI Mock Interview</p>
+                        <h2 class="detail-role">{selectedInterviewData.role}</h2>
+                        <p class="detail-desc">Prepare for your interview with GURU.AI. Answer realistic design questions, record your responses, and receive instant feedback on your strengths and areas for improvement.</p>
+                        <ul class="detail-rules">
+                            <li>You will face a series of questions from an AI interviewer.</li>
+                            <li>Answer the questions by recording your response when prompted.</li>
+                            <li>Once you finish, you'll receive AI-generated feedback on your answers.</li>
+                        </ul>
+                        <div class="detail-company-row">
+                            <div class="company-logo-sm" style={selectedInterviewData.logoStyle}>{selectedInterviewData.companyInitial}</div>
+                            <span class="detail-company-name">{selectedInterviewData.company}</span>
+                        </div>
+                    </div>
+                    <div class="detail-right">
+                        <div class="detail-steps">
+                            <div class="detail-step">
+                                <div class="step-icon">❓</div>
+                                <p class="step-text">You will face a series of questions from an AI interviewer.</p>
+                            </div>
+                            <div class="detail-step">
+                                <div class="step-icon">🎙</div>
+                                <p class="step-text">Answer the questions by recording your response when prompted.</p>
+                            </div>
+                            <div class="detail-step">
+                                <div class="step-icon">⭐</div>
+                                <p class="step-text">Once you finish, you'll receive AI-generated feedback on your answers.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="detail-modal-footer">
+                    <button class="btn-primary" onclick={handleBeginInterview}>Start Interview</button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+</template>

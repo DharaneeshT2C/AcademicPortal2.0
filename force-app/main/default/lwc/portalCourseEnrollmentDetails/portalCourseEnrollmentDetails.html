@@ -1,0 +1,121 @@
+<template>
+    <section class="enrollment-layout">
+        <template if:true={showSkeleton}>
+            <div class="skeleton-wrap" aria-busy="true" aria-live="polite">
+                <div class="skeleton-header-row">
+                    <div class="skeleton-line skeleton-title"></div>
+                    <div class="skeleton-line skeleton-button"></div>
+                </div>
+                <div class="skeleton-list">
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                </div>
+                <div class="skeleton-footer">
+                    <div class="skeleton-line skeleton-footer-text"></div>
+                    <div class="skeleton-line skeleton-footer-button"></div>
+                </div>
+            </div>
+        </template>
+
+        <template if:false={showSkeleton}>
+        <div class="left-panel">
+            <div class="main-content">
+                <header class="section-header">
+                    <h1>{semesterTitle}</h1>
+                    <div class="header-actions">
+                        <button type="button" class="schedule-button" onclick={openScheduleModal}>View Schedule</button>
+                        <button type="button" class="help-button" onclick={openHelpModal}>Get Help</button>
+                    </div>
+                </header>
+
+                <template if:true={errorMessage}>
+                    <div class="empty-state">{errorMessage}</div>
+                </template>
+
+                <template if:true={hasPrograms}>
+                    <div class="program-list">
+                        <template for:each={programs} for:item="program">
+                            <article key={program.id} class="program-card">
+                                <div class="program-header">
+                                    <h2>{program.name}</h2>
+                                    <div class="program-actions">
+                                        <span class="date-pill">{program.lastDateText}</span>
+                                        <template if:true={program.showEnrollButton}>
+                                            <button type="button" class="enroll-button" data-route={courseBrochureRoute}
+                                                data-template={program.id} data-pathway-type={program.pathwayType}
+                                                onclick={handleOpenBrochure}>
+                                                Enrol Now →
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <template if:true={program.showCreditSummary}>
+                                    <p class="credit-line">{program.mandatoryText}</p>
+                                    <p class="credit-line">{program.electiveText}</p>
+                                </template>
+                                <p class={program.statusClass}>{program.statusText}</p>
+                            </article>
+                        </template>
+                    </div>
+                </template>
+                <template if:false={hasPrograms}>
+                    <div class="empty-state">No program pathways found for this semester.</div>
+                </template>
+            </div>
+
+            <footer class="footer-bar">
+                <p class="footer-text">Finish pathway enrollment to start with course selection</p>
+                <button type="button" class="select-courses-button" data-route={courseDetailsRoute}
+                    disabled={isSelectCoursesDisabled} onclick={handleSelectCourses}>Select Courses
+                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+<path d="M12 4L10.59 5.41L16.17 11H4V13H16.17L10.59 18.59L12 20L20 12L12 4Z" fill="white"/>
+</svg>
+            </button>
+            </footer>
+        </div>
+
+        <template if:true={isHelpModalOpen}>
+            <section class="help-modal-backdrop" role="dialog" aria-modal="true" aria-label="Get Help">
+                <div class="help-modal">
+                    <h3>Get Help</h3>
+                    <div class="help-divider"></div>
+
+                    <label class="field-label" for="help-description">Description of the Issue (Optional)</label>
+                    <div class="description-wrap">
+                        <textarea id="help-description" class="modal-textarea"
+                            placeholder="Enter description"></textarea>
+                        <button type="button" class="auto-create-button">Auto-Create Form Now</button>
+                    </div>
+
+                    <label class="field-label required" for="help-type">Choose Issue Type</label>
+                    <select id="help-type" class="modal-input">
+                        <option>Examinations</option>
+                        <option>Course Selection</option>
+                        <option>Fee Related</option>
+                    </select>
+
+                    <label class="field-label required" for="help-subject">Issue Subject</label>
+                    <input id="help-subject" class="modal-input" type="text" placeholder="Enter issue subject" />
+
+                    <p class="field-label upload-label">Upload Supporting Document (Optional)</p>
+                    <div class="upload-box">
+                        <p><span>Click to upload</span> or drag and drop</p>
+                        <p>PNG, JPG or PDF (Max 5 MB)</p>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="cancel-button" onclick={closeHelpModal}>Cancel</button>
+                        <button type="button" class="modal-submit-button">Submit</button>
+                    </div>
+                </div>
+            </section>
+        </template>
+
+        <template if:true={isScheduleModalOpen}>
+            <c-ken-enrollment-schedule onclose={closeScheduleModal}></c-ken-enrollment-schedule>
+        </template>
+        </template>
+    </section>
+</template>

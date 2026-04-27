@@ -1,0 +1,252 @@
+:host {
+    --primary-color: #3061ff;
+    --secondary-color: #eaefff;
+}
+
+.evaluation-requests-page {
+    border-radius: 14px;
+    height: calc(100vh - 153px);
+    background: #ffffff;
+    padding: 0;
+    overflow-y: auto;
+    color: #3a404d;
+}
+
+.tab-header {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 18px 24px 0;
+    border-bottom: 1px solid #d8dde6;
+}
+
+.tab-button {
+    border: 0;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: #3f4653;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 0 12px 12px;
+    cursor: pointer;
+}
+
+.tab-button-active {
+    color: #2f3646;
+    border-bottom-color: var(--primary-color, #3061ff);
+}
+
+.table-shell {
+    margin: 26px 24px 20px;
+    border: 1px solid #cfd5df;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.mobile-cards {
+    display: none;
+}
+
+.request-card {
+    border: 1px solid #d8dde6;
+    border-radius: 12px;
+    background: #ffffff;
+    padding: 12px;
+}
+
+.request-card + .request-card {
+    margin-top: 10px;
+}
+
+.request-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.request-card-code {
+    margin: 0;
+    color: #2f3646;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.request-card-course {
+    margin: 6px 0 0;
+    color: #556073;
+    font-size: 13px;
+}
+
+.request-card-grid {
+    margin: 10px 0 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 10px;
+}
+
+.request-card-item {
+    margin: 0;
+}
+
+.request-card-item dt {
+    color: #778296;
+    font-size: 11px;
+    line-height: 1.25;
+}
+
+.request-card-item dd {
+    margin: 2px 0 0;
+    color: #3c4453;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.25;
+}
+
+.request-card-item-full {
+    grid-column: 1 / -1;
+}
+
+.request-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.request-table thead th {
+    background: #eef1f6;
+    color: #363e4b;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: left;
+    padding: 18px 24px;
+    white-space: nowrap;
+    border-bottom: 1px solid #d8dde6;
+}
+
+.request-table tbody td {
+    padding: 12px 24px;
+    font-size: 14px;
+    color: #626a77;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.action-col,
+.action-cell {
+    width: 160px;
+    text-align: right;
+}
+
+.card-action {
+    width: 124px;
+    border: 0;
+    border-radius: 10px;
+    min-height: 38px;
+    padding: 8px 12px;
+    font-size: 14px;
+    line-height: 1.2;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.action-primary {
+    background: var(--primary-color, #3061ff);
+    color: #fff;
+}
+
+.mobile-evaluate-btn {
+    border: 0;
+    border-radius: 10px;
+    min-height: 32px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.action-dominant {
+    /* box-shadow: 0 8px 16px color-mix(in srgb, var(--primary-color, #3061ff) 35%, transparent); */
+}
+
+.completed-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 124px;
+    min-height: 38px;
+    border-radius: 10px;
+    background: #ebf4ec;
+    border: 1px solid #c1dcc3;
+    color: #2f5f37;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+@media (max-width: 1200px) {
+    .table-shell {
+        overflow-x: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .evaluation-requests-page {
+        height: auto;
+        min-height: unset;
+    }
+
+    .tab-header {
+        padding: 14px 14px 0;
+        gap: 14px;
+    }
+
+    .tab-button {
+        font-size: 14px;
+        padding-bottom: 10px;
+    }
+
+    .table-shell {
+        display: none;
+    }
+
+    .mobile-cards {
+        display: block;
+        margin: 14px;
+    }
+
+    .request-table thead th {
+        font-size: 14px;
+        padding: 12px;
+    }
+
+    .request-table tbody td {
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+
+    .card-action,
+    .completed-pill {
+        min-width: 100px;
+        min-height: 32px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .mobile-cards {
+        margin: 10px;
+    }
+
+    .request-card {
+        padding: 10px;
+    }
+
+    .request-card-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .request-card-item-full {
+        grid-column: auto;
+    }
+}

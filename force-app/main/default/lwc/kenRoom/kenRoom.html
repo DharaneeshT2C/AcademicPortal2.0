@@ -1,0 +1,285 @@
+<template>
+    <template if:true={isDetailView}>
+        <div class="detail-breadcrumbs">
+            <button type="button" class="crumb-link" onclick={handleBreadcrumbDashboardClick}>Dashboard</button>
+            <span class="crumb-sep">&gt;</span>
+            <button type="button" class="crumb-link" onclick={handleBreadcrumbMasterDataClick}>Master Data</button>
+            <span class="crumb-sep">&gt;</span>
+            <button type="button" class="crumb-link" onclick={handleBreadcrumbMasterTabClick}>Rooms</button>
+            <span class="crumb-sep">&gt;</span>
+            <span>{selectedRoomOverview.roomTitle}</span>
+        </div>
+
+        <div class="detail-head">
+            <div class="detail-head-left">
+                <button class="back-btn" type="button" onclick={handleBackToList}>
+                    <lightning-icon icon-name="utility:back" size="x-small"></lightning-icon>
+                    <span>Back</span>
+                </button>
+                <div class="title-block">
+                    <div class="title-row">
+                        <h2 class="room-detail-title">{selectedRoomOverview.roomTitle}</h2>
+                        <span class={selectedRoomStatusClass}>{selectedRoomStatus}</span>
+                    </div>
+                    <div class="category-id">Room ID: {selectedRoomOverview.roomIdentifier}</div>
+                </div>
+            </div>
+
+            <div class="detail-head-actions">
+                <button type="button" class="action-btn" onclick={handleEditSelected}>
+                    <lightning-icon icon-name="utility:edit" size="x-small"></lightning-icon>
+                    <span>Edit</span>
+                </button>
+                <button type="button" class="action-btn danger" onclick={handleDeactivateSelected}>
+                    <lightning-icon icon-name="utility:delete" size="x-small"></lightning-icon>
+                    <span>Deactivate</span>
+                </button>
+            </div>
+        </div>
+
+        <section class="detail-card">
+            <h3>Overview</h3>
+            <div class="overview-grid">
+                <div class="overview-item">
+                    <div class="overview-label overview-label-strong">BUILDING</div>
+                    <button type="button" class="overview-link-btn" onclick={handleOpenLinkedBuilding} disabled={isBuildingLinkDisabled}>
+                        {selectedRoomOverview.building}
+                    </button>
+                </div>
+                <div class="overview-item">
+                    <div class="overview-label overview-label-strong">CATEGORY</div>
+                    <button type="button" class="overview-link-btn" onclick={handleOpenLinkedCategory} disabled={isCategoryLinkDisabled}>
+                        {selectedRoomOverview.category}
+                    </button>
+                </div>
+                <div class="overview-item">
+                    <div class="overview-label overview-label-strong">FLOOR</div>
+                    <div class="overview-value">{selectedRoomOverview.floor}</div>
+                </div>
+                <div class="overview-item">
+                    <div class="overview-label overview-label-strong">CAPACITY</div>
+                    <div class="overview-value">{selectedRoomOverview.capacity}</div>
+                </div>
+                <div class="overview-item">
+                    <div class="overview-label overview-label-strong">CURRENT OCCUPANCY</div>
+                    <div class="overview-value">{selectedRoomOverview.occupancyText}</div>
+                </div>
+                <div class="overview-item">
+                    <div class="overview-label overview-label-strong">STATUS</div>
+                    <div class="overview-value">{selectedRoomOverview.status}</div>
+                </div>
+                <div class="overview-item">
+                    <div class="overview-label overview-label-strong">FEE TYPE</div>
+                    <div class="overview-value link">{selectedRoomOverview.feeType}</div>
+                </div>
+            </div>
+
+            <div class="building-utilization">
+                <div class="overview-label overview-label-strong">ROOM OCCUPANCY</div>
+                <div class="utilization-row">
+                    <div class="utilization-track">
+                        <div class="utilization-fill" style={selectedRoomOverview.utilizationStyle}></div>
+                    </div>
+                    <div class="room-occupancy-value">{selectedRoomOverview.occupancyText}</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="detail-card room-amenities-card">
+            <h3>Amenities (from Category)</h3>
+            <div class="amenity-pills">
+                <template for:each={selectedRoomAmenitiesFromCategory} for:item="amenity">
+                    <span key={amenity} class="amenity-pill">{amenity}</span>
+                </template>
+            </div>
+            <div class="used-rooms">Amenities are managed at category level.</div>
+        </section>
+
+        <section class="detail-card linked-rooms-card room-occupants-card">
+            <div class="linked-rooms-head">
+                <h3>{currentOccupantsHeading}</h3>
+            </div>
+            <div class="linked-rooms-table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>STUDENT NAME</th>
+                            <th>ROLL NO</th>
+                            <th>CHECK-IN DATE</th>
+                            <th>ALLOCATION TYPE</th>
+                            <th>ENROLLMENT CYCLE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={roomCurrentOccupantsUiRows} for:item="row">
+                            <tr key={row.key}>
+                                <td>{row.studentName}</td>
+                                <td class="amenities-link">{row.rollNo}</td>
+                                <td>{row.checkInDateText}</td>
+                                <td>{row.allocationType}</td>
+                                <td>{row.enrollmentCycleText}</td>
+                            </tr>
+                        </template>
+                        <template if:true={isLoadingRoomOccupants}>
+                            <tr><td colspan="5">Loading current occupants...</td></tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="detail-card linked-rooms-card room-history-card">
+            <div class="linked-rooms-head">
+                <h3>Room History - All Past Occupants</h3>
+            </div>
+            <div class="linked-rooms-table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>STUDENT NAME</th>
+                            <th>ROLL NO</th>
+                            <th>ACADEMIC YEAR</th>
+                            <th>CHECK-IN DATE</th>
+                            <th>CHECK-OUT DATE</th>
+                            <th>ALLOCATION TYPE</th>
+                            <th>STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={roomPastOccupantsUiRows} for:item="row">
+                            <tr key={row.key}>
+                                <td>{row.studentName}</td>
+                                <td class="amenities-link">{row.rollNo}</td>
+                                <td>{row.academicYearText}</td>
+                                <td>{row.checkInDateText}</td>
+                                <td>{row.checkOutDateText}</td>
+                                <td>{row.allocationType}</td>
+                                <td><span class={row.statusClass}>{row.statusText}</span></td>
+                            </tr>
+                        </template>
+                        <template if:true={isLoadingRoomOccupants}>
+                            <tr><td colspan="7">Loading past occupants...</td></tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="detail-card activity-history-end-card">
+            <h3>Activity &amp; History</h3>
+            <div class="activity-history-meta">
+                <div class="activity-history-meta-item">
+                    <div class="overview-label overview-label-strong">CREATED BY</div>
+                    <div class="overview-value">{roomActivityCreatedByName}</div>
+                </div>
+                <div class="activity-history-meta-item">
+                    <div class="overview-label overview-label-strong">CREATED DATE</div>
+                    <div class="overview-value">{roomActivityCreatedDateText}</div>
+                </div>
+                <div class="activity-history-meta-item">
+                    <div class="overview-label overview-label-strong">LAST MODIFIED</div>
+                    <div class="overview-value">{roomActivityLastModifiedText}</div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template if:false={isDetailView}>
+        <template if:false={hideListHead}>
+            <div class="list-head">
+                <button class="new-btn" type="button" onclick={handleOpenModal}>
+                    <lightning-icon icon-name="utility:add" size="x-small"></lightning-icon>
+                    <span>{primaryActionLabel}</span>
+                </button>
+            </div>
+        </template>
+        <div class="filters">
+            <div class="search-wrap">
+                <lightning-icon icon-name="utility:search" size="x-small"></lightning-icon>
+                <input
+                    type="text"
+                    placeholder="Search..."
+                    value={searchTerm}
+                    oninput={handleSearchChange}
+                />
+            </div>
+            <select class="status-select" value={selectedStatus} onchange={handleStatusChange}>
+                <template for:each={statusOptions} for:item="option">
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                </template>
+            </select>
+        </div>
+        <c-ken-room-view rows={filteredRows} is-loading={isLoading} onrowaction={handleRowAction}></c-ken-room-view>
+    </template>
+
+    <template if:true={isModalOpen}>
+        <div class="modal-overlay" onclick={handleCloseModal}></div>
+        <section class="modal" role="dialog" aria-modal="true" aria-label={roomModalTitle}>
+            <header class="modal-header">
+                <h2>{roomModalTitle}</h2>
+                <button type="button" class="close-btn" onclick={handleCloseModal} aria-label="Close">
+                    <lightning-icon icon-name="utility:close" size="x-small"></lightning-icon>
+                </button>
+            </header>
+
+            <template if:true={isSavingRoom}>
+                <div class="modal-saving">
+                    <lightning-spinner alternative-text="Saving room" size="small"></lightning-spinner>
+                </div>
+            </template>
+
+            <div class="modal-body">
+                <div class="field">
+                    <label>Building <span>*</span></label>
+                    <select data-field="buildingValue" value={roomForm.buildingValue} onchange={handleRoomFieldChange}>
+                        <option value="">Select building</option>
+                        <template for:each={roomBuildingOptions} for:item="option">
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        </template>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Floor <span>*</span></label>
+                    <select data-field="floorId" value={roomForm.floorId} onchange={handleRoomFieldChange} disabled={isRoomFloorDisabled}>
+                        <option value="">Select floor</option>
+                        <template for:each={filteredRoomFloorOptions} for:item="option">
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        </template>
+                    </select>
+                    <p class="hint">Select a building first</p>
+                </div>
+                <div class="field">
+                    <label>Room Number <span>*</span></label>
+                    <input type="text" placeholder="e.g., A-405" data-field="roomNumber" value={roomForm.roomNumber} onchange={handleRoomFieldChange} />
+                </div>
+                <div class="field">
+                    <label>Category <span>*</span></label>
+                    <select data-field="roomCategoryId" value={roomForm.roomCategoryId} onchange={handleRoomFieldChange}>
+                        <option value="">Select category</option>
+                        <template for:each={roomCategoryOptions} for:item="option">
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        </template>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Capacity <span>*</span></label>
+                    <input type="text" placeholder="Enter capacity (minimum 1)" data-field="capacity" value={roomForm.capacity} onchange={handleRoomFieldChange} />
+                    <p class="hint">Capacity must be &ge; 1</p>
+                </div>
+                <div class="field">
+                    <label>Status <span>*</span></label>
+                    <select data-field="statusValue" value={roomForm.statusValue} onchange={handleRoomFieldChange}>
+                        <template for:each={roomStatusOptions} for:item="option">
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        </template>
+                    </select>
+                </div>
+            </div>
+
+            <footer class="modal-footer">
+                <button type="button" class="btn-cancel" onclick={handleCloseModal}>Cancel</button>
+                <button type="button" class="btn-create" onclick={handleSaveRoom} disabled={isSavingRoom}>{createRoomButtonLabel}</button>
+            </footer>
+        </section>
+    </template>
+</template>

@@ -1,0 +1,160 @@
+<template>
+    <template lwc:if={showToast}>
+        <c-toast message={toastMessage} variant={toastVariant} onclose={handleToastClose}></c-toast>
+    </template>
+    <div class="page">
+        <div class="page-header">
+            <h2 class="page-title">Mess</h2>
+            <p class="breadcrumb">Home &gt; Campus Life</p>
+        </div>
+        <div class="menu-controls">
+            <div class="controls-left">
+                <span class="daily-label">Daily menu</span>
+                <div class="mess-select-wrap">
+                    <select class="mess-select"><option>Mess A</option><option>Mess B</option></select>
+                </div>
+            </div>
+            <div class="controls-right">
+                <span class="date-label"><c-icon name="calendar_today" size="16"></c-icon> {data.date}</span>
+                <div class="day-week-toggle">
+                    <button class={dayBtnClass} onclick={handleViewDay}>Day</button>
+                    <button class={weekBtnClass} onclick={handleViewWeek}>Week</button>
+                </div>
+                <button class="btn-help" onclick={handleGetHelp}><c-icon name="help_outline" size="16"></c-icon> Get Help</button>
+            </div>
+        </div>
+
+        <template lwc:if={isWeekMode}>
+            <div class="card week-card">
+                <table class="week-table">
+                    <thead><tr><th>Day</th><th>Breakfast</th><th>Lunch</th><th>Dinner</th></tr></thead>
+                    <tbody>
+                        <template for:each={weekDays} for:item="d">
+                            <tr key={d.key}>
+                                <td><strong>{d.day}</strong></td>
+                                <td>{d.breakfast}</td>
+                                <td>{d.lunch}</td>
+                                <td>{d.dinner}</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+
+        <template lwc:else>
+            <div class="menu-grid">
+                <div class="meal-card">
+                    <div class="meal-card-head">
+                        <h3 class="meal-name">Breakfast</h3>
+                        <div class="head-right">
+                            <button class="feedback-link" data-meal="Breakfast" onclick={handleOpenFeedback}>Give Feedback</button>
+                            <span class="meal-time-badge">{data.meals.breakfast.time}</span>
+                        </div>
+                    </div>
+                    <div class="meal-divider"></div>
+                    <div class="items-grid">
+                        <template for:each={breakfastItems} for:item="item">
+                            <div key={item.key} class="food-item">
+                                <span class="food-bullet">&bull;</span>
+                                <span class="food-name">{item.name}</span>
+                                <template lwc:if={item.isJain}><span class="jain-tag">Jain</span></template>
+                                <span class="kcal">(90 kcal)</span>
+                            </div>
+                        </template>
+                    </div>
+                    <template lwc:if={hasMoreBreakfast}>
+                        <button class="view-more-btn" onclick={handleToggleViewMore}>{viewMoreLabel}</button>
+                    </template>
+                </div>
+
+                <div class="meal-card">
+                    <div class="meal-card-head">
+                        <h3 class="meal-name">Lunch</h3>
+                        <div class="head-right">
+                            <button class="feedback-link" data-meal="Lunch" onclick={handleOpenFeedback}>Give Feedback</button>
+                            <span class="meal-time-badge">{data.meals.lunch.time}</span>
+                        </div>
+                    </div>
+                    <div class="meal-divider"></div>
+                    <div class="items-grid">
+                        <template for:each={lunchItems} for:item="item">
+                            <div key={item.key} class="food-item">
+                                <span class="food-bullet">&bull;</span>
+                                <span class="food-name">{item.name}</span>
+                                <span class="kcal">(90 kcal)</span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="meal-card">
+                    <div class="meal-card-head">
+                        <h3 class="meal-name">High Tea</h3>
+                        <div class="head-right">
+                            <button class="feedback-link" data-meal="High Tea" onclick={handleOpenFeedback}>Give Feedback</button>
+                            <span class="meal-time-badge">{data.meals.highTea.time}</span>
+                        </div>
+                    </div>
+                    <div class="meal-divider"></div>
+                    <div class="items-grid">
+                        <template for:each={highTeaItems} for:item="item">
+                            <div key={item.key} class="food-item">
+                                <span class="food-bullet">&bull;</span>
+                                <span class="food-name">{item.name}</span>
+                                <span class="kcal">(90 kcal)</span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="meal-card">
+                    <div class="meal-card-head">
+                        <h3 class="meal-name">Dinner</h3>
+                        <div class="head-right">
+                            <button class="feedback-link" data-meal="Dinner" onclick={handleOpenFeedback}>Give Feedback</button>
+                            <span class="meal-time-badge">{data.meals.dinner.time}</span>
+                        </div>
+                    </div>
+                    <div class="meal-divider"></div>
+                    <div class="items-grid">
+                        <template for:each={dinnerItems} for:item="item">
+                            <div key={item.key} class="food-item">
+                                <span class="food-bullet">&bull;</span>
+                                <span class="food-name">{item.name}</span>
+                                <span class="kcal">(90 kcal)</span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template lwc:if={showFeedbackModal}>
+            <div class="modal-backdrop" onclick={handleCloseFeedback}>
+                <div class="modal" onclick={stopProp}>
+                    <div class="modal-header">
+                        <h3>{feedbackTitle}</h3>
+                        <button class="icon-btn" onclick={handleCloseFeedback}>&#x2715;</button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="modal-sub">How was the {feedbackMeal} today?</p>
+                        <div class="rating-row">
+                            <template for:each={ratingOptions} for:item="opt">
+                                <button key={opt.value} class={opt.cls} data-value={opt.value} onclick={handlePickRating}>{opt.label}</button>
+                            </template>
+                        </div>
+                        <label class="field">
+                            <span>Comments (optional)</span>
+                            <textarea rows="3" oninput={handleFeedbackComments} value={feedbackComments} placeholder="Anything to add?"></textarea>
+                        </label>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-outline" onclick={handleCloseFeedback}>Cancel</button>
+                        <button class="btn-primary" onclick={handleSubmitFeedbackModal}>Submit</button>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

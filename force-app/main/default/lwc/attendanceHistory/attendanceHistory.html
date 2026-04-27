@@ -1,0 +1,81 @@
+<template>
+    <section class="attendance-shell">
+        <div class="top-row">
+            <h2 class="title">Attendance</h2>
+            <div class="top-actions">
+                <div class="semester-wrap">
+                    <select class="semester-select" onchange={handleSemesterChange}>
+                        <template for:each={semesterOptions} for:item="option">
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        </template>
+                    </select>
+                    <span class="current-pill"><span class="dot"></span>Current</span>
+                    <span class="caret">⌄</span>
+                </div>
+                <button type="button" class="help-btn">Get Help</button>
+            </div>
+        </div>
+
+        <div class="table-card">
+            <div class="table-scroll">
+                <table class="attendance-table">
+                    <thead>
+                        <tr>
+                            <th class="col-sn">S.No</th>
+                            <th>Course Name</th>
+                            <th>Course Code</th>
+                            <th>Class <span class="tiny-caret">⌄</span></th>
+                            <th>Attendance (%)</th>
+                            <th>All Status <span class="tiny-caret">⌄</span></th>
+                            <th >
+                                
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={tableRows} for:item="row">
+                            <tr key={row.id}>
+                                <td class="col-sn">{row.serialNo}</td>
+                                <td>{row.courseName}</td>
+                                <td>{row.courseCode}</td>
+                                <td>{row.className}</td>
+                                <td><span class={row.attendanceClass}>{row.attendance}</span></td>
+                                <td>
+                                    <span class={row.statusClass}>
+                                        <template if:true={row.showAttentionIcon}>
+                                            <span class="attention-icon">!</span>
+                                        </template>
+                                        {row.status}
+                                    </span>
+                                </td>
+                                <td class="col-action"><button type="button" class="view-btn" onclick={handleViewDetails}>View Details</button></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="mobile-card-list">
+            <template for:each={tableRows} for:item="row">
+                <article class="mobile-card" key={row.id}>
+                    <div class="mobile-head">
+                        <h3 class="mobile-course">{row.courseName}</h3>
+                        <span class={row.attendanceClass}>{row.attendance}</span>
+                    </div>
+                    <p class="mobile-code">{row.courseCode}</p>
+                    <p class="mobile-class">Class: {row.className}</p>
+                    <div class="mobile-footer">
+                        <span class={row.statusClass}>
+                            <template if:true={row.showAttentionIcon}>
+                                <span class="attention-icon">!</span>
+                            </template>
+                            {row.status}
+                        </span>
+                        <button type="button" class="view-btn" onclick={handleViewDetails}>View Details</button>
+                    </div>
+                </article>
+            </template>
+        </div>
+    </section>
+</template>

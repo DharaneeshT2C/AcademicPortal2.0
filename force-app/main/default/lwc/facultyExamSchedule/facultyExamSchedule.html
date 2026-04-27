@@ -1,0 +1,128 @@
+<template>
+    <section class="invigilation-shell" aria-label="Faculty exam schedule">
+        <div class="top-row">
+            <h2 class="title">Exam schedule</h2>
+            <div class="filters">
+                <div class="select-wrap">
+                    <select class="filter-select narrow" onchange={handleYearChange}>
+                        <template for:each={yearOptions} for:item="option">
+                            <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                        </template>
+                    </select>
+                </div>
+                <div class="select-wrap">
+                    <select class="filter-select narrow" onchange={handleExamTypeChange}>
+                        <template for:each={examTypeOptions} for:item="option">
+                            <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                        </template>
+                    </select>
+                </div>
+                <div class="select-wrap">
+                    <select class="filter-select narrow" onchange={handleCourseChange}>
+                        <template for:each={courseOptions} for:item="option">
+                            <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                        </template>
+                    </select>
+                </div>
+                <div class="select-wrap">
+                    <select class="filter-select narrow" onchange={handleClassChange}>
+                        <template for:each={classOptions} for:item="option">
+                            <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                        </template>
+                    </select>
+                </div>
+                <div class="search-wrap">
+                    <span class="search-icon">◯</span>
+                    <input class="search-input" type="text" placeholder="Search" value={searchTerm} oninput={handleSearch} />
+                </div>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table class="inv-table" role="grid">
+                <thead>
+                    <tr>
+                        <th>Exam type</th>
+                        <th>Class</th>
+                        <th>Exam</th>
+                        <th>Course</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Venue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template if:true={hasPaginatedRows}>
+                        <template for:each={paginatedRows} for:item="row">
+                            <tr key={row.id}>
+                                <td>{row.examType}</td>
+                                <td>{row.className}</td>
+                                <td>{row.exam}</td>
+                                <td>{row.course}</td>
+                                <td>{row.date}</td>
+                                <td>{row.time}</td>
+                                <td>{row.venue}</td>
+                            </tr>
+                        </template>
+                    </template>
+                    <template if:false={hasPaginatedRows}>
+                        <tr>
+                            <td colspan="7" class="empty">No exam schedule available.</td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mobile-cards" aria-label="Exam schedule cards">
+            <template if:true={hasPaginatedRows}>
+                <template for:each={paginatedRows} for:item="row">
+                    <article key={row.id} class="schedule-card">
+                        <div class="card-row card-row-top">
+                            <p class="card-title">{row.exam}</p>
+                            <span class="card-chip">{row.className}</span>
+                        </div>
+                        <p class="card-course">{row.course}</p>
+                        <dl class="card-grid">
+                            <div class="card-item">
+                                <dt>Exam type</dt>
+                                <dd>{row.examType}</dd>
+                            </div>
+                            <div class="card-item">
+                                <dt>Date</dt>
+                                <dd>{row.date}</dd>
+                            </div>
+                            <div class="card-item">
+                                <dt>Time</dt>
+                                <dd>{row.time}</dd>
+                            </div>
+                            <div class="card-item">
+                                <dt>Venue</dt>
+                                <dd>{row.venue}</dd>
+                            </div>
+                        </dl>
+                    </article>
+                </template>
+            </template>
+            <template if:false={hasPaginatedRows}>
+                <p class="mobile-empty">No exam schedule available.</p>
+            </template>
+        </div>
+
+        <footer class="table-footer">
+            <span>
+                Rows per page:
+                <select class="rows-inline-select" onchange={handleRowsPerPageChange}>
+                    <template for:each={rowOptions} for:item="option">
+                        <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                    </template>
+                </select>
+            </span>
+            <span>{paginationLabel}</span>
+            <div class="footer-nav">
+                <button type="button" class="nav-btn" onclick={handlePreviousPage} disabled={disablePrevious}>‹</button>
+                <button type="button" class="nav-btn" onclick={handleNextPage} disabled={disableNext}>›</button>
+            </div>
+        </footer>
+    </section>
+</template>

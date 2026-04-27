@@ -1,0 +1,134 @@
+<template>
+    <div class="tracker-page">
+        <div class="breadcrumb">
+            <button class="bc-link" onclick={handleBack}>Placements</button>
+            <span class="bc-sep">›</span>
+            <span class="bc-current">Your Applications</span>
+        </div>
+
+        <div class="tracker-header">
+            <h2 class="page-title">Applications</h2>
+            <div class="tracker-controls">
+                <div class="cycle-tabs">
+                    <template for:each={cycles} for:item="c">
+                        <button key={c.key} class={c.cls} data-cycle={c.key} onclick={handleCycleSwitch}>{c.label}</button>
+                    </template>
+                </div>
+                <button class="btn-compare" onclick={handleCompareOffers}>Compare Offers</button>
+            </div>
+        </div>
+
+        <div class="table-card">
+            <div class="table-toolbar">
+                <div class="toolbar-filters">
+                    <div class="filter-wrap">
+                        <button class="filter-btn" onclick={handleToggleCategoryMenu}>{categoryButtonLabel}</button>
+                        <template lwc:if={showCategoryMenu}>
+                            <div class="filter-menu">
+                                <template for:each={categoryOptions} for:item="opt">
+                                    <button key={opt.value} class="filter-menu-item" data-value={opt.value} onclick={handlePickCategory}>{opt.value}</button>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="filter-wrap">
+                        <button class="filter-btn" onclick={handleToggleCompanyTypeMenu}>{companyTypeButtonLabel}</button>
+                        <template lwc:if={showCompanyTypeMenu}>
+                            <div class="filter-menu">
+                                <template for:each={companyTypeOptions} for:item="opt">
+                                    <button key={opt.value} class="filter-menu-item" data-value={opt.value} onclick={handlePickCompanyType}>{opt.value}</button>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                    <button class="filter-btn-icon" onclick={handleResetFilters}>⊞ Reset</button>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table class="apps-table">
+                    <thead>
+                        <tr>
+                            <th>Company Name</th>
+                            <th>Profile</th>
+                            <th>Applied on</th>
+                            <th>Category</th>
+                            <th>Current Phase</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={tableRows} for:item="app">
+                            <tr key={app.id}>
+                                <td>
+                                    <div class="company-cell">
+                                        <div class="company-logo-sm" style={app.logoStyle}>{app.companyInitial}</div>
+                                        <span class="company-cell-name">{app.company}</span>
+                                    </div>
+                                </td>
+                                <td class="profile-cell">{app.profile}</td>
+                                <td class="date-cell">{app.appliedDate}</td>
+                                <td>
+                                    <span class={app.categoryClass}>{app.category}</span>
+                                </td>
+                                <td class="phase-cell">{app.currentStage}</td>
+                                <td>
+                                    <span class={app.statusClass}>{app.statusLabel}</span>
+                                </td>
+                                <td>
+                                    <div class="action-btns">
+                                        <template lwc:if={app.hasBookSlot}>
+                                            <button class="btn-action btn-action-primary" data-id={app.jobId} onclick={handleViewJob}>Book Slot</button>
+                                        </template>
+                                        <template lwc:if={app.hasWithdraw}>
+                                            <button class="btn-action btn-action-danger" data-id={app.id} onclick={handleWithdraw}>Withdraw</button>
+                                        </template>
+                                        <template lwc:if={app.hasReviewOffer}>
+                                            <button class="btn-action btn-action-success" data-id={app.jobId} onclick={handleViewJob}>Review Offer</button>
+                                        </template>
+                                        <template lwc:if={app.hasDownloadOffer}>
+                                            <button class="btn-action btn-action-outline" data-id={app.id} onclick={handleDownloadOfferLetter}>Download Offer Letter</button>
+                                        </template>
+                                    </div>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Withdraw Modal -->
+        <template lwc:if={showWithdrawModal}>
+            <div class="modal-overlay" onclick={handleCancelWithdraw}>
+                <div class="modal-box" onclick={stopProp}>
+                    <div class="modal-header">
+                        <h3 class="modal-title">Withdraw Application?</h3>
+                        <button class="modal-close" onclick={handleCancelWithdraw}>✕</button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="modal-desc">This action may affect your placement eligibility. Withdrawing from a shortlisted position may restrict future applications this cycle.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-outline" onclick={handleCancelWithdraw}>Cancel</button>
+                        <button class="btn-danger" onclick={handleConfirmWithdraw}>Withdraw</button>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- Success Modal -->
+        <template lwc:if={showSuccessModal}>
+            <div class="modal-overlay" onclick={handleCloseSuccess}>
+                <div class="modal-box modal-sm" onclick={stopProp}>
+                    <div class="success-modal-body">
+                        <div class="success-icon">✓</div>
+                        <h3 class="success-title">Withdrawal Successful</h3>
+                        <p class="success-msg">Your application has been withdrawn successfully.</p>
+                        <button class="btn-primary" onclick={handleCloseSuccess}>Done</button>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,35 @@
+<template>
+    <template lwc:if={showToast}>
+        <c-toast message={toastMessage} variant={toastVariant} onclose={handleToastClose}></c-toast>
+    </template>
+    <div class="page">
+        <div class="page-header"><button class="back-btn" onclick={handleBack}><c-icon name="arrow_back" size="20"></c-icon></button><div><h2 class="page-title">{semester.name}</h2><p class="breadcrumb">Fee Payment &gt; Semester Details</p></div></div>
+        <div class="card">
+            <div class="detail-header">
+                <div class="detail-info"><span class="status-badge">{semester.status}</span><p class="total-label">Total: <strong>INR {semester.totalFeeAmount}</strong></p></div>
+                <button class="btn-primary" onclick={handleMakePayment} disabled={isPayDisabled}>{payButtonLabel}</button>
+            </div>
+            <template lwc:if={hasPayRef}>
+                <div class="pay-ref">Payment reference: <strong>{_payRef}</strong></div>
+            </template>
+            <table class="fee-table">
+                <thead><tr><th></th><th>Fee Item</th><th>Due Date</th><th>Currency</th><th>Total Payable</th><th>Total Paid</th><th>Remaining</th><th>Late Fee</th><th>Status</th></tr></thead>
+                <tbody>
+                    <template for:each={fees} for:item="fee">
+                        <tr key={fee.item} class="parent-row">
+                            <td><template lwc:if={fee.hasChildren}><c-icon name="expand_more" size="18"></c-icon></template></td>
+                            <td><strong>{fee.item}</strong></td><td>{fee.dueDate}</td><td>{fee.currency}</td><td>{fee.totalPayable}</td><td>{fee.totalPaid}</td><td>{fee.remaining}</td><td>{fee.lateFee}</td><td><span class="status-pill">{fee.status}</span></td>
+                        </tr>
+                        <template lwc:if={fee.hasChildren}>
+                            <template for:each={fee.formattedChildren} for:item="child">
+                                <tr key={child.item} class="child-row">
+                                    <td></td><td class="indent">{child.item}</td><td>{child.dueDate}</td><td>{child.currency}</td><td>{child.totalPayable}</td><td>{child.totalPaid}</td><td>{child.remaining}</td><td>{child.lateFee}</td><td><span class="status-pill">{child.status}</span></td>
+                                </tr>
+                            </template>
+                        </template>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</template>

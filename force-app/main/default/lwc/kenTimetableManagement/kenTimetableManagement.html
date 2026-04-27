@@ -1,0 +1,565 @@
+<template>
+    <template if:true={showBuilder}>
+        <c-ken-timetable-builder
+            academic-term-id={builderAcademicTermId}
+            course-offering-id={builderCourseOfferingId}
+            onback={handleBackToManagement}>
+        </c-ken-timetable-builder>
+    </template>
+
+    <template if:true={showDetail}>
+        <c-ken-timetable-detail
+            course-offering-id={selectedTimetable.id}
+            timetable-name={selectedTimetable.name}
+            term={selectedTimetable.term}
+            department={selectedTimetable.department}
+            version={selectedTimetable.version}
+            status={selectedTimetable.status}
+            mode={selectedTimetable.mode}
+            last-updated={selectedTimetable.lastUpdated}
+            onback={handleBackToManagement}
+            onopenbuilder={handleOpenBuilder}>
+        </c-ken-timetable-detail>
+    </template>
+
+    <template if:true={showManagement}>
+        <section class="master-layout">
+            <div class="master-shell">
+                <div class="master-header">
+                    <div class="master-hero">
+                        <div class="hero-icon" aria-hidden="true">
+                            <lightning-icon icon-name="utility:event" size="small" alternative-text="Timetable"></lightning-icon>
+                        </div>
+                        <div class="hero-copy">
+                            <h1 class="hero-title">Timetable Management</h1>
+                            <p class="hero-subtitle">Review course offerings by academic term, scan assignment readiness, and open the builder from one workspace.</p>
+                        </div>
+                        <button class="create-button" type="button" onclick={handleCreateTimetable}>
+                            <span class="button-plus">+</span>
+                            <span>Create New Timetable</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="master-body">
+                    <div class="tab-list management-tab-row" role="tablist" aria-label="Timetable management sections">
+                        <template for:each={managementTabs} for:item="tab">
+                            <button
+                                key={tab.id}
+                                class={tab.className}
+                                type="button"
+                                data-tab={tab.id}
+                                role="tab"
+                                onclick={handleManagementTabChange}>
+                                {tab.label}
+                            </button>
+                        </template>
+                    </div>
+
+                    <div class="summary-strip">
+                        <div class="summary-copy">
+                            <div class="section-eyebrow">{dashboardEyebrow}</div>
+                            <p class="summary">{dashboardSummaryText}</p>
+                        </div>
+                        <div class="stats-grid">
+                            <template for:each={dashboardStats} for:item="stat">
+                                <article key={stat.label} class="stat-card">
+                                    <p class="stat-label">{stat.label}</p>
+                                    <p class={stat.className}>{stat.value}</p>
+                                </article>
+                            </template>
+                        </div>
+                    </div>
+
+                    <template if:true={showOfferingsTab}>
+                        <div class="workspace-panel filters-panel">
+                            <div class="section-head">
+                                <div>
+                                    <div class="section-eyebrow">Filters</div>
+                                    <h2 class="section-title">Find course offerings quickly</h2>
+                                </div>
+                            </div>
+
+                            <div class="filters-grid">
+                                <label class="search-field">
+                                    <span class="search-icon" aria-hidden="true">
+                                        <lightning-icon icon-name="utility:search" size="x-small" alternative-text="Search"></lightning-icon>
+                                    </span>
+                                    <input
+                                        type="search"
+                                        placeholder="Search offerings by name, course, faculty, or session..."
+                                        oninput={handleSearchInput} />
+                                </label>
+
+                                <label class="filter-select with-icon">
+                                    <span class="filter-icon" aria-hidden="true">
+                                        <lightning-icon icon-name="utility:filterList" size="x-small" alternative-text="Filter"></lightning-icon>
+                                    </span>
+                                    <select value={selectedTermId} onchange={handleTermChange}>
+                                        <template for:each={termOptions} for:item="option">
+                                            <option key={option.value} value={option.value}>{option.label}</option>
+                                        </template>
+                                    </select>
+                                </label>
+
+                                <label class="filter-select">
+                                    <select value={selectedStatus} onchange={handleStatusChange}>
+                                        <template for:each={statusOptions} for:item="option">
+                                            <option key={option.value} value={option.value}>{option.label}</option>
+                                        </template>
+                                    </select>
+                                </label>
+
+                                <label class="filter-select">
+                                    <select value={selectedType} onchange={handleTypeChange}>
+                                        <template for:each={typeOptions} for:item="option">
+                                            <option key={option.value} value={option.value}>{option.label}</option>
+                                        </template>
+                                    </select>
+                                </label>
+
+                                <label class="filter-select">
+                                    <select value={selectedOfferingType} onchange={handleOfferingTypeChange}>
+                                        <template for:each={offeringTypeOptions} for:item="option">
+                                            <option key={option.value} value={option.value}>{option.label}</option>
+                                        </template>
+                                    </select>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="workspace-panel table-panel">
+                            <div class="section-head table-head">
+                                <div>
+                                    <div class="section-eyebrow">Offerings</div>
+                                    <h2 class="section-title">Course offering workspace</h2>
+                                </div>
+                                <div class="table-tools">
+                                    <p class="results-hint">{totalResultsLabel}</p>
+                                </div>
+                            </div>
+
+                            <div class={tableWrapClass}>
+                                <template if:true={isLoading}>
+                                    <div class="table-message">Loading course offerings...</div>
+                                </template>
+
+                                <template if:true={loadError}>
+                                    <div class="table-message error">{loadError}</div>
+                                </template>
+
+                                <template if:true={hasOfferings}>
+                                    <table class="management-table">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Offering Name</th>
+                                                <th scope="col">Term</th>
+                                                <th scope="col">Course</th>
+                                                <th scope="col">Course Code</th>
+                                                <th scope="col">Status</th>
+                                                <th scope="col">Type</th>
+                                                <th scope="col">Offering Type</th>
+                                                <th scope="col">Faculty</th>
+                                                <th scope="col">Last Updated</th>
+                                                <th scope="col" class="actions-heading">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={paginatedOfferings} for:item="item">
+                                                <tr key={item.id}>
+                                                    <td data-label="Offering Name">
+                                                        <button class="name-link" type="button" data-offering-id={item.id} onclick={handlePreview}>
+                                                            {item.name}
+                                                        </button>
+                                                    </td>
+                                                    <td data-label="Term">{item.term}</td>
+                                                    <td data-label="Course">{item.courseName}</td>
+                                                    <td data-label="Course Code" class="version-cell">{item.courseCode}</td>
+                                                    <td data-label="Status">
+                                                        <span class={item.statusClass}>{item.status}</span>
+                                                    </td>
+                                                    <td data-label="Type">
+                                                        <span class={item.typeClass}>{item.type}</span>
+                                                    </td>
+                                                    <td data-label="Offering Type">{item.offeringType}</td>
+                                                    <td data-label="Faculty">{item.facultyName}</td>
+                                                    <td data-label="Last Updated" class="updated-cell">{item.lastUpdated}</td>
+                                                    <td data-label="Actions">
+                                                        <div class="row-actions">
+                                                            <lightning-button-icon
+                                                                icon-name="utility:preview"
+                                                                size="small"
+                                                                alternative-text="Preview"
+                                                                variant="bare"
+                                                                data-offering-id={item.id}
+                                                                onclick={handlePreview}>
+                                                            </lightning-button-icon>
+                                                            <lightning-button-icon
+                                                                icon-name="utility:forward"
+                                                                size="small"
+                                                                alternative-text="Open Builder"
+                                                                variant="bare"
+                                                                data-offering-id={item.id}
+                                                                onclick={handleOpenBuilder}>
+                                                            </lightning-button-icon>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </template>
+
+                                <template if:true={isEmptyState}>
+                                    <div class="table-message">No course offerings found for the selected filters.</div>
+                                </template>
+                            </div>
+
+                            <div class="table-footer">
+                                <p>{totalResultsLabel}</p>
+                                <div class="footer-controls">
+                                    <label class="page-size-select" title="Rows per page">
+                                        <span>Rows</span>
+                                        <select value={selectedPageSize} onchange={handlePageSizeChange}>
+                                            <template for:each={pageSizeOptions} for:item="option">
+                                                <option key={option.value} value={option.value}>{option.label}</option>
+                                            </template>
+                                        </select>
+                                    </label>
+                                    <div class="pagination">
+                                    <span class="page-label">{pageLabel}</span>
+                                    <button type="button" onclick={handlePreviousPage} disabled={disablePreviousPage}>Previous</button>
+                                    <button type="button" onclick={handleNextPage} disabled={disableNextPage}>Next</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template if:true={showWeeklyPlanTab}>
+                        <div class="workspace-panel weekly-panel">
+                            <div class="section-head">
+                                <div>
+                                    <div class="section-eyebrow">Weekly View</div>
+                                    <h2 class="section-title">Program plan weekly schedule</h2>
+                                </div>
+                                <div class="weekly-actions">
+                                    <button
+                                        class="secondary-action weekly-publish"
+                                        type="button"
+                                        onclick={handlePublishWeeklySchedule}
+                                        disabled={disablePlanPublish}>
+                                        <span>Publish Weekly Schedule</span>
+                                    </button>
+                                    <button
+                                        class="create-button weekly-download"
+                                        type="button"
+                                        onclick={handleDownloadWeeklySchedule}
+                                        disabled={disablePlanDownload}>
+                                        <span>Download Weekly Schedule</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="filters-grid weekly-filters-grid">
+                                <label class="filter-select with-icon">
+                                    <span class="filter-icon" aria-hidden="true">
+                                        <lightning-icon icon-name="utility:event" size="x-small" alternative-text="Term"></lightning-icon>
+                                    </span>
+                                    <select value={selectedPreviewTermId} onchange={handlePreviewTermChange}>
+                                        <option value="">Select Term</option>
+                                        <template for:each={previewTermOptions} for:item="option">
+                                            <option key={option.value} value={option.value}>{option.label}</option>
+                                        </template>
+                                    </select>
+                                </label>
+
+                                <label class="filter-select with-icon">
+                                    <span class="filter-icon" aria-hidden="true">
+                                        <lightning-icon icon-name="utility:filterList" size="x-small" alternative-text="Program Plan"></lightning-icon>
+                                    </span>
+                                    <select value={selectedPreviewProgramPlanId} onchange={handlePreviewProgramPlanChange}>
+                                        <template for:each={previewProgramPlanOptions} for:item="option">
+                                            <option key={option.value} value={option.value}>{option.label}</option>
+                                        </template>
+                                    </select>
+                                </label>
+
+                                <label class="filter-select weekly-date-field">
+                                    <span>Start Date</span>
+                                    <input type="date" value={selectedPreviewStartDate} onchange={handlePreviewStartDateChange} />
+                                </label>
+
+                                <label class="filter-select weekly-date-field">
+                                    <span>End Date</span>
+                                    <input type="date" value={selectedPreviewEndDate} onchange={handlePreviewEndDateChange} />
+                                </label>
+                            </div>
+
+                            <div class="tab-list management-tab-row preview-view-toggle" role="tablist" aria-label="Weekly preview orientation">
+                                <template for:each={previewOrientationTabs} for:item="tab">
+                                    <button
+                                        key={tab.id}
+                                        class={tab.className}
+                                        type="button"
+                                        data-view={tab.id}
+                                        role="tab"
+                                        onclick={handlePreviewOrientationChange}>
+                                        {tab.label}
+                                    </button>
+                                </template>
+                            </div>
+
+                            <div class="weekly-summary-card">
+                                <p>{weeklyPreviewSummary}</p>
+                            </div>
+
+                            <section class="grid-preview-panel">
+                                <div class="grid-preview-head">
+                                    <div>
+                                        <div class="section-eyebrow">Grid</div>
+                                        <h3>Weekly Timetable</h3>
+                                    </div>
+                                    <p>Review all scheduled course offerings for the selected program plan in one weekly view.</p>
+                                </div>
+
+                            <div class="preview-wrap weekly-preview-wrap">
+                                <template if:true={hasPlanPreview}>
+                                    <template if:true={showVerticalPreview}>
+                                        <table class="timetable-grid">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col" class="time-col">Time</th>
+                                                    <template for:each={previewDateColumns} for:item="column">
+                                                        <th key={column.key} scope="col">{column.label}</th>
+                                                    </template>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <template for:each={weeklyPreviewRows} for:item="row">
+                                                    <tr key={row.time}>
+                                                        <th scope="row" class="time-col time-value">{row.time}</th>
+                                                        <template for:each={row.slots} for:item="slot">
+                                                            <template if:true={slot.render}>
+                                                                <td key={slot.key} rowspan={slot.rowSpan}>
+                                                                    <div class="grid-slot" style={slot.cellStyle}>
+                                                                        <template if:true={slot.hasEntry}>
+                                                                            <article class={slot.tone}>
+                                                                                <div class={slot.cellClass}>
+                                                                                    <strong>{slot.label}</strong>
+                                                                                    <template if:true={slot.type}>
+                                                                                        <span class={slot.typePillClass}>{slot.type}</span>
+                                                                                    </template>
+                                                                                    <template if:true={slot.faculty}>
+                                                                                        <span>{slot.faculty}</span>
+                                                                                    </template>
+                                                                                    <span>{slot.timeLabel}</span>
+                                                                                </div>
+                                                                            </article>
+                                                                        </template>
+                                                                    </div>
+                                                                </td>
+                                                            </template>
+                                                        </template>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </template>
+                                </template>
+
+                                <template if:false={hasPlanPreview}>
+                                    <div class="table-message">
+                                        <template if:true={isPlanPreviewLoading}>
+                                            <span>Loading weekly schedule...</span>
+                                        </template>
+                                        <template if:false={isPlanPreviewLoading}>
+                                            <span>{weeklyPreviewSummary}</span>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                            </section>
+                        </div>
+                    </template>
+
+                    <template if:true={showTemplatesTab}>
+                        <div class="workspace-panel template-panel">
+                            <div class="section-head template-panel-head">
+                                <div>
+                                    <div class="section-eyebrow">Templates</div>
+                                    <h2 class="section-title">Course offering schedule templates</h2>
+                                </div>
+                                <button class="create-button" type="button" onclick={handleOpenTemplateModal}>
+                                    <span class="button-plus">+</span>
+                                    <span>Create Template</span>
+                                </button>
+                            </div>
+
+                            <template if:true={hasRecentTemplates}>
+                                <div class="table-wrap template-table-wrap">
+                                    <table class="management-table template-management-table">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Template Name</th>
+                                                <th scope="col">Frequency</th>
+                                                <th scope="col">Start Date</th>
+                                                <th scope="col">End Date</th>
+                                                <th scope="col">Status</th>
+                                                <th scope="col" class="actions-heading">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={templateRows} for:item="template">
+                                                <tr key={template.key}>
+                                                    <td data-label="Template Name">
+                                                        <button
+                                                            class="name-link template-name-link"
+                                                            type="button"
+                                                            data-template-id={template.id}
+                                                            onclick={handleTemplateCardClick}>
+                                                            {template.name}
+                                                        </button>
+                                                    </td>
+                                                    <td data-label="Frequency" class="template-frequency-cell">{template.frequencyLabel}</td>
+                                                    <td data-label="Start Date" class="updated-cell">{template.startDateLabel}</td>
+                                                    <td data-label="End Date" class="updated-cell">{template.endDateLabel}</td>
+                                                    <td data-label="Status">
+                                                        <span class={template.statusClass}>{template.statusLabel}</span>
+                                                    </td>
+                                                    <td data-label="Actions">
+                                                        <div class="row-actions">
+                                                            <lightning-button-icon
+                                                                icon-name="utility:copy"
+                                                                size="small"
+                                                                alternative-text="Clone Template"
+                                                                title="Clone Template"
+                                                                variant="bare"
+                                                                data-template-id={template.id}
+                                                                onclick={handleCloneTemplate}>
+                                                            </lightning-button-icon>
+                                                            <lightning-button-icon
+                                                                icon-name="utility:forward"
+                                                                size="small"
+                                                                alternative-text="Open Template"
+                                                                title="Open Template"
+                                                                variant="bare"
+                                                                data-template-id={template.id}
+                                                                onclick={handleTemplateCardClick}>
+                                                            </lightning-button-icon>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </template>
+                            <template if:false={hasRecentTemplates}>
+                                <div class="template-empty-card">
+                                    <p>No course offering schedule templates are available yet.</p>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template if:true={isTemplateModalOpen}>
+        <section
+            class="template-modal-backdrop"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Create Schedule Template"
+            onclick={handleCloseTemplateModal}>
+            <article class="template-modal" onclick={stopModalClose}>
+                <div class="template-modal-head">
+                    <div>
+                        <div class="section-eyebrow">Templates</div>
+                        <h2 class="section-title">Create schedule template</h2>
+                    </div>
+                    <button class="template-modal-close" type="button" onclick={handleCloseTemplateModal} aria-label="Close">
+                        ×
+                    </button>
+                </div>
+
+                <div class="template-modal-body">
+                    <div class="filters-grid template-select-grid">
+                        <label class="filter-select with-icon">
+                            <span class="filter-icon" aria-hidden="true">
+                                <lightning-icon icon-name="utility:copy" size="x-small" alternative-text="Template"></lightning-icon>
+                            </span>
+                            <select onchange={handleTemplateSelectionChange}>
+                                <template for:each={templateSelectOptions} for:item="option">
+                                    <option key={option.value} value={option.value}>{option.label}</option>
+                                </template>
+                            </select>
+                        </label>
+                    </div>
+
+                    <section class="template-form-card">
+                        <div class="template-form-grid">
+                            <label class="template-field template-field-wide">
+                                <span>Template Name</span>
+                                <input type="text" value={templateForm.name} data-field="name" oninput={handleTemplateFieldChange} placeholder="Mon Wed Fri 10:30 - 11:30 AM" />
+                            </label>
+
+                            <label class="template-field template-field-wide">
+                                <span>Frequency (RRULE)</span>
+                                <input type="text" value={templateForm.recurrencePattern} data-field="recurrencePattern" oninput={handleTemplateFieldChange} placeholder="RRULE:FREQ=WEEKLY;INTERVAL=1" />
+                            </label>
+
+                            <label class="template-field">
+                                <span>Start Date</span>
+                                <input type="date" value={templateForm.startDate} data-field="startDate" onchange={handleTemplateFieldChange} />
+                            </label>
+
+                            <label class="template-field">
+                                <span>End Date</span>
+                                <input type="date" value={templateForm.endDate} data-field="endDate" onchange={handleTemplateFieldChange} />
+                            </label>
+
+                            <label class="template-field">
+                                <span>Start Time</span>
+                                <input type="time" value={templateForm.startTime} data-field="startTime" onchange={handleTemplateFieldChange} />
+                            </label>
+
+                            <label class="template-field">
+                                <span>End Time</span>
+                                <input type="time" value={templateForm.endTime} data-field="endTime" onchange={handleTemplateFieldChange} />
+                            </label>
+
+                            <label class="template-field template-field-full">
+                                <span>Description</span>
+                                <textarea value={templateForm.description} data-field="description" oninput={handleTemplateFieldChange} placeholder="Optional notes for this schedule template."></textarea>
+                            </label>
+                        </div>
+
+                        <div class="template-days">
+                            <span class="template-days-label">Active Days</span>
+                            <div class="template-day-grid">
+                                <template for:each={templateDayOptions} for:item="day">
+                                    <label key={day.key} class="template-day-chip">
+                                        <input type="checkbox" checked={day.checked} data-field={day.field} onchange={handleTemplateFieldChange} />
+                                        <span>{day.label}</span>
+                                    </label>
+                                </template>
+                            </div>
+                        </div>
+
+                        <div class="template-actions">
+                            <button class="secondary-action weekly-publish" type="button" onclick={handleResetTemplateForm}>
+                                <span>Reset</span>
+                            </button>
+                            <button class="create-button" type="button" onclick={handleCreateTemplate} disabled={disableTemplateSave}>
+                                <span>Create Template</span>
+                            </button>
+                        </div>
+                    </section>
+                </div>
+            </article>
+        </section>
+    </template>
+</template>

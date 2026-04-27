@@ -1,0 +1,148 @@
+<template>
+    <section class="attendance-shell">
+        <div class="attendance-grid">
+            <article class="panel today-panel">
+                <div class="panel-head">
+                    <h2 class="panel-title">Today’s Attendance <span>| {todayDateLabel}</span></h2>
+                    <button class="outline-btn" type="button" onclick={handleAttendanceOverviewClick}>Attendance Overview</button>
+                </div>
+
+                <template if:true={hasTodaySessions}>
+                    <div class="today-list">
+                        <template for:each={todaySessions} for:item="session">
+                            <article class="today-item" key={session.id}>
+                                <div>
+                                    <h3 class="session-title">{session.subject} | {session.code}</h3>
+                                    <p class="session-time"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+<g clip-path="url(#clip0_16505_268676)">
+<path d="M8.9925 1.5C4.8525 1.5 1.5 4.86 1.5 9C1.5 13.14 4.8525 16.5 8.9925 16.5C13.14 16.5 16.5 13.14 16.5 9C16.5 4.86 13.14 1.5 8.9925 1.5ZM9 15C5.685 15 3 12.315 3 9C3 5.685 5.685 3 9 3C12.315 3 15 5.685 15 9C15 12.315 12.315 15 9 15Z" fill="#373A45"/>
+<path d="M9.375 5.25H8.25V9.75L12.1875 12.1125L12.75 11.19L9.375 9.1875V5.25Z" fill="#373A45"/>
+</g>
+<defs>
+<clipPath id="clip0_16505_268676">
+<rect width="18" height="18" fill="white"/>
+</clipPath>
+</defs>
+</svg> {session.time}</p>
+                                </div>
+                                <span class={session.statusClass}>{session.status}</span>
+                            </article>
+                        </template>
+                    </div>
+                </template>
+                <template if:false={hasTodaySessions}>
+                    <div class="empty-center">- You don’t have any scheduled sessions for today -</div>
+                </template>
+            </article>
+
+            <article class="panel attention-panel">
+                <h2 class="attention-title">Needs Attention!</h2>
+                <div class="attention-divider"></div>
+
+                <template if:true={hasAttentionItems}>
+                    <div class="attention-list">
+                        <template for:each={attentionItems} for:item="item">
+                            <article class="attention-item" key={item.id}>
+                                <h3>{item.title}</h3>
+                                <p><span>{item.highlight}</span>{item.text}</p>
+                            </article>
+                        </template>
+                    </div>
+                </template>
+                <template if:false={hasAttentionItems}>
+                    <div class="attention-empty">
+                        <img src={needsAttentionImageUrl} alt="All Caught Up" />
+                        <h3>All Caught Up!</h3>
+                        <p>Keep it up, you are on track!</p>
+                    </div>
+                </template>
+            </article>
+
+            <article class="panel course-panel">
+                <div class="panel-head">
+                    <h2 class="panel-title">Course Wise Details</h2>
+                    <div class="semester-wrap">
+                        <template if:true={isDropdownOpen}>
+                            <div class="sem-backdrop" onclick={closeDropdown}></div>
+                        </template>
+
+                        <button
+                            class="semester-trigger"
+                            type="button"
+                            aria-haspopup="listbox"
+                            aria-expanded={isDropdownOpen}
+                            aria-label="Select semester"
+                            onclick={handleDropdownToggle}
+                        >
+                            <span class="semester-label-text">{selectedSemesterLabel}</span>
+                            <template if:true={showCurrentSemesterChip}>
+                                <span class="current-pill"><span class="dot"></span>Current</span>
+                            </template>
+                            <span class="semester-caret">⌄</span>
+                        </button>
+
+                        <template if:true={isDropdownOpen}>
+                            <ul class="semester-dropdown" role="listbox">
+                                <template for:each={semesterOptions} for:item="opt">
+                                    <li
+                                        key={opt.value}
+                                        class="semester-option"
+                                        role="option"
+                                        data-value={opt.value}
+                                        onclick={handleOptionSelect}
+                                    >
+                                        <span class="option-label">{opt.label}</span>
+                                        <template if:true={opt.isCurrent}>
+                                            <span class="current-pill"><span class="dot"></span>Current</span>
+                                        </template>
+                                    </li>
+                                </template>
+                            </ul>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="chart-wrap">
+                    <canvas class="course-bar-chart"></canvas>
+                </div>
+            </article>
+
+            <article class="panel leave-panel">
+                <div class="panel-head">
+                    <h2 class="panel-title">Leave Requests</h2>
+                    <button class="outline-btn" type="button">View All</button>
+                </div>
+
+                <template if:true={hasLeaveItems}>
+                    <div class="leave-list">
+                        <template for:each={leaveRequests} for:item="leave">
+                            <article class="leave-item" key={leave.id}>
+                                <div class="leave-body">
+                                    <h3 class="leave-title">{leave.title}</h3>
+                                    <template if:true={leave.subtitle}>
+                                        <p class="leave-subtitle">{leave.subtitle}</p>
+                                    </template>
+                                    <template if:true={leave.date}>
+                                        <p class="leave-date">
+                                            <lightning-icon icon-name="utility:event" alternative-text="Date" size="xx-small" class="leave-cal-icon"></lightning-icon>
+                                            {leave.date}
+                                        </p>
+                                    </template>
+                                </div>
+                                <span class={leave.statusChipClass}>{leave.status}</span>
+                            </article>
+                        </template>
+                    </div>
+                    <button class="primary-btn" type="button">Request Leave of Absence</button>
+                </template>
+                <template if:false={hasLeaveItems}>
+                    <div class="leave-empty">
+                        <img src={leaveRequestImageUrl} alt="No Leave Requests" />
+                        <p>You haven’t requested any leaves yet</p>
+                    </div>
+                    <button class="primary-btn" type="button">Apply for Leave</button>
+                </template>
+            </article>
+        </div>
+    </section>
+</template>

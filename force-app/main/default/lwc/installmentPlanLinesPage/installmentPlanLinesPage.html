@@ -1,0 +1,67 @@
+<template>
+    <div class="page">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <button type="button" class="crumb-btn" onclick={handleBackToMasterData}>Master Data</button>
+            <span class="sep">&gt;</span>
+            <button type="button" class="crumb-btn" onclick={handleBackToInstallmentPlans}>Installment Plans</button>
+            <span class="sep">&gt;</span>
+            <button type="button" class="crumb-btn" onclick={handleBackToPlanDetails}>{recordName}</button>
+            <span class="sep">&gt;</span>
+            <span class="crumbCurrent">Installment Lines</span>
+        </nav>
+
+        <header class="pageHeader">
+            <div class="titleBlock">
+                <h1 class="pageTitle">Installment Lines</h1>
+                <p class="pageMeta">{recordName}</p>
+            </div>
+        </header>
+
+        <div class="tabsCard">
+            <div class="tabs">
+                <button type="button" class="tab" onclick={handleBackToPlanDetails}>Details</button>
+                <button type="button" class="tab tab-active" aria-current="page">Installment Lines</button>
+            </div>
+        </div>
+
+        <template if:true={isLoading}>
+            <div class="loading">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={isLoading}>
+            <div class="tableCard">
+                <div class="tableScroll">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Installment</th>
+                                <th>% of Total Applicable</th>
+                                <th>Start Date</th>
+                                <th>Due in Days</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template if:true={hasRows}>
+                                <template for:each={rows} for:item="row">
+                                    <tr key={row.rowKey}>
+                                        <td>Installment {row.order}</td>
+                                        <td>{row.percentage}%</td>
+                                        <td>{row.startDateLabel}</td>
+                                        <td>{row.dueDaysLabel}</td>
+                                    </tr>
+                                </template>
+                            </template>
+                            <template if:false={hasRows}>
+                                <tr>
+                                    <td colspan="4" class="empty">No installment lines found.</td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

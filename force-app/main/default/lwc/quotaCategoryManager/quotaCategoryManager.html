@@ -1,0 +1,364 @@
+<template>
+    <div class="page" onclick={handlePageClick}>
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a href="javascript:void(0)" class="crumbLink" onclick={navigateToMasterData}>Master Data</a>
+            <span class="sep">&gt;</span>
+            <template if:false={isCategoryDetailView}>
+                <span class="crumbCurrent">Quota &amp; Categories</span>
+            </template>
+            <template if:true={isCategoryDetailView}>
+                <a href="javascript:void(0)" class="crumbLink" onclick={handleBackToCategoryList}>Quota &amp; Categories</a>
+                <span class="sep">&gt;</span>
+                <template if:true={selectedCategory}>
+                    <span class="crumbCurrent">{selectedCategory.categoryName}</span>
+                </template>
+                <template if:false={selectedCategory}>
+                    <span class="crumbCurrent">Category Details</span>
+                </template>
+            </template>
+        </nav>
+
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+        </template>
+
+        <template if:false={isLoading}>
+            <template if:false={isCategoryDetailView}>
+                <section class="viewSection">
+                    <header class="pageHeader">
+                        <div class="titleBlock">
+                            <h1 class="pageTitle">Quota &amp; Categories</h1>
+                            <p class="pageMeta">{categoryCountText} - Indian Standards Supported</p>
+                        </div>
+                        <lightning-button
+                            class="primaryActionBtn"
+                            variant="brand"
+                            label="New Category"
+                            onclick={handleNewCategoryPage}>
+                        </lightning-button>
+                    </header>
+
+                    <div class="toolbar">
+                        <lightning-input
+                            class="searchInput"
+                            type="search"
+                            variant="label-hidden"
+                            value={searchText}
+                            onchange={handleSearchChange}
+                            placeholder="Search categories..."
+                            aria-label="Search categories">
+                        </lightning-input>
+                        <button class="filterBtn" type="button" onclick={handleFilterClick} aria-label="Filter categories">
+                            <lightning-icon icon-name="utility:filterList" size="x-small"></lightning-icon>
+                            <span>Filter</span>
+                        </button>
+                    </div>
+
+                    <template if:true={filteredCategories.length}>
+                        <div class="tableCard">
+                            <div class="tableHeader categoryGrid">
+                                <div></div>
+                                <div>Category Name</div>
+                                <div>Category Type</div>
+                                <div>No. of Quotas</div>
+                                <div>Active</div>
+                                <div>Last Modified</div>
+                                <div class="actionsHeader">Actions</div>
+                            </div>
+
+                            <template for:each={filteredCategories} for:item="categoryRow">
+                                <section key={categoryRow.categoryId} class="categorySection">
+                                    <div class="categoryGrid dataRow">
+                                        <div class="toggleCell">
+                                            <lightning-button-icon
+                                                icon-name={categoryRow.toggleIconName}
+                                                variant="bare"
+                                                alternative-text="Toggle category"
+                                                title="Toggle category"
+                                                data-category-id={categoryRow.categoryId}
+                                                onclick={handleToggleCategory}>
+                                            </lightning-button-icon>
+                                        </div>
+                                        <div class="nameCell">
+                                            <button class="nameLink" data-category-id={categoryRow.categoryId} onclick={handleOpenCategoryDetails}>
+                                                {categoryRow.categoryName}
+                                            </button>
+                                        </div>
+                                        <div class="bodyText">{categoryRow.categoryType}</div>
+                                        <div>
+                                            <span class="countBadge">{categoryRow.quotaCountText}</span>
+                                        </div>
+                                        <div>
+                                            <span class={categoryRow.activeClass}>{categoryRow.activeText}</span>
+                                        </div>
+                                        <div class="bodyText">{categoryRow.lastUpdatedText}</div>
+                                        <div class="menuCell">
+                                            <div class="actionsMenuWrap">
+                                                <lightning-button-icon
+                                                    class="threeDotBtn"
+                                                    icon-name="utility:threedots_vertical"
+                                                    variant="bare"
+                                                    size="small"
+                                                    alternative-text="Category actions"
+                                                    title="Category actions"
+                                                    data-category-id={categoryRow.categoryId}
+                                                    onclick={handleCategoryActionButtonClick}>
+                                                </lightning-button-icon>
+                                                <template if:true={categoryRow.isCategoryMenuOpen}>
+                                                    <div class="actionsMenu" onclick={handleMenuContainerClick}>
+                                                        <button class="actionsMenuItem" data-action="view" data-category-id={categoryRow.categoryId} onclick={handleCategoryActionClick}>View</button>
+                                                        <button class="actionsMenuItem" data-action="edit" data-category-id={categoryRow.categoryId} onclick={handleCategoryActionClick}>Edit</button>
+                                                        <button class="actionsMenuItem actionsMenuItemDisabled" type="button" disabled aria-disabled="true">Clone</button>
+                                                        <button class="actionsMenuItem" data-action="addQuota" data-category-id={categoryRow.categoryId} onclick={handleCategoryActionClick}>Add Quota Entry</button>
+                                                        <button class="actionsMenuItem deleteItem" data-action="delete" data-category-id={categoryRow.categoryId} onclick={handleCategoryActionClick}>Delete</button>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <template if:true={categoryRow.isExpanded}>
+                                        <div class="quotaPanel">
+                                            <div class="quotaPanelHead">
+                                                <div class="sectionLabel">Quota Entries</div>
+                                                <lightning-button
+                                                    class="quotaActionBtn"
+                                                    label="Add Quota Entry"
+                                                    variant="neutral"
+                                                    data-category-id={categoryRow.categoryId}
+                                                    onclick={openNewQuotaModal}>
+                                                </lightning-button>
+                                            </div>
+
+                                            <div class="nestedTableCard">
+                                                <div class="tableHeader quotaGrid quotaGridExpanded">
+                                                    <div aria-hidden="true"></div>
+                                                    <div>Quota Name</div>
+                                                    <div>Code</div>
+                                                    <div>Reservation %</div>
+                                                    <div>Active</div>
+                                                    <div>Last Modified</div>
+                                                    <div class="actionsHeader">Actions</div>
+                                                </div>
+
+                                                <template for:each={categoryRow.quotas} for:item="quotaRow">
+                                                    <div key={quotaRow.quotaId} class="quotaGrid quotaGridExpanded quotaRow">
+                                                        <div aria-hidden="true"></div>
+                                                        <div class="bodyText">{quotaRow.quotaName}</div>
+                                                        <div><span class="codeBadge">{quotaRow.code}</span></div>
+                                                        <div class="bodyText">{quotaRow.reservationPercentText}</div>
+                                                        <div><span class={quotaRow.activeClass}>{quotaRow.activeText}</span></div>
+                                                        <div class="bodyText">{quotaRow.lastUpdatedText}</div>
+                                                        <div class={quotaRow.quotaMenuCellClass}>
+                                                            <div class="actionsMenuWrap">
+                                                                <lightning-button-icon
+                                                                    class="threeDotBtn"
+                                                                    icon-name="utility:threedots_vertical"
+                                                                    variant="bare"
+                                                                    size="small"
+                                                                    alternative-text="Quota actions"
+                                                                    title="Quota actions"
+                                                                    data-category-id={categoryRow.categoryId}
+                                                                    data-quota-id={quotaRow.quotaId}
+                                                                    onclick={handleQuotaActionButtonClick}>
+                                                                </lightning-button-icon>
+                                                                <template if:true={quotaRow.isQuotaMenuOpen}>
+                                                                    <div class="actionsMenu" onclick={handleMenuContainerClick}>
+                                                                        <button class="actionsMenuItem" data-action="edit" data-category-id={categoryRow.categoryId} data-quota-id={quotaRow.quotaId} onclick={handleQuotaActionClick}>Edit</button>
+                                                                        <button class="actionsMenuItem actionsMenuItemDisabled" type="button" disabled aria-disabled="true">Clone</button>
+                                                                        <button class="actionsMenuItem deleteItem" data-action="delete" data-category-id={categoryRow.categoryId} data-quota-id={quotaRow.quotaId} onclick={handleQuotaActionClick}>Delete</button>
+                                                                    </div>
+                                                                </template>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </section>
+                            </template>
+                        </div>
+                    </template>
+
+                    <template if:false={filteredCategories.length}>
+                        <div class="emptyState">No categories found.</div>
+                    </template>
+                </section>
+            </template>
+
+            <template if:true={isCategoryDetailView}>
+                <template if:true={selectedCategory}>
+                    <section class="viewSection">
+                        <div class="detailHeader">
+                            <div>
+                                <div class="detailTitleRow">
+                                    <h1 class="pageTitle detailTitle">{selectedCategory.categoryName}</h1>
+                                    <span class={selectedCategory.activeClass}>{selectedCategory.activeText}</span>
+                                </div>
+                                <div class="detailMetaRow">
+                                    <span class="metaText">Created by {selectedCategory.createdByName}</span>
+                                    <span class="metaText">Last modified {selectedCategory.lastUpdatedText}</span>
+                                </div>
+                            </div>
+                            <div class="detailActions">
+                                <lightning-button
+                                    label="Edit"
+                                    icon-name="utility:edit"
+                                    data-action="edit"
+                                    data-category-id={selectedCategory.categoryId}
+                                    onclick={handleCategoryActionClick}>
+                                </lightning-button>
+                                <button class="iconActionBtn" type="button" disabled aria-label="Clone category">
+                                    <lightning-icon icon-name="utility:copy" size="x-small"></lightning-icon>
+                                    <span>Clone</span>
+                                </button>
+                                <div class="actionsMenuWrap">
+                                    <lightning-button-icon
+                                        class="threeDotBtn"
+                                        icon-name="utility:threedots"
+                                        variant="bare"
+                                        alternative-text="More actions"
+                                        title="More actions"
+                                        data-category-id={selectedCategory.categoryId}
+                                        onclick={handleCategoryActionButtonClick}>
+                                    </lightning-button-icon>
+                                    <template if:true={selectedCategory.isCategoryMenuOpen}>
+                                        <div class="actionsMenu" onclick={handleMenuContainerClick}>
+                                            <button class="actionsMenuItem" data-action="view" data-category-id={selectedCategory.categoryId} onclick={handleCategoryActionClick}>View</button>
+                                            <button class="actionsMenuItem" data-action="edit" data-category-id={selectedCategory.categoryId} onclick={handleCategoryActionClick}>Edit</button>
+                                            <button class="actionsMenuItem actionsMenuItemDisabled" type="button" disabled aria-disabled="true">Clone</button>
+                                            <button class="actionsMenuItem" data-action="addQuota" data-category-id={selectedCategory.categoryId} onclick={handleCategoryActionClick}>Add Quota Entry</button>
+                                            <button class="actionsMenuItem deleteItem" data-action="delete" data-category-id={selectedCategory.categoryId} onclick={handleCategoryActionClick}>Delete</button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tabCard">
+                            <div class="detailTabs">
+                                <button
+                                    class={detailsTabClass}
+                                    data-tab="details"
+                                    onclick={handleDetailTabClick}>
+                                    Details
+                                </button>
+                                <button
+                                    class={relatedTabClass}
+                                    data-tab="related"
+                                    onclick={handleDetailTabClick}>
+                                    Related
+                                </button>
+                                <!-- <button class="tabButton tabDisabled" type="button" disabled aria-disabled="true">Usage</button> -->
+                            </div>
+                        </div>
+
+                        <template if:true={isDetailsTab}>
+                            <div class="detailCardGrid">
+                                <section class="detailCard">
+                                    <div class="sectionLabel">Category Information</div>
+                                    <div class="detailGrid">
+                                        <div class="fieldItem">
+                                            <div class="fieldLabel">Category Name</div>
+                                            <div class="fieldValue">{selectedCategory.categoryName}</div>
+                                        </div>
+                                        <div class="fieldItem">
+                                            <div class="fieldLabel">Category Type</div>
+                                            <div class="fieldValue">{selectedCategory.categoryType}</div>
+                                        </div>
+                                        <div class="fieldItem">
+                                            <div class="fieldLabel">Active</div>
+                                            <div class="fieldValue">
+                                                <span class={selectedCategory.activeClass}>{selectedCategory.activeText}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="detailCard">
+                                    <div class="sectionLabel">Metadata</div>
+                                    <div class="detailGrid">
+                                        <div class="fieldItem">
+                                            <div class="fieldLabel">Created By</div>
+                                            <div class="fieldValue">{selectedCategory.createdByName}</div>
+                                        </div>
+                                        <div class="fieldItem">
+                                            <div class="fieldLabel">Created Date</div>
+                                            <div class="fieldValue">{selectedCategory.createdDateText}</div>
+                                        </div>
+                                        <div class="fieldItem">
+                                            <div class="fieldLabel">Last Modified</div>
+                                            <div class="fieldValue">{selectedCategory.lastUpdatedText}</div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </template>
+
+                        <template if:true={isRelatedTab}>
+                            <section class="detailCard">
+                                <div class="quotaPanelHead">
+                                    <div class="sectionLabel">Quota Entries</div>
+                                    <lightning-button
+                                        variant="brand"
+                                        label="Add Quota Entry"
+                                        data-category-id={selectedCategory.categoryId}
+                                        onclick={openNewQuotaModal}>
+                                    </lightning-button>
+                                </div>
+
+                                <div class="nestedTableCard">
+                                    <div class="tableHeader quotaGrid quotaGridRelated relatedQuotaGrid">
+                                        <div aria-hidden="true"></div>
+                                        <div>Quota Name</div>
+                                        <div>Code</div>
+                                        <div>Reservation %</div>
+                                        <div>Active</div>
+                                        <div>Last Modified</div>
+                                        <div class="actionsHeader">Actions</div>
+                                    </div>
+                                    <template for:each={selectedCategory.quotas} for:item="quotaRow">
+                                        <div key={quotaRow.quotaId} class="quotaGrid quotaGridRelated quotaRow relatedQuotaGrid">
+                                            <div aria-hidden="true"></div>
+                                            <div class="bodyText">{quotaRow.quotaName}</div>
+                                            <div><span class="codeBadge">{quotaRow.code}</span></div>
+                                            <div class="bodyText">{quotaRow.reservationPercentText}</div>
+                                            <div><span class={quotaRow.activeClass}>{quotaRow.activeText}</span></div>
+                                            <div class="bodyText">{quotaRow.lastUpdatedText}</div>
+                                            <div class={quotaRow.quotaMenuCellClass}>
+                                                <div class="actionsMenuWrap">
+                                                    <lightning-button-icon
+                                                        class="threeDotBtn"
+                                                        icon-name="utility:threedots_vertical"
+                                                        variant="bare"
+                                                        size="small"
+                                                        alternative-text="Quota actions"
+                                                        title="Quota actions"
+                                                        data-category-id={selectedCategory.categoryId}
+                                                        data-quota-id={quotaRow.quotaId}
+                                                        onclick={handleQuotaActionButtonClick}>
+                                                    </lightning-button-icon>
+                                                    <template if:true={quotaRow.isQuotaMenuOpen}>
+                                                        <div class="actionsMenu" onclick={handleMenuContainerClick}>
+                                                            <button class="actionsMenuItem" data-action="edit" data-category-id={selectedCategory.categoryId} data-quota-id={quotaRow.quotaId} onclick={handleQuotaActionClick}>Edit</button>
+                                                            <button class="actionsMenuItem actionsMenuItemDisabled" type="button" disabled aria-disabled="true">Clone</button>
+                                                            <button class="actionsMenuItem deleteItem" data-action="delete" data-category-id={selectedCategory.categoryId} data-quota-id={quotaRow.quotaId} onclick={handleQuotaActionClick}>Delete</button>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </template>
+                                    <template if:false={selectedCategory.quotas.length}>
+                                        <div class="emptyState">No quota entries found.</div>
+                                    </template>
+                                </div>
+                            </section>
+                        </template>
+                    </section>
+                </template>
+            </template>
+        </template>
+    </div>
+</template>

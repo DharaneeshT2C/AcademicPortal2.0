@@ -1,0 +1,613 @@
+:host {
+  display: block;
+  width: 100%;
+  --primary-color: #3061ff;
+  --secondary-color: #eaefff;
+}
+
+.enrollment-layout {
+  height: calc(100vh - 150px);
+  background: #ffffff;
+  border: 1px solid #e1e5ec;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.skeleton-wrap {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.skeleton-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.skeleton-line {
+  height: 14px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #e7ebf2 0%, #f3f5f9 50%, #e7ebf2 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.1s ease-in-out infinite;
+}
+
+.skeleton-title {
+  width: min(240px, 60%);
+  height: 18px;
+}
+
+.skeleton-button {
+  width: 120px;
+  height: 34px;
+  border-radius: 10px;
+}
+
+.skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.skeleton-card {
+  border-radius: 12px;
+  min-height: 110px;
+  background: linear-gradient(90deg, #e7ebf2 0%, #f3f5f9 50%, #e7ebf2 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.1s ease-in-out infinite;
+}
+
+.skeleton-footer {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.skeleton-footer-text {
+  width: min(360px, 70%);
+}
+
+.skeleton-footer-button {
+  width: 140px;
+  height: 36px;
+  border-radius: 10px;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.left-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 190px);
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.main-content {
+  padding: 24px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.section-header h1 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.25;
+  color: #313848;
+  font-weight: 600;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.date-pill {
+  border: 1px solid #e3d2ad;
+  background: #f5efde;
+  color: #404857;
+  border-radius: 999px;
+  font-size: 14px;
+  line-height: 1.25;
+  padding: 8px 16px;
+  white-space: nowrap;
+}
+
+.help-button {
+  border: 1px solid var(--primary-color, #3061ff);
+  background: #f8f9fc;
+  color: #30384a;
+  font-size: 14px;
+  line-height: 1.25;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.schedule-button {
+  border: 1px solid var(--primary-color, #3061ff);
+  background: #ffffff;
+  color: #30384a;
+  font-size: 14px;
+  line-height: 1.25;
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.program-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.program-card {
+  border: 1px solid #dfe4ec;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 18px 24px;
+}
+
+.program-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.program-header h2 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.25;
+  color: #313848;
+  font-weight: 500;
+}
+
+.program-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.enroll-button {
+  border: 1px solid var(--primary-color, #3061ff);
+  background: var(--primary-color, #3061ff);
+  color: #ffffff;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.25;
+  padding: 8px 16px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.credit-line,
+.status-line {
+  margin: 0 0 6px;
+  font-size: 14px;
+  line-height: 1.25;
+  color: #4f5768;
+}
+
+.status-line {
+  margin-top: 9px;
+  position: relative;
+  padding-left: 28px;
+  color: #4f5768;
+}
+
+.status-line::before {
+  content: "!";
+  position: absolute;
+  left: 0;
+  top: 1px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.status-warning::before {
+  background: #d89c12;
+}
+
+.empty-state {
+  border: 1px dashed #d7dce5;
+  border-radius: 10px;
+  padding: 16px;
+  color: #4b5262;
+  background: #f8f9fc;
+}
+
+.footer-bar {
+  margin-top: auto;
+  border-top: 1px solid #dfe4ec;
+  background: #ffffff;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.footer-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.25;
+  color: #565f70;
+  font-style: italic;
+}
+
+.select-courses-button {
+  border: 1px solid var(--primary-color, #3061ff);
+  background: var(--primary-color, #3061ff);
+  color: #ffffff;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.25;
+  padding: 8px 16px;
+}
+
+.select-courses-button[disabled] {
+  opacity: 0.9;
+  cursor: not-allowed;
+}
+
+.help-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 31, 41, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 30;
+}
+
+.help-modal {
+  width: min(680px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 20px 22px;
+}
+
+.help-modal h3 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 500;
+  color: #363b47;
+}
+
+.help-divider {
+  margin: 14px 0 16px;
+  border-top: 1px solid #cfd5e1;
+}
+
+.field-label {
+  display: block;
+  margin: 0 0 8px;
+  color: #4b5262;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.required::after {
+  content: "*";
+  color: #e54a45;
+}
+
+.description-wrap {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.modal-textarea {
+  width: 100%;
+  border: 1px solid #b6bece;
+  border-radius: 10px;
+  min-height: 140px;
+  resize: vertical;
+  padding: 14px;
+  font-size: 16px;
+  color: #343b4d;
+  font-family: inherit;
+}
+
+.auto-create-button {
+  position: absolute;
+  right: 12px;
+  bottom: 14px;
+  border: 1px solid var(--primary-color, #3061ff);
+  background: #ffffff;
+  color: #3b4761;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.modal-input {
+  width: 100%;
+  margin-bottom: 16px;
+  border: 1px solid #c4cad6;
+  border-radius: 10px;
+  min-height: 42px;
+  padding: 0 12px;
+  font-size: 16px;
+  color: #363b47;
+  background: #ffffff;
+}
+
+.upload-label {
+  margin-bottom: 8px;
+}
+
+.upload-box {
+  border: 1px dashed #c5cbd8;
+  border-radius: 12px;
+  text-align: center;
+  padding: 18px 12px;
+  margin-bottom: 20px;
+}
+
+.upload-box p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.4;
+  color: #555c6b;
+}
+
+.upload-box p + p {
+  margin-top: 4px;
+}
+
+.upload-box span {
+  color: var(--primary-color, #3061ff);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.cancel-button,
+.modal-submit-button {
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.cancel-button {
+  border: 1px solid var(--primary-color, #3061ff);
+  background: #ffffff;
+  color: #38425c;
+}
+
+.modal-submit-button {
+  border: 1px solid var(--primary-color, #3061ff);
+  background: var(--primary-color, #3061ff);
+  color: #ffffff;
+}
+
+@media (max-width: 1200px) {
+  .program-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .program-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 900px) {
+  .section-header,
+  .footer-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .footer-text {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  .enrollment-layout {
+    min-height: auto;
+    border-radius: 12px;
+  }
+
+  .left-panel {
+    min-height: auto;
+    overflow: visible;
+  }
+
+  .main-content {
+    padding: 16px 14px;
+    overflow-y: visible;
+  }
+
+  .section-header {
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .section-header h1 {
+    font-size: 20px;
+    line-height: 1.3;
+  }
+
+  .header-actions,
+  .help-button,
+  .schedule-button {
+    width: 100%;
+  }
+
+  .help-button,
+  .schedule-button,
+  .enroll-button,
+  .select-courses-button {
+    min-height: 42px;
+  }
+
+  .program-list {
+    gap: 12px;
+  }
+
+  .program-card {
+    padding: 14px;
+    border-radius: 10px;
+  }
+
+  .program-header {
+    margin-bottom: 8px;
+    gap: 10px;
+  }
+
+  .program-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .date-pill,
+  .enroll-button {
+    display: block;
+    width: 100%;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .date-pill {
+    padding: 10px 14px;
+    line-height: 1.35;
+  }
+
+  .credit-line {
+    margin-bottom: 4px;
+    line-height: 1.35;
+  }
+
+  .status-line {
+    margin-top: 8px;
+    line-height: 1.35;
+  }
+
+  .footer-bar {
+    padding: 12px 14px 14px;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .select-courses-button {
+    width: 100%;
+  }
+
+  .footer-text {
+    width: 100%;
+    text-align: center;
+    line-height: 1.35;
+  }
+
+  .help-modal {
+    width: calc(100vw - 20px);
+    max-height: calc(100vh - 20px);
+    border-radius: 12px;
+    padding: 14px;
+  }
+
+  .field-label,
+  .modal-textarea,
+  .modal-input,
+  .auto-create-button,
+  .cancel-button,
+  .modal-submit-button {
+    font-size: 14px;
+  }
+
+  .modal-actions {
+    justify-content: stretch;
+  }
+
+  .cancel-button,
+  .modal-submit-button {
+    flex: 1 1 0;
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 12px;
+  }
+
+  .program-card {
+    padding: 12px;
+  }
+
+  .program-header h2,
+  .section-header h1 {
+    line-height: 1.35;
+  }
+
+  .program-header h2 {
+    font-size: 18px;
+  }
+
+  .status-line {
+    padding-left: 24px;
+  }
+
+  .status-line::before {
+    width: 16px;
+    height: 16px;
+    font-size: 11px;
+  }
+
+  .footer-bar {
+    padding: 10px 12px 12px;
+  }
+
+  .help-button,
+  .schedule-button,
+  .enroll-button,
+  .select-courses-button {
+    border-radius: 10px;
+  }
+}

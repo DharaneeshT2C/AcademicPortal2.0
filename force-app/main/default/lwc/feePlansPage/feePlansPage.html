@@ -1,0 +1,158 @@
+<template>
+    <div class="page">
+        <template if:true={notification}>
+            <section class={notification.containerClass} role="alert" aria-live="assertive">
+                <div class="noticeContent">
+                    <div class="noticeIconWrap">
+                        <lightning-icon icon-name={notification.iconName} size="x-small"></lightning-icon>
+                    </div>
+                    <div class="noticeCopy">
+                        <div class="noticeTitle">{notification.title}</div>
+                        <p class="noticeMessage">{notification.message}</p>
+                    </div>
+                </div>
+                <button type="button" class="noticeDismiss" onclick={dismissNotification} aria-label="Dismiss message">
+                    <lightning-icon icon-name="utility:close" size="x-small"></lightning-icon>
+                </button>
+            </section>
+        </template>
+
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <button type="button" class="crumb-btn" onclick={handleGoToMasterData}>Master Data</button>
+            <span class="sep">&gt;</span>
+            <button type="button" class="crumb-btn" onclick={handleGoToFeePlans}>Fee Plans</button>
+        </nav>
+
+        <header class="pageHeader">
+            <div class="titleBlock">
+                <h1 class="pageTitle">Fee Plans</h1>
+                <p class="pageMeta">{itemCountLabel}</p>
+            </div>
+            <lightning-button
+                class="primaryActionBtn"
+                variant="brand"
+                label="New"
+                icon-name="utility:add"
+                onclick={handleNew}>
+            </lightning-button>
+        </header>
+
+        <div class="toolbar">
+            <lightning-combobox
+                class="view-picklist"
+                variant="label-hidden"
+                value={selectedView}
+                options={viewOptions}
+                onchange={handleViewChange}>
+            </lightning-combobox>
+
+            <div class="toolbar-right">
+                <lightning-input
+                    class="searchInput"
+                    type="search"
+                    variant="label-hidden"
+                    placeholder="Search fee plans..."
+                    value={searchTerm}
+                    onchange={handleSearch}
+                    aria-label="Search fee plans">
+                </lightning-input>
+                <button class="filterBtn" type="button" disabled aria-disabled="true" aria-label="Filters">
+                    <lightning-icon icon-name="utility:filterList" size="x-small"></lightning-icon>
+                    <span>Filters</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="tableCard">
+            <template if:true={isLoading}>
+                <div class="loading">
+                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <template if:false={isLoading}>
+                <div class="tableScroll">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Fee Plan Name</th>
+                                <th>Status</th>
+                                <th>Version</th>
+                                <th>Categories</th>
+                                <th>Last Modified</th>
+                                <th>Used in Programme Fees</th>
+                                <th class="actions-col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template if:true={hasRows}>
+                                <template for:each={filteredPlans} for:item="plan">
+                                    <tr key={plan.feeSetId}>
+                                        <td>
+                                            <button class="link-button" data-id={plan.feeSetId} onclick={handleOpenRecord}>{plan.feePlanName}</button>
+                                        </td>
+                                        <td>
+                                            <span class={plan.statusClass}>{plan.statusLabel}</span>
+                                        </td>
+                                        <td class="bodyText">{plan.versionLabel}</td>
+                                        <td class="bodyText">{plan.categoryLabel}</td>
+                                        <td class="bodyText">{plan.lastModifiedLabel}</td>
+                                        <td>
+                                            <span class="usageBadge">{plan.usedInProgrammeFees}</span>
+                                        </td>
+                                        <td class="actions-cell">
+                                            <lightning-button-icon
+                                                class="three-dot-btn"
+                                                icon-name="utility:threedots_vertical"
+                                                variant="bare"
+                                                alternative-text="Actions"
+                                                title="Actions"
+                                                data-id={plan.feeSetId}
+                                                onclick={handleToggleActionMenu}>
+                                            </lightning-button-icon>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </template>
+                            <template if:false={hasRows}>
+                                <tr>
+                                    <td colspan="7" class="empty">No fee plans found.</td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+        </div>
+
+        <template if:true={openActionMenu}>
+            <div class="action-popover action-popover-floating" style={openActionMenu.style} onclick={handleMenuContainerClick}>
+                <button class="action-item" type="button" data-action="view" data-id={openActionMenu.recordId} onclick={handleActionClick}>View</button>
+                <button class={openActionMenu.editButtonClass} type="button" data-action="edit" data-id={openActionMenu.recordId} onclick={handleActionClick} disabled={openActionMenu.isEditDisabled} aria-disabled={openActionMenu.editAriaDisabled}>Edit</button>
+                <button class="action-item" type="button" data-action="clone" data-id={openActionMenu.recordId} onclick={handleActionClick}>Clone</button>
+                <button class="action-item action-item-disabled" type="button" disabled aria-disabled="true">Archive</button>
+                <button class="action-item action-item-danger" type="button" data-action="delete" data-id={openActionMenu.recordId} onclick={handleActionClick}>Delete</button>
+            </div>
+        </template>
+
+        <template if:true={confirmDialog}>
+            <section class="dialogBackdrop" role="presentation">
+                <div class="dialogCard" role="dialog" aria-modal="true" aria-labelledby="fee-plan-confirm-title">
+                    <div class="dialogHeader">
+                        <div class="dialogIconWrap">
+                            <lightning-icon icon-name="utility:warning" size="small"></lightning-icon>
+                        </div>
+                        <div>
+                            <h2 id="fee-plan-confirm-title" class="dialogTitle">{confirmDialog.title}</h2>
+                            <p class="dialogMessage">{confirmDialog.message}</p>
+                        </div>
+                    </div>
+                    <div class="dialogFooter">
+                        <button type="button" class="dialogBtn dialogBtnNeutral" onclick={closeConfirmDialog}>Cancel</button>
+                        <button type="button" class="dialogBtn dialogBtnDanger" onclick={handleConfirmDelete}>Delete Fee Plan</button>
+                    </div>
+                </div>
+            </section>
+        </template>
+    </div>
+</template>

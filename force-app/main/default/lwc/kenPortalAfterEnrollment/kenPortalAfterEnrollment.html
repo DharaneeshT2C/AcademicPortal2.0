@@ -1,0 +1,107 @@
+<template>
+    <section class="after-enrollment-layout">
+        <template if:true={showSkeleton}>
+            <section class="skeleton-wrap" aria-busy="true" aria-live="polite">
+                <div class="skeleton-header-row">
+                    <div class="skeleton-line skeleton-title"></div>
+                    <div class="skeleton-line skeleton-button"></div>
+                </div>
+                <div class="skeleton-banner"></div>
+                <div class="skeleton-table">
+                    <div class="skeleton-line skeleton-table-head"></div>
+                    <div class="skeleton-row"></div>
+                    <div class="skeleton-row"></div>
+                    <div class="skeleton-row"></div>
+                </div>
+            </section>
+        </template>
+
+        <template if:false={showSkeleton}>
+        <div class="page-header">
+            <h1>{semesterHeading}</h1>
+            <div class="page-header-actions">
+                <template if:true={showViewScheduleButton}>
+                    <button type="button" class="header-outline-button" onclick={handleViewEnrollmentSchedule}>View Enrolment Schedule</button>
+                </template>
+                <button type="button" class="help-button">Get Help</button>
+            </div>
+        </div>
+
+        <section class={bannerModel.bannerClass}>
+            <div class="status-copy">
+                <h2>
+                    <span class={bannerModel.iconClass} aria-hidden="true">{bannerModel.iconText}</span>
+                    {bannerModel.title}
+                </h2>
+                <p>{bannerModel.description}</p>
+            </div>
+            <div class="status-actions">
+                <span class={bannerModel.pillClass}>{bannerModel.pillLabel}</span>
+                <template if:true={showEditButton}>
+                    <button type="button" class="edit-button" onclick={handleEditEnrollment}>{editButtonLabel}</button>
+                </template>
+            </div>
+        </section>
+
+        <template if:true={loading}>
+            <lightning-spinner alternative-text="Loading"></lightning-spinner>
+        </template>
+
+        <template if:false={loading}>
+            <template if:true={errorMessage}>
+                <div class="table-card">
+                    <p>{errorMessage}</p>
+                </div>
+            </template>
+
+            <template if:false={errorMessage}>
+                <template if:true={pathwaySections.length}>
+                    <template for:each={pathwaySections} for:item="section">
+                        <section key={section.id} class="pathway-section">
+                            <header class="pathway-header">
+                                <h3>{section.title}</h3>
+                                <p>Mandatory: {section.mandatoryCredits} credits&nbsp;&nbsp;|&nbsp;&nbsp;Electives: {section.electiveCredits} credits</p>
+                            </header>
+
+                            <div class="table-card">
+                                <div class="table-head table-row">
+                                    <template for:each={tableColumns} for:item="column">
+                                        <p key={column.key} class="type-head">
+                                            <span>{column.label}</span>
+                                            <template if:true={column.showChevron}>
+                                                <lightning-icon icon-name="utility:chevrondown" size="xx-small"></lightning-icon>
+                                            </template>
+                                        </p>
+                                    </template>
+                                </div>
+
+                                <template for:each={section.rows} for:item="row">
+                                    <div key={row.id} class="table-row">
+                                        <p>{row.courseName}</p>
+                                        <p>{row.courseCode}</p>
+                                        <p>{row.credits}</p>
+                                        <p>{row.type}</p>
+                                        <p>{row.faculty}</p>
+                                        <p class="status-cell">
+                                            <span class={row.statusClass}>{row.status}</span>
+                                        </p>
+                                    </div>
+                                </template>
+                            </div>
+                        </section>
+                    </template>
+                </template>
+                <template if:false={pathwaySections.length}>
+                    <div class="table-card">
+                        <p>No enrollment details found for this semester.</p>
+                    </div>
+                </template>
+            </template>
+        </template>
+
+        <template if:true={isScheduleModalOpen}>
+            <c-ken-enrollment-schedule onclose={handleCloseScheduleModal}></c-ken-enrollment-schedule>
+        </template>
+        </template>
+    </section>
+</template>

@@ -1,0 +1,8 @@
+:host { font-family: var(--font-family, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif); }
+.page { width: 100%; }
+.page-title { font-size: 20px; font-weight: 600; margin-bottom: 24px; letter-spacing: -0.02em; }
+.coming-soon-card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 80px 40px; text-align: center; box-shadow: var(--shadow-sm); }
+.coming-icon { margin-bottom: 20px; }
+.coming-icon c-icon { color: var(--primary); opacity: 0.4; }
+.coming-title { font-size: 24px; font-weight: 700; margin-bottom: 10px; letter-spacing: -0.02em; }
+.coming-desc { font-size: 14px; color: var(--text-secondary); max-width: 360px; margin: 0 auto; line-height: 1.6; }

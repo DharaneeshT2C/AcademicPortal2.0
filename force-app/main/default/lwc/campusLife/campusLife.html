@@ -1,0 +1,143 @@
+<template>
+    <div class="page">
+        <h2 class="page-title">Campus Life</h2>
+        <div class="campus-grid">
+            <div class="card events-card">
+                <div class="card-header">
+                    <h3 class="section-title">Featured Events</h3>
+                    <button class="btn-outline" onclick={handleEvents}>View More</button>
+                </div>
+                <div class="events-row">
+                    <template for:each={formattedEvents} for:item="event">
+                        <div key={event.id} class="event-card">
+                            <div class="event-thumb">
+                                <img src={event.imgUrl} alt="Event" class="event-img" />
+                                <span class="event-type-badge">{event.type}</span>
+                            </div>
+                            <div class="event-content">
+                                <h4 class="event-title">{event.title}</h4>
+                                <p class="event-mode"><c-icon name="circle" size="8"></c-icon> {event.mode}</p>
+                                <div class="event-meta-row">
+                                    <span class="event-chip"><c-icon name="calendar_today" size="12"></c-icon> {event.date}</span>
+                                    <span class="event-chip"><c-icon name="schedule" size="12"></c-icon> {event.time}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <div class="card clubs-card">
+                <h3 class="section-title">Discover Clubs</h3>
+                <div class="club-list">
+                    <template for:each={data.clubs} for:item="club">
+                        <div key={club.id} class="club-list-item" onclick={handleClubs}>
+                            <img src={club.thumb} alt={club.name} class="club-thumb" />
+                            <span class="club-label">{club.name}</span>
+                            <c-icon name="arrow_forward_ios" size="14"></c-icon>
+                        </div>
+                    </template>
+                </div>
+                <button class="btn-primary full-width" onclick={handleClubs}>Explore Clubs</button>
+            </div>
+
+            <div class="card gatepass-card">
+                <div class="card-header">
+                    <h3 class="section-title">Gate Pass</h3>
+                    <button class="btn-outline" onclick={handleGatePass}>View All</button>
+                </div>
+                <div class="gp-list">
+                    <div class="gp-item" onclick={handleGatePass}>
+                        <div class="gp-info"><span class="gp-count">{data.gatePass.activeCount}</span> Active Gate Passes</div>
+                        <c-icon name="arrow_forward_ios" size="16"></c-icon>
+                    </div>
+                    <div class="gp-item" onclick={handleGatePass}>
+                        <div class="gp-info"><span class="gp-count">10+</span> Expired Passes</div>
+                        <c-icon name="arrow_forward_ios" size="16"></c-icon>
+                    </div>
+                    <div class="gp-item" onclick={handleGatePass}>
+                        <div class="gp-info"><span class="gp-count">{data.gatePass.upcomingCount}</span> More Upcoming Passes</div>
+                        <c-icon name="arrow_forward_ios" size="16"></c-icon>
+                    </div>
+                    <div class="gp-item" onclick={handleGatePass}>
+                        <div class="gp-info"><span class="gp-count">{data.gatePass.notUsedCount}</span> Passes Not Used</div>
+                        <c-icon name="arrow_forward_ios" size="16"></c-icon>
+                    </div>
+                </div>
+                <button class="btn-primary full-width" onclick={handleCreateGatePass}>Create a Gate Pass</button>
+            </div>
+
+            <div class="card hostel-card">
+                <h3 class="section-title">Hostel Details</h3>
+                <div class="room-row">
+                    <span class="room-number">{data.hostel.roomNo}</span>
+                    <span class="room-type-badge">{data.hostel.type}</span>
+                </div>
+                <p class="room-location"><c-icon name="location_on" size="16"></c-icon> {data.hostel.building}</p>
+                <div class="hostel-people">
+                    <div class="people-section">
+                        <h4 class="people-label">Roommates</h4>
+                        <div class="avatar-stack">
+                            <template for:each={roommateAvatars} for:item="av">
+                                <img key={av} src={av} alt="Roommate" class="avatar-circle-img" />
+                            </template>
+                        </div>
+                    </div>
+                    <div class="people-section">
+                        <h4 class="people-label">Warden</h4>
+                        <p class="warden-name">{data.hostel.warden.name}</p>
+                        <p class="warden-email"><c-icon name="email" size="14"></c-icon> {data.hostel.warden.email}</p>
+                    </div>
+                </div>
+                <button class="btn-primary full-width" onclick={handleHostel}>View Details</button>
+            </div>
+
+            <div class="card mess-card">
+                <h3 class="section-title">Mess Details</h3>
+                <div class="mess-grid">
+                    <div class="meal-item">
+                        <div class="meal-icon-wrap meal-breakfast"><c-icon name="free_breakfast" size="22"></c-icon></div>
+                        <div class="meal-info">
+                            <strong>Breakfast</strong>
+                            <span>{data.mess.breakfast.time}</span>
+                        </div>
+                    </div>
+                    <div class="meal-item">
+                        <div class="meal-icon-wrap meal-lunch"><c-icon name="lunch_dining" size="22"></c-icon></div>
+                        <div class="meal-info">
+                            <strong>Lunch</strong>
+                            <span>{data.mess.lunch.time}</span>
+                        </div>
+                    </div>
+                    <div class="meal-item">
+                        <div class="meal-icon-wrap meal-snacks"><c-icon name="local_cafe" size="22"></c-icon></div>
+                        <div class="meal-info">
+                            <strong>Snacks</strong>
+                            <span>{data.mess.snacks.time}</span>
+                        </div>
+                    </div>
+                    <div class="meal-item">
+                        <div class="meal-icon-wrap meal-dinner"><c-icon name="dinner_dining" size="22"></c-icon></div>
+                        <div class="meal-info">
+                            <strong>Dinner</strong>
+                            <span>{data.mess.dinner.time}</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn-outline full-width" onclick={handleMess}>View Details</button>
+            </div>
+
+            <div class="library-card" onclick={handleLibrary}>
+                <div class="library-dots"></div>
+                <div class="library-circle"></div>
+                <div class="library-arrow"><c-icon name="arrow_forward" size="20"></c-icon></div>
+                <div class="library-illustration">
+                    <c-icon name="auto_stories" size="72"></c-icon>
+                </div>
+                <h3 class="library-title">Library Corner</h3>
+                <p class="library-desc">Explore Knowledge, Borrow Resources, and Grow Your Mind</p>
+                <button class="library-cta" onclick={handleLibrary}>Explore &rarr;</button>
+            </div>
+        </div>
+    </div>
+</template>

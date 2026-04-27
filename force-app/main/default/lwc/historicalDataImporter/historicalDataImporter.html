@@ -1,0 +1,77 @@
+<template>
+    <template if:true={isThemeLoading}>
+        <div class="master-layout skeleton-shell" aria-busy="true">
+            <div class="master-shell">
+                <div class="master-header">
+                    <div class="master-hero skeleton-hero">
+                        <div class="skeleton-icon skeleton-shimmer" aria-hidden="true"></div>
+                        <div class="skeleton-hero-text">
+                            <div class="skeleton-line skeleton-shimmer w-40"></div>
+                            <div class="skeleton-line skeleton-shimmer w-65"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="master-body skeleton-body">
+                    <div class="skeleton-tabs" role="presentation">
+                        <div class="skeleton-pill skeleton-shimmer w-20"></div>
+                        <div class="skeleton-pill skeleton-shimmer w-22"></div>
+                    </div>
+                    <div class="skeleton-content skeleton-shimmer"></div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template if:false={isThemeLoading}>
+        <div class="master-layout">
+            <div class="master-shell">
+                <div class="master-header">
+                <div class="master-hero">
+                    <div class="hero-icon" aria-hidden="true">
+                        <lightning-icon icon-name="utility:date_input" size="small"></lightning-icon>
+                    </div>
+                    <div class="hero-copy">
+                            <div class="hero-title">Historical Data Import</div>
+                            <div class="hero-subtitle">Import historical course offerings, participant enrollments, and exam results.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="master-body">
+                    <div class="tab-list" role="tablist" aria-label="Historical data import sections">
+                        <template for:each={tabs} for:item="tab">
+                            <button
+                                key={tab.id}
+                                type="button"
+                                class={tab.className}
+                                data-tab={tab.id}
+                                data-label={tab.label}
+                                role="tab"
+                                aria-selected={tab.ariaSelected}
+                                tabindex={tab.tabIndex}
+                                onclick={handleTabClick}
+                            >
+                                <span class="tab-label">{tab.label}</span>
+                            </button>
+                        </template>
+                    </div>
+                    <div class="tab-panels">
+                        <template if:true={renderActiveTab}>
+                            <section class="tab-panel" role="tabpanel" if:true={isCourseOfferingTab}>
+                                <c-course-offering-importer onrefreshimport={handleRefreshImport}></c-course-offering-importer>
+                            </section>
+                            <section class="tab-panel" role="tabpanel" if:true={isParticipantTab}>
+                                <c-course-offering-participant-importer onrefreshimport={handleRefreshImport}></c-course-offering-participant-importer>
+                            </section>
+                            <section class="tab-panel" role="tabpanel" if:true={isExamCourseResultTab}>
+                                <c-exam-course-result-importer onrefreshimport={handleRefreshImport}></c-exam-course-result-importer>
+                            </section>
+                            <section class="tab-panel" role="tabpanel" if:true={isExamTermResultTab}>
+                                <c-exam-term-result-importer onrefreshimport={handleRefreshImport}></c-exam-term-result-importer>
+                            </section>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+</template>

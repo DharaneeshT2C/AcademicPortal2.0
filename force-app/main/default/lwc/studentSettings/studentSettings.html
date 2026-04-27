@@ -1,0 +1,623 @@
+<template>
+    <template if:true={isFacultyRole}>
+        <div class="student-settings-page faculty-settings-page">
+            <section class="settings-section faculty-profile-section">
+                <div class="faculty-profile-row">
+                    <div class="faculty-avatar-wrap">
+                        <template lwc:if={profilePhotoUrl}>
+                            <img src={profilePhotoUrl} alt="Faculty profile" class="faculty-avatar-img" />
+                        </template>
+                        <template lwc:else>
+                            <div class="faculty-avatar-fallback">{facultyProfileInitials}</div>
+                        </template>
+                        <button type="button" class="edit-icon-btn faculty-edit-photo-btn" onclick={handleEditPhoto} aria-label="Edit profile picture">
+                            <lightning-icon icon-name="utility:edit" size="xx-small"></lightning-icon>
+                        </button>
+                    </div>
+
+                    <div class="faculty-profile-meta">
+                        <h2 class="faculty-name">{facultyFormData.profileName}</h2>
+                        <p class="faculty-id">{facultyFormData.profileId}</p>
+
+                        <div class="faculty-meta-grid">
+                            <div class="faculty-meta-item">
+                                <p>Department</p>
+                                <span>{facultyFormData.department}</span>
+                            </div>
+                            <div class="faculty-meta-item">
+                                <p>Role</p>
+                                <span>{facultyFormData.role}</span>
+                            </div>
+                            <div class="faculty-meta-item">
+                                <p>Specialisation</p>
+                                <span>{facultyFormData.specialisation}</span>
+                            </div>
+                            <div class="faculty-meta-item">
+                                <p>Status</p>
+                                <span class="faculty-status-pill">{facultyFormData.status}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="settings-section faculty-details-section">
+                <h2 class="section-title">Personal Details</h2>
+                <div class="section-body faculty-section-body">
+                    <div class="faculty-divider"></div>
+
+                    <div class="faculty-block">
+                        <h3 class="faculty-block-title">Bio</h3>
+                        <div class="form-grid form-grid-4 basic-fields-grid">
+                            <div class="basic-field">
+                                <label class="basic-label" for="idCardName">ID card name</label>
+                                <input id="idCardName" class="basic-input" type="text" value={facultyFormData.idCardName} data-field="idCardName" oninput={handleInputChange} />
+                            </div>
+                            <div class="basic-field">
+                                <label class="basic-label" for="facultyGender">Gender</label>
+                                <input id="facultyGender" class="basic-input" type="text" value={facultyFormData.gender} data-field="gender" oninput={handleInputChange} />
+                            </div>
+                            <div class="basic-field">
+                                <label class="basic-label" for="facultyDob">Date of birth</label>
+                                <input id="facultyDob" class="basic-input" type="text" value={facultyFormData.dateOfBirth} data-field="dateOfBirth" oninput={handleInputChange} />
+                            </div>
+                            <div class="basic-field">
+                                <label class="basic-label" for="facultyNationality">Nationality</label>
+                                <input id="facultyNationality" class="basic-input" type="text" value={facultyFormData.nationality} data-field="nationality" oninput={handleInputChange} />
+                            </div>
+                            <div class="basic-field">
+                                <label class="basic-label" for="countryOfResidence">Country of residence</label>
+                                <input id="countryOfResidence" class="basic-input" type="text" value={facultyFormData.countryOfResidence} data-field="countryOfResidence" oninput={handleInputChange} />
+                            </div>
+                            <div class="basic-field">
+                                <label class="basic-label" for="birthPlace">Birth place</label>
+                                <input id="birthPlace" class="basic-input" type="text" value={facultyFormData.birthPlace} data-field="birthPlace" oninput={handleInputChange} />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="faculty-divider"></div>
+
+                    <div class="faculty-block">
+                        <div class="form-grid form-grid-4 basic-fields-grid">
+                            <div class="basic-field">
+                                <label class="basic-label" for="facultyPhoneNumber">Phone number</label>
+                                <div id="facultyPhoneNumber" class="request-row request-row-basic">
+                                    <span>{facultyFormData.phoneNumber}</span>
+                                    <button type="button" class="request-link" onclick={openPhoneEditModal}>Edit</button>
+                                </div>
+                                <label class="faculty-check-wrap">
+                                    <input type="checkbox" checked={facultyFormData.hidePhoneNumber} data-field="hidePhoneNumber" onchange={handleFacultyToggleChange} />
+                                    <span>Hide my phone number</span>
+                                </label>
+                            </div>
+
+                            <div class="basic-field">
+                                <label class="basic-label" for="facultyEmailId">Email ID</label>
+                                <div id="facultyEmailId" class="request-row request-row-basic">
+                                    <span>{facultyFormData.emailId}</span>
+                                    <button type="button" class="request-link" onclick={openEmailEditModal}>Edit</button>
+                                </div>
+                                <label class="faculty-check-wrap">
+                                    <input type="checkbox" checked={facultyFormData.hideEmailId} data-field="hideEmailId" onchange={handleFacultyToggleChange} />
+                                    <span>Hide my email id</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="faculty-divider"></div>
+
+                    <div class="faculty-block">
+                        <div class="form-grid form-grid-4 basic-fields-grid">
+                            <div class="basic-field">
+                                <label class="basic-label" for="facultyPassword">Password</label>
+                                <div id="facultyPassword" class="request-row request-row-basic">
+                                    <span>{facultyFormData.password}</span>
+                                    <button type="button" class="request-link" onclick={openPasswordModal}>Edit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="faculty-divider"></div>
+
+                    <div class="faculty-block">
+                        <h3 class="faculty-block-title">Health Card</h3>
+                        <div class="form-grid form-grid-4 basic-fields-grid">
+                            <div class="basic-field">
+                                <label class="basic-label" for="facultyBloodGroup">Blood group</label>
+                                <input id="facultyBloodGroup" class="basic-input" type="text" value={facultyFormData.bloodGroup} data-field="bloodGroup" oninput={handleInputChange} />
+                            </div>
+                            <div class="basic-field">
+                                <label class="basic-label" for="facultyAllergies">Allergies</label>
+                                <input id="facultyAllergies" class="basic-input" type="text" value={facultyFormData.allergies} data-field="allergies" oninput={handleInputChange} />
+                            </div>
+                            <div class="basic-field">
+                                <label class="basic-label" for="facultyOthers">Others</label>
+                                <input id="facultyOthers" class="basic-input" type="text" value={facultyFormData.others} data-field="others" oninput={handleInputChange} />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="faculty-divider"></div>
+
+                    <div class="faculty-block">
+                        <h3 class="faculty-block-title">Permanent Address</h3>
+                        <div class="form-grid form-grid-4 basic-fields-grid">
+                            <div class="basic-field">
+                                <label class="basic-label" for="facultyPermanentHouse">House/flat no</label>
+                                <input id="facultyPermanentHouse" class="basic-input" type="text" value={facultyFormData.permanentHouse} data-field="permanentHouse" oninput={handleInputChange} />
+                            </div>
+                            <div class="basic-field">
+                                <label class="basic-label" for="facultyPermanentStreet">Street</label>
+                                <input id="facultyPermanentStreet" class="basic-input" type="text" value={facultyFormData.permanentStreet} data-field="permanentStreet" oninput={handleInputChange} />
+                            </div>
+                            <div class="basic-field">
+                                <label class="basic-label" for="facultyPermanentSuburb">Suburb</label>
+                                <input id="facultyPermanentSuburb" class="basic-input" type="text" value={facultyFormData.permanentSuburb} data-field="permanentSuburb" oninput={handleInputChange} />
+                            </div>
+                            <div class="basic-field">
+                                <label class="basic-label" for="facultyPermanentCountry">Country</label>
+                                <input id="facultyPermanentCountry" class="basic-input" type="text" value={facultyFormData.permanentCountry} data-field="permanentCountry" oninput={handleInputChange} />
+                            </div>
+                            <div class="basic-field">
+                                <label class="basic-label" for="facultyPermanentPincode">Pincode</label>
+                                <input id="facultyPermanentPincode" class="basic-input" type="text" value={facultyFormData.permanentPincode} data-field="permanentPincode" oninput={handleInputChange} />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="faculty-divider"></div>
+
+                    <div class="faculty-block">
+                        <h3 class="faculty-block-title">Country address</h3>
+                        <div class="form-grid form-grid-4 basic-fields-grid">
+                            <div class="basic-field">
+                                <label class="basic-label" for="facultyCurrentHouse">House/flat no</label>
+                                <input id="facultyCurrentHouse" class="basic-input" type="text" value={facultyFormData.currentHouse} data-field="currentHouse" oninput={handleInputChange} />
+                            </div>
+                            <div class="basic-field">
+                                <label class="basic-label" for="facultyCurrentStreet">Street</label>
+                                <input id="facultyCurrentStreet" class="basic-input" type="text" value={facultyFormData.currentStreet} data-field="currentStreet" oninput={handleInputChange} />
+                            </div>
+                            <div class="basic-field">
+                                <label class="basic-label" for="facultyCurrentSuburb">Suburb</label>
+                                <input id="facultyCurrentSuburb" class="basic-input" type="text" value={facultyFormData.currentSuburb} data-field="currentSuburb" oninput={handleInputChange} />
+                            </div>
+                            <div class="basic-field">
+                                <label class="basic-label" for="facultyCurrentCountry">Country</label>
+                                <input id="facultyCurrentCountry" class="basic-input" type="text" value={facultyFormData.currentCountry} data-field="currentCountry" oninput={handleInputChange} />
+                            </div>
+                            <div class="basic-field">
+                                <label class="basic-label" for="facultyCurrentPincode">Pincode</label>
+                                <input id="facultyCurrentPincode" class="basic-input" type="text" value={facultyFormData.currentPincode} data-field="currentPincode" oninput={handleInputChange} />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="faculty-divider"></div>
+
+                    <div class="faculty-block">
+                        <h3 class="faculty-block-title">Aadhaar details</h3>
+                        <div class="form-grid form-grid-4 basic-fields-grid">
+                            <div class="basic-field">
+                                <label class="basic-label" for="facultyAadharNumber">Aadhaar number</label>
+                                <input id="facultyAadharNumber" class="basic-input" type="text" value={facultyFormData.aadharNumber} data-field="aadharNumber" oninput={handleInputChange} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="footer-actions faculty-footer-actions">
+                <button type="button" class="request-outline-btn" onclick={openDiscardConfirmModal}>Discard Changes</button>
+                <button type="button" class="save-btn" onclick={handleSubmitForReview}>Submit For Review</button>
+            </div>
+
+            <template if:true={isPhoneEditModalOpen}>
+                <div class="settings-modal-backdrop" onclick={handleBackdropClose}>
+                    <div class="settings-modal-card" onclick={stopModalClose}>
+                        <h3 class="settings-modal-title">Edit phone number</h3>
+                        <input
+                            class="settings-modal-input"
+                            type="text"
+                            placeholder="+91 Enter new phone number"
+                            value={editPhoneValue}
+                            oninput={handlePhoneValueChange}
+                        />
+                        <div class="settings-modal-actions">
+                            <button type="button" class="request-outline-btn" onclick={closeModal}>Cancel</button>
+                            <button type="button" class="save-btn settings-action-btn" onclick={handleVerifyPhone}>Verify</button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <template if:true={isOtpModalOpen}>
+                <div class="settings-modal-backdrop" onclick={handleBackdropClose}>
+                    <div class="settings-modal-card settings-modal-card-otp" onclick={stopModalClose}>
+                        <h3 class="settings-modal-title otp-title">Enter OTP</h3>
+                        <p class="settings-modal-subtitle">A 4-digit pin has been sent to your phone number</p>
+                        <div class="otp-input-row">
+                            <template for:each={otpBoxes} for:item="otp">
+                                <input
+                                    key={otp.id}
+                                    class="otp-box"
+                                    type="text"
+                                    maxlength="1"
+                                    value={otp.value}
+                                    data-index={otp.index}
+                                    oninput={handleOtpInput}
+                                    onkeydown={handleOtpKeydown}
+                                />
+                            </template>
+                        </div>
+                        <p class="otp-resend-text">
+                            Didn’t receive OTP?
+                            <button type="button" class="otp-resend-link" onclick={handleResendOtp}>Click to resend.</button>
+                        </p>
+                        <div class="settings-modal-actions">
+                            <button type="button" class="request-outline-btn" onclick={closeModal}>Cancel</button>
+                            <button type="button" class="save-btn settings-action-btn" onclick={handleVerifyOtp}>Verify</button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <template if:true={isEmailEditModalOpen}>
+                <div class="settings-modal-backdrop" onclick={handleBackdropClose}>
+                    <div class="settings-modal-card settings-modal-card-email" onclick={stopModalClose}>
+                        <h3 class="settings-modal-title">Edit email ID</h3>
+                        <input
+                            class="settings-modal-input"
+                            type="email"
+                            placeholder="Enter new email"
+                            value={editEmailValue}
+                            oninput={handleEmailValueChange}
+                        />
+                        <div class="settings-modal-actions">
+                            <button type="button" class="request-outline-btn" onclick={closeModal}>Cancel</button>
+                            <button type="button" class="save-btn settings-action-btn" onclick={handleVerifyEmail}>Verify</button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <template if:true={isPasswordModalOpen}>
+                <div class="settings-modal-backdrop" onclick={handleBackdropClose}>
+                    <div class="settings-modal-card settings-modal-card-password" onclick={stopModalClose}>
+                        <h3 class="settings-modal-title">Change password</h3>
+
+                        <label class="settings-modal-field-label" for="currentPasswordInput">Current password</label>
+                        <div class="settings-password-input-wrap">
+                            <input
+                                id="currentPasswordInput"
+                                class="settings-modal-input"
+                                type={currentPasswordType}
+                                placeholder="Enter current password"
+                                value={currentPasswordInput}
+                                oninput={handleCurrentPasswordChange}
+                            />
+                            <button type="button" class="settings-eye-btn" onclick={toggleCurrentPasswordVisibility} aria-label="Toggle current password visibility">
+                                <lightning-icon icon-name={currentPasswordIcon} size="x-small"></lightning-icon>
+                            </button>
+                        </div>
+
+                        <label class="settings-modal-field-label" for="newPasswordInput">New password</label>
+                        <div class="settings-password-input-wrap">
+                            <input
+                                id="newPasswordInput"
+                                class="settings-modal-input"
+                                type={newPasswordType}
+                                placeholder="Enter new password"
+                                value={newPasswordInput}
+                                oninput={handleNewPasswordChange}
+                            />
+                            <button type="button" class="settings-eye-btn" onclick={toggleNewPasswordVisibility} aria-label="Toggle new password visibility">
+                                <lightning-icon icon-name={newPasswordIcon} size="x-small"></lightning-icon>
+                            </button>
+                        </div>
+
+                        <div class="settings-modal-actions">
+                            <button type="button" class="request-outline-btn" onclick={closeModal}>Cancel</button>
+                            <button type="button" class="save-btn settings-action-btn" onclick={handleUpdatePassword}>Done</button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <template if:true={isSuccessModalOpen}>
+                <div class="settings-modal-backdrop" onclick={handleBackdropClose}>
+                    <div class="settings-modal-card settings-modal-card-success" onclick={stopModalClose}>
+                        <div class="settings-success-icon-wrap">
+                            <span class="settings-success-check">✓</span>
+                        </div>
+                        <h3 class="settings-success-title">{successTitle}</h3>
+                        <p class="settings-success-subtitle">{successMessage}</p>
+                    </div>
+                </div>
+            </template>
+
+            <template if:true={isDiscardConfirmModalOpen}>
+                <div class="settings-modal-backdrop" onclick={handleBackdropClose}>
+                    <div class="settings-modal-card settings-modal-card-discard" onclick={stopModalClose}>
+                        <button type="button" class="discard-close-btn" onclick={closeModal} aria-label="Close discard confirmation">×</button>
+                        <h3 class="settings-modal-title discard-title">Are you sure your want to discard the changes done?</h3>
+                        <div class="discard-actions-row">
+                            <button type="button" class="request-outline-btn discard-action-btn" onclick={closeModal}>Cancel</button>
+                            <button type="button" class="save-btn discard-action-btn" onclick={confirmFacultyDiscard}>Discard Changes</button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </template>
+
+    <template if:false={isFacultyRole}>
+        <div class="student-settings-page">
+            <section class="settings-section">
+                <h2 class="section-title">Basic Details</h2>
+
+                <div class="section-body">
+                    <div class="profile-row">
+                        <div class="profile-photo-wrap" aria-hidden="true">{profileInitials}</div>
+                        <div class="profile-meta">
+                            <p class="photo-title">Edit profile picture</p>
+                            <p class="photo-hint">Max: 120px | 12mb</p>
+                            <button type="button" class="edit-icon-btn" onclick={handleEditPhoto} aria-label="Edit profile picture">
+                                <lightning-icon icon-name="utility:edit" size="xx-small"></lightning-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-grid form-grid-3 basic-fields-grid">
+                        <div class="basic-field">
+                            <label class="basic-label" for="firstName">First Name</label>
+                            <input
+                                id="firstName"
+                                class="basic-input"
+                                type="text"
+                                value={formData.firstName}
+                                data-field="firstName"
+                                oninput={handleInputChange}
+                            />
+                        </div>
+
+                        <div class="basic-field">
+                            <label class="basic-label" for="lastName">Last Name</label>
+                            <input
+                                id="lastName"
+                                class="basic-input"
+                                type="text"
+                                value={formData.lastName}
+                                data-field="lastName"
+                                oninput={handleInputChange}
+                            />
+                        </div>
+
+                        <div class="basic-field">
+                            <label class="basic-label" for="dateOfBirth">Date of Birth</label>
+                            <div class="basic-input with-icon">
+                                <input
+                                    id="dateOfBirth"
+                                    class="plain-input"
+                                    type="text"
+                                    value={formData.dateOfBirth}
+                                    data-field="dateOfBirth"
+                                    oninput={handleInputChange}
+                                />
+                                <lightning-icon icon-name="utility:event" size="x-small"></lightning-icon>
+                            </div>
+                        </div>
+
+                        <div class="basic-field">
+                            <label class="basic-label" for="gender">Gender</label>
+                            <div class="select-wrap">
+                                <select
+                                    id="gender"
+                                    class="basic-input plain-select"
+                                    data-field="gender"
+                                    onchange={handleInputChange}
+                                >
+                                    <template for:each={genderOptions} for:item="option">
+                                        <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="basic-field">
+                            <label class="basic-label" for="emailReadonly">Email</label>
+                            <div id="emailReadonly" class="request-row request-row-basic">
+                                <span>{formData.email}</span>
+                                <button type="button" class="request-link" data-target="Email" onclick={handleRequestChange}>
+                                    Request to Change
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="basic-field">
+                            <label class="basic-label" for="phoneReadonly">Phone Number</label>
+                            <div id="phoneReadonly" class="request-row request-row-basic">
+                                <span>{formData.phone}</span>
+                                <button type="button" class="request-link" data-target="Phone Number" onclick={handleRequestChange}>
+                                    Request to Change
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="settings-section">
+                <h2 class="section-title">Medical Details</h2>
+                <div class="section-body">
+                    <div class="form-grid form-grid-2 basic-fields-grid">
+                        <div class="basic-field">
+                            <label class="basic-label" for="bloodGroup">Blood Group</label>
+                            <div class="select-wrap">
+                                <select
+                                    id="bloodGroup"
+                                    class="basic-input plain-select"
+                                    data-field="bloodGroup"
+                                    onchange={handleInputChange}
+                                >
+                                    <template for:each={bloodGroupOptions} for:item="option">
+                                        <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="basic-field">
+                            <label class="basic-label" for="allergies">Allergies</label>
+                            <div class="select-wrap">
+                                <select
+                                    id="allergies"
+                                    class="basic-input plain-select"
+                                    data-field="allergies"
+                                    onchange={handleInputChange}
+                                >
+                                    <template for:each={allergyOptions} for:item="option">
+                                        <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="settings-section">
+                <h2 class="section-title">Permanent Address</h2>
+                <div class="section-body">
+                    <div class="form-grid form-grid-3 basic-fields-grid">
+                        <div class="basic-field">
+                            <label class="basic-label" for="permanentHouse">House/Flat No</label>
+                            <input id="permanentHouse" class="basic-input" type="text" value={formData.permanentHouse} data-field="permanentHouse" oninput={handleInputChange} />
+                        </div>
+                        <div class="basic-field">
+                            <label class="basic-label" for="permanentStreet">Street</label>
+                            <input id="permanentStreet" class="basic-input" type="text" value={formData.permanentStreet} data-field="permanentStreet" oninput={handleInputChange} />
+                        </div>
+                        <div class="basic-field">
+                            <label class="basic-label" for="permanentSuburb">Suburb</label>
+                            <input id="permanentSuburb" class="basic-input" type="text" value={formData.permanentSuburb} data-field="permanentSuburb" oninput={handleInputChange} />
+                        </div>
+                        <div class="basic-field">
+                            <label class="basic-label" for="permanentCity">City</label>
+                            <div class="select-wrap">
+                                <select id="permanentCity" class="basic-input plain-select" data-field="permanentCity" onchange={handleInputChange}>
+                                    <template for:each={permanentCityOptions} for:item="option">
+                                        <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="basic-field">
+                            <label class="basic-label" for="permanentPincode">Pincode</label>
+                            <input id="permanentPincode" class="basic-input" type="text" value={formData.permanentPincode} data-field="permanentPincode" oninput={handleInputChange} />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="settings-section">
+                <div class="section-header">
+                    <h2 class="section-title">Current Address</h2>
+                    <button type="button" class="request-outline-btn" data-target="Current Address" onclick={handleRequestChange}>
+                        Request to Change
+                    </button>
+                </div>
+                <div class="section-body">
+                    <div class="form-grid form-grid-3 basic-fields-grid">
+                        <div class="basic-field">
+                            <label class="basic-label" for="currentHouse">House/Flat No</label>
+                            <input id="currentHouse" class="basic-input" type="text" value={formData.currentHouse} data-field="currentHouse" oninput={handleInputChange} />
+                        </div>
+                        <div class="basic-field">
+                            <label class="basic-label" for="currentStreet">Street</label>
+                            <input id="currentStreet" class="basic-input" type="text" value={formData.currentStreet} data-field="currentStreet" oninput={handleInputChange} />
+                        </div>
+                        <div class="basic-field">
+                            <label class="basic-label" for="currentSuburb">Suburb</label>
+                            <input id="currentSuburb" class="basic-input" type="text" value={formData.currentSuburb} data-field="currentSuburb" oninput={handleInputChange} />
+                        </div>
+                        <div class="basic-field">
+                            <label class="basic-label" for="currentCity">City</label>
+                            <div class="select-wrap">
+                                <select id="currentCity" class="basic-input plain-select" data-field="currentCity" onchange={handleInputChange}>
+                                    <template for:each={currentCityOptions} for:item="option">
+                                        <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="basic-field">
+                            <label class="basic-label" for="currentPincode">Pincode</label>
+                            <input id="currentPincode" class="basic-input" type="text" value={formData.currentPincode} data-field="currentPincode" oninput={handleInputChange} />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="settings-section">
+                <div class="section-header">
+                    <h2 class="section-title">Guardian Details</h2>
+                    <button type="button" class="request-outline-btn" data-target="Guardian Details" onclick={handleRequestChange}>
+                        Request to Change
+                    </button>
+                </div>
+                <div class="section-body">
+                    <div class="form-grid form-grid-3 basic-fields-grid">
+                        <div class="basic-field">
+                            <label class="basic-label" for="guardianName">Name</label>
+                            <input id="guardianName" class="basic-input" type="text" value={formData.guardianName} data-field="guardianName" oninput={handleInputChange} />
+                        </div>
+                        <div class="basic-field">
+                            <label class="basic-label" for="guardianRelationship">Relationship</label>
+                            <div class="select-wrap">
+                                <select
+                                    id="guardianRelationship"
+                                    class="basic-input plain-select"
+                                    data-field="guardianRelationship"
+                                    onchange={handleInputChange}
+                                >
+                                    <template for:each={guardianRelationOptions} for:item="option">
+                                        <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                                    </template>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="basic-field">
+                            <label class="basic-label" for="guardianPhone">Phone Number</label>
+                            <input id="guardianPhone" class="basic-input" type="text" value={formData.guardianPhone} data-field="guardianPhone" oninput={handleInputChange} />
+                        </div>
+                        <div class="basic-field">
+                            <label class="basic-label" for="guardianEmail">Email ID</label>
+                            <input id="guardianEmail" class="basic-input" type="email" value={formData.guardianEmail} data-field="guardianEmail" oninput={handleInputChange} />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="settings-section">
+                <h2 class="section-title">AADHAR Details</h2>
+                <div class="section-body">
+                    <div class="form-grid form-grid-2 basic-fields-grid">
+                        <div class="basic-field">
+                            <label class="basic-label" for="aadharNumber">AADHAR Number</label>
+                            <input id="aadharNumber" class="basic-input" type="text" value={formData.aadharNumber} data-field="aadharNumber" oninput={handleInputChange} />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="footer-actions">
+                <button type="button" class="request-outline-btn" onclick={handleDiscard}>Discard Changes</button>
+                <button type="button" class="save-btn" onclick={handleSave}>Save Changes</button>
+            </div>
+        </div>
+    </template>
+</template>

@@ -1,0 +1,100 @@
+<template>
+    <div class="results-page">
+        <div class="breadcrumb">
+            <button class="bc-link" onclick={handleBack}>Placements</button>
+            <span class="bc-sep">›</span>
+            <span class="bc-current">Interview Results</span>
+        </div>
+
+        <div class="results-header">
+            <h2 class="page-title">Interview Results</h2>
+            <div class="results-actions">
+                <button class="btn-outline" onclick={handleShare}>Share Result</button>
+                <button class="btn-primary" onclick={handleRetakeMock}>Retake Test</button>
+            </div>
+        </div>
+
+        <!-- Report Card -->
+        <div class="report-card">
+            <div class="report-header">
+                <div class="check-badge">✓</div>
+                <div class="report-info">
+                    <h3 class="report-title">Interview Report</h3>
+                    <p class="report-sub">Congrats! You Aced the Interview ✓</p>
+                </div>
+                <div class="score-badges">
+                    <span class="score-badge score-mock">+ Short Summary</span>
+                </div>
+            </div>
+            <div class="report-text">
+                <p>{data.summary}</p>
+            </div>
+        </div>
+
+        <!-- 2-col layout -->
+        <div class="results-grid">
+            <!-- Suggested Improvements -->
+            <div class="section-card">
+                <h3 class="section-title">Suggested Improvements</h3>
+                <template for:each={suggestions} for:item="suggestion">
+                    <div key={suggestion.id} class="suggestion-item">
+                        <div class="suggestion-header" data-id={suggestion.id} onclick={handleToggleSuggestion}>
+                            <span class="suggestion-icon">⚠</span>
+                            <span class="suggestion-title">{suggestion.title}</span>
+                            <span class="expand-arrow">{suggestion.expandArrow}</span>
+                        </div>
+                        <template lwc:if={suggestion.isExpanded}>
+                            <div class="suggestion-body">
+                                <template for:each={suggestion.bulletItems} for:item="bullet">
+                                    <p key={bullet.key} class="suggestion-bullet">• {bullet.text}</p>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Suggested Lessons -->
+            <div class="section-card">
+                <h3 class="section-title">Suggested Lessons</h3>
+                <template for:each={suggestedLessons} for:item="lesson">
+                    <div key={lesson.id} class="lesson-card">
+                        <div class="lesson-info">
+                            <div class="lesson-title">{lesson.title}</div>
+                            <div class="lesson-meta">
+                                <span>⏱ {lesson.duration}</span>
+                                <span class="lesson-type">{lesson.type}</span>
+                            </div>
+                            <div class="lesson-tags">
+                                <template for:each={lesson.tagItems} for:item="tag">
+                                    <span key={tag.key} class="lesson-tag">{tag.label}</span>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+                <button class="btn-view-more" onclick={handleViewMoreCourses}>View More Courses</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <template lwc:if={showShareModal}>
+        <div class="modal-overlay" onclick={handleCloseShare}>
+            <div class="modal-box" onclick={stopProp}>
+                <div class="modal-header">
+                    <h3 class="modal-title">Share with...</h3>
+                    <button class="modal-close" onclick={handleCloseShare}>✕</button>
+                </div>
+                <div class="modal-body">
+                    <button class="btn-download-results" onclick={handleDownloadResults}>Download Results</button>
+                    <div class="share-divider">— or share with link —</div>
+                    <div class="share-link-row">
+                        <input type="text" class="share-link-input" value="https://link.figma.com/nkPr7..." readonly />
+                        <button class="btn-copy" onclick={handleCopyLink}>Copy</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+</template>

@@ -1,0 +1,219 @@
+.learn-shell {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 16px;
+    min-height: calc(100vh - 153px);
+    color: #363d49;
+}
+
+button {
+    font-size: 14px !important;
+}
+
+.top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #2f3644;
+}
+
+.semester-wrap {
+    height: 42px;
+    min-width: 320px;
+    border: 1px solid #c7ccd5;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    background: #ffffff;
+}
+
+.semester-select {
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    font-weight: 500;
+    color: #2f3644;
+    outline: none;
+    appearance: none;
+    padding-right: 4px;
+    min-width: 130px;
+}
+
+.current-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #4d74f6;
+    border-radius: 999px;
+    padding: 4px 12px;
+    color: #2f3644;
+    font-size: 14px;
+    line-height: 1;
+    background: #ffffff;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #e25454;
+}
+
+.caret {
+    color: #697182;
+    font-size: 16px;
+    line-height: 1;
+    margin-left: auto;
+}
+
+.course-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.course-card {
+    border-radius: 12px;
+    background: #eef1f6;
+    overflow: hidden;
+    border: 1px solid #e1e5ec;
+}
+
+.banner {
+    height: 132px;
+}
+
+.banner-green {
+    background:
+        radial-gradient(circle at 78% 62%, #f6cd2b 0 14px, transparent 15px),
+        radial-gradient(circle at 72% 48%, #74c2ff 0 8px, transparent 9px),
+        linear-gradient(130deg, #3c963f 0%, #2f8e35 60%, #2e8b34 100%);
+}
+
+.banner-green.soft {
+    background:
+        radial-gradient(circle at 78% 62%, #f6cd2b 0 14px, transparent 15px),
+        radial-gradient(circle at 72% 48%, #74c2ff 0 8px, transparent 9px),
+        linear-gradient(130deg, #6ab16d 0%, #63aa67 58%, #3b983f 100%);
+}
+
+.banner-violet {
+    background:
+        radial-gradient(circle at 70% 66%, #5d4cc2 0 54px, transparent 55px),
+        radial-gradient(circle at 78% 50%, #f1f4ff 0 5px, transparent 6px),
+        linear-gradient(120deg, #a968ef 0%, #9958e2 55%, #7d40c9 100%);
+}
+
+.card-body {
+    padding: 12px 12px 14px;
+}
+
+.course-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #2f3644;
+}
+
+.course-meta {
+    margin: 4px 0 0;
+    font-size: 14px;
+    color: #646d7c;
+}
+
+.info-row {
+    margin: 10px 0 0;
+    font-size: 14px;
+    color: #4f5664;
+}
+
+.tag-row {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+}
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    padding: 5px 10px;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.tag-mandatory {
+    background: #f8ecec;
+    color: #5e4a4a;
+    border-color: #e7c4c4;
+}
+
+.tag-mandatory::before,
+.tag-elective::before {
+    content: '•';
+    margin-right: 6px;
+    font-size: 12px;
+}
+
+.tag-elective {
+    background: #e9efff;
+    color: #3e4f77;
+    border-color: #a8bcff;
+}
+
+.tag-mode {
+    background: #dfe8ff;
+    color: #2f5fd8;
+}
+
+@media (max-width: 1300px) {
+    .course-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1024px) {
+    .course-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .top-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .semester-wrap {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .course-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .learn-shell {
+        padding: 12px;
+    }
+
+    .semester-select {
+        font-size: 14px;
+    }
+
+    .current-pill {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+}

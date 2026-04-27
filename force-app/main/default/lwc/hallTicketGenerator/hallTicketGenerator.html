@@ -1,0 +1,29 @@
+<template>
+    <div class="slds-p-around_medium">
+        <template lwc:if={isBusy}>
+            <div class="slds-align_absolute-center slds-p-vertical_large">
+                <lightning-spinner alternative-text="Generating hall tickets" size="small"></lightning-spinner>
+                <span class="slds-m-left_small">Generating hall tickets...</span>
+            </div>
+        </template>
+
+        <template lwc:else>
+            <p class="slds-text-body_regular slds-m-bottom_medium">
+                Do you want to generate hall tickets for all students under this Program Plan?
+            </p>
+
+            <div class="slds-grid slds-grid_align-end">
+                <lightning-button
+                    label="Cancel"
+                    onclick={handleCancel}
+                    class="slds-m-right_x-small">
+                </lightning-button>
+                <lightning-button
+                    variant="brand"
+                    label="Generate"
+                    onclick={handleConfirm}>
+                </lightning-button>
+            </div>
+        </template>
+    </div>
+</template>

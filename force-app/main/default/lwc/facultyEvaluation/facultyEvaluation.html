@@ -1,0 +1,25 @@
+<template>
+    <section class="evaluation-panel">
+        <header class="panel-head">
+            <h2 class="panel-title">Evaluation requests ({requestsCount})</h2>
+            <button type="button" class="btn-view-all" onclick={navigateToEvaluationRequests}>View all</button>
+        </header>
+
+        <div class="request-grid">
+            <template for:each={evaluationRequests} for:item="request">
+                <article class="request-card" key={request.id}>
+                    <h3 class="request-title">{request.subject}</h3>
+                    <p class="bundle-code">Bundle code: {request.bundleCode}</p>
+                    <p class="request-meta">{request.papers} papers <span class="meta-separator">|</span> {request.type}</p>
+                    <button
+                        type="button"
+                        class="btn-evaluate card-action action-primary action-dominant"
+                        onclick={navigateToEvaluationBooklets}
+                    >
+                        Evaluate
+                    </button>
+                </article>
+            </template>
+        </div>
+    </section>
+</template>

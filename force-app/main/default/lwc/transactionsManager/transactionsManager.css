@@ -1,0 +1,129 @@
+:host {
+    display: block;
+    font-family: Roboto, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --tm-brand: #145dff;
+    --tm-brand-hover: #0f49d2;
+    --tm-brand-soft: rgba(20, 93, 255, 0.18);
+    --tm-page-bg: #eef4ff;
+    --tm-surface: #ffffff;
+    --tm-border: #d5e0f4;
+    --tm-text-primary: #182230;
+    --tm-text-secondary: #55637a;
+    --tm-shadow-soft: 0 4px 14px rgba(20, 93, 255, 0.1);
+}
+
+.page {
+    min-height: calc(100vh - 128px);
+    border-radius: 18px;
+    padding: 24px;
+    background:
+        radial-gradient(circle at 100% 0%, rgba(20, 93, 255, 0.12), transparent 35%),
+        var(--tm-page-bg);
+    border: 1px solid var(--tm-border);
+}
+
+.moduleHeader {
+    margin-bottom: 22px;
+}
+
+.titleWrap {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.iconWrap {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--tm-border);
+    background: #eaf1ff;
+    box-shadow: var(--tm-shadow-soft);
+}
+
+.iconWrap lightning-icon {
+    --slds-c-icon-color-foreground-default: var(--tm-brand);
+}
+
+.title {
+    margin: 0;
+    font-size: 26px;
+    line-height: 1.2;
+    font-weight: 700;
+    color: var(--tm-text-primary);
+}
+
+.subtitle {
+    margin: 8px 0 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--tm-text-secondary);
+}
+
+.tabs {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 22px;
+    border-bottom: 1px solid var(--tm-border);
+    flex-wrap: wrap;
+}
+
+.tabButton {
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    color: var(--tm-text-secondary);
+    padding: 0 4px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+        color 180ms ease,
+        border-color 180ms ease;
+}
+
+.tabButton:hover {
+    color: var(--tm-text-primary);
+}
+
+.tabButtonActive {
+    color: var(--tm-brand);
+    font-weight: 700;
+    border-bottom-color: var(--tm-brand);
+}
+
+.tabPanel {
+    background: var(--tm-surface);
+    border: 1px solid var(--tm-border);
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: var(--tm-shadow-soft);
+}
+
+.tabButton:focus-visible {
+    outline: 3px solid var(--tm-brand-soft);
+    outline-offset: 2px;
+    border-radius: 6px;
+}
+
+@media (max-width: 1024px) {
+    .page {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .tabs {
+        gap: 10px;
+        overflow-x: auto;
+    }
+
+    .tabButton {
+        white-space: nowrap;
+    }
+}

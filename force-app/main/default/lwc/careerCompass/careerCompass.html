@@ -1,0 +1,87 @@
+<template>
+    <div class="career-compass-page">
+        <div class="breadcrumb">
+            <button class="bc-link" onclick={handleBack}>Home</button>
+            <span class="bc-sep">›</span>
+            <span class="bc-current">Career Compass</span>
+        </div>
+
+        <template lwc:if={showResults}>
+            <!-- Results Screen -->
+            <div class="results-hero">
+                <span class="compass-icon-lg">🧭</span>
+                <h1 class="results-title">Your Career Compass Results</h1>
+                <p class="results-sub">Based on your answers, here are the best career paths for you.</p>
+            </div>
+            <div class="careers-list">
+                <template for:each={recommendedCareers} for:item="career">
+                    <div key={career.id} class="career-card">
+                        <div class="career-card-left">
+                            <div class="career-match-ring">
+                                <span class="career-match-num">{career.matchLabel}</span>
+                                <span class="career-match-label">Match</span>
+                            </div>
+                        </div>
+                        <div class="career-card-center">
+                            <h3 class="career-title">{career.title}</h3>
+                            <p class="career-desc">{career.desc}</p>
+                            <div class="career-tags">
+                                <template for:each={career.tagItems} for:item="tag">
+                                    <span key={tag.key} class="career-tag">{tag.label}</span>
+                                </template>
+                            </div>
+                        </div>
+                        <div class="career-card-right">
+                            <button class="btn-explore-jobs" onclick={handleGoToPlacements}>Explore Jobs →</button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            <div class="results-actions">
+                <button class="btn-outline" onclick={handleRetake}>Retake Quiz</button>
+                <button class="btn-primary" onclick={handleGoToPlacements}>Browse Jobs</button>
+            </div>
+        </template>
+
+        <template lwc:else>
+            <!-- Quiz Screen -->
+            <div class="compass-hero">
+                <span class="compass-icon-lg">🧭</span>
+                <h1 class="compass-title">Career Compass</h1>
+                <p class="compass-sub">Answer a few quick questions to unlock your ideal career direction.</p>
+            </div>
+
+            <div class="quiz-container">
+                <!-- Progress -->
+                <div class="progress-row">
+                    <span class="progress-count">{questionCountLabel}</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style={progressStyle}></div>
+                    </div>
+                </div>
+
+                <!-- Question -->
+                <div class="question-card">
+                    <h3 class="question-text">{currentQuestion.question}</h3>
+                    <div class="options-grid">
+                        <template for:each={currentOptions} for:item="opt">
+                            <button key={opt.key} class={opt.cls} data-id={opt.id} onclick={handleSelectOption}>
+                                <span class="opt-key">{opt.id}</span>
+                                <span class="opt-label">{opt.text}</span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="quiz-nav">
+                    <button class="btn-outline" onclick={handlePrev} disabled={isFirstQuestion}>← Back</button>
+                    <button class="btn-primary" onclick={handleNext} disabled={noAnswer}>
+                        <template lwc:if={isLastQuestion}>See Results →</template>
+                        <template lwc:else>Next →</template>
+                    </button>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,899 @@
+/* ================================================
+   Residence Allotment Component Styles
+   ================================================ */
+
+.hidden {
+    display: none !important;
+}
+
+@keyframes skeleton-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.skeleton-wrap {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: calc(100vh - 160px);
+}
+
+.skeleton-header-block {
+    height: 40px;
+    border-radius: var(--slds-g-radius-border-3, 12px);
+    background: linear-gradient(90deg, #e7ebf2 0%, #f3f5f9 50%, #e7ebf2 100%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.1s ease-in-out infinite;
+}
+
+.skeleton-row {
+    display: flex;
+    gap: 20px;
+    flex: 1;
+}
+
+.skeleton-card-large,
+.skeleton-card-small {
+    border-radius: 16px;
+    background: linear-gradient(90deg, #e7ebf2 0%, #f3f5f9 50%, #e7ebf2 100%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.1s ease-in-out infinite;
+}
+
+.skeleton-card-large {
+    flex: 2;
+}
+
+.skeleton-card-small {
+    flex: 1;
+}
+
+/* Page Container */
+.page-container {
+    background: #FFFFFF;
+    padding: var(--slds-g-spacing-6, 32px);
+    border-radius: 16px;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    color: #1F2937;
+    height: calc(100vh - 160px); /* Strict height */
+    overflow-y: auto; /* Scroll within container if content overflows */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Page Title */
+.page-title {
+    font-size: 22px;
+    font-weight: var(--slds-g-font-weight-5, 500);
+    color: #111827;
+    margin: 0 0 var(--slds-g-spacing-5, 24px )0;
+    flex-shrink: 0;
+}
+
+/* ... skipped ... */
+
+.room-type-title {
+    font-size: var(--slds-g-font-scale-3, 20px);
+    font-weight: var(--slds-g-font-weight-5, 500);
+    color: #111827;
+    margin: 0 0 6px 0;
+}
+
+/* ... skipped ... */
+
+.info-value {
+    font-size: 15px;
+    font-weight: var(--slds-g-font-weight-5, 500);
+    color: #111827;
+}
+
+/* ... skipped ... */
+
+.roommate-heading {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: var(--slds-g-font-weight-5, 500);
+    color: #4B5563;
+    margin: 0 0 var(--slds-g-spacing-4, 16px )0;
+}
+
+/* ... skipped ... */
+
+.chip-name {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: var(--slds-g-font-weight-5, 500);
+    color: #1F2937;
+}
+
+/* ... skipped ... */
+
+.payment-title {
+    font-size: 18px;
+    font-weight: var(--slds-g-font-weight-5, 500);
+    color: #111827;
+    margin: 0 0 var(--slds-g-spacing-5, 24px )0;
+}
+
+/* ... skipped ... */
+
+.payment-amount {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: var(--slds-g-font-weight-5, 500);
+    color: #111827;
+}
+
+/* ... skipped ... */
+
+.total-label {
+    font-size: var(--slds-g-font-scale-2, 16px);
+    font-weight: var(--slds-g-font-weight-5, 500);
+    color: #111827;
+}
+
+.total-amount {
+    font-size: 18px;
+    font-weight: var(--slds-g-font-weight-5, 500);
+    color: #111827;
+}
+
+/* ... skipped ... */
+
+.deadline-text {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: var(--slds-g-font-weight-5, 500);
+    color: #92702A;
+}
+
+/* ... skipped ... */
+
+.info-banner-title {
+    font-size: 15px;
+    font-weight: var(--slds-g-font-weight-5, 500);
+    color: #374151;
+    margin: 0 0 var(--slds-g-spacing-3, 12px )0;
+}
+
+/* ================================
+   Main Content: Two-Column Layout
+   ================================ */
+.main-content {
+    display: flex;
+    gap: 24px;
+    margin-bottom: var(--slds-g-spacing-6, 32px);
+    align-items: stretch; /* Stretch to fill equal height */
+}
+
+.left-column {
+    flex: 1.2;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.right-column {
+    flex: 0.8;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ================================
+   Card Base
+   ================================ */
+.card {
+    background: #FFFFFF;
+    border: var(--slds-g-sizing-border-1, 1px )solid #E5E7EB;
+    border-radius: 16px; 
+    padding: var(--slds-g-spacing-5, 24px);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    flex: 1; /* Expand to fill column */
+    display: flex;
+    flex-direction: column;
+}
+
+/* ... skipped Room Card internals ... */
+
+/* ================================
+   Payment Card
+   ================================ */
+.payment-card {
+    background: #F9FAFB;
+    display: flex;
+    flex-direction: column;
+    /* flex: 1; Removed */
+}
+
+/* ================================
+   Room Card
+   ================================ */
+/* ================================
+   Room Card
+   ================================ */
+/* Note: .room-card uses the shared .card class which already has flex: 1 */
+.room-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--slds-g-spacing-5, 24px);
+    padding-bottom: 20px;
+    border-bottom: 1px solid #F3F4F6;
+    flex-shrink: 0;
+}
+.room-subtitle {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    color: #6B7280;
+    margin: 0;
+}
+
+/* ================================
+   Buttons
+   ================================ */
+.btn-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: var(--slds-g-spacing-2, 8px )var(--slds-g-spacing-4, 16px);
+    border: 1.5px solid var(--primary-color, #3061FF);
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    background: #FFFFFF;
+    color: var(--primary-color, #3061FF);
+    font-size: var(--slds-g-font-scale-base, 13px);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-outline:hover {
+    background: #F0F4FF;
+}
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px var(--slds-g-spacing-5, 24px);
+    border: none;
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    background: var(--primary-color, #3061FF);
+    color: #FFFFFF;
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-primary:hover {
+    background: var(--primary-color, #2563EB);
+}
+
+/* ================================
+   Info Grid (Room Details)
+   ================================ */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 28px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.info-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--slds-g-radius-border-3, 12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.blue-icon {
+    background: #EBF1FF; /* Lighter blue-grey background as per image */
+}
+
+.blue-icon svg {
+    stroke: var(--primary-color, #3061FF); /* Explicit blue stroke */
+}
+
+.info-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-label {
+    font-size: var(--slds-g-font-scale-base, 13px);
+    color: #9CA3AF;
+    margin-bottom: var(--slds-g-spacing-1, 4px);
+}
+.roommate-section {
+    padding-top: 20px;
+    border-top: 1px solid #F3F4F6;
+    margin-top: auto; /* Push to bottom of card */
+}
+
+.room-title-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.room-type-title {
+    font-size: 18px; /* Slightly reduced as per general feel */
+    font-weight: var(--slds-g-font-weight-6, 600); /* Keeping slightly bold for hierarchy, or user wants ALL 500? "all title here". Let's do 500 */
+    font-weight: var(--slds-g-font-weight-5, 500);
+    color: #111827;
+    margin: 0 0 6px 0;
+}
+
+.room-subtitle {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    color: #6B7280;
+    margin: 0;
+}
+
+/* ================================
+   Buttons
+   ================================ */
+.btn-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: var(--slds-g-spacing-2, 8px )var(--slds-g-spacing-4, 16px);
+    border: 1.5px solid var(--primary-color, #3061FF);
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    background: #FFFFFF;
+    color: var(--primary-color, #3061FF);
+    font-size: var(--slds-g-font-scale-base, 13px);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-outline:hover {
+    background: #F0F4FF;
+}
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px var(--slds-g-spacing-5, 24px);
+    border: none;
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    background: var(--primary-color, #3061FF);
+    color: #FFFFFF;
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-primary:hover {
+    background: var(--primary-color, #2563EB);
+}
+
+/* ================================
+   Info Grid (Room Details)
+   ================================ */
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 28px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.info-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--slds-g-radius-border-3, 12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.blue-icon {
+    background: #EBF1FF; /* Lighter blue-grey background as per image */
+}
+
+.blue-icon svg {
+    stroke: var(--primary-color, #3061FF); /* Explicit blue stroke */
+}
+
+.info-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-label {
+    font-size: var(--slds-g-font-scale-base, 13px);
+    color: #9CA3AF;
+    margin-bottom: var(--slds-g-spacing-1, 4px);
+}
+
+.info-value {
+    font-size: 15px;
+    font-weight: var(--slds-g-font-weight-5, 500);
+    color: #111827;
+}
+
+/* ================================
+   Roommate Section
+   ================================ */
+.roommate-section {
+    padding-top: 20px;
+    border-top: 1px solid #F3F4F6;
+    margin-top: 20px; /* Revert to standard margin */
+}
+
+.roommate-heading {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: #4B5563;
+    margin: 0 0 var(--slds-g-spacing-4, 16px )0;
+}
+
+.roommate-chips {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.roommate-chip {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #F9FAFB;
+    border: var(--slds-g-sizing-border-1, 1px )solid #F3F4F6;
+    border-radius: var(--slds-g-radius-border-3, 12px);
+    padding: var(--slds-g-spacing-2, 8px )var(--slds-g-spacing-3, 12px);
+    min-width: var(--slds-g-sizing-13, 160px);
+}
+
+.chip-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.chip-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.chip-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.chip-name {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: #1F2937;
+}
+
+.chip-id {
+    font-size: var(--slds-g-font-scale-neg-1, 12px);
+    color: #9CA3AF;
+}
+
+/* ================================
+   Payment Card
+   ================================ */
+.payment-card {
+    background: #F9FAFB;
+    display: flex;
+    flex-direction: column;
+    /* height: 100%; Removed to allow dynamic height */
+}
+
+.payment-title {
+    font-size: 18px;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: #111827;
+    margin: 0 0 var(--slds-g-spacing-5, 24px )0;
+}
+
+.payment-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: var(--slds-g-spacing-5, 24px);
+    padding-bottom: var(--slds-g-spacing-5, 24px);
+    border-bottom: 1px solid #F3F4F6;
+}
+
+.payment-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.payment-label {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    color: #4B5563;
+}
+
+.payment-amount {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: #111827;
+}
+
+.payment-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0; /* Align to bottom of card padding */
+}
+
+.total-label {
+    font-size: var(--slds-g-font-scale-2, 16px);
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: #111827;
+}
+
+.total-amount {
+    font-size: 18px;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: #111827;
+}
+
+/* ================================
+   Deadline Banner
+   ================================ */
+.deadline-banner {
+    background: #FFFBEB;
+    padding: var(--slds-g-spacing-5, 24px);
+    margin-top: var(--slds-g-spacing-5, 24px); /* Gap between payment card and banner */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.deadline-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.deadline-icon {
+    flex-shrink: 0;
+}
+
+.deadline-text {
+    font-size: var(--slds-g-font-scale-1, 14px);
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: #92702A;
+}
+
+.deadline-subtext {
+    font-size: var(--slds-g-font-scale-base, 13px);
+    color: #6B7280;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ================================
+   Important Information Banner
+   ================================ */
+.info-banner {
+    background: #EBF1FF; /* Soft blue as per image */
+    border-radius: 16px;
+    padding: var(--slds-g-spacing-5, 24px);
+    margin-bottom: var(--slds-g-spacing-5, 24px);
+}
+
+.info-banner-title {
+    font-size: 15px;
+    font-weight: var(--slds-g-font-weight-7, 700);
+    color: #374151;
+    margin: 0 0 var(--slds-g-spacing-3, 12px )0;
+}
+
+.info-list {
+    margin: 0;
+    padding: 0 0 0 var(--slds-g-spacing-4, 16px);
+    list-style-type: none;
+}
+
+.info-list-item {
+    position: relative;
+    font-size: 13.5px;
+    color: #4B5563;
+    line-height: var(--slds-g-font-line-height-6, 2);
+    padding-left: var(--slds-g-spacing-3, 12px);
+}
+
+.info-list-item::before {
+    content: "â€¢";
+    position: absolute;
+    left: -4px;
+    color: #9CA3AF;
+    font-weight: var(--slds-g-font-weight-bold, bold);
+}
+
+/* ================================
+   Action Buttons Footer
+   ================================ */
+.action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding-top: var(--slds-g-spacing-5, 24px);
+    border-top: 1px solid #E5E7EB;
+    /* Sticky footer */
+    position: sticky;
+    bottom: -32px; /* Offset for container padding */
+    background: #FFFFFF;
+    margin-top: auto; 
+    z-index: 10;
+    padding-bottom: 0; /* Align with bottom */
+}
+
+.btn-download {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ================================
+   Responsive Design
+   ================================ */
+@media (max-width: 1024px) {
+    .main-content {
+        flex-direction: column;
+    }
+
+    .left-column,
+    .right-column {
+        flex: 1;
+    }
+}
+
+@media (max-width: 600px) {
+    .page-container {
+        padding: var(--slds-g-spacing-4, 16px);
+    }
+
+    .page-title {
+        font-size: 18px;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .room-header {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .action-buttons .btn-primary {
+        width: 100%;
+        justify-content: center;
+    }
+}
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.85); /* Dark semi-transparent background */
+    z-index: 99999;
+    display: flex;
+    flex-direction: column; /* Ensure content stacks if needed, but centering is key */
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 0px;
+    right: -50px; /* Aligned with right edge to ensure visibility */
+    background: #FFFFFF;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    z-index: 1010;
+}
+
+.main-image-container {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    border-radius: var(--slds-g-radius-border-3, 12px);
+    overflow: hidden;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #FFFFFF;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    z-index: 10;
+    transition: all 0.2s;
+}
+
+.nav-btn:hover {
+    background: #F3F4F6;
+    transform: translateY(-50%) scale(1.05);
+}
+
+.prev-btn {
+    left: -60px;
+}
+
+.next-btn {
+    right: -60px;
+}
+
+.thumbnails-row {
+    display: flex;
+    gap: 16px;
+    margin-top: 10px;
+    overflow-x: auto;
+    padding: var(--slds-g-spacing-1, 4px);
+}
+
+.thumbnail {
+    width: 100px;
+    height: 70px;
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    overflow: hidden;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: all 0.2s;
+    border: 2px solid transparent;
+}
+
+.thumbnail:hover, .thumbnail.active {
+    opacity: 1;
+    border-color: #FFFFFF;
+    transform: scale(1.05);
+}
+
+.thumbnail-img {
+    width: 100%;
+    height: 100%;
+    /* object-fit: cover; Not needed for gradients */
+}
+
+/* ================================
+   Mobile Modal Styles
+   ================================ */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 100%;
+        padding: 0;
+        gap: 12px;
+    }
+
+    .main-image-container {
+        height: 300px; /* Reduced height for mobile */
+        border-radius: var(--slds-g-radius-border-2, 8px);
+    }
+
+    .nav-btn {
+        width: var(--slds-g-sizing-9, 32px);
+        height: var(--slds-g-sizing-9, 32px);
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .prev-btn {
+        left: 10px; /* Bring inside */
+    }
+
+    .next-btn {
+        right: 10px; /* Bring inside */
+    }
+
+    .modal-close-btn {
+        top: -40px; /* Above content */
+        right: 0;
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .thumbnails-row {
+        justify-content: flex-start;
+        width: 100%;
+    }
+
+    .thumbnail {
+        width: var(--slds-g-sizing-12, 80px);
+        height: 60px;
+        flex-shrink: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-image-container {
+        height: var(--slds-g-sizing-14, 240px);
+    }
+
+    .modal-close-btn {
+        top: 10px;
+        right: 10px;
+        z-index: 100;
+    }
+    
+    /* Ensure separate close button logic if moved inside, 
+       but here we might need to change HTML structure if it's outside.
+       Current HTML: modal-close-btn is sibling to main-image-container inside modal-content.
+       So absolute positioning relies on modal-content relative.
+    */
+    .modal-content {
+        padding-top: 50px; /* Make space for close button if kept at top */
+    }
+    
+    .modal-close-btn {
+        top: 0;
+        right: 0;
+        background: transparent;
+        color: white; /* If on dark overlay */
+        box-shadow: none;
+    }
+    
+    /* Better approach: Keep button fixed or absolute to overlay */
+    .modal-close-btn svg {
+        stroke: #FFFFFF; /* White icon for visibility on dark overlay */
+    }
+}

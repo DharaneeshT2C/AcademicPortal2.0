@@ -1,0 +1,146 @@
+:host {
+    display: block;
+    width: 100%;
+}
+
+.portal-header {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    /* background: #e9edf2; */
+    /* padding: 18px 22px; */
+}
+
+.title-panel,
+.actions-panel {
+    background: #ffffff;
+    border-radius: 8px;
+    min-height: 78px;
+    display: flex;
+    align-items: center;
+}
+
+.title-panel {
+    flex: 1;
+    padding: 0 28px;
+}
+
+.title-panel h1 {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.2;
+    color: #333845;
+    font-weight: 700;
+}
+
+.actions-panel {
+    /* flex: 0 0 520px; */
+    justify-content: space-between;
+    padding: 0 26px;
+    width: 100%;
+}
+
+.icon-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.icon-button {
+    /* width: 56px;
+    height: 56px; */
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.icon-image {
+    width: 20px;
+    height: 20px;
+    display: block;
+    object-fit: contain;
+}
+
+.bell-active {
+    background: var(--secondary-color, #eaefff);
+    width: 35px;
+    height: 35px;
+}
+
+.divider {
+    width: 1px;
+    height: 50px;
+    background: #cdd2db;
+    margin: 0 16px;
+}
+
+.logo-text {
+    font-size: 16px;
+    line-height: 1.2;
+    font-weight: 600;
+    color: #3a3f4b;
+    white-space: nowrap;
+}
+
+@media (max-width: 1024px) {
+    .portal-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .actions-panel {
+        flex: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .portal-header {
+        padding: 14px;
+        gap: 14px;
+    }
+
+    .title-panel,
+    .actions-panel {
+        min-height: 78px;
+    }
+
+    .title-panel h1 {
+        font-size: 16px;
+    }
+
+    .actions-panel {
+        padding: 0 14px;
+    }
+
+    .icon-row {
+        gap: 8px;
+    }
+
+    .icon-button {
+        width: 48px;
+        height: 48px;
+    }
+
+    .divider {
+        height: 52px;
+        margin: 0 10px;
+    }
+
+    .logo-text {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .title-panel h1 {
+        font-size: 14px;
+    }
+
+    .logo-text {
+        font-size: 12px;
+    }
+}

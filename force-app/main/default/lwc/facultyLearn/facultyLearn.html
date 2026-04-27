@@ -1,0 +1,36 @@
+<template>
+    <section class="learn-shell">
+        <div class="top-row">
+            <h2 class="title">All Courses</h2>
+            <div class="semester-wrap">
+                <select class="semester-select" onchange={handleSemesterChange}>
+                    <template for:each={selectedSemesterOptions} for:item="option">
+                        <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                    </template>
+                </select>
+                <span class="current-pill"><span class="dot"></span>Current</span>
+                <span class="caret">⌄</span>
+            </div>
+        </div>
+
+        <div class="course-grid">
+            <template for:each={courses} for:item="course">
+                <article class="course-card" key={course.id}>
+                    <div class={course.bannerClass}></div>
+                    <div class="card-body">
+                        <h3 class="course-title">{course.name}</h3>
+                        <p class="course-meta">{course.program} | {course.code} | {course.credits}</p>
+
+                        <p class="info-row">👥&nbsp; {course.students} students</p>
+                        <p class="info-row">📍&nbsp; {course.room}</p>
+
+                        <div class="tag-row">
+                            <span class={course.typeClass}>{course.type}</span>
+                            <span class={course.modeClass}>{course.mode}</span>
+                        </div>
+                    </div>
+                </article>
+            </template>
+        </div>
+    </section>
+</template>

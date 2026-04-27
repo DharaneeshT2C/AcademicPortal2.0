@@ -1,0 +1,143 @@
+<template>
+    <div class="page">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <button type="button" class="crumb-btn" onclick={handleGoToMasterData}>Master Data</button>
+            <span class="sep">&gt;</span>
+            <button type="button" class="crumb-btn" onclick={handleGoToScholarships}>Scholarships</button>
+        </nav>
+
+        <header class="pageHeader">
+            <div class="titleBlock">
+                <h1 class="pageTitle">Scholarships</h1>
+                <p class="pageMeta">{itemCountLabel}</p>
+            </div>
+            <lightning-button
+                class="primaryActionBtn"
+                variant="brand"
+                label="New"
+                icon-name="utility:add"
+                onclick={handleNew}>
+            </lightning-button>
+        </header>
+
+        <div class="toolbar">
+            <lightning-combobox
+                class="view-picklist"
+                variant="label-hidden"
+                value={selectedView}
+                options={viewOptions}
+                onchange={handleViewChange}>
+            </lightning-combobox>
+
+            <div class="toolbar-right">
+                <lightning-input
+                    class="searchInput"
+                    type="search"
+                    variant="label-hidden"
+                    placeholder="Search scholarships..."
+                    value={searchTerm}
+                    onchange={handleSearch}
+                    aria-label="Search scholarships">
+                </lightning-input>
+                <button class="filterBtn" type="button" disabled aria-disabled="true" aria-label="Filters">
+                    <lightning-icon icon-name="utility:filterList" size="x-small"></lightning-icon>
+                    <span>Filters</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="tableCard">
+            <template if:true={isLoading}>
+                <div class="loading">
+                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <template if:false={isLoading}>
+                <div class="tableScroll">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Scholarship Name</th>
+                                <th>Status</th>
+                                <th>Type</th>
+                                <th>Mode</th>
+                                <th>Last Modified</th>
+                                <th class="actions-col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template if:true={hasRows}>
+                                <template for:each={filteredRows} for:item="row">
+                                    <tr key={row.id}>
+                                        <td>
+                                            <button class="link-button" data-id={row.id} onclick={handleOpenRecord}>{row.name}</button>
+                                        </td>
+                                        <td><span class={row.statusClass}>{row.statusLabel}</span></td>
+                                        <td class="bodyText">{row.typeLabel}</td>
+                                        <td class="bodyText">{row.modeLabel}</td>
+                                        <td class="bodyText">{row.lastModifiedLabel}</td>
+                                        <td class="actions-cell">
+                                            <lightning-button-icon
+                                                class="three-dot-btn"
+                                                icon-name="utility:threedots_vertical"
+                                                variant="bare"
+                                                alternative-text="Actions"
+                                                title="Actions"
+                                                data-id={row.id}
+                                                onclick={handleToggleActionMenu}>
+                                            </lightning-button-icon>
+                                            <template if:true={row.isActionMenuOpen}>
+                                                <div class="action-popover">
+                                                    <button
+                                                        class="action-item"
+                                                        type="button"
+                                                        data-action="view"
+                                                        data-id={row.id}
+                                                        onclick={handleActionClick}>
+                                                        View
+                                                    </button>
+                                                    <button
+                                                        class={row.editActionClass}
+                                                        type="button"
+                                                        data-action="edit"
+                                                        data-id={row.id}
+                                                        disabled={row.isEditDisabled}
+                                                        onclick={handleActionClick}>
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        class="action-item"
+                                                        type="button"
+                                                        data-action="clone"
+                                                        data-id={row.id}
+                                                        onclick={handleActionClick}>
+                                                        Clone
+                                                    </button>
+                                                    <button
+                                                        class={row.archiveActionClass}
+                                                        type="button"
+                                                        data-action="archive"
+                                                        data-id={row.id}
+                                                        disabled={row.isDeleteDisabled}
+                                                        onclick={handleActionClick}>
+                                                        Archive
+                                                    </button>
+                                                </div>
+                                            </template>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </template>
+                            <template if:false={hasRows}>
+                                <tr>
+                                    <td colspan="6" class="empty">No scholarships found.</td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>

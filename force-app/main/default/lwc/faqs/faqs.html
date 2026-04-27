@@ -1,0 +1,18 @@
+<template>
+    <div class="page">
+        <div class="page-header"><button class="back-btn" onclick={handleBack}><c-icon name="arrow_back" size="20"></c-icon></button><div><h2 class="page-title">FAQs</h2></div></div>
+        <div class="search-bar"><c-icon name="search" size="20"></c-icon><input type="text" placeholder="Search FAQs..." class="search-input" /></div>
+        <div class="card">
+            <template for:each={faqs} for:item="faq">
+                <div key={faq.category} class="faq-group">
+                    <div class="faq-category"><c-icon name="help_outline" size="20"></c-icon><span>{faq.category}</span><c-icon name="expand_more" size="18"></c-icon></div>
+                    <template lwc:if={faq.hasQuestions}>
+                        <template for:each={faq.questions} for:item="q">
+                            <div key={q.q} class="faq-item"><div class="faq-question"><span>{q.q}</span><c-icon name="expand_more" size="20"></c-icon></div><template lwc:if={q.a}><p class="faq-answer">{q.a}</p></template></div>
+                        </template>
+                    </template>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>

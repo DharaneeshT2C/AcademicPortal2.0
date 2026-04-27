@@ -1,0 +1,135 @@
+<template>
+    <lightning-modal-header label={modalTitle}></lightning-modal-header>
+
+    <lightning-modal-body class="modalBody">
+        <p class="intro">Define a fee component used in fee plans and assignments.</p>
+
+        <section class="section">
+            <h3 class="sectionTitle">Basic Information</h3>
+            <div class="grid">
+                <div class="fieldBlock">
+                    <lightning-input
+                        data-id="feeHeadName"
+                        name="feeHeadName"
+                        label="Fee Head Name"
+                        value={feeHeadName}
+                        placeholder="e.g., Tuition Fee, Admission Fee"
+                        required
+                        onchange={handleFieldInput}
+                    ></lightning-input>
+                    <p class="helperText">Example: Tuition Fee, Admission Fee, Hostel Fee</p>
+                </div>
+
+                <div class="fieldBlock">
+                    <lightning-combobox
+                        data-id="feeHeadType"
+                        name="feeHeadType"
+                        label="Head Category"
+                        value={feeHeadType}
+                        placeholder="Select category"
+                        options={feeHeadTypeOptions}
+                        required
+                        onchange={handleFieldInput}
+                    ></lightning-combobox>
+                    <p class="helperText">Used for grouping and reporting purposes</p>
+                </div>
+            </div>
+
+            <div class="toggleBlock">
+                <div class="toggleHeader">
+                    <span class="toggleLabel">Active</span>
+                    <lightning-input
+                        type="toggle"
+                        variant="label-hidden"
+                        name="isActive"
+                        checked={isActive}
+                        onchange={handleFieldInput}
+                    ></lightning-input>
+                </div>
+                <p class="helperText">Only active fee heads can be used in new fee plans</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h3 class="sectionTitle">Financial Behavior</h3>
+            <div class="grid">
+                <div class="toggleInline">
+                    <span class="toggleLabel">Refundable</span>
+                    <lightning-input
+                        type="toggle"
+                        variant="label-hidden"
+                        name="refundable"
+                        checked={refundable}
+                        onchange={handleFieldInput}
+                    ></lightning-input>
+                </div>
+
+                <div class="toggleInline">
+                    <span class="toggleLabel">Taxable</span>
+                    <lightning-input
+                        type="toggle"
+                        variant="label-hidden"
+                        name="taxable"
+                        checked={taxable}
+                        onchange={handleFieldInput}
+                    ></lightning-input>
+                </div>
+            </div>
+
+            <div class="fieldBlock">
+                <lightning-combobox
+                    name="defaultRemittanceAccountId"
+                    label="Default Remittance Account (Optional)"
+                    value={defaultRemittanceAccountId}
+                    options={remittanceAccountOptions}
+                    placeholder="Select account (optional)"
+                    onchange={handleFieldInput}
+                ></lightning-combobox>
+                <p class="helperText">Optional. Can be overridden at Programme Fee Publishing level.</p>
+            </div>
+
+            <div class="grid">
+                <div class="fieldBlock">
+                    <lightning-combobox
+                        name="taxDefinitionId"
+                        label="Tax Code"
+                        value={taxDefinitionId}
+                        options={taxDefinitionOptions}
+                        placeholder="Select tax code"
+                        onchange={handleFieldInput}
+                    ></lightning-combobox>
+                </div>
+
+                <div class="fieldBlock">
+                    <lightning-input
+                        name="taxPercentage"
+                        label="Tax Percentage"
+                        value={taxPercentage}
+                        read-only
+                    ></lightning-input>
+                </div>
+            </div>
+        </section>
+
+        <section class="section sectionLast">
+            <h3 class="sectionTitle">Usage &amp; Governance</h3>
+            <div class="fieldBlock">
+                <lightning-textarea
+                    name="description"
+                    label="Description (Optional)"
+                    value={description}
+                    placeholder="Enter description for this fee head..."
+                    onchange={handleFieldInput}
+                ></lightning-textarea>
+            </div>
+        </section>
+    </lightning-modal-body>
+
+    <lightning-modal-footer>
+        <div class="footerActions">
+            <lightning-button label="Cancel" onclick={handleCancel} disabled={isBusy}></lightning-button>
+            <lightning-button label="Save &amp; New" onclick={handleSaveAndNew} disabled={isBusy}></lightning-button>
+            <lightning-button variant="brand" label="Save" onclick={handleSave} disabled={isBusy}></lightning-button>
+        </div>
+    </lightning-modal-footer>
+</template>

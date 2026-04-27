@@ -1,0 +1,421 @@
+:host {
+    --border-color: #d9dde6;
+    --row-border: #ebeff5;
+    --table-blue: #233f92;
+    --text-main: #373a45;
+    --text-muted: #6b7280;
+    --chip-yellow-bg: #fff4da;
+    --chip-yellow-border: #efd18a;
+    --chip-blue-bg: #edf4ff;
+    --chip-blue-border: #2f80ff;
+    display: block;
+    color: var(--text-main);
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        sans-serif;
+}
+
+.fee-plan-shell {
+    padding: 16px;
+     height: calc(100vh - 214px);
+     overflow: auto;
+}
+
+.semester-section {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 24px;
+    margin-bottom: 24px;
+}
+
+.semester-section:last-child {
+    margin-bottom: 0;
+}
+
+.semester-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.semester-trigger {
+    border: none;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    text-align: left;
+}
+
+.semester-title {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #303545;
+}
+
+.semester-summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--teritary-font-color);
+}
+
+.summary-label {
+    color:var(--secondary-font-color);
+    font-size: 0.9rem;
+}
+
+.summary-value {
+    color:var(--secondary-font-color);
+    font-weight: 700;
+}
+
+.semester-toggle,
+.fee-toggle {
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: #666d7b;
+    cursor: pointer;
+    padding: 0;
+}
+
+.toggle-icon {
+    --slds-c-icon-color-foreground-default: currentColor;
+}
+
+.plan-card {
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    background: #fff;
+    overflow: hidden;
+}
+
+.table-scroll {
+    overflow-x: auto;
+}
+
+.plan-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.plan-table thead th {
+    color: var(--primary-font-color);
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+    padding: 18px 14px;
+    border-bottom: 1px solid var(--border-color);
+    background: #fff;
+}
+
+.sort-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    padding: 0;
+}
+
+.sort-mark {
+    width: 12px;
+    height: 12px;
+}
+
+.plan-table tbody td {
+    padding: 18px 14px;
+    font-size: 14px;
+    color: var(--secondary-font-color);
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.item-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.item-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #3a3f4c;
+}
+
+.child-plan-row td {
+    background: var(--teritary-color);
+    border-bottom: none;
+}
+
+/* .child-plan-row.first-child-row td {
+    border-top: 12px solid #fff;
+} */
+
+.child-plan-row.last-child-row td {
+    border-bottom: 12px solid #fff;
+}
+
+.child-item-name {
+    color: var(--secondary-font-color);
+    font-size: 14px;
+}
+
+.plan-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    min-width: 114px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--secondary-font-color);
+}
+
+.plan-status.partially-paid {
+    background: var(--chip-yellow-bg);
+    border-color: var(--chip-yellow-border);
+}
+
+.plan-status.pending {
+    background: var(--chip-blue-bg);
+    border-color: var(--chip-blue-border);
+}
+
+.card-footer {
+    display: flex;
+    justify-content: flex-end;
+    /* border-top: 1px solid var(--border-color); */
+    padding: 12px;
+}
+
+.download-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary-color);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 7px 14px;
+    cursor: pointer;
+}
+
+.download-icon {
+    --slds-c-icon-color-foreground-default: #ffffff;
+}
+
+@media (max-width: 768px) {
+    .fee-plan-shell {
+        padding: 0;
+        height: auto;
+        overflow: visible;
+    }
+
+    .semester-section,
+    .semester-header,
+    .plan-card,
+    .table-scroll,
+    .plan-table,
+    .card-footer {
+        display: none;
+    }
+
+    .fee-plan-mobile {
+        padding: 16px;
+    }
+
+    .mobile-semester-section {
+        border-bottom: 1px solid #d8dde6;
+        padding-bottom: 18px;
+        margin-bottom: 18px;
+    }
+
+    .mobile-semester-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 10px;
+    }
+
+    .mobile-semester-headline {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .mobile-semester-title {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #373a45;
+    }
+
+    .mobile-semester-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 12px;
+        border: 1px solid #3061ff;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 500;
+        color: #373a45;
+        background: #ffffff;
+    }
+
+    .mobile-status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #d95c59;
+    }
+
+    .mobile-semester-toggle {
+        width: 24px;
+        height: 24px;
+        border: none;
+        background: transparent;
+        color: #525866;
+        padding: 0;
+    }
+
+    .mobile-total-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+        color: #5a6170;
+        font-size: 12px;
+    }
+
+    .mobile-total-value {
+        color: #4b4f5c;
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    .mobile-item-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .mobile-item-card,
+    .mobile-child-card {
+        border: 1px solid #d8dde6;
+        border-radius: 14px;
+        background: #ffffff;
+        overflow: hidden;
+    }
+
+    .mobile-item-header,
+    .mobile-child-header {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        border: none;
+        background: transparent;
+        padding: 16px;
+        text-align: left;
+    }
+
+    .mobile-item-title,
+    .mobile-child-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #2f3441;
+    }
+
+    .mobile-item-body {
+        padding: 0 16px 16px;
+    }
+
+    .mobile-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px 20px;
+    }
+
+    .mobile-grid-cell {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        font-size: 12px;
+        color: #666d7b;
+    }
+
+    .mobile-grid-cell-full {
+        grid-column: 1 / -1;
+    }
+
+    .mobile-field-label {
+        color: #505662;
+    }
+
+    .mobile-field-value {
+        color: #666d7b;
+    }
+
+    .mobile-divider {
+        height: 1px;
+        background: #dde2ea;
+        margin: 14px 0;
+    }
+
+    .totals-grid {
+        gap: 12px 20px;
+    }
+
+    .mobile-child-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-top: 16px;
+    }
+
+    .mobile-child-header {
+        background: #f5f7fb;
+        padding-bottom: 14px;
+    }
+
+    .mobile-child-card .mobile-grid,
+    .mobile-child-card .mobile-divider,
+    .mobile-child-card .totals-grid {
+        margin-left: 16px;
+        margin-right: 16px;
+    }
+
+    .mobile-child-card .totals-grid {
+        margin-bottom: 16px;
+    }
+
+    .mobile-download-button {
+        width: 100%;
+        border: none;
+        border-radius: 12px;
+        background: #3766f5;
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 500;
+        padding: 14px 16px;
+    }
+}

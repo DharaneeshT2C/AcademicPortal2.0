@@ -1,0 +1,142 @@
+<template>
+    <div class="page">
+        <h2 class="page-title">Attendance</h2>
+
+        <template lwc:if={hasSuccess}>
+            <div class="success-banner">{_successBanner}</div>
+        </template>
+
+        <div class="attendance-grid">
+            <div class="main-col">
+                <div class="today-section card">
+                    <div class="today-header">
+                        <h3 class="section-title">Today's Attendance | 03 Feb 2026</h3>
+                        <button class="btn-outline" onclick={handleToggleOverview}>{overviewLabel}</button>
+                    </div>
+                    <template lwc:if={showOverview}>
+                        <div class="overview-panel">
+                            <div class="overview-stat"><span>Overall</span><strong>{overallPct}%</strong></div>
+                            <div class="overview-stat"><span>Subjects at risk</span><strong>{atRiskCount}</strong></div>
+                            <div class="overview-stat"><span>Total subjects</span><strong>{subjectCount}</strong></div>
+                        </div>
+                    </template>
+                    <template for:each={todayItems} for:item="item">
+                        <div key={item.id} class="today-item">
+                            <div class="today-info">
+                                <h4 class="today-subject">{item.subject}</h4>
+                                <p class="today-time"><c-icon name="schedule" size="16"></c-icon> {item.time}</p>
+                            </div>
+                            <span class={item.statusClass}>{item.status}</span>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="chart-section card">
+                    <div class="chart-header">
+                        <h3 class="section-title">Course Wise Details</h3>
+                        <div class="chart-filters">
+                            <select class="filter-select"><option>Semester 1</option></select>
+                            <span class="current-badge">Current</span>
+                        </div>
+                    </div>
+                    <div class="bar-chart">
+                        <div class="chart-y-axis">
+                            <span>100%</span><span>50%</span><span>0%</span>
+                        </div>
+                        <div class="chart-bars">
+                            <template for:each={courseWiseData} for:item="bar">
+                                <div key={bar.key} class="bar-container">
+                                    <div class="bar-wrapper">
+                                        <div class={bar.barClass} style={bar.barStyle}></div>
+                                    </div>
+                                    <span class="bar-label">{bar.subject}</span>
+                                    <span class="bar-code">({bar.code})</span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-col">
+                <div class="attention-card">
+                    <h3 class="attention-title">Needs Attention!</h3>
+                    <template for:each={data.needsAttention} for:item="item">
+                        <div key={item.subject} class="attention-item">
+                            <h4 class="attention-subject">{item.subject}</h4>
+                            <p class="attention-msg">{item.message}</p>
+                        </div>
+                    </template>
+                </div>
+
+                <div class="leave-section card">
+                    <div class="leave-header">
+                        <h3 class="section-title">Leave Requests</h3>
+                        <button class="btn-outline" onclick={handleToggleViewAllLeaves}>{viewAllLabel}</button>
+                    </div>
+                    <template for:each={leaveRequests} for:item="lr">
+                        <div key={lr.key} class="leave-item">
+                            <div class="leave-info">
+                                <h4 class="leave-title">{lr.title}</h4>
+                                <p class="leave-type">{lr.type}</p>
+                                <template lwc:if={lr.dates}>
+                                    <p class="leave-dates"><c-icon name="calendar_today" size="16"></c-icon> {lr.dates}</p>
+                                </template>
+                            </div>
+                            <span class={lr.statusClass}>{lr.status}</span>
+                        </div>
+                    </template>
+                    <button class="btn-primary full-width" onclick={handleOpenLeaveModal}>Request Leave of Absence</button>
+                </div>
+            </div>
+        </div>
+
+        <template lwc:if={showLeaveModal}>
+            <div class="modal-backdrop" onclick={handleCloseLeaveModal}>
+                <div class="modal" onclick={stopPropagation}>
+                    <div class="modal-header">
+                        <h3>Request Leave of Absence</h3>
+                        <button class="icon-btn" onclick={handleCloseLeaveModal} aria-label="Close">
+                            <c-icon name="close" size="20"></c-icon>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <template lwc:if={hasFormError}>
+                            <div class="error-banner">{_formError}</div>
+                        </template>
+                        <label class="field">
+                            <span>Title</span>
+                            <input type="text" data-field="title" value={formTitle} onchange={handleFormChange} oninput={handleFormChange} placeholder="e.g. Family wedding"/>
+                        </label>
+                        <label class="field">
+                            <span>Type</span>
+                            <select data-field="leaveType" value={formLeaveType} onchange={handleFormChange}>
+                                <template for:each={leaveTypeOptions} for:item="opt">
+                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                </template>
+                            </select>
+                        </label>
+                        <div class="field-row">
+                            <label class="field">
+                                <span>From</span>
+                                <input type="date" data-field="fromDate" value={formFromDate} onchange={handleFormChange}/>
+                            </label>
+                            <label class="field">
+                                <span>To</span>
+                                <input type="date" data-field="toDate" value={formToDate} onchange={handleFormChange}/>
+                            </label>
+                        </div>
+                        <label class="field">
+                            <span>Reason</span>
+                            <textarea data-field="reason" rows="3" value={formReason} onchange={handleFormChange} oninput={handleFormChange} placeholder="Brief reason for the leave (optional)"></textarea>
+                        </label>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-outline" onclick={handleCloseLeaveModal} disabled={isSubmitDisabled}>Cancel</button>
+                        <button class="btn-primary" onclick={handleSubmitLeave} disabled={isSubmitDisabled}>{submitLabel}</button>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

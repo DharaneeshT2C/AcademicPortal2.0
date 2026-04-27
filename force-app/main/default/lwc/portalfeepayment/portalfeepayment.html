@@ -1,0 +1,344 @@
+<template>
+  <section class="fee-payment-page">
+    <div class="layout-grid">
+      <div class="main-column">
+        <article class="hero-card">
+          <div class="hero-header">
+            <div>
+              <div class="title-row">
+                <h1>{programName}</h1>
+                <span class="status-chip status-chip-outline">
+                  <span class="status-dot"></span>
+                  {programStatus}
+                </span>
+              </div>
+              <!-- <p class="sub-copy">{cohortLabel}</p> -->
+            </div>
+
+            <button class="primary-button" type="button" onclick={handleOpenPaymentModal}>
+              Make Payments
+            </button>
+          </div>
+
+          <div class="summary-grid">
+            <div class="summary-block">
+              <p>Total Amount Paid</p>
+              <h2>{totalPaidDisplay} <span>of {totalFeeDisplay}</span></h2>
+            </div>
+            <div class="summary-block">
+              <p>Total Pending</p>
+              <h2>{totalPendingDisplay} <span>of {totalFeeDisplay}</span></h2>
+            </div>
+            <div class="summary-block">
+              <p>Total Fee Amount</p>
+              <h2>{totalFeeDisplay}</h2>
+            </div>
+          </div>
+        </article>
+
+        <article class={paymentStatusCardClass}>
+          <div>
+            <div class="status-heading-row" style="align-items: center;">
+              <h2>Payment Status</h2>
+              <span class={paymentStatusPillClass} style="background-color: white;">{paymentStatusLabel}</span>
+            </div>
+            <p>{paymentStatusDescription}</p>
+          </div>
+
+          <lightning-icon
+            class="status-illustration"
+            icon-name="utility:success"
+            size="large"
+            alternative-text="Payment status illustration">
+          </lightning-icon>
+        </article>
+
+        <article class="plan-card"> 
+          <div class="section-header">
+            <div>
+              <h2>Your Current Plan</h2>
+              <!-- <p>{planSummaryCopy}</p> -->
+            </div>
+            <button class="outline-button" type="button" onclick={handleToggleExpandAll}>
+              View Plan
+            </button>
+          </div>
+
+          <div class="table-shell desktop-table">
+            <div class="table-head">
+              <span title="Fee Item">Fee Item</span>
+              <span title="Due Date">Due Date</span>
+              <span title="Currency">Currency</span>
+              <span title="Total Amount">Total Amount</span>
+              <!-- <span title="Tax">Tax</span>
+              <span title="TDS">TDS</span> -->
+              <span title="Total Payable">Total Payable</span>
+              <span title="Status">Status</span>
+            </div>
+
+            <template for:each={planRows} for:item="row">
+              <div key={row.id} class="table-row-wrap">
+                <div class="table-row">
+                  <button class="fee-item-button" type="button" data-id={row.id} onclick={handleTogglePlanRow}>
+                    <span>{row.feeItem}</span>
+                    <lightning-icon
+                      icon-name={row.chevronIconName}
+                      size="xx-small"
+                      class="chevron"
+                      alternative-text="Toggle fee breakdown">
+                    </lightning-icon>
+                  </button>
+                  <span>{row.dueDate}</span>
+                  <span>{row.currency}</span>
+                  <span>{row.totalAmountDisplay}</span>
+                  <!-- <span>{row.taxDisplay}</span>
+                  <span>{row.tdsDisplay}</span> -->
+                  <span>{row.totalPayableDisplay}</span>
+                  <span class={row.statusClass} style="padding: 6px 6px">{row.statusLabel}</span>
+                </div>
+
+                <template if:true={row.isExpanded}>
+                  <div class="expanded-panel">
+                    <div class="expanded-plan-list">
+                      <template for:each={row.childItems} for:item="child">
+                        <div key={child.id} class="expanded-plan-row">
+                          <span class="child-item-name">{child.feeItem}</span>
+                          <span>{child.dueDate}</span>
+                          <span>{child.currency}</span>
+                          <span>{child.totalAmountDisplay}</span>
+                          <!-- <span>{child.taxDisplay}</span>
+                          <span>{child.tdsDisplay}</span> -->
+                          <span>{child.totalPayableDisplay}</span>
+                          <span></span>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </template>
+          </div>
+
+          <div class="mobile-plan-list">
+            <template for:each={planRows} for:item="row">
+              <article key={row.id} class="mobile-plan-card">
+                <button class="mobile-plan-toggle" type="button" data-id={row.id} onclick={handleTogglePlanRow}>
+                  <div>
+                    <h3>{row.feeItem}</h3>
+                    <p>{row.dueDate}</p>
+                  </div>
+                  <lightning-icon
+                    icon-name={row.chevronIconName}
+                    size="xx-small"
+                    class="chevron"
+                    alternative-text="Toggle fee breakdown">
+                  </lightning-icon>
+                </button>
+
+                <div class="mobile-plan-body">
+                  <div class="mobile-data-grid">
+                    <span>Currency</span>
+                    <strong>{row.currency}</strong>
+                    <span>Total Amount</span>
+                    <strong>{row.totalAmountDisplay}</strong>
+                    <span>Tax</span>
+                    <strong>{row.taxDisplay}</strong>
+                    <span>TDS</span>
+                    <strong>{row.tdsDisplay}</strong>
+                    <span>Total Payable</span>
+                    <strong>{row.totalPayableDisplay}</strong>
+                    <span>Status</span>
+                    <strong class={row.statusClass}>{row.statusLabel}</strong>
+                  </div>
+
+                  <template if:true={row.isExpanded}>
+                    <div class="expanded-panel expanded-panel-mobile">
+                      <div class="mobile-breakdown-list">
+                        <template for:each={row.childItems} for:item="child">
+                          <div key={child.id} class="mobile-breakdown-item">
+                            <div class="mobile-breakdown-head">
+                              <strong>{child.feeItem}</strong>
+                              <span class={child.statusClass}>{child.statusLabel}</span>
+                            </div>
+                            <div class="mobile-breakdown-grid">
+                              <span>Concession</span>
+                              <span>{child.concessionDisplay}</span>
+                              <span>Tax</span>
+                              <span>{child.taxDisplay}</span>
+                              <span>TDS</span>
+                              <span>{child.tdsDisplay}</span>
+                              <span>Due Date</span>
+                              <span>{child.dueDate}</span>
+                              <span>Total Amount</span>
+                              <span>{child.totalAmountDisplay}</span>
+                              <span>Total Paid</span>
+                              <span>{child.paidAmountDisplay}</span>
+                              <span>Balance Due</span>
+                              <span>{child.balanceDueDisplay}</span>
+                            </div>
+                          </div>
+                        </template>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </article>
+            </template>
+          </div>
+        </article>
+      </div>
+
+      <div class="side-column">
+        <article class="side-card">
+          <div class="section-header side-header">
+            <h2>Invoices</h2>
+            <button
+              class="outline-button"
+              type="button"
+              onclick={handleViewAllInvoices}
+              title="View all invoices">
+              {invoiceButtonLabel}
+            </button>
+          </div>
+
+          <div class="stack-list list-invoices">
+            <template for:each={visibleInvoices} for:item="invoice">
+              <div key={invoice.id} class="list-row">
+                <div>
+                  <h3>{invoice.title}</h3>
+                  <p>{invoice.reference}</p>
+                </div>
+
+                <template if:true={invoice.isAvailable}>
+                  <button
+                    class="icon-button"
+                    type="button"
+                    data-id={invoice.id}
+                    onclick={handleDownloadInvoice}
+                    title="Download invoice">
+                    <lightning-icon icon-name="utility:download" size="x-small" alternative-text="Download invoice"></lightning-icon>
+                  </button>
+                </template>
+                <template if:false={invoice.isAvailable}>
+                  <span class="status-chip status-chip-warn">Not Available</span>
+                </template>
+              </div>
+            </template>
+          </div>
+        </article>
+
+        <article class="side-card transactions-card">
+          <div class="section-header side-header">
+            <h2>Transaction History</h2>
+            <button class="outline-button" type="button" onclick={handleToggleTransactionFilter}>
+              Refunds
+            </button>
+          </div>
+
+          <div class="stack-list history-list">
+            <template for:each={visibleTransactions} for:item="transaction">
+              <div key={transaction.id} class="list-row transaction-row">
+                <div>
+                  <h3>{transaction.reference}</h3>
+                  <p>{transaction.dateDisplay}</p>
+                </div>
+
+                <div class="transaction-actions">
+                  <span class={transaction.statusClass}>{transaction.statusLabel}</span>
+                  <template if:true={transaction.showRetry}>
+                    <button
+                      class="retry-button"
+                      type="button"
+                      data-id={transaction.id}
+                      onclick={handleRetryTransaction}
+                      title="Retry failed payment">
+                      <lightning-icon
+                        icon-name="utility:refresh"
+                        size="x-small"
+                        alternative-text="Retry failed payment">
+                      </lightning-icon>
+                    </button>
+                  </template>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <button
+            class="footer-button"
+            type="button"
+            onclick={handleShowAllTransactions}
+            title="View all transactions">
+            {transactionFooterLabel}
+          </button>
+        </article>
+      </div>
+    </div>
+
+    <template if:true={isPaymentModalOpen}>
+      <section class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="payment-modal-title">
+        <div class="modal-card">
+          <div class="modal-header">
+            <div>
+              <h2 id="payment-modal-title">Make Payment</h2>
+              <p>Select a due fee item and complete the payment.</p>
+            </div>
+            <button class="icon-close" type="button" onclick={handleClosePaymentModal}>×</button>
+          </div>
+
+          <div class="modal-body">
+            <div class="field-group">
+              <label class="field-label">Fee Item</label>
+              <div class="option-list">
+                <template for:each={payableOptions} for:item="option">
+                  <label key={option.id} class={option.optionClass}>
+                    <input
+                      type="radio"
+                      name="feeItem"
+                      value={option.id}
+                      checked={option.selected}
+                      onchange={handleSelectPayableItem} />
+                    <div>
+                      <strong>{option.feeItem}</strong>
+                      <span>{option.pendingAmountDisplay} pending</span>
+                    </div>
+                  </label>
+                </template>
+              </div>
+            </div>
+
+            <div class="modal-form-grid">
+              <label class="field-group">
+                <span class="field-label">Amount</span>
+                <lightning-input
+                  type="number"
+                  variant="label-hidden"
+                  min="1"
+                  value={paymentAmount}
+                  onchange={handlePaymentAmountChange}>
+                </lightning-input>
+                <span class="field-hint">Maximum payable: {selectedPendingAmountDisplay}</span>
+              </label>
+
+              <label class="field-group">
+                <span class="field-label">Payment Method</span>
+                <select class="field-select" value={selectedGateway} onchange={handleGatewayChange}>
+                  <template for:each={gatewayOptions} for:item="gateway">
+                    <option key={gateway.value} value={gateway.value}>{gateway.label}</option>
+                  </template>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button class="ghost-button" type="button" onclick={handleClosePaymentModal}>Cancel</button>
+            <button class="primary-button" type="button" onclick={handleSubmitPayment} disabled={isSubmitPaymentDisabled}>
+              {submitPaymentButtonLabel}
+            </button>
+          </div>
+        </div>
+      </section>
+    </template>
+  </section>
+</template>

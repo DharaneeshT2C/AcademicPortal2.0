@@ -1,0 +1,74 @@
+<template>
+    <div class="whole-container">
+        <div class="tab-header">
+            <div class="tab-list" role="tablist" aria-label="Fee payment sections">
+                <template for:each={decoratedTabs} for:item="tab">
+                    <button
+                        key={tab.value}
+                        class={tab.className}
+                        data-value={tab.value}
+                        onclick={handleTabChange}
+                        type="button"
+                    >
+                        {tab.label}
+                    </button>
+                </template>
+            </div>
+
+            <div class={headerActionsClass}>
+                <template if:true={showSearch}>
+                    <label class="search-shell">
+                        <lightning-icon
+                            icon-name="utility:search"
+                            size="x-small"
+                            alternative-text="Search"
+                            class="search-icon"
+                        ></lightning-icon>
+                        <input
+                            type="text"
+                            value={searchTerm}
+                            placeholder={searchPlaceholder}
+                            oninput={handleSearchChange}
+                        />
+                    </label>
+                </template>
+
+                <button class="help-button" type="button" onclick={openHelpModal}>Get Help</button>
+            </div>
+        </div>
+
+        <div class="details-container">
+            <template if:true={isFeePaymentsTab}>
+                <c-fee-payments-module fee-assignments={feeAssignments} is-loading={isLoading}></c-fee-payments-module>
+            </template>
+
+            <template if:true={isFeePlanTab}>
+                <c-fee-plan-module fee-assignments={feeAssignments} is-loading={isLoading}></c-fee-plan-module>
+            </template>
+
+            <template if:true={isTransactionHistoryTab}>
+                <c-fee-payments-transactions-table search-term={searchTerm} rows={transactionRows} is-loading={isLoading}></c-fee-payments-transactions-table>
+            </template>
+
+            <template if:true={isInvoicesTab}>
+                <c-fee-payments-invoices-table search-term={searchTerm} rows={invoiceRows} is-loading={isLoading}></c-fee-payments-invoices-table>
+            </template>
+
+            <template if:true={isRefundsTab}>
+                <c-fee-payments-refunds-table search-term={searchTerm} rows={refundRows} is-loading={isLoading}></c-fee-payments-refunds-table>
+            </template>
+        </div>
+
+        <template if:true={isHelpModalOpen}>
+            <c-fee-payments-help-modal
+                default-issue-type={defaultIssueType}
+                onclose={closeHelpModal}
+                onsubmithelp={handleHelpSubmit}>
+            </c-fee-payments-help-modal>
+        </template>
+
+        <button class="floating-help-button" type="button" onclick={openHelpModal} aria-label="Get Help">
+            ?
+        </button>
+    </div>
+</template>

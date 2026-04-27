@@ -1,0 +1,17 @@
+<template>
+    <div class="page">
+        <div class="page-header"><button class="back-btn" onclick={handleBack}><c-icon name="arrow_back" size="20"></c-icon></button><div><h2 class="page-title">Gate Pass</h2></div><button class="btn-primary" onclick={handleCreate}><c-icon name="add" size="20"></c-icon> Create Request</button></div>
+        <div class="passes-list">
+            <template for:each={formattedPasses} for:item="pass">
+                <div key={pass.id} class="pass-card">
+                    <div class="pass-header"><span class="pass-id">{pass.requestId}</span><span class={pass.statusClass}>{pass.status}</span></div>
+                    <h4 class="pass-type">{pass.type}</h4>
+                    <template lwc:if={pass.visitor}><p class="pass-detail"><c-icon name="person" size="16"></c-icon> {pass.visitor}</p></template>
+                    <p class="pass-desc">{pass.description}</p>
+                    <template lwc:if={pass.exitDateTime}><p class="pass-detail"><c-icon name="schedule" size="16"></c-icon> {pass.exitDateTime}</p></template>
+                    <template lwc:if={pass.attachment}><p class="pass-attachment"><c-icon name="attach_file" size="16"></c-icon> {pass.attachment}</p></template>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>

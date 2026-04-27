@@ -1,0 +1,64 @@
+<template>
+    <div class="wrapper">
+
+        <!-- HEADER -->
+        <div class="header">
+            <h2>Your schedule</h2>
+        </div>
+
+        <div class="container">
+
+            <!-- LEFT: CALENDAR -->
+            <div class="calendar">
+                <div class="calendar-header">
+                    <button onclick={prevMonth}>&lt;</button>
+                    <span>{monthYearLabel}</span>
+                    <button onclick={nextMonth}>&gt;</button>
+                </div>
+
+                <div class="weekdays">
+                    <span>S</span><span>M</span><span>T</span><span>W</span>
+                    <span>T</span><span>F</span><span>S</span>
+                </div>
+
+                <div class="days">
+                    <template for:each={calendarDays} for:item="day">
+                        <span
+                            key={day.date}
+                            class={day.className}
+                            data-date={day.date}
+                            onclick={selectDate}>
+                            {day.label}
+                        </span>
+                    </template>
+                </div>
+            </div>
+
+            <!-- RIGHT: SCHEDULE -->
+            <div class="schedule">
+
+                <template if:true={hasDaySchedules}>
+    <template for:each={daySchedules} for:item="item">
+        <div key={item.key} class="schedule-card">
+            <div class="info">
+                <h3>{item.courseName}</h3>
+                <p class="faculty">{item.facultyName}</p>
+                <p class="time">
+                    🕒 {item.startTime} – {item.endTime}
+                </p>
+            </div>
+        </div>
+    </template>
+</template>
+
+
+                <template if:false={hasDaySchedules}>
+                    <p class="empty">
+                        No sessions for this day
+                    </p>
+                </template>
+
+            </div>
+        </div>
+    </div>
+</template>

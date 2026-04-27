@@ -1,0 +1,23 @@
+<template>
+    <div class="page">
+        <div class="page-header"><button class="back-btn" onclick={handleBack}><c-icon name="arrow_back" size="20"></c-icon></button><div><h2 class="page-title">Marks Breakdown</h2><p class="breadcrumb">Exams &gt; Results &gt; Marks Breakdown</p></div></div>
+        <div class="card">
+            <div class="course-info-header">
+                <div class="info-row"><span class="info-label">Course Code</span><span class="info-value">{data.courseCode}</span></div>
+                <div class="info-row"><span class="info-label">Course Name</span><span class="info-value">{data.courseName}</span></div>
+                <div class="info-row"><span class="info-label">Section</span><span class="info-value">{data.section}</span></div>
+                <div class="info-row"><span class="info-label">Term</span><span class="info-value">{data.term}</span></div>
+            </div>
+            <table class="marks-table">
+                <thead><tr><th>Component</th><th>Max Marks</th><th>Weightage (%)</th></tr></thead>
+                <tbody>
+                    <template for:each={data.components} for:item="comp">
+                        <tr key={comp.name}><td>{comp.name}</td><td>{comp.maxMarks}</td><td>{comp.weightage}%</td></tr>
+                    </template>
+                </tbody>
+            </table>
+            <div class="composite-row"><span>Composite Score</span><strong class="composite-value">{data.composite}</strong></div>
+            <div class="grade-row"><span>Final Grade</span><strong class="grade-value">{data.finalGrade}</strong></div>
+        </div>
+    </div>
+</template>

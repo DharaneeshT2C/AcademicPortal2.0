@@ -1,0 +1,402 @@
+<template>
+    <div class="page">
+        <div class="breadcrumb">
+            <a href="javascript:void(0)" onclick={navigateToMasterData}>Master Data</a>
+            <span class="sep">&gt;</span>
+            <template if:true={isListView}>
+                <span>Payment Gateways</span>
+            </template>
+            <template if:true={isFormView}>
+                <a href="javascript:void(0)" onclick={handleFormCancel}>Payment Gateways</a>
+                <span class="sep">&gt;</span>
+                <span>{formPageTitle}</span>
+            </template>
+            <template if:true={isPaymentGatewayDetailView}>
+                <a href="javascript:void(0)" onclick={handleBackToPaymentGatewayList}>Payment Gateways</a>
+                <span class="sep">&gt;</span>
+                <span>{selectedPaymentGateway.gatewayDisplayName}</span>
+            </template>
+        </div>
+
+        <template if:true={notification}>
+            <section class={notification.className} role="alert">
+                <div class="notificationContent">
+                    <div>
+                        <div class="notificationTitle">{notification.title}</div>
+                        <div class="notificationMessage">{notification.message}</div>
+                    </div>
+                    <button type="button" class="notificationDismiss" onclick={handleNotificationDismiss} aria-label="Dismiss notification">
+                        <lightning-icon icon-name="utility:close" size="x-small" alternative-text="Dismiss"></lightning-icon>
+                    </button>
+                </div>
+            </section>
+        </template>
+
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+        </template>
+
+        <template if:false={isLoading}>
+            <template if:true={isListView}>
+                <div class="titleRow">
+                    <div class="titleBlock">
+                        <div class="title">Payment Gateways</div>
+                        <div class="subtitle">{gatewayCountText}</div>
+                    </div>
+                    <lightning-button class="primaryActionBtn" variant="brand" label="New" onclick={openNewGatewayModal}></lightning-button>
+                </div>
+
+                <div class="toolbar">
+                    <div class="leftTools">
+                        <lightning-button-menu
+                            class="scopeMenu"
+                            alternative-text="Gateway scope"
+                            label={gatewayScopeLabel}
+                            icon-size="x-small"
+                            menu-alignment="auto"
+                            variant="border"
+                            onselect={handleGatewayScopeSelect}
+                        >
+                            <lightning-menu-item value="all" label="All Gateways" checked={isScopeAll}></lightning-menu-item>
+                            <lightning-menu-item value="active" label="Active Gateways" checked={isScopeActive}></lightning-menu-item>
+                            <lightning-menu-item value="inactive" label="Inactive Gateways" checked={isScopeInactive}></lightning-menu-item>
+                        </lightning-button-menu>
+                    </div>
+                    <div class="rightTools">
+                        <div class="searchBox">
+                            <lightning-input
+                                class="searchInput"
+                                type="search"
+                                variant="label-hidden"
+                                value={searchText}
+                                onchange={handleSearchChange}
+                                placeholder="Search gateways..."
+                                aria-label="Search gateways"
+                            ></lightning-input>
+                        </div>
+                        <lightning-button class="filterBtn" variant="neutral" label="Filters" onclick={handleFilterClick}></lightning-button>
+                    </div>
+                </div>
+
+                <template if:true={hasPaymentGateways}>
+                    <div class="tableWrap">
+                        <div class="header gatewayGrid">
+                            <div>Gateway Name</div>
+                            <div>Provider</div>
+                            <div>External Reference</div>
+                            <div>Merchant Credential</div>
+                            <div>Environment</div>
+                            <div>Status</div>
+                            <div>Last Modified</div>
+                            <div class="actionsHeader">Actions</div>
+                        </div>
+
+                        <template for:each={filteredPaymentGateways} for:item="row">
+                            <div key={row.id} class="gatewayGrid dataRow">
+                                <div class="nameCell">
+                                    <button class="nameLink" data-gateway-id={row.id} onclick={handleOpenPaymentGatewayDetails}>
+                                        {row.paymentGatewayName}
+                                    </button>
+                                </div>
+                                <div>{row.paymentGatewayProviderName}</div>
+                                <div>{row.externalReference}</div>
+                                <div>{row.merchantCredentialName}</div>
+                                <div>
+                                    <template if:true={row.environmentClass}>
+                                        <span class={row.environmentClass}>{row.environment}</span>
+                                    </template>
+                                    <template if:false={row.environmentClass}>
+                                        {row.environment}
+                                    </template>
+                                </div>
+                                <div><span class={row.statusClass}>{row.status}</span></div>
+                                <div>{row.lastModifiedText}</div>
+                                <div class={row.actionsCellClass}>
+                                    <button
+                                        class="actionsButton"
+                                        title="Actions"
+                                        aria-label="Gateway actions"
+                                        data-gateway-id={row.id}
+                                        onclick={handleToggleActionMenu}
+                                    >
+                                        <lightning-icon icon-name="utility:threedots_vertical" size="x-small" alternative-text="Actions"></lightning-icon>
+                                    </button>
+                                    <template if:true={row.isActionMenuOpen}>
+                                        <div class="actionsMenu">
+                                            <button class="actionItem" data-gateway-id={row.id} data-action="view" onclick={handleRowAction}>View</button>
+                                            <button class="actionItem" data-gateway-id={row.id} data-action="edit" onclick={handleRowAction}>Edit</button>
+                                            <button class="actionItem actionItemDisabled" type="button" disabled aria-disabled="true">Clone</button>
+                                            <button class="actionItem actionDelete" data-gateway-id={row.id} data-action="delete" onclick={handleRowAction}>Delete</button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <template if:false={hasPaymentGateways}>
+                    <div class="empty emptyCard">No payment gateways found.</div>
+                </template>
+            </template>
+
+            <template if:true={isFormView}>
+                <div class="builderHeader">
+                    <div class="builderTitleBlock">
+                        <div class="builderTitle">{formPageTitle}</div>
+                        <div class="builderSubtitle">Configure payment gateway details</div>
+                    </div>
+                    <div class="formHeaderActions">
+                        <lightning-button class="btnNeutral" label="Cancel" onclick={handleFormCancel} disabled={formIsSaving}></lightning-button>
+                        <lightning-button class="btnPrimary" variant="brand" label={formSaveLabel} onclick={handleFormSave} disabled={formIsSaving}></lightning-button>
+                    </div>
+                </div>
+
+                <section class="builderCard">
+                    <div class="builderSectionTitle">Basic Configuration</div>
+
+                    <div class="builderGrid twoColGrid">
+                        <lightning-input
+                            class="builderField"
+                            data-id="paymentGatewayName"
+                            name="paymentGatewayName"
+                            label="Payment Gateway Name"
+                            value={formPaymentGatewayName}
+                            required
+                            onchange={handleFormFieldChange}
+                        ></lightning-input>
+                        <lightning-input
+                            class="builderField"
+                            data-id="gatewayDisplayName"
+                            name="gatewayDisplayName"
+                            label="Gateway Display Name"
+                            value={formGatewayDisplayName}
+                            required
+                            onchange={handleFormFieldChange}
+                        ></lightning-input>
+                        <div class="searchableSelect builderField">
+                            <lightning-input
+                                class="builderField"
+                                data-id="paymentGatewayProviderId"
+                                type="search"
+                                label="Payment Gateway Provider"
+                                placeholder="Search or select provider..."
+                                value={formProviderSearchText}
+                                required
+                                oninput={handleProviderInput}
+                                onfocus={handleProviderFocus}
+                                onblur={handleProviderBlur}
+                            ></lightning-input>
+                            <template if:true={isProviderDropdownOpen}>
+                                <div class="searchableDropdown">
+                                    <template if:true={hasFilteredProviderOptions}>
+                                        <template for:each={filteredProviderOptionRows} for:item="option">
+                                            <button
+                                                key={option.value}
+                                                type="button"
+                                                class={option.optionClass}
+                                                data-value={option.value}
+                                                data-label={option.label}
+                                                onmousedown={handleProviderOptionSelect}
+                                            >
+                                                {option.label}
+                                            </button>
+                                        </template>
+                                    </template>
+                                    <template if:false={hasFilteredProviderOptions}>
+                                        <div class="searchableEmpty">No matching providers found.</div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                        <lightning-combobox
+                            class="builderField"
+                            data-id="status"
+                            name="status"
+                            label="Status"
+                            value={formStatus}
+                            options={statusOptions}
+                            required
+                            onchange={handleFormFieldChange}
+                        ></lightning-combobox>
+                        <lightning-combobox
+                            class="builderField"
+                            name="environment"
+                            label="Environment"
+                            value={formEnvironment}
+                            options={environmentOptions}
+                            onchange={handleFormFieldChange}
+                        ></lightning-combobox>
+                        <lightning-input
+                            class="builderField"
+                            data-id="externalReference"
+                            name="externalReference"
+                            label="External Reference"
+                            value={formExternalReference}
+                            required
+                            onchange={handleFormFieldChange}
+                        ></lightning-input>
+                        <div class="searchableSelect builderField fieldSpanTwo">
+                            <lightning-input
+                                class="builderField"
+                                data-id="merchantCredentialId"
+                                type="search"
+                                label="Merchant Credential"
+                                placeholder="Search or select merchant credential..."
+                                value={formMerchantCredentialSearchText}
+                                required
+                                oninput={handleMerchantCredentialInput}
+                                onfocus={handleMerchantCredentialFocus}
+                                onblur={handleMerchantCredentialBlur}
+                            ></lightning-input>
+                            <template if:true={isMerchantCredentialDropdownOpen}>
+                                <div class="searchableDropdown">
+                                    <template if:true={hasFilteredMerchantCredentialOptions}>
+                                        <template for:each={filteredMerchantCredentialOptionRows} for:item="option">
+                                            <button
+                                                key={option.value}
+                                                type="button"
+                                                class={option.optionClass}
+                                                data-value={option.value}
+                                                data-label={option.label}
+                                                onmousedown={handleMerchantCredentialOptionSelect}
+                                            >
+                                                {option.label}
+                                            </button>
+                                        </template>
+                                    </template>
+                                    <template if:false={hasFilteredMerchantCredentialOptions}>
+                                        <div class="searchableEmpty">No matching credentials found.</div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="builderCard">
+                    <div class="builderSectionTitle">Additional Information</div>
+                    <div class="builderGridSingle">
+                        <lightning-textarea
+                            class="builderField"
+                            name="comments"
+                            label="Comments"
+                            value={formComments}
+                            onchange={handleFormFieldChange}
+                        ></lightning-textarea>
+                    </div>
+                </section>
+            </template>
+
+            <template if:true={isPaymentGatewayDetailView}>
+                <template if:true={selectedPaymentGateway}>
+                    <div class="detailHeader">
+                        <div class="detailHeaderTop">
+                            <div>
+                                <div class="detailTitleRow">
+                                    <div class="detailTitle">{selectedPaymentGateway.gatewayDisplayName}</div>
+                                    <span class={selectedPaymentGateway.statusClass}>{selectedPaymentGateway.status}</span>
+                                </div>
+                                <div class="detailMetaRow">
+                                    <div class="muted">Payment Gateway Name: {selectedPaymentGateway.paymentGatewayName}</div>
+                                    <div class="muted">Last modified {selectedPaymentGateway.lastModifiedRelative}</div>
+                                </div>
+                            </div>
+                            <div class="detailActions">
+                                <lightning-button class="detailActionBtn" label="Edit" onclick={handleDetailEdit}></lightning-button>
+                                <lightning-button class="detailActionBtn" label="Clone" onclick={handleDetailClone}></lightning-button>
+                                <lightning-button class="detailActionBtn detailDeleteBtn" label="Delete" onclick={handleDetailDelete}></lightning-button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detailsCard">
+                        <div class="tabRow">
+                            <span class="tab tabActive">Details</span>
+                            <!-- <span class="tab">Technical Setup</span>
+                            <span class="tab">Usage</span> -->
+                        </div>
+
+                        <div class="detailSectionTitle">Gateway Information</div>
+                        <div class="detailGrid">
+                            <div>
+                                <div class="fieldLabel">Gateway Display Name</div>
+                                <div class="fieldValue">{selectedPaymentGateway.gatewayDisplayName}</div>
+                            </div>
+                            <div>
+                                <div class="fieldLabel">Payment Gateway Name</div>
+                                <div class="fieldValue">{selectedPaymentGateway.paymentGatewayName}</div>
+                            </div>
+                            <div>
+                                <div class="fieldLabel">Provider</div>
+                                <div class="fieldValue">
+                                    <template if:true={selectedPaymentGateway.paymentGatewayProviderUrl}>
+                                        <a class="fieldValueLink" href={selectedPaymentGateway.paymentGatewayProviderUrl}>
+                                            {selectedPaymentGateway.paymentGatewayProviderName}
+                                        </a>
+                                    </template>
+                                    <template if:false={selectedPaymentGateway.paymentGatewayProviderUrl}>
+                                        {selectedPaymentGateway.paymentGatewayProviderName}
+                                    </template>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="fieldLabel">Merchant Credential</div>
+                                <div class="fieldValue">
+                                    <template if:true={selectedPaymentGateway.merchantCredentialUrl}>
+                                        <a class="fieldValueLink" href={selectedPaymentGateway.merchantCredentialUrl}>
+                                            {selectedPaymentGateway.merchantCredentialName}
+                                        </a>
+                                    </template>
+                                    <template if:false={selectedPaymentGateway.merchantCredentialUrl}>
+                                        {selectedPaymentGateway.merchantCredentialName}
+                                    </template>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="fieldLabel">Environment</div>
+                                <div class="fieldValue">
+                                    <span class={selectedPaymentGateway.environmentClass}>{selectedPaymentGateway.environment}</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="fieldLabel">Status</div>
+                                <div class="fieldValue">
+                                    <span class={selectedPaymentGateway.statusClass}>{selectedPaymentGateway.status}</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="fieldLabel">External Reference</div>
+                                <div class="fieldValue">{selectedPaymentGateway.externalReference}</div>
+                            </div>
+                            <div>
+                                <div class="fieldLabel">Comments</div>
+                                <div class="fieldValue">{selectedPaymentGateway.comments}</div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </template>
+        </template>
+
+        <template if:true={confirmDialog}>
+            <section class="dialogBackdrop" role="presentation">
+                <div class="dialogCard" role="dialog" aria-modal="true" aria-labelledby="payment-gateway-confirm-title">
+                    <div class="dialogHeader">
+                        <div class="dialogIconWrap">
+                            <lightning-icon icon-name="utility:warning" size="small"></lightning-icon>
+                        </div>
+                        <div>
+                            <h2 id="payment-gateway-confirm-title" class="dialogTitle">{confirmDialog.title}</h2>
+                            <p class="dialogMessage">{confirmDialog.message}</p>
+                        </div>
+                    </div>
+                    <div class="dialogFooter">
+                        <button type="button" class="dialogBtn dialogBtnNeutral" onclick={closeConfirmDialog}>Cancel</button>
+                        <button type="button" class="dialogBtn dialogBtnDanger" onclick={handleConfirmDelete}>{confirmDialog.confirmLabel}</button>
+                    </div>
+                </div>
+            </section>
+        </template>
+    </div>
+</template>

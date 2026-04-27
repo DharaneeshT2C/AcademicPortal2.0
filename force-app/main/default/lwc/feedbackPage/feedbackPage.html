@@ -1,0 +1,35 @@
+<template>
+    <template lwc:if={showToast}>
+        <c-toast message={toastMessage} variant={toastVariant} onclose={handleToastClose}></c-toast>
+    </template>
+    <div class="page">
+        <h2 class="page-title">Feedback</h2>
+        <div class="feedback-grid">
+            <div class="main-col">
+                <h3 class="section-title">Feedback Forms</h3>
+                <div class="forms-grid">
+                    <template for:each={formCards} for:item="form">
+                        <div key={form.id} class="form-card">
+                            <c-icon name={form.icon} size="32"></c-icon>
+                            <h4 class="form-title">{form.title}</h4>
+                            <p class="form-count">{form.count} forms</p>
+                            <span class={form.statusClass}>{form.status}</span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+            <div class="right-col">
+                <div class="card attention-card">
+                    <h3 class="section-title">Needs Attention!</h3>
+                    <template for:each={data.needsAttention} for:item="item">
+                        <div key={item.title} class="attention-item">
+                            <h4 class="att-title">{item.title}</h4>
+                            <p class="att-due">{item.dueIn}</p>
+                            <p class="att-date">Last Date: {item.lastDate}</p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

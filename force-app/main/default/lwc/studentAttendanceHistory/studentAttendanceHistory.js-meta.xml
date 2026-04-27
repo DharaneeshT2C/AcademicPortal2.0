@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightningCommunity__Default</target>
+        <target>lightningCommunity__Page</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+            <property name="dashboardPageApiName" type="String" label="Dashboard Page API Name" description="API name of the Experience Cloud page for the Attendance Dashboard (e.g. Attendance_Dashboard)"/>
+            <property name="detailsPageApiName" type="String" label="Course Details Page API Name" description="API name of the Experience Cloud page for Course Details (e.g. Attendance_Course_Details)"/>
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

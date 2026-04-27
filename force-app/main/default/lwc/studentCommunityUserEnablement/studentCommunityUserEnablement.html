@@ -1,0 +1,184 @@
+<template>
+  <lightning-card>
+    <div class="enablement-shell">
+      <header class="enablement-header">
+        <div>
+          <p class="eyebrow">Person Account User Enablement</p>
+          <h1 class="title">{pageTitle}</h1>
+          <p class="subtitle">{pageSubtitle}</p>
+        </div>
+        <div class="header-actions">
+          <lightning-button-icon
+            icon-name="utility:refresh"
+            alternative-text="Refresh"
+            title="Refresh"
+            onclick={handleRefresh}
+            disabled={isWorking}
+          ></lightning-button-icon>
+          <lightning-button
+            label="Submit"
+            variant="brand"
+            onclick={handleSubmit}
+            disabled={isSubmitDisabled}
+          ></lightning-button>
+        </div>
+      </header>
+
+      <nav class="role-tabs" aria-label="Person account role">
+        <button
+          class={studentTabClass}
+          type="button"
+          data-role="Student"
+          aria-selected={isStudentActive}
+          onclick={handleRoleTabClick}
+          disabled={isWorking}
+        >
+          Student
+        </button>
+        <button
+          class={facultyTabClass}
+          type="button"
+          data-role="Faculty"
+          aria-selected={isFacultyActive}
+          onclick={handleRoleTabClick}
+          disabled={isWorking}
+        >
+          Faculty
+        </button>
+      </nav>
+
+      <section class="summary-grid" aria-label="Enablement summary">
+        <article class="summary-item">
+          <span class="summary-label">{totalLabel}</span>
+          <strong class="summary-value">{totalCount}</strong>
+        </article>
+        <article class="summary-item">
+          <span class="summary-label">Ready</span>
+          <strong class="summary-value">{readyCount}</strong>
+        </article>
+        <article class="summary-item">
+          <span class="summary-label">Selected</span>
+          <strong class="summary-value">{selectedCount}</strong>
+        </article>
+      </section>
+
+      <section class="search-panel" aria-label="Record filters">
+        <div class={searchControlsClass}>
+          <lightning-input
+            data-id="nameEmailSearch"
+            type="search"
+            label="Name or Email"
+            value={personSearchTerm}
+            placeholder={searchPlaceholder}
+            oninput={handlePersonSearchTermChange}
+            onchange={handlePersonSearchTermChange}
+            onkeydown={handleSearchKeydown}
+            disabled={isWorking}
+          ></lightning-input>
+          <template if:true={showProgramPlanFilter}>
+            <lightning-combobox
+              label="Program Plan"
+              value={selectedProgramPlanId}
+              placeholder={programPlanPlaceholder}
+              options={programPlanOptions}
+              onchange={handleProgramPlanChange}
+              disabled={isWorking}
+            ></lightning-combobox>
+          </template>
+          <div class="search-actions">
+            <lightning-button
+              label="Search"
+              icon-name="utility:search"
+              variant="brand"
+              onclick={handleSearch}
+              disabled={isSearchDisabled}
+            ></lightning-button>
+            <lightning-button
+              label="Clear"
+              variant="neutral"
+              onclick={handleClearSearch}
+              disabled={isWorking}
+            ></lightning-button>
+          </div>
+        </div>
+      </section>
+
+      <template if:true={isLoading}>
+        <div class="loading-panel">
+          <lightning-spinner
+            alternative-text="Loading records"
+            size="medium"
+          ></lightning-spinner>
+        </div>
+      </template>
+
+      <template if:false={isLoading}>
+        <template if:true={hasRows}>
+          <div class="table-toolbar">
+            <p class="table-summary">{pageSummary}</p>
+            <div class="table-toolbar-controls">
+              <span class="rows-label">Rows:</span>
+              <lightning-combobox
+                label="Rows"
+                variant="label-hidden"
+                class="rows-combobox"
+                value={pageSizeValue}
+                options={pageSizeOptions}
+                onchange={handlePageSizeChange}
+                disabled={isWorking}
+              ></lightning-combobox>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <lightning-datatable
+              key-field="accountId"
+              data={pagedRows}
+              columns={columns}
+              selected-rows={selectedRowIds}
+              disabled-rows={disabledRowIds}
+              onrowselection={handleRowSelection}
+            ></lightning-datatable>
+          </div>
+          <div class="pagination-bar">
+            <lightning-button
+              label="Previous"
+              variant="neutral"
+              onclick={handlePreviousPage}
+              disabled={isPreviousDisabled}
+            ></lightning-button>
+            <span class="pagination-label">{pageLabel}</span>
+            <lightning-button
+              label="Next"
+              variant="neutral"
+              onclick={handleNextPage}
+              disabled={isNextDisabled}
+            ></lightning-button>
+          </div>
+        </template>
+
+        <template if:false={hasRows}>
+          <div class="empty-state">{emptyStateMessage}</div>
+        </template>
+      </template>
+
+      <template if:true={hasResults}>
+        <section class="results-panel">
+          <h2 class="results-title">Submit Results</h2>
+          <template for:each={results} for:item="result">
+            <article key={result.key} class={result.cssClass}>
+              <lightning-icon
+                icon-name={result.iconName}
+                size="x-small"
+                alternative-text={result.iconAlt}
+              ></lightning-icon>
+              <div>
+                <p class="result-name">{result.accountName}</p>
+                <p class="result-message">{result.message}</p>
+              </div>
+            </article>
+          </template>
+        </section>
+      </template>
+    </div>
+  </lightning-card>
+</template>

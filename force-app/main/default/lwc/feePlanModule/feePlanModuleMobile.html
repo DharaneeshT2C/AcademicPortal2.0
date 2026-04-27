@@ -1,0 +1,159 @@
+<template>
+    <section class="fee-plan-mobile">
+        <template for:each={mobileSemesters} for:item="semester">
+            <article key={semester.id} class="mobile-semester-section">
+                <header class="mobile-semester-header">
+                    <div class="mobile-semester-headline">
+                        <h2 class="mobile-semester-title">{semester.program} - {semester.semester}</h2>
+                        <template if:true={semester.showHeaderStatus}>
+                            <span class="mobile-semester-status">
+                                <span class="mobile-status-dot"></span>
+                                {semester.headerStatusLabel}
+                            </span>
+                        </template>
+                    </div>
+
+                    <button
+                        class="mobile-semester-toggle"
+                        data-semester-id={semester.id}
+                        onclick={handleSemesterToggle}
+                        type="button"
+                        aria-label={semester.toggleLabel}
+                    >
+                        <lightning-icon
+                            icon-name={semester.toggleIcon}
+                            size="xx-small"
+                            alternative-text={semester.toggleLabel}
+                            class="toggle-icon"
+                        ></lightning-icon>
+                    </button>
+                </header>
+
+                <div class="mobile-total-row">
+                    <span class="mobile-total-label">Total fee amount:</span>
+                    <strong class="mobile-total-value">{semester.totalFeeAmount}</strong>
+                </div>
+
+                <template if:true={semester.expanded}>
+                    <div class="mobile-item-stack">
+                        <template for:each={semester.items} for:item="item">
+                            <section key={item.id} class="mobile-item-card">
+                                <button
+                                    class="mobile-item-header"
+                                    data-semester-id={semester.id}
+                                    data-item-id={item.id}
+                                    onclick={handleFeeToggle}
+                                    type="button"
+                                    aria-label={item.toggleLabel}
+                                >
+                                    <span class="mobile-item-title">{item.name}</span>
+                                    <lightning-icon
+                                        icon-name={item.toggleIcon}
+                                        size="xx-small"
+                                        alternative-text={item.toggleLabel}
+                                        class="toggle-icon"
+                                    ></lightning-icon>
+                                </button>
+
+                                <template if:true={item.expanded}>
+                                    <div class="mobile-item-body">
+                                        <div class="mobile-grid">
+                                            <div class="mobile-grid-cell">
+                                                <span class="mobile-field-label">Concession:</span>
+                                                <span class="mobile-field-value">INR {item.concession}/-</span>
+                                            </div>
+                                            <div class="mobile-grid-cell">
+                                                <span class="mobile-field-label">Tax:</span>
+                                                <span class="mobile-field-value">INR {item.tax} /-</span>
+                                            </div>
+                                            <div class="mobile-grid-cell">
+                                                <span class="mobile-field-label">TDS:</span>
+                                                <span class="mobile-field-value">INR {item.tds}/-</span>
+                                            </div>
+                                            <div class="mobile-grid-cell">
+                                                <span class="mobile-field-label">Due date:</span>
+                                                <span class="mobile-field-value">{item.dueDate}</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="mobile-divider"></div>
+
+                                        <div class="mobile-grid totals-grid">
+                                            <div class="mobile-grid-cell mobile-grid-cell-full">
+                                                <span class="mobile-field-label">Total fee amount:</span>
+                                                <span class="mobile-field-value">INR {item.totalPayable}</span>
+                                            </div>
+                                            <div class="mobile-grid-cell">
+                                                <span class="mobile-field-label">Total payable:</span>
+                                                <span class="mobile-field-value">INR {item.totalPayable}</span>
+                                            </div>
+                                            <div class="mobile-grid-cell">
+                                                <span class="mobile-field-label">Total paid:</span>
+                                                <span class="mobile-field-value">INR {item.concession}/-</span>
+                                            </div>
+                                        </div>
+
+                                        <template if:true={item.hasChildren}>
+                                            <div class="mobile-child-stack">
+                                                <template for:each={item.children} for:item="child">
+                                                    <article key={child.id} class="mobile-child-card">
+                                                        <div class="mobile-child-header">
+                                                            <span class="mobile-child-title">{child.name}</span>
+                                                            <template if:true={child.hasStatus}>
+                                                                <span class={child.statusClass}>{child.status}</span>
+                                                            </template>
+                                                        </div>
+
+                                                        <div class="mobile-grid">
+                                                            <div class="mobile-grid-cell">
+                                                                <span class="mobile-field-label">Concession:</span>
+                                                                <span class="mobile-field-value">INR {child.concession}/-</span>
+                                                            </div>
+                                                            <div class="mobile-grid-cell">
+                                                                <span class="mobile-field-label">Tax:</span>
+                                                                <span class="mobile-field-value">INR {child.tax} /-</span>
+                                                            </div>
+                                                            <div class="mobile-grid-cell">
+                                                                <span class="mobile-field-label">TDS:</span>
+                                                                <span class="mobile-field-value">INR {child.tds}/-</span>
+                                                            </div>
+                                                            <div class="mobile-grid-cell">
+                                                                <span class="mobile-field-label">Due date:</span>
+                                                                <span class="mobile-field-value">{child.dueDate}</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="mobile-divider"></div>
+
+                                                        <div class="mobile-grid totals-grid">
+                                                            <div class="mobile-grid-cell">
+                                                                <span class="mobile-field-label">Total Amount:</span>
+                                                                <span class="mobile-field-value">INR {child.totalAmount}/-</span>
+                                                            </div>
+                                                            <div class="mobile-grid-cell">
+                                                                <span class="mobile-field-label">Total paid:</span>
+                                                                <span class="mobile-field-value">--</span>
+                                                            </div>
+                                                            <div class="mobile-grid-cell mobile-grid-cell-full">
+                                                                <span class="mobile-field-label">Balance due:</span>
+                                                                <span class="mobile-field-value">INR {child.totalPayable}/-</span>
+                                                            </div>
+                                                        </div>
+                                                    </article>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </section>
+                        </template>
+
+                        <button class="mobile-download-button" type="button">
+                            Download Fee Plan
+                        </button>
+                    </div>
+                </template>
+            </article>
+        </template>
+    </section>
+</template>

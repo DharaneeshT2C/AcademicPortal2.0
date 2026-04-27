@@ -1,0 +1,89 @@
+<template>
+    <template lwc:if={showErrorPopup}>
+        <section class="error-popup-backdrop" role="presentation">
+            <div class="error-popup" role="alertdialog" aria-modal="true" aria-labelledby="quota-error-title">
+                <div class="error-popup__header">
+                    <h3 id="quota-error-title" class="error-popup__title">Unable to Save Quota</h3>
+                    <lightning-button-icon
+                        icon-name="utility:close"
+                        variant="bare"
+                        alternative-text="Close"
+                        onclick={handleErrorPopupClose}>
+                    </lightning-button-icon>
+                </div>
+                <div class="error-popup__body">{errorPopupMessage}</div>
+                <div class="error-popup__footer">
+                    <lightning-button variant="brand" label="OK" onclick={handleErrorPopupClose}></lightning-button>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <lightning-modal-body>
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 class="modal-title">{modalTitle}</h2>
+                    <p class="modal-subtitle">Configure a quota entry for fee assignment.</p>
+                </div>
+                <lightning-button-icon
+                    icon-name="utility:close"
+                    variant="bare"
+                    alternative-text="Close"
+                    onclick={handleCancel}
+                    class="close-button">
+                </lightning-button-icon>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label">Quota Name <span class="required">*</span></label>
+                <lightning-input
+                    data-id="quotaName"
+                    name="quotaName"
+                    variant="label-hidden"
+                    value={quotaName}
+                    placeholder="e.g., General (Open)"
+                    required
+                    onchange={handleChange}>
+                </lightning-input>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label">Code <span class="required">*</span></label>
+                <lightning-input
+                    data-id="code"
+                    name="code"
+                    variant="label-hidden"
+                    value={code}
+                    placeholder="e.g., GEN"
+                    required
+                    onchange={handleChange}>
+                </lightning-input>
+                <div class="helper-text">
+                    Code must be unique (case-insensitive).
+                </div>
+            </div>
+
+            <div class="toggle-row">
+                <lightning-input
+                    data-id="isActive"
+                    type="toggle"
+                    name="isActive"
+                    variant="label-hidden"
+                    checked={isActive}
+                    message-toggle-active=""
+                    message-toggle-inactive=""
+                    onchange={handleChange}>
+                </lightning-input>
+                <span class="toggle-label">Active</span>
+            </div>
+        </div>
+    </lightning-modal-body>
+
+    <lightning-modal-footer>
+        <div class="modal-actions">
+            <lightning-button label="Cancel" onclick={handleCancel}></lightning-button>
+            <lightning-button variant="brand" label={saveButtonLabel} onclick={handleSave} disabled={isSaving}></lightning-button>
+        </div>
+    </lightning-modal-footer>
+</template>

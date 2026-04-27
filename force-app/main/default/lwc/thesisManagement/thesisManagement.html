@@ -1,0 +1,86 @@
+<template>
+    <div class="page">
+        <h2 class="page-title">Thesis Management</h2>
+        <div class="thesis-grid">
+            <div class="main-col">
+                <div class="card">
+                    <h3 class="section-title">Thesis Management</h3>
+                    <div class="phases-bar">
+                        <template for:each={phases} for:item="phase">
+                            <div key={phase.key} class={phase.phaseClass}>
+                                <div class="phase-dot"></div>
+                                <div class="phase-info">
+                                    <span class={phase.statusClass}>{phase.status}</span>
+                                    <span class="phase-name">Phase {phase.id}</span>
+                                    <span class="phase-label">{phase.name}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 class="section-title">Eligibility Requirements</h3>
+                    <div class="alert-bar">
+                        <c-icon name="info" size="20"></c-icon>
+                        <span>You are not yet eligible to request a supervisor. Please complete all required milestones below before requesting a supervisor.</span>
+                    </div>
+                    <div class="requirements-list">
+                        <template for:each={requirements} for:item="req">
+                            <div key={req.key} class="req-item">
+                                <c-icon name={req.reqIcon} size="20"></c-icon>
+                                <div class="req-content"><h4 class="req-title">{req.text}</h4><p class="req-detail">{req.detail}</p></div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+            <div class="right-col">
+                <div class="card">
+                    <h3 class="section-title">Preparing for Your Thesis</h3>
+                    <template for:each={tips} for:item="tip">
+                        <div key={tip.key} class="tip-item">
+                            <h4 class="tip-title">{tip.title}</h4>
+                            <p class="tip-desc">{tip.description}</p>
+                        </div>
+                    </template>
+                </div>
+                <div class="card">
+                    <h3 class="section-title">Tasks</h3>
+                    <div class="empty-state">
+                        <c-icon name="assignment" size="48"></c-icon>
+                        <p class="empty-text">- No tasks -</p>
+                    </div>
+                    <template lwc:if={hasExtraTasks}>
+                        <ul class="extra-tasks">
+                            <template for:each={extraTasks} for:item="t">
+                                <li key={t.id}>{t.title} <span class="task-pill">{t.status}</span></li>
+                            </template>
+                        </ul>
+                    </template>
+                    <button class="btn-primary full-width" onclick={handleOpenAddTask}>Add A Task</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <template lwc:if={showToast}>
+        <c-toast message={toastMessage} variant={toastVariant} onclose={handleToastClose}></c-toast>
+    </template>
+
+    <template lwc:if={showAddTaskModal}>
+        <div class="modal-backdrop" onclick={handleCloseAddTask}>
+            <div class="modal" onclick={stopProp}>
+                <div class="modal-header"><h3>Add a Task</h3><button class="icon-btn" onclick={handleCloseAddTask}>&#x2715;</button></div>
+                <div class="modal-body">
+                    <label class="field"><span>Task title</span>
+                        <input type="text" oninput={handleTaskInput} value={newTaskTitle} placeholder="e.g. Draft chapter 1 outline" />
+                    </label>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-outline" onclick={handleCloseAddTask}>Cancel</button>
+                    <button class="btn-primary" onclick={handleSubmitAddTask}>Add</button>
+                </div>
+            </div>
+        </div>
+    </template>
+</template>

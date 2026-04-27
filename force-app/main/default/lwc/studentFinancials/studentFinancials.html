@@ -1,0 +1,64 @@
+<template>
+    <section class="page">
+        <header class="header">
+            <div class="headerIcon">
+                <lightning-icon icon-name="utility:user" size="small" alternative-text="Student Financials"></lightning-icon>
+            </div>
+            <div>
+                <h1 class="title">Student Financials</h1>
+                <p class="subtitle">
+                    Manage student-level financial operations including fee assignments and scholarship allocations.
+                </p>
+            </div>
+        </header>
+
+        <div class="tabs" role="tablist" aria-label="Student financial tabs">
+            <button
+                class={feeTabClass}
+                type="button"
+                role="tab"
+                id="tab-fee-assignments"
+                data-tab="feeAssignments"
+                aria-controls="panel-fee-assignments"
+                aria-selected={isFeeTab}
+                tabindex={feeTabIndex}
+                onclick={handleTabClick}
+                onkeydown={handleTabKeydown}>
+                Fee Assignments
+            </button>
+            <button
+                class={scholarshipTabClass}
+                type="button"
+                role="tab"
+                id="tab-scholarship-assignments"
+                data-tab="scholarshipAssignments"
+                aria-controls="panel-scholarship-assignments"
+                aria-selected={isScholarshipTab}
+                tabindex={scholarshipTabIndex}
+                onclick={handleTabClick}
+                onkeydown={handleTabKeydown}>
+                Scholarship Assignments
+            </button>
+        </div>
+
+        <template if:true={isFeeTab}>
+            <div
+                id="panel-fee-assignments"
+                role="tabpanel"
+                aria-labelledby="tab-fee-assignments"
+                class="tabPanel">
+                <c-fee-assignments></c-fee-assignments>
+            </div>
+        </template>
+
+        <template if:true={isScholarshipTab}>
+            <div
+                id="panel-scholarship-assignments"
+                role="tabpanel"
+                aria-labelledby="tab-scholarship-assignments"
+                class="tabPanel">
+                <c-scholarship-assignments></c-scholarship-assignments>
+            </div>
+        </template>
+    </section>
+</template>

@@ -1,0 +1,95 @@
+<template>
+    <section class="leave-request-page">
+        <article class="request-card">
+            <header class="request-head">
+                <div class="title-wrap">
+                    <h1 class="request-title">{requestTitle}</h1>
+                    <span class="review-pill">{requestStatus}</span>
+                </div>
+                <button type="button" class="cancel-request-btn" onclick={openCancelModal}>Cancel Request</button>
+            </header>
+
+            <div class="meta-table-wrap">
+                <table class="meta-table" aria-label="Leave request meta details">
+                    <thead>
+                        <tr>
+                            <th scope="col">Request ID</th>
+                            <th scope="col">Date &amp; Time</th>
+                            <th scope="col">Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{requestNumber}</td>
+                            <td>{requestDateTime}</td>
+                            <td>{requestType}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <section class="thread-block">
+                <p class="thread-meta"><span>You</span> | 3rd oct 2026 | 8:25PM</p>
+                <article class="message-card">
+                    <h2 class="message-heading">Description</h2>
+                    <p class="message-body">{description}</p>
+
+                    <div class="message-divider"></div>
+                    <h2 class="message-heading">Supporting Documents</h2>
+                    <div class="doc-chip-wrap">
+                        <button type="button" class="doc-chip" title="SportsDay_Practice_Notice.pdf">
+                            <lightning-icon
+                                icon-name="utility:attach"
+                                size="xx-small"
+                                alternative-text="Attachment"
+                                class="doc-icon"
+                            ></lightning-icon>
+                            <span>SportsDay_Practice_Notice.pdf</span>
+                        </button>
+                    </div>
+                </article>
+            </section>
+
+            <section class="thread-block">
+                <p class="thread-meta"><span>Admin</span> | 3rd oct 2026 | 8:25PM</p>
+                <article class="message-card">
+                    <p class="message-body greeting">Hi Mallika,</p>
+                    <p class="message-body">
+                        Your request for sick leave has been received and approved. Please take the necessary time to
+                        rest and recover. Kindly keep us informed of your health status and notify us once you are fit
+                        to resume your duties.
+                    </p>
+
+                    <button type="button" class="reply-btn">
+                        <lightning-icon
+                            icon-name="utility:reply"
+                            size="xx-small"
+                            alternative-text="Reply"
+                            class="reply-icon"
+                        ></lightning-icon>
+                        <span>Reply</span>
+                    </button>
+                </article>
+            </section>
+        </article>
+
+        <template if:true={showCancelModal}>
+            <section
+                class="cancel-modal-backdrop"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Cancel request confirmation"
+            >
+                <article class="cancel-modal">
+                    <h2 class="cancel-modal-title">Are you sure you want to cancel this request?</h2>
+                    <footer class="cancel-modal-actions">
+                        <button type="button" class="cancel-modal-secondary" onclick={closeCancelModal}>Cancel</button>
+                        <button type="button" class="cancel-modal-danger" onclick={confirmCancelRequest}>
+                            Cancel Request
+                        </button>
+                    </footer>
+                </article>
+            </section>
+        </template>
+    </section>
+</template>

@@ -1,0 +1,354 @@
+:host {
+    display: block;
+    font-family: Inter, Roboto, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --asp-brand: #0b5cab;
+    --asp-brand-soft: rgba(11, 92, 171, 0.18);
+    --asp-text-primary: #182330;
+    --asp-text-secondary: #5f6b7a;
+    --asp-border: #d8e1ec;
+    --asp-bg-page: #f5f8fc;
+    --asp-surface: #ffffff;
+    --asp-shadow: 0 3px 8px rgba(15, 23, 42, 0.08);
+}
+
+.page {
+    min-height: calc(100vh - 128px);
+    padding: 24px;
+    border-radius: 14px;
+    background:
+        radial-gradient(circle at 86% 0%, rgba(11, 92, 171, 0.09), transparent 36%),
+        var(--asp-bg-page);
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-size: 12px;
+    color: var(--asp-text-secondary);
+}
+
+.crumbBtn {
+    border: 0;
+    background: transparent;
+    color: var(--asp-brand);
+    font-size: 12px;
+    padding: 0;
+    cursor: pointer;
+}
+
+.crumbBtn:hover {
+    text-decoration: underline;
+}
+
+.sep {
+    color: #98a6b8;
+}
+
+.currentCrumb {
+    color: var(--asp-text-primary);
+    font-weight: 600;
+}
+
+.pageHeader {
+    margin-bottom: 24px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.pageTitle {
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.2;
+    color: var(--asp-text-primary);
+    font-weight: 700;
+}
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cancelBtn {
+    border: 0;
+    background: transparent;
+    color: var(--asp-brand);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 8px 6px;
+}
+
+.cancelBtn:hover {
+    text-decoration: underline;
+}
+
+.secondaryBtn,
+.primaryBtn {
+    min-height: 36px;
+    border-radius: 8px;
+    padding: 0 14px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.secondaryBtn {
+    background: #ffffff;
+    border-color: #c2d0e0;
+    color: var(--asp-text-primary);
+}
+
+.primaryBtn {
+    background: var(--asp-brand);
+    border-color: var(--asp-brand);
+    color: #ffffff;
+}
+
+.primaryBtn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+    gap: 24px;
+}
+
+.card {
+    background: var(--asp-surface);
+    border: 1px solid var(--asp-border);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: var(--asp-shadow);
+    margin-bottom: 20px;
+}
+
+.errorBanner {
+    margin-bottom: 16px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #f3c7c2;
+    background: #fff4f2;
+    color: #8f1d14;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.sectionTitle {
+    margin: 0 0 14px;
+    font-size: 14px;
+    line-height: 1.3;
+    color: var(--asp-text-primary);
+    font-weight: 700;
+}
+
+.field {
+    margin-top: 12px;
+}
+
+.helperText {
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: var(--asp-text-secondary);
+}
+
+.summaryPanel {
+    margin-top: 16px;
+    border: 1px solid #e5edf7;
+    border-radius: 8px;
+    background: #f9fbfe;
+    padding: 14px;
+}
+
+.summaryTitle {
+    margin: 0 0 12px;
+    font-size: 13px;
+    color: var(--asp-text-primary);
+    font-weight: 700;
+}
+
+.summaryGrid,
+.studentGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 16px;
+}
+
+.summaryLabel {
+    margin: 0;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--asp-text-secondary);
+    font-weight: 700;
+}
+
+.summaryValue {
+    margin: 6px 0 0;
+    font-size: 14px;
+    color: var(--asp-text-primary);
+    font-weight: 600;
+}
+
+.searchRow {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: end;
+}
+
+.searchBtn {
+    min-height: 40px;
+    border-radius: 8px;
+    border: 1px solid var(--asp-brand);
+    background: var(--asp-brand);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 0 16px;
+    cursor: pointer;
+}
+
+.searchBtn:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.searchMessage {
+    margin: 10px 0 0;
+    font-size: 12px;
+    color: var(--asp-text-secondary);
+}
+
+.studentCard {
+    margin-top: 16px;
+    border: 1px solid #e5edf7;
+    border-radius: 8px;
+    background: #f9fbfe;
+    padding: 14px;
+}
+
+.settingsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.summaryCard {
+    position: sticky;
+    top: 16px;
+}
+
+.summaryRows {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.summaryRow {
+    display: grid;
+    gap: 4px;
+}
+
+.rowLabel {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--asp-text-secondary);
+    font-weight: 700;
+}
+
+.rowValue {
+    font-size: 14px;
+    color: var(--asp-text-primary);
+    font-weight: 600;
+}
+
+.panelApplyBtn {
+    width: 100%;
+    height: 44px;
+    border-radius: 8px;
+    border: 1px solid var(--asp-brand);
+    background: var(--asp-brand);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.panelApplyBtn:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.panelApplyBtn lightning-icon {
+    --slds-c-icon-color-foreground-default: #ffffff;
+}
+
+lightning-input,
+lightning-textarea,
+lightning-combobox {
+    --slds-c-input-radius-border: 8px;
+    --slds-c-input-color-border: #cfd9e5;
+    --slds-c-input-shadow: none;
+    --slds-c-textarea-radius-border: 8px;
+    --slds-c-textarea-color-border: #cfd9e5;
+    --slds-c-textarea-shadow: none;
+    --slds-c-combobox-color-border: #cfd9e5;
+    --slds-c-combobox-radius-border: 8px;
+}
+
+button:focus-visible,
+.crumbBtn:focus-visible,
+.cancelBtn:focus-visible {
+    outline: 3px solid var(--asp-brand-soft);
+    outline-offset: 2px;
+}
+
+@media (max-width: 1024px) {
+    .layout {
+        grid-template-columns: 1fr;
+    }
+
+    .summaryCard {
+        position: static;
+    }
+}
+
+@media (max-width: 640px) {
+    .page {
+        padding: 16px;
+    }
+
+    .pageHeader {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .headerActions {
+        flex-wrap: wrap;
+    }
+
+    .summaryGrid,
+    .studentGrid,
+    .settingsGrid,
+    .searchRow {
+        grid-template-columns: 1fr;
+    }
+
+    .searchBtn {
+        width: 100%;
+    }
+}

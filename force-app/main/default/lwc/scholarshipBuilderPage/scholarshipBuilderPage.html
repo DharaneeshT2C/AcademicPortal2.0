@@ -1,0 +1,211 @@
+<template>
+    <div class="page">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <button type="button" class="crumb-btn" onclick={handleGoToMasterData}>Master Data</button>
+            <span class="sep">&gt;</span>
+            <button type="button" class="crumb-btn" onclick={handleGoToScholarships}>Scholarships</button>
+            <span class="sep">&gt;</span>
+            <span class="crumb-current">{crumbActionLabel}</span>
+        </nav>
+
+        <header class="page-header">
+            <h1 class="page-title">{pageTitle}</h1>
+            <div class="header-actions">
+                <lightning-button class="btn-neutral" label="Cancel" onclick={handleCancel} disabled={isSaving}></lightning-button>
+                <lightning-button class="btn-outline" label="Save Draft" onclick={handleSaveDraft} disabled={isSaving}></lightning-button>
+                <lightning-button class="btn-primary" variant="brand" label="Activate" onclick={handleActivate} disabled={isSaving}></lightning-button>
+            </div>
+        </header>
+
+        <template if:true={isLoading}>
+            <div class="loading-card">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={isLoading}>
+            <section class="form-card">
+                <h2 class="section-title">Scholarship Information</h2>
+
+                <div class="form-grid two-col-grid">
+                    <lightning-input
+                        class="field-control"
+                        label="Scholarship Name"
+                        name="scholarshipName"
+                        value={scholarshipName}
+                        onchange={handleFieldChange}
+                        required>
+                    </lightning-input>
+
+                    <lightning-combobox
+                        class="field-control"
+                        label="Type"
+                        name="type"
+                        value={typeValue}
+                        options={typeOptions}
+                        onchange={handleFieldChange}
+                        required>
+                    </lightning-combobox>
+
+                    <lightning-combobox
+                        class="field-control"
+                        label="Value Type"
+                        name="valueType"
+                        value={valueTypeValue}
+                        options={valueTypeOptions}
+                        onchange={handleFieldChange}
+                        required>
+                    </lightning-combobox>
+
+                    <lightning-combobox
+                        class="field-control"
+                        label="Calculation Type"
+                        name="calculationType"
+                        value={calculationTypeValue}
+                        options={calculationTypeOptions}
+                        onchange={handleFieldChange}
+                        required>
+                    </lightning-combobox>
+                </div>
+            </section>
+
+            <section class="form-card">
+                <h2 class="section-title">Value Configuration</h2>
+
+                <div class="form-grid two-col-grid">
+                    <lightning-combobox
+                        class="field-control"
+                        label="Currency"
+                        name="currencyIsoCode"
+                        value={currencyIsoCode}
+                        options={currencyOptions}
+                        onchange={handleFieldChange}
+                        required>
+                    </lightning-combobox>
+
+                    <div class="field-spacer" aria-hidden="true"></div>
+
+                    <template if:true={isFixedValueType}>
+                        <lightning-input
+                            class="field-control"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            label="Fixed Value"
+                            name="fixedValue"
+                            value={fixedValue}
+                            onchange={handleFieldChange}
+                            required>
+                        </lightning-input>
+                    </template>
+
+                    <template if:true={isRangeValueType}>
+                        <lightning-input
+                            class="field-control"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            label="Range Start Value"
+                            name="rangeStartValue"
+                            value={rangeStartValue}
+                            onchange={handleFieldChange}
+                            required>
+                        </lightning-input>
+
+                        <lightning-input
+                            class="field-control"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            label="Range End Value"
+                            name="rangeEndValue"
+                            value={rangeEndValue}
+                            onchange={handleFieldChange}
+                            required>
+                        </lightning-input>
+                    </template>
+                </div>
+            </section>
+
+            <section class="form-card">
+                <h2 class="section-title">Linked Mapping</h2>
+
+                <div class="form-grid one-col-grid">
+                    <div class="linked-mapping-table">
+                        <template for:each={linkedMappings} for:item="mapping">
+                            <article key={mapping.key} class="linked-mapping-row">
+                                <div class="linked-mapping-head">
+                                    <h3 class="linked-mapping-title">Linked Level {mapping.rowIndex}</h3>
+                                    <lightning-button-icon
+                                        icon-name="utility:delete"
+                                        alternative-text="Remove linked level"
+                                        title="Remove linked level"
+                                        variant="bare"
+                                        data-key={mapping.key}
+                                        onclick={handleRemoveLinkedLevel}
+                                        disabled={mapping.removeDisabled}>
+                                    </lightning-button-icon>
+                                </div>
+
+                                <lightning-combobox
+                                    class="field-control"
+                                    label="Linked Level"
+                                    value={mapping.linkedLevel}
+                                    options={mapping.availableLinkedLevelOptions}
+                                    placeholder="Select linked level"
+                                    data-key={mapping.key}
+                                    onchange={handleLinkedLevelChange}
+                                    disabled={isSaving}>
+                                </lightning-combobox>
+
+                                <div class="dual-list-shell">
+                                    <lightning-dual-listbox
+                                        class="field-control"
+                                        label={mapping.linkedEntityLabel}
+                                        source-label="Available Records"
+                                        selected-label="Selected Records"
+                                        options={mapping.linkedEntityOptions}
+                                        value={mapping.selectedLinkedEntityIds}
+                                        data-key={mapping.key}
+                                        disabled={mapping.isLinkedEntityDisabled}
+                                        onchange={handleLinkedEntitySelectionChange}>
+                                    </lightning-dual-listbox>
+                                </div>
+                            </article>
+                        </template>
+                    </div>
+
+                    <div class="linked-mapping-actions">
+                        <lightning-button
+                            class="btn-outline"
+                            label="Add Linked Level"
+                            icon-name="utility:add"
+                            onclick={handleAddLinkedLevel}
+                            disabled={isAddLinkedLevelDisabled}>
+                        </lightning-button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="form-card">
+                <h2 class="section-title">Description</h2>
+
+                <div class="form-grid one-col-grid">
+                    <lightning-textarea
+                        class="field-control"
+                        name="description"
+                        label="Description"
+                        value={descriptionValue}
+                        onchange={handleFieldChange}
+                        maxlength="32000">
+                    </lightning-textarea>
+                </div>
+            </section>
+
+            <footer class="page-footer">
+                <lightning-button class="btn-neutral" label="Cancel" onclick={handleCancel} disabled={isSaving}></lightning-button>
+                <lightning-button class="btn-primary" variant="brand" label="Save" onclick={handleFooterSave} disabled={isSaving}></lightning-button>
+            </footer>
+        </template>
+    </div>
+</template>

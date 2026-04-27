@@ -1,0 +1,120 @@
+:host { font-family: var(--font-family, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif); }
+.app-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+    background: var(--bg-main, #F8FAFC);
+}
+
+.sidebar-container {
+    width: 260px;
+    flex-shrink: 0;
+    background: var(--sidebar-bg, #1a1f36);
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    overflow-y: auto;
+    z-index: 100;
+}
+
+.app-layout.viewmode-mobile {
+    grid-template-columns: 1fr;
+}
+.app-layout.viewmode-mobile .sidebar-container {
+    position: fixed;
+    left: -260px;
+    top: 0;
+    height: 100vh;
+    transition: left 0.3s ease;
+    z-index: 1000;
+    box-shadow: var(--shadow-xl);
+}
+.app-layout.viewmode-mobile .sidebar-container.sidebar-open {
+    left: 0;
+}
+.app-layout.viewmode-mobile .sidebar-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 999;
+    backdrop-filter: blur(2px);
+}
+.app-layout.viewmode-mobile .content-area {
+    padding: 16px;
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+.main-area {
+    width: 100%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.content-area {
+    flex: 1;
+    padding: 20px 28px;
+    max-width: 1600px;
+}
+
+.page-content {
+    animation: pageEnter 200ms ease-out both;
+}
+
+@keyframes pageEnter {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.sidebar-overlay {
+    display: none;
+}
+
+@media (max-width: 1024px) {
+    .app-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar-container {
+        position: fixed;
+        left: -260px;
+        top: 0;
+        width: 260px;
+        height: 100vh;
+        background: #1a1f36;
+        transition: left 0.3s ease;
+        z-index: 1000;
+        box-shadow: var(--shadow-xl);
+    }
+
+    .sidebar-container.sidebar-open {
+        left: 0;
+    }
+
+    .sidebar-overlay {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.4);
+        z-index: 999;
+        backdrop-filter: blur(2px);
+    }
+
+    .content-area {
+        padding: 20px 24px;
+    }
+}
+
+@media (max-width: 640px) {
+    .content-area {
+        padding: 16px;
+    }
+}

@@ -1,0 +1,20 @@
+<template>
+    <template lwc:if={showToast}>
+        <c-toast message={toastMessage} variant={toastVariant} onclose={handleToastClose}></c-toast>
+    </template>
+    <div class="page">
+        <h2 class="page-title">My Exams</h2>
+        <div class="tabs"><button class="tab active">My Exams</button><button class="tab" onclick={handleResults}>Results</button></div>
+        <div class="card">
+            <div class="card-header"><h3 class="section-title">Exam Enrollment</h3><div class="actions"><select class="filter-select"><option>Semester 2</option></select><button class="btn-primary" onclick={handleEnroll}>Enroll</button></div></div>
+            <table class="exam-table">
+                <thead><tr><th></th><th>Course Name</th><th>Course Code</th><th>Exam</th><th>Credits</th><th>Format</th><th>Type</th><th>Eligibility</th></tr></thead>
+                <tbody>
+                    <template for:each={formattedCourses} for:item="course">
+                        <tr key={course.code}><td><input type="checkbox" checked={course.selected} /></td><td>{course.name}</td><td>{course.code}</td><td>{course.exam}</td><td>{course.credits}</td><td>{course.format}</td><td><span class={course.typeClass}>{course.type}</span></td><td><span class={course.eligClass}>{course.eligibility}</span></td></tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</template>

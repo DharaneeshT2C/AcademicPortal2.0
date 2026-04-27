@@ -1,0 +1,254 @@
+<template>
+
+    <div class="category-tabs">
+
+        <template for:each={categoryTabs} for:item="tab">
+
+            <button key={tab.id} class={tab.className} data-category={tab.id} onclick={handleCategoryClick}>
+
+                {tab.label}
+
+            </button>
+
+        </template>
+
+    </div>
+
+
+    <template for:each={programs} for:item="program">
+
+        <div key={program.id} class="semester-card">
+
+            <div class="semester-header" data-program-id={program.id} onclick={handleProgramToggle}>
+
+                <div class="semester-title">
+
+                    {program.program} - {program.semester}
+
+                    <span class={program.statusClass}>
+
+                        <template if:true={program.showStatusDot}>
+                            <span class="status-dot"></span>
+                        </template>
+
+                        {program.statusLabel}
+
+                    </span>
+
+                </div>
+
+                <lightning-icon icon-name={program.toggleIcon} size="xx-small" class="toggle-icon">
+                </lightning-icon>
+
+            </div>
+
+            <template if:true={program.expanded}>
+
+                <template for:each={program.decoratedFeeItems} for:item="feeItem">
+
+                    <div key={feeItem.id} class={feeItem.feeParentClass}>
+
+                        <div class="fee-parent-main">
+
+                            <div class="fee-left">
+
+                                <div class={feeItem.partialClass}>
+
+                                    <input type="checkbox" checked={feeItem.selected} data-program-id={program.id}
+                                        data-item-id={feeItem.id} onchange={handleCheckboxChange} />
+
+                                </div>
+
+                                <span class="fee-name">
+                                    {feeItem.name}
+                                </span>
+
+                                <template if:true={feeItem.info}>
+                                    <div class="info-chip-wrap">
+                                        <button class="info-chip" type="button" title="Payable amount details"
+                                            data-row-id={feeItem.id} onclick={handleInfoToggle}>
+                                            i
+                                        </button>
+
+                                        <template if:true={feeItem.showInfoPopover}>
+                                            <div class="info-popover">
+                                                <div class="info-modal-header">
+                                                    <div class="info-popover-title">{feeItem.infoDetails.title}</div>
+                                                    <button class="info-modal-close" type="button"
+                                                        title="Close details" data-row-id={feeItem.id}
+                                                        onclick={handleInfoToggle}>
+                                                        ×
+                                                    </button>
+                                                </div>
+
+                                                <div class="info-primary-block">
+                                                    <div class="info-label">Total Payable</div>
+                                                    <div class="info-value">{feeItem.infoDetails.totalPayable}</div>
+                                                </div>
+
+                                                <div class="info-divider"></div>
+
+                                                <div class="info-grid">
+                                                    <div class="info-grid-cell">
+                                                        <div class="info-label">Total Fees</div>
+                                                        <div class="info-value">{feeItem.infoDetails.totalFees}</div>
+                                                    </div>
+
+                                                    <div class="info-grid-cell">
+                                                        <div class="info-label">Concession</div>
+                                                        <div class="info-value">{feeItem.infoDetails.concession}</div>
+                                                    </div>
+
+                                                    <div class="info-grid-cell">
+                                                        <div class="info-label">Tax</div>
+                                                        <div class="info-value">{feeItem.infoDetails.tax}</div>
+                                                    </div>
+
+                                                    <div class="info-grid-cell">
+                                                        <div class="info-label">TDS</div>
+                                                        <div class="info-value">{feeItem.infoDetails.tds}</div>
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+                                        </template>
+
+                                    </div>
+                                </template>
+
+                            </div>
+
+                            <div class="fee-right">
+
+                                <button class="toggle-btn" data-program-id={program.id}
+                                    data-item-id={feeItem.id} onclick={handleItemToggle}>
+
+                                    <lightning-icon icon-name={feeItem.toggleIcon} size="xx-small" class="toggle-icon">
+                                    </lightning-icon>
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <template if:true={feeItem.expanded}>
+                            <div class="fee-summary">
+                                <div class="fee-summary-item">
+                                    <span>Total fee amount:</span>
+                                    <strong>{feeItem.amountDisplay}</strong>
+                                </div>
+
+                                <div class="fee-summary-item">
+                                    <span>Total paid:</span>
+                                    <strong>{feeItem.paidDisplay}</strong>
+                                </div>
+
+                                <div class="fee-summary-item fee-summary-item-full">
+                                    <span>Total payable:</span>
+                                    <strong>{feeItem.remainingDisplay}</strong>
+                                </div>
+                            </div>
+
+                            <template for:each={feeItem.children} for:item="row">
+                                <div key={row.id} class="installment-card">
+
+	                                    <div class="installment-header">
+	
+	                                        <input type="checkbox" disabled={feeItem.selected} checked={row.selected} data-program-id={program.id}
+	                                            data-item-id={feeItem.id} data-child-id={row.id}
+	                                            onchange={handleCheckboxChange} />
+
+                                        <span class="installment-name">
+                                            {row.name}
+                                        </span>
+
+                                        <span class={row.statusClass}>
+                                            {row.status}
+                                        </span>
+
+                                    </div>
+
+
+                                    <div class="installment-body">
+
+                                        <div>
+                                            Total fee :
+                                            <strong>{row.amountDisplay}</strong>
+                                        </div>
+
+                                        <div>
+                                            Total paid :
+                                            <strong>{row.paidDisplay}</strong>
+                                        </div>
+
+                                        <div>
+                                            Total payable :
+                                            <strong>{row.remainingDisplay}</strong>
+                                        </div>
+
+                                        <div>
+                                            Balance due :
+                                            <strong>{row.remainingDisplay}</strong>
+                                        </div>
+
+                                        <div>
+                                            Due date :
+                                            <strong>{row.dueDate}</strong>
+                                        </div>
+
+                                    </div>
+
+
+                                    <template if:true={row.selected}>
+
+                                        <div class="selected-amount-row">
+
+                                            <span style="font-size: 12px;">Selected amount :</span>
+
+                                            <input class="selected-amount-input" type="text"
+                                                value={row.paymentAmountDisplay} data-program-id={program.id}
+                                                data-item-id={feeItem.id} data-child-id={row.id}
+                                                oninput={handlePaymentAmountChange} />
+
+                                        </div>
+
+                                    </template>
+
+                                </div>
+                            </template>
+                        </template>
+
+                    </div>
+
+                </template>
+
+            </template>
+
+        </div>
+
+    </template>
+
+
+    <!-- PAYMENT FOOTER -->
+
+    <div class="payment-footer">
+
+        <div class="selected-bar">
+
+            <span>Selected amount :</span>
+
+            <strong>{selectedAmountDisplay}</strong>
+
+        </div>
+
+        <button class="pay-btn">
+
+            Pay selected amount
+
+        </button>
+
+    </div>
+
+</template>

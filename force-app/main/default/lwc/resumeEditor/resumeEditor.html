@@ -1,0 +1,215 @@
+<template>
+    <div class="resume-editor-page">
+        <div class="breadcrumb">
+            <button class="bc-link" onclick={handleBack}>Placements</button>
+            <span class="bc-sep">›</span>
+            <button class="bc-link" onclick={handleBack}>Resume Library</button>
+            <span class="bc-sep">›</span>
+            <span class="bc-current">Create Resume</span>
+        </div>
+
+        <!-- Wizard Steps -->
+        <div class="wizard-bar">
+            <div class={step1Class}>
+                <span class="step-num">1</span>
+                <span class="step-label">Choose Template</span>
+            </div>
+            <div class="wizard-connector"></div>
+            <div class={step2Class}>
+                <span class="step-num">2</span>
+                <span class="step-label">Edit Details</span>
+            </div>
+            <div class="wizard-connector"></div>
+            <div class={step3Class}>
+                <span class="step-num">3</span>
+                <span class="step-label">Preview &amp; Save</span>
+            </div>
+        </div>
+
+        <!-- Step 1: Choose Template -->
+        <template lwc:if={isStep1}>
+            <div class="step-content">
+                <h2 class="step-title">Choose a Resume Template</h2>
+                <p class="step-sub">Select a template that best represents your professional style.</p>
+                <div class="templates-grid">
+                    <template for:each={templates} for:item="tmpl">
+                        <div key={tmpl.id} class={tmpl.cls} data-id={tmpl.id} onclick={handleSelectTemplate}>
+                            <div class="template-preview" style={tmpl.previewStyle}>
+                                <div class="tmpl-header" style={tmpl.headerStyle}></div>
+                                <div class="tmpl-lines">
+                                    <div class="tmpl-line tmpl-line-long"></div>
+                                    <div class="tmpl-line tmpl-line-med"></div>
+                                    <div class="tmpl-line tmpl-line-short"></div>
+                                    <div class="tmpl-line tmpl-line-long"></div>
+                                    <div class="tmpl-line tmpl-line-med"></div>
+                                </div>
+                            </div>
+                            <div class="template-name">{tmpl.name}</div>
+                            <template lwc:if={tmpl.selected}>
+                                <div class="template-check">✓</div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+                <div class="step-footer">
+                    <button class="btn-outline" onclick={handleBack}>Cancel</button>
+                    <button class="btn-primary" onclick={handleNext}>Next →</button>
+                </div>
+            </div>
+        </template>
+
+        <!-- Step 2: Edit Details -->
+        <template lwc:if={isStep2}>
+            <div class="step-content">
+                <h2 class="step-title">Edit Your Details</h2>
+                <div class="edit-layout">
+                    <div class="edit-form">
+                        <div class="form-section">
+                            <h4 class="form-section-title">Personal Information</h4>
+                            <div class="upload-photo-area">
+                                <div class="photo-placeholder">👤</div>
+                                <button class="btn-upload-photo" onclick={handleUploadPhoto}>Upload Photo</button>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label class="field-label">First Name</label>
+                                    <input type="text" class="field-input" value={formData.firstName} />
+                                </div>
+                                <div class="form-field">
+                                    <label class="field-label">Last Name</label>
+                                    <input type="text" class="field-input" value={formData.lastName} />
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label class="field-label">Gender</label>
+                                    <input type="text" class="field-input" value={formData.gender} />
+                                </div>
+                                <div class="form-field">
+                                    <label class="field-label">Phone</label>
+                                    <input type="text" class="field-input" value={formData.phone} />
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-field">
+                                    <label class="field-label">Email ID</label>
+                                    <input type="email" class="field-input" value={formData.email} />
+                                </div>
+                                <div class="form-field">
+                                    <label class="field-label">City</label>
+                                    <input type="text" class="field-input" value={formData.city} />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h4 class="form-section-title">Professional Summary</h4>
+                            <div class="rich-text-toolbar">
+                                <button class="rte-btn" data-cmd="bold" onclick={handleRteFormat}>B</button>
+                                <button class="rte-btn" data-cmd="italic" onclick={handleRteFormat}>I</button>
+                                <button class="rte-btn" data-cmd="underline" onclick={handleRteFormat}>U</button>
+                                <div class="rte-sep"></div>
+                                <button class="rte-btn rte-ai" onclick={handleAiContinue}>✨ AI Continue</button>
+                            </div>
+                            <textarea class="summary-textarea" rows="4">{formData.summary}</textarea>
+                            <p class="recruiter-tip">💡 Recruiter tip: Keep it concise and impactful. Focus on your top 3 achievements.</p>
+                        </div>
+
+                        <div class="form-section">
+                            <h4 class="form-section-title">Education</h4>
+                            <div class="section-placeholder">
+                                <span class="section-placeholder-text">MBA, University of Technology — 2022–2024</span>
+                                <button class="btn-add-item" onclick={handleAddEducation}>+ Add New</button>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h4 class="form-section-title">Work Experience</h4>
+                            <div class="section-placeholder">
+                                <span class="section-placeholder-text">UX Designer, Acme Corp — May 2022 - Present</span>
+                                <button class="btn-add-item" onclick={handleAddWork}>+ Add New</button>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h4 class="form-section-title">Skills</h4>
+                            <div class="skills-tags">
+                                <template for:each={skills} for:item="skill">
+                                    <span key={skill.key} class="skill-tag">{skill.label} ✕</span>
+                                </template>
+                                <button class="btn-add-skill" onclick={handleAddSkill}>+ Add Skill</button>
+                            </div>
+                        </div>
+
+                        <div class="form-section add-section-row">
+                            <h4 class="form-section-title">Add Section</h4>
+                            <div class="add-section-chips">
+                                <button class="add-section-chip" data-section="Custom Section" onclick={handleAddSection}>Custom Section</button>
+                                <button class="add-section-chip" data-section="Extra Curricular" onclick={handleAddSection}>Extra Curricular</button>
+                                <button class="add-section-chip" data-section="Hobbies" onclick={handleAddSection}>Hobbies</button>
+                                <button class="add-section-chip" data-section="Internships" onclick={handleAddSection}>Internships</button>
+                                <button class="add-section-chip" data-section="References" onclick={handleAddSection}>References</button>
+                                <button class="add-section-chip" data-section="Languages" onclick={handleAddSection}>Languages</button>
+                                <button class="add-section-chip cover-letter" data-section="Cover Letter" onclick={handleAddSection}>✉ Create Cover Letter</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="step-footer">
+                    <button class="btn-outline" onclick={handlePrev}>← Back</button>
+                    <button class="btn-primary" onclick={handleNext}>Next →</button>
+                </div>
+            </div>
+        </template>
+
+        <!-- Step 3: Preview & Save -->
+        <template lwc:if={isStep3}>
+            <div class="step-content">
+                <h2 class="step-title">Preview &amp; Save</h2>
+                <div class="preview-container">
+                    <div class="resume-preview-doc">
+                        <div class="preview-header-bar"></div>
+                        <div class="preview-name">Joshua B</div>
+                        <div class="preview-role">UX/UI Designer · Chennai, India</div>
+                        <div class="preview-contact">nupu*****@gmail.com · +91 81694 *****</div>
+                        <div class="preview-divider"></div>
+                        <div class="preview-section-title">Professional Summary</div>
+                        <div class="preview-text">{formData.summary}</div>
+                        <div class="preview-section-title">Education</div>
+                        <div class="preview-text">MBA, University of Technology · 2022–2024</div>
+                        <div class="preview-section-title">Experience</div>
+                        <div class="preview-text">UX Designer · Acme Corp · May 2022 – Present</div>
+                        <div class="preview-section-title">Skills</div>
+                        <div class="preview-skills-row">
+                            <template for:each={skills} for:item="skill">
+                                <span key={skill.key} class="preview-skill-chip">{skill.label}</span>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+                <div class="step-footer">
+                    <button class="btn-outline" onclick={handlePrev}>← Back</button>
+                    <button class="btn-outline" onclick={handleDownload}>↓ Download</button>
+                    <button class="btn-primary" onclick={handleSave}>Save Resume</button>
+                </div>
+            </div>
+        </template>
+
+        <!-- Save Modal -->
+        <template lwc:if={showSaveModal}>
+            <div class="modal-overlay" onclick={handleCloseSaveModal}>
+                <div class="modal-box" onclick={stopProp}>
+                    <div class="success-modal-body">
+                        <div class="success-icon">🎉</div>
+                        <h3 class="success-title">Resume Created Successfully!</h3>
+                        <p class="success-msg">Your resume has been saved to your Resume Library.</p>
+                        <div class="success-actions">
+                            <button class="btn-outline" onclick={handleDownload}>↓ Download Resume</button>
+                            <button class="btn-primary" onclick={handleCloseSaveModal}>Go to Library</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

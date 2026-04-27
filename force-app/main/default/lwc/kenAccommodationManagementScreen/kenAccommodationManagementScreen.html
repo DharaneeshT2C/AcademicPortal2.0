@@ -1,0 +1,1049 @@
+<template>
+    <div class="acm-container">
+        <div class="acm-header">
+            <div class="acm-header-copy">
+                <h1 class="acm-title">Accommodation Management</h1>
+                <p class="acm-sub-text">Manage applications and room assignments per window</p>
+            </div>
+
+            <div class="acm-select-row">
+                <label class="acm-field">
+                    <span class="acm-field-label">Cycle:</span>
+                    <select class="acm-select" value={selectedCycleId} onchange={handleCycleChange}>
+                        <template for:each={cycleOptions} for:item="option">
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        </template>
+                    </select>
+                </label>
+
+                <label class="acm-field">
+                    <span class="acm-field-label">Window:</span>
+                    <select class="acm-select acm-select--window" value={selectedWindowId} onchange={handleWindowChange}>
+                        <option value="">&#8212; Select Window &#8212;</option>
+                        <template for:each={windowOptions} for:item="option">
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        </template>
+                    </select>
+                </label>
+            </div>
+        </div>
+
+        <template if:false={hasSelectedWindow}>
+            <section class="acm-empty-card">
+                <div class="acm-empty-icon">
+                    <lightning-icon icon-name="utility:layers" size="large"></lightning-icon>
+                </div>
+                <h2 class="acm-empty-title">Select a Window</h2>
+                <p class="acm-empty-text">Choose an enrollment window to manage accommodation.</p>
+            </section>
+        </template>
+
+        <template if:true={hasSelectedWindow}>
+            <template if:true={isListView}>
+            <div class="acm-window-meta">
+                <lightning-icon icon-name="utility:layers" size="xx-small"></lightning-icon>
+                <span class="acm-window-name">{selectedWindow.name}</span>
+                <span class="acm-pill acm-pill--violet-soft">{selectedWindow.allotmentType}</span>
+                <span class="acm-pill acm-pill--green-soft">{selectedWindow.status}</span>
+                <span class="acm-date-range">&middot; {selectedWindow.startDate} to {selectedWindow.endDate}</span>
+            </div>
+
+            <div class="acm-summary-grid">
+                <template for:each={selectedWindowSummary} for:item="summary">
+                    <article key={summary.key} class={summary.tileClass}>
+                        <div class={summary.iconClass}>
+                            <lightning-icon icon-name={summary.iconName} size="x-small"></lightning-icon>
+                        </div>
+                        <div class="acm-summary-copy">
+                            <span class="acm-summary-label">{summary.label}</span>
+                            <span class="acm-summary-value">{summary.value}</span>
+                        </div>
+                    </article>
+                </template>
+            </div>
+
+            <div class="acm-view-tabs">
+                <template for:each={currentViewTabs} for:item="tab">
+                    <button
+                        key={tab.value}
+                        class={tab.className}
+                        type="button"
+                        data-value={tab.value}
+                        onclick={handleViewChange}
+                    >
+                        <lightning-icon icon-name={tab.iconName} size="xx-small"></lightning-icon>
+                        <span>{tab.label}</span>
+                    </button>
+                </template>
+            </div>
+
+            <section class="acm-filter-card">
+                <button class="acm-filter-toggle" type="button" onclick={handleToggleFilters}>
+                    <div class="acm-filter-title">
+                        <lightning-icon icon-name="utility:filterList" size="xx-small"></lightning-icon>
+                        <span>Filters</span>
+                    </div>
+                    <lightning-icon icon-name={filterToggleIcon} size="xx-small"></lightning-icon>
+                </button>
+
+                <template if:true={isFilterPanelOpen}>
+                    <div class="acm-filter-body">
+                        <div class="acm-filter-fields">
+                            <label class="acm-filter-field">
+                                <span>Program</span>
+                                <select
+                                    name="program"
+                                    class="acm-select acm-select--filter"
+                                    value={filters.program}
+                                    onchange={handleFilterChange}
+                                >
+                                    <template for:each={programFilterOptions} for:item="option">
+                                        <option key={option.value} value={option.value}>{option.label}</option>
+                                    </template>
+                                </select>
+                            </label>
+
+                            <label class="acm-filter-field">
+                                <span>Payment</span>
+                                <select
+                                    name="payment"
+                                    class="acm-select acm-select--filter"
+                                    value={filters.payment}
+                                    onchange={handleFilterChange}
+                                >
+                                    <template for:each={paymentFilterOptions} for:item="option">
+                                        <option key={option.value} value={option.value}>{option.label}</option>
+                                    </template>
+                                </select>
+                            </label>
+
+                            <template if:true={isInProgressView}>
+                                <label class="acm-filter-field">
+                                    <span>Status</span>
+                                    <select
+                                        name="status"
+                                        class="acm-select acm-select--filter"
+                                        value={filters.status}
+                                        onchange={handleFilterChange}
+                                    >
+                                        <template for:each={statusFilterOptions} for:item="option">
+                                            <option key={option.value} value={option.value}>{option.label}</option>
+                                        </template>
+                                    </select>
+                                </label>
+                            </template>
+
+                            <template if:false={isInProgressView}>
+                                <label class="acm-filter-field">
+                                    <span>Building</span>
+                                    <select
+                                        name="building"
+                                        class="acm-select acm-select--filter"
+                                        value={filters.building}
+                                        onchange={handleFilterChange}
+                                    >
+                                        <template for:each={buildingFilterOptions} for:item="option">
+                                            <option key={option.value} value={option.value}>{option.label}</option>
+                                        </template>
+                                    </select>
+                                </label>
+                            </template>
+                        </div>
+
+                        <div class="acm-filter-actions">
+                            <button class="acm-clear-btn" type="button" onclick={handleClearFilters}>
+                                <lightning-icon icon-name="utility:refresh" size="xx-small"></lightning-icon>
+                                <span>Reset</span>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </section>
+
+            <template if:true={isInProgressView}>
+                <section class="acm-engine-card">
+                    <div class="acm-engine-copy">
+                        <lightning-icon icon-name="utility:info_alt" size="xx-small"></lightning-icon>
+                        <span>Auto allotment engine - {selectedWindow.engineMode}</span>
+                    </div>
+
+                    <div class="acm-engine-actions">
+                        <button
+                            class="acm-secondary-btn"
+                            type="button"
+                            data-mode="configure"
+                            disabled={isAutoAllotmentActionDisabled}
+                            onclick={handleOpenAutoAllotmentModal}
+                        >
+                            <lightning-icon icon-name="utility:settings" size="xx-small"></lightning-icon>
+                            <span>Configure</span>
+                        </button>
+                        <button
+                            class="acm-primary-btn"
+                            type="button"
+                            data-mode="run"
+                            disabled={isAutoAllotmentActionDisabled}
+                            onclick={handleOpenAutoAllotmentModal}
+                        >
+                            <lightning-icon icon-name="utility:play" size="xx-small"></lightning-icon>
+                            <span>Run Auto Allotment</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="acm-table-card">
+                    <div class="acm-table-head">
+                        <h3>{inProgressCountLabel}</h3>
+                    </div>
+
+                    <div class="acm-table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>STUDENT</th>
+                                    <th>ROLL NO</th>
+                                    <th>PROGRAM</th>
+                                    <th>CATEGORY</th>
+                                    <th>PAYMENT</th>
+                                    <th>ALLOTMENT TYPE</th>
+                                    <th>STATUS</th>
+                                    <th>ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={filteredInProgressRows} for:item="row">
+                                    <tr key={row.id}>
+                                        <td>
+                                            <button class="acm-link-btn" type="button" data-id={row.id} onclick={handleOpenApplicationDetail}>
+                                                {row.student}
+                                            </button>
+                                        </td>
+                                        <td>{row.rollNo}</td>
+                                        <td>{row.program}</td>
+                                        <td>{row.category}</td>
+                                        <td><span class={row.paymentClass}>{row.payment}</span></td>
+                                        <td><span class={row.allotmentTypeClass}>{row.allotmentType}</span></td>
+                                        <td><span class={row.statusClass}>{row.status}</span></td>
+                                        <td>
+                                            <div class="acm-row-actions">
+                                                <button
+                                                    class="acm-icon-btn"
+                                                    type="button"
+                                                    title="View Application"
+                                                    data-id={row.id}
+                                                    onclick={handleOpenApplicationDetail}
+                                                >
+                                                    <span class="acm-action-icon acm-action-icon--neutral">
+                                                        <svg viewBox="0 0 20 20" aria-hidden="true">
+                                                            <path d="M1.75 10s2.9-4.75 8.25-4.75S18.25 10 18.25 10s-2.9 4.75-8.25 4.75S1.75 10 1.75 10Z"></path>
+                                                            <circle cx="10" cy="10" r="2.6"></circle>
+                                                        </svg>
+                                                    </span>
+                                                </button>
+                                                <button
+                                                    class="acm-icon-btn"
+                                                    type="button"
+                                                    title="Assign Room"
+                                                    data-id={row.id}
+                                                    data-name={row.student}
+                                                    data-roll={row.rollNo}
+                                                    data-mode="inProgress"
+                                                    onclick={handleOpenAssignRoomModal}
+                                                >
+                                                    <span class="acm-action-icon acm-action-icon--primary">
+                                                        <svg viewBox="0 0 20 20" aria-hidden="true">
+                                                            <path d="M2.5 11.25V7.75A1.75 1.75 0 0 1 4.25 6h11.5a1.75 1.75 0 0 1 1.75 1.75v3.5"></path>
+                                                            <path d="M2.5 11.25h15v4.25H2.5z"></path>
+                                                            <path d="M5.25 6V4.75h3.5V6"></path>
+                                                            <path d="M4.25 15.5v1.75M15.75 15.5v1.75"></path>
+                                                        </svg>
+                                                    </span>
+                                                </button>
+                                                <button
+                                                    class="acm-icon-btn"
+                                                    type="button"
+                                                    title="Reject Application"
+                                                    data-id={row.id}
+                                                    data-name={row.student}
+                                                    onclick={handleOpenRejectModal}
+                                                >
+                                                    <span class="acm-action-icon acm-action-icon--danger">
+                                                        <svg viewBox="0 0 20 20" aria-hidden="true">
+                                                            <circle cx="10" cy="10" r="6.75"></circle>
+                                                            <path d="m7.4 7.4 5.2 5.2M12.6 7.4l-5.2 5.2"></path>
+                                                        </svg>
+                                                    </span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </template>
+
+            <template if:false={isInProgressView}>
+                <section class="acm-table-card">
+                    <div class="acm-table-head">
+                        <h3>{allocatedCountLabel}</h3>
+                    </div>
+
+                    <div class="acm-table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>STUDENT</th>
+                                    <th>ROOM</th>
+                                    <th>BUILDING</th>
+                                    <th>CATEGORY</th>
+                                    <th>ALLOTMENT TYPE</th>
+                                    <th>SOURCE</th>
+                                    <th>PAYMENT</th>
+                                    <th>ASSIGNED</th>
+                                    <th>ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={filteredAllocatedRows} for:item="row">
+                                    <tr key={row.id}>
+                                        <td>
+                                            <button class="acm-link-btn" type="button" data-id={row.id} onclick={handleOpenAllocatedDetail}>
+                                                {row.student}
+                                            </button>
+                                        </td>
+                                        <td>{row.room}</td>
+                                        <td>{row.building}</td>
+                                        <td>{row.category}</td>
+                                        <td><span class={row.allotmentTypeClass}>{row.allotmentType}</span></td>
+                                        <td>
+                                            <template if:true={row.sourceClass}>
+                                                <span class={row.sourceClass}>{row.source}</span>
+                                            </template>
+                                        </td>
+                                        <td>
+                                            <template if:true={row.paymentClass}>
+                                                <span class={row.paymentClass}>{row.payment}</span>
+                                            </template>
+                                        </td>
+                                        <td>{row.assignedOn}</td>
+                                        <td>
+                                            <div class="acm-row-actions">
+                                                <button
+                                                    class="acm-icon-btn"
+                                                    type="button"
+                                                    title="Preview"
+                                                    data-id={row.id}
+                                                    onclick={handleOpenAllocatedDetail}
+                                                >
+                                                    <span class="acm-action-icon acm-action-icon--neutral">
+                                                        <svg viewBox="0 0 20 20" aria-hidden="true">
+                                                            <path d="M1.75 10s2.9-4.75 8.25-4.75S18.25 10 18.25 10s-2.9 4.75-8.25 4.75S1.75 10 1.75 10Z"></path>
+                                                            <circle cx="10" cy="10" r="2.6"></circle>
+                                                        </svg>
+                                                    </span>
+                                                </button>
+                                                <button
+                                                    class="acm-inline-btn"
+                                                    type="button"
+                                                    data-id={row.id}
+                                                    data-name={row.student}
+                                                    data-roll={row.rollNo}
+                                                    data-mode="allocated"
+                                                    onclick={handleOpenAssignRoomModal}
+                                                >
+                                                    Reassign
+                                                </button>
+                                                <button
+                                                    class="acm-inline-btn"
+                                                    type="button"
+                                                    data-id={row.id}
+                                                    data-name={row.student}
+                                                    onclick={handleOpenCheckoutModal}
+                                                >
+                                                    Checkout
+                                                </button>
+                                                <button
+                                                    class="acm-inline-btn acm-inline-btn--danger"
+                                                    type="button"
+                                                    data-id={row.id}
+                                                    data-name={row.student}
+                                                    onclick={handleOpenCancelModal}
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </template>
+            </template>
+
+            <template if:true={isDetailView}>
+                <section class="acm-detail-shell">
+                    <div class="acm-breadcrumbs">
+                        <span>Dashboard</span>
+                        <span class="acm-breadcrumb-sep">&gt;</span>
+                        <span>Accommodation</span>
+                        <span class="acm-breadcrumb-sep">&gt;</span>
+                        <span>{detailBreadcrumbCurrent}</span>
+                    </div>
+
+                    <div class="acm-detail-header-row">
+                        <button class="acm-back-btn" type="button" onclick={handleBackToList}>
+                            <lightning-icon icon-name="utility:back" size="xx-small"></lightning-icon>
+                            <span>Back</span>
+                        </button>
+
+                        <div class="acm-detail-header-copy">
+                            <h2 class="acm-detail-title">{detailPageTitle}</h2>
+                            <p class="acm-detail-subtitle">{detailHeaderSubtitle}</p>
+                        </div>
+                    </div>
+
+                    <template if:true={isLoadingDetail}>
+                        <div class="acm-detail-loading">
+                            <lightning-spinner size="small" alternative-text="Loading application details"></lightning-spinner>
+                        </div>
+                    </template>
+
+                    <template if:false={isLoadingDetail}>
+                        <div class="acm-detail-grid">
+                            <div class="acm-detail-main">
+                                <article class="acm-detail-card">
+                                    <div class="acm-detail-card-head">
+                                        <lightning-icon icon-name="utility:user" size="xx-small"></lightning-icon>
+                                        <h3>Student Information</h3>
+                                    </div>
+                                    <div class="acm-detail-card-body">
+                                        <div class="acm-detail-info-grid">
+                                            <template for:each={detailStudentFields} for:item="field">
+                                                <div key={field.key} class="acm-detail-field">
+                                                    <span class="acm-detail-field-label">{field.label}</span>
+                                                    <span class="acm-detail-field-value">{field.value}</span>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </article>
+
+                                <article class="acm-detail-card">
+                                    <div class="acm-detail-card-head">
+                                        <lightning-icon icon-name={detailPrimarySectionIconName} size="xx-small"></lightning-icon>
+                                        <h3>{detailPrimarySectionTitle}</h3>
+                                    </div>
+                                    <div class="acm-detail-card-body">
+                                        <template if:true={isAllocatedDetailView}>
+                                            <div class={detailPrimaryGridClass}>
+                                                <template for:each={detailPrimaryFields} for:item="field">
+                                                    <div key={field.key} class="acm-detail-field">
+                                                        <span class="acm-detail-field-label">{field.label}</span>
+                                                        <template if:true={field.pillClass}>
+                                                            <span class={field.pillClass}>{field.value}</span>
+                                                        </template>
+                                                        <template if:false={field.pillClass}>
+                                                            <span class="acm-detail-field-value">{field.value}</span>
+                                                        </template>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+
+                                        <template if:false={isAllocatedDetailView}>
+                                            <div class="acm-detail-info-grid acm-detail-info-grid--application-top">
+                                                <template for:each={detailApplicationPrimaryFields} for:item="field">
+                                                    <div key={field.key} class="acm-detail-field">
+                                                        <span class="acm-detail-field-label">{field.label}</span>
+                                                        <template if:true={field.pillClass}>
+                                                            <span class={field.pillClass}>{field.value}</span>
+                                                        </template>
+                                                        <template if:false={field.pillClass}>
+                                                            <span class="acm-detail-field-value">{field.value}</span>
+                                                        </template>
+                                                    </div>
+                                                </template>
+                                            </div>
+
+                                            <template if:true={detailApplicationAppliedOnField}>
+                                                <div class="acm-detail-info-grid acm-detail-info-grid--application-bottom">
+                                                    <div class="acm-detail-field">
+                                                        <span class="acm-detail-field-label">{detailApplicationAppliedOnField.label}</span>
+                                                        <span class="acm-detail-field-value">{detailApplicationAppliedOnField.value}</span>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </template>
+                                    </div>
+                                </article>
+
+                                <template if:true={showPreferenceSections}>
+                                    <article class="acm-detail-card">
+                                        <div class="acm-detail-card-head">
+                                            <lightning-icon icon-name="utility:layers" size="xx-small"></lightning-icon>
+                                            <h3>Room Preferences</h3>
+                                        </div>
+                                        <div class="acm-detail-card-body">
+                                            <div class="acm-room-pref-list">
+                                                <template for:each={detailRoomPreferences} for:item="preference">
+                                                    <div key={preference.id} class="acm-room-pref-item">
+                                                        <div class="acm-room-pref-order">{preference.orderLabel}</div>
+                                                        <div class="acm-room-pref-copy">
+                                                            <div class="acm-room-pref-title">{preference.title}</div>
+                                                            <template if:true={preference.subtitle}>
+                                                                <div class="acm-room-pref-subtitle">{preference.subtitle}</div>
+                                                            </template>
+                                                            <template if:true={preference.meta}>
+                                                                <div class="acm-room-pref-meta">{preference.meta}</div>
+                                                            </template>
+                                                        </div>
+                                                        <template if:true={preference.availabilityClass}>
+                                                            <span class={preference.availabilityClass}>{preference.availabilityLabel}</span>
+                                                        </template>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </article>
+
+                                    <article class="acm-detail-card">
+                                        <div class="acm-detail-card-head">
+                                            <lightning-icon icon-name="utility:people" size="xx-small"></lightning-icon>
+                                            <h3>Roommate Preference</h3>
+                                        </div>
+                                        <div class="acm-detail-card-body acm-detail-card-body--roommate">
+                                            <template if:true={hasRoommatePreference}>
+                                                <div class={roommatePreference.cardClass}>
+                                                    <div class="acm-roommate-top">
+                                                        <div class="acm-roommate-name-wrap">
+                                                            <lightning-icon icon-name="utility:people" size="xx-small" class="acm-roommate-name-icon"></lightning-icon>
+                                                            <div class="acm-roommate-name">{roommatePreference.name}</div>
+                                                        </div>
+                                                        <template if:true={roommatePreference.matchClass}>
+                                                            <span class={roommatePreference.matchClass}>{roommatePreference.matchLabel}</span>
+                                                        </template>
+                                                    </div>
+                                                    <template if:true={roommatePreference.rollNo}>
+                                                        <div class="acm-roommate-detail"><span class="acm-roommate-detail-label">Roll No:</span> {roommatePreference.rollNo}</div>
+                                                    </template>
+                                                    <template if:true={roommatePreference.currentStatus}>
+                                                        <div class="acm-roommate-detail"><span class="acm-roommate-detail-label">Current Status:</span> {roommatePreference.currentStatus}</div>
+                                                    </template>
+                                                    <template if:true={roommatePreference.samePreferenceSelected}>
+                                                        <div class="acm-roommate-detail"><span class="acm-roommate-detail-label">Same Room Selected:</span> {roommatePreference.samePreferenceSelected}</div>
+                                                    </template>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </article>
+                                </template>
+                            </div>
+
+                            <aside class="acm-detail-side">
+                                <article class="acm-detail-card">
+                                    <div class="acm-detail-card-head">
+                                        <h3>Quick Actions</h3>
+                                    </div>
+                                    <div class="acm-detail-card-body">
+                                        <div class="acm-detail-actions">
+                                            <button class={detailPrimaryActionClass} type="button" onclick={handlePrimaryDetailAction}>
+                                                <template if:true={isAllocatedDetailView}>
+                                                    <span class="acm-action-icon acm-action-icon--neutral">
+                                                        <svg viewBox="0 0 20 20" aria-hidden="true">
+                                                            <path d="M10 3.5a6.5 6.5 0 1 1-4.6 1.9"></path>
+                                                            <path d="M3.75 4.5h3.5V8"></path>
+                                                        </svg>
+                                                    </span>
+                                                </template>
+                                                <template if:false={isAllocatedDetailView}>
+                                                    <span class="acm-action-icon acm-action-icon--white">
+                                                        <svg viewBox="0 0 20 20" aria-hidden="true">
+                                                            <path d="M2.5 11.25V7.75A1.75 1.75 0 0 1 4.25 6h11.5a1.75 1.75 0 0 1 1.75 1.75v3.5"></path>
+                                                            <path d="M2.5 11.25h15v4.25H2.5z"></path>
+                                                            <path d="M5.25 6V4.75h3.5V6"></path>
+                                                            <path d="M4.25 15.5v1.75M15.75 15.5v1.75"></path>
+                                                        </svg>
+                                                    </span>
+                                                </template>
+                                                <span>{detailPrimaryActionLabel}</span>
+                                            </button>
+                                            <button class="acm-ghost-danger-btn" type="button" onclick={handleSecondaryDetailAction}>
+                                                <span class="acm-action-icon acm-action-icon--danger">
+                                                    <svg viewBox="0 0 20 20" aria-hidden="true">
+                                                        <circle cx="10" cy="10" r="6.75"></circle>
+                                                        <path d="m7.4 7.4 5.2 5.2M12.6 7.4l-5.2 5.2"></path>
+                                                    </svg>
+                                                </span>
+                                                <span>{detailSecondaryActionLabel}</span>
+                                            </button>
+                                            <template if:true={showDetailCheckoutAction}>
+                                                <button class="acm-ghost-btn" type="button" onclick={handleDetailCheckoutAction}>
+                                                    <span class="acm-action-icon acm-action-icon--neutral">
+                                                        <svg viewBox="0 0 20 20" aria-hidden="true">
+                                                            <path d="M12.25 4.25h4.25v11.5h-4.25"></path>
+                                                            <path d="M3.5 10h9.25"></path>
+                                                            <path d="m9.5 6.75 3.25 3.25-3.25 3.25"></path>
+                                                        </svg>
+                                                    </span>
+                                                    <span>Checkout</span>
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </article>
+                            </aside>
+                        </div>
+                    </template>
+                </section>
+            </template>
+        </template>
+
+        <template if:true={isAutoAllotmentModalOpen}>
+            <div class="acm-modal-backdrop acm-modal-backdrop--blur"></div>
+            <section class="acm-modal" role="dialog" aria-modal="true" aria-labelledby="acm-auto-allotment-title">
+                <div class={autoAllotmentModalCardClass}>
+                    <div class="acm-modal-head acm-auto-modal-head">
+                        <h3 id="acm-auto-allotment-title">Auto Allotment Configuration</h3>
+                        <button class="acm-modal-close" type="button" aria-label="Close" onclick={handleCloseAutoAllotmentModal}>
+                            <svg viewBox="0 0 20 20" aria-hidden="true">
+                                <path d="m6 6 8 8M14 6l-8 8"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="acm-modal-body acm-auto-modal-body">
+                        <label class="acm-modal-field acm-auto-modal-field">
+                            <span class="acm-modal-field-label">Allocation Rule</span>
+                            <select
+                                class="acm-select acm-select--modal"
+                                data-field="allocationRule"
+                                value={autoAllotmentDraft.allocationRule}
+                                onchange={handleAutoAllotmentFieldChange}
+                            >
+                                <template for:each={autoAllotmentRuleOptions} for:item="option">
+                                    <option key={option.value} value={option.value}>{option.label}</option>
+                                </template>
+                            </select>
+                        </label>
+
+                        <template if:true={isAutoAllotmentRunMode}>
+                            <label class="acm-modal-field acm-auto-modal-field">
+                                <span class="acm-modal-field-label">Run As</span>
+                                <select
+                                    class="acm-select acm-select--modal"
+                                    value={autoAllotmentRunAsType}
+                                    onchange={handleAutoAllotmentRunAsChange}
+                                >
+                                    <template for:each={assignmentAllotmentTypeOptions} for:item="option">
+                                        <option key={option.value} value={option.value}>{option.label}</option>
+                                    </template>
+                                </select>
+                            </label>
+                        </template>
+
+                        <div class="acm-auto-modal-divider"></div>
+
+                        <div class="acm-auto-modal-toggle-row">
+                            <div class="acm-auto-modal-toggle-copy">
+                                <div class="acm-auto-modal-toggle-title">Enable Batch Processing</div>
+                                <div class="acm-auto-modal-toggle-subtitle">Process allotments in batches</div>
+                            </div>
+                            <label class="acm-toggle" aria-label="Enable batch processing">
+                                <input
+                                    type="checkbox"
+                                    data-field="batchProcessing"
+                                    checked={autoAllotmentDraft.batchProcessing}
+                                    onchange={handleAutoAllotmentToggle}
+                                />
+                                <span class="acm-toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <template if:true={showAutoAllotmentBatchSettings}>
+                            <div class="acm-auto-modal-panel">
+                                <label class="acm-modal-field acm-auto-modal-field">
+                                    <span class="acm-modal-field-label">Batch Size</span>
+                                    <input
+                                        class="acm-input acm-input--modal-number"
+                                        data-field="batchSize"
+                                        type="number"
+                                        min="1"
+                                        value={autoAllotmentDraft.batchSize}
+                                        onchange={handleAutoAllotmentFieldChange}
+                                    />
+                                </label>
+
+                                <label class="acm-modal-field acm-auto-modal-field">
+                                    <span class="acm-modal-field-label">Batch Grouping</span>
+                                    <select
+                                        class="acm-select acm-select--modal"
+                                        data-field="batchGrouping"
+                                        value={autoAllotmentDraft.batchGrouping}
+                                        onchange={handleAutoAllotmentFieldChange}
+                                    >
+                                        <template for:each={autoAllotmentGroupingOptions} for:item="option">
+                                            <option key={option.value} value={option.value}>{option.label}</option>
+                                        </template>
+                                    </select>
+                                </label>
+                            </div>
+                        </template>
+
+                        <div class="acm-auto-modal-divider"></div>
+
+                        <div class="acm-auto-modal-toggle-row">
+                            <div class="acm-auto-modal-toggle-copy">
+                                <div class="acm-auto-modal-toggle-title">Previous Year Carry Forward</div>
+                                <div class="acm-auto-modal-toggle-subtitle">Attempt same room assignment from last year first</div>
+                            </div>
+                            <label class="acm-toggle" aria-label="Enable previous year carry forward">
+                                <input
+                                    type="checkbox"
+                                    data-field="previousYearCarryForward"
+                                    checked={autoAllotmentDraft.previousYearCarryForward}
+                                    onchange={handleAutoAllotmentToggle}
+                                />
+                                <span class="acm-toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <template if:true={showAutoAllotmentCarryForwardNote}>
+                            <div class="acm-auto-modal-note">
+                                System will first attempt to assign the student's previous year room. If unavailable,
+                                it falls back to ranked preference logic.
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="acm-modal-foot acm-auto-modal-foot">
+                        <button class="acm-modal-keep-btn" type="button" onclick={handleCloseAutoAllotmentModal}>Cancel</button>
+                        <button
+                            class="acm-primary-btn acm-primary-btn--wide"
+                            type="button"
+                            disabled={isAutoAllotmentPrimaryDisabled}
+                            onclick={handleConfirmAutoAllotment}
+                        >
+                            <span>{autoAllotmentPrimaryActionLabel}</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </template>
+
+        <template if:true={isAssignRoomModalOpen}>
+            <div class="acm-modal-backdrop acm-modal-backdrop--blur"></div>
+            <section class="acm-modal" role="dialog" aria-modal="true" aria-labelledby="acm-assign-room-title">
+                <div class={assignRoomModalCardClass}>
+                    <div class="acm-modal-head">
+                        <div>
+                            <h3 id="acm-assign-room-title">Select Room</h3>
+                            <p class="acm-modal-subcopy">{assignRoomSubtitle}</p>
+                        </div>
+                        <button class="acm-modal-close" type="button" aria-label="Close" onclick={handleCloseAssignRoomModal}>
+                            <svg viewBox="0 0 20 20" aria-hidden="true">
+                                <path d="m6 6 8 8M14 6l-8 8"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="acm-room-picker-body">
+                        <template if:true={isLoadingAssignableRooms}>
+                            <div class="acm-detail-loading acm-detail-loading--modal">
+                                <lightning-spinner size="small" alternative-text="Loading rooms"></lightning-spinner>
+                            </div>
+                        </template>
+
+                        <template if:false={isLoadingAssignableRooms}>
+                            <template if:true={isAssignRoomCardDesign}>
+                                <p class="acm-room-picker-helper">{assignRoomHelperText}</p>
+
+                                <template if:true={hasAssignableRoomCards}>
+                                    <div class="acm-room-choice-list">
+                                        <template for:each={assignRoomCards} for:item="row">
+                                            <button
+                                                key={row.id}
+                                                class={row.cardClass}
+                                                type="button"
+                                                data-id={row.id}
+                                                onclick={handleSelectAssignableRoom}
+                                            >
+                                                <span class={row.radioClass} aria-hidden="true">
+                                                    <span class={row.radioDotClass}></span>
+                                                </span>
+
+                                                <span class="acm-room-choice-copy">
+                                                    <span class="acm-room-choice-title">{row.room}</span>
+                                                    <span class="acm-room-choice-subtitle">{row.subtitleLabel}</span>
+                                                </span>
+
+                                                <span class={row.availabilityClass}>{row.availabilityLabel}</span>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </template>
+
+                                <template if:false={hasAssignableRoomCards}>
+                                    <div class="acm-room-picker-empty">No available rooms found for this student.</div>
+                                </template>
+                            </template>
+
+                            <template if:true={isAssignRoomTableDesign}>
+                                <template if:true={hasAssignableRoomRows}>
+                                    <div class="acm-room-picker-table-wrap">
+                                        <table class="acm-room-picker-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>ROOM</th>
+                                                    <th>BUILDING</th>
+                                                    <th>CATEGORY</th>
+                                                    <th>CAPACITY</th>
+                                                    <th>OCCUPANCY</th>
+                                                    <th>STATUS</th>
+                                                    <th>PREF. MATCH</th>
+                                                    <template if:true={showAssignRoommateColumn}>
+                                                        <th>ROOMMATE</th>
+                                                    </template>
+                                                    <th>ACTION</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <template for:each={assignRoomRows} for:item="row">
+                                                    <tr key={row.id} class={row.rowClass}>
+                                                        <td>{row.room}</td>
+                                                        <td>{row.building}</td>
+                                                        <td>{row.category}</td>
+                                                        <td>{row.capacity}</td>
+                                                        <td>{row.occupancyLabel}</td>
+                                                        <td><span class={row.statusClass}>{row.status}</span></td>
+                                                        <td>
+                                                            <span class={row.preferenceClass}>
+                                                                <template if:true={row.preferenceMatch}>
+                                                                    <svg viewBox="0 0 16 16" aria-hidden="true">
+                                                                        <path d="M3 8.25 6.1 11.3 13 4.5"></path>
+                                                                    </svg>
+                                                                </template>
+                                                                <span>{row.preferenceLabel}</span>
+                                                            </span>
+                                                        </td>
+                                                        <template if:true={showAssignRoommateColumn}>
+                                                            <td>
+                                                                <span class={row.roommateClass}>
+                                                                    <template if:true={row.roommateMatch}>
+                                                                        <svg viewBox="0 0 16 16" aria-hidden="true">
+                                                                            <path d="M3 8.25 6.1 11.3 13 4.5"></path>
+                                                                        </svg>
+                                                                    </template>
+                                                                    <span>{row.roommateLabel}</span>
+                                                                </span>
+                                                            </td>
+                                                        </template>
+                                                        <td>
+                                                            <button
+                                                                class={row.actionClass}
+                                                                type="button"
+                                                                data-id={row.id}
+                                                                disabled={row.actionDisabled}
+                                                                onclick={handleSelectAssignableRoom}
+                                                            >
+                                                                {row.actionLabel}
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </template>
+
+                                <template if:false={hasAssignableRoomRows}>
+                                    <div class="acm-room-picker-empty">No rooms found for this student.</div>
+                                </template>
+                            </template>
+                        </template>
+                    </div>
+
+                    <div class="acm-modal-foot">
+                        <template if:true={isAssignRoomTableDesign}>
+                            <div class="acm-room-picker-footer-copy">{assignRoomSelectionText}</div>
+                        </template>
+                        <div class="acm-room-picker-footer-actions">
+                            <button class="acm-modal-keep-btn" type="button" onclick={handleCloseAssignRoomModal}>Cancel</button>
+                            <button class="acm-primary-btn acm-primary-btn--wide" type="button" disabled={isAssignConfirmDisabled} onclick={handleOpenAssignRunAsModal}>
+                                {assignRoomConfirmLabel}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </template>
+
+        <template if:true={isAssignRunAsModalOpen}>
+            <div class="acm-modal-backdrop"></div>
+            <section class="acm-modal" role="dialog" aria-modal="true" aria-labelledby="acm-assign-run-as-title">
+                <div class="acm-modal-card">
+                    <div class="acm-modal-head">
+                        <h3 id="acm-assign-run-as-title">Run As</h3>
+                        <button class="acm-modal-close" type="button" aria-label="Close" onclick={handleCloseAssignRunAsModal}>
+                            <svg viewBox="0 0 20 20" aria-hidden="true">
+                                <path d="m6 6 8 8M14 6l-8 8"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="acm-modal-body">
+                        <label class="acm-modal-field">
+                            <span class="acm-modal-field-label">Allotment Type</span>
+                            <select
+                                class="acm-select acm-select--modal"
+                                value={assignRoomAllotmentType}
+                                disabled={isAssignAllotmentTypeDisabled}
+                                onchange={handleAssignAllotmentTypeChange}
+                            >
+                                <template for:each={assignmentAllotmentTypeOptions} for:item="option">
+                                    <option key={option.value} value={option.value}>{option.label}</option>
+                                </template>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div class="acm-modal-foot">
+                        <button class="acm-modal-keep-btn" type="button" onclick={handleCloseAssignRunAsModal}>Cancel</button>
+                        <button class="acm-primary-btn" type="button" disabled={isAssignRunAsConfirmDisabled} onclick={handleConfirmAssignRoom}>Confirm Assignment</button>
+                    </div>
+                </div>
+            </section>
+        </template>
+
+        <template if:true={isCancelModalOpen}>
+            <div class="acm-modal-backdrop"></div>
+            <section class="acm-modal" role="dialog" aria-modal="true" aria-labelledby="acm-cancel-modal-title">
+                <div class="acm-modal-card">
+                    <div class="acm-modal-head">
+                        <h3 id="acm-cancel-modal-title">Cancel</h3>
+                        <button class="acm-modal-close" type="button" aria-label="Close" onclick={handleCloseCancelModal}>
+                            <svg viewBox="0 0 20 20" aria-hidden="true">
+                                <path d="m6 6 8 8M14 6l-8 8"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="acm-modal-body">
+                        <template if:true={hasCancelModalStudentName}>
+                            <p class="acm-modal-copy">
+                                Cancel for <strong>{cancelModalStudentName}</strong>?
+                            </p>
+                        </template>
+                        <template if:false={hasCancelModalStudentName}>
+                            <p class="acm-modal-copy">{cancelModalPrompt}</p>
+                        </template>
+
+                        <div class="acm-modal-alert">
+                            <span class="acm-action-icon acm-action-icon--danger">
+                                <svg viewBox="0 0 20 20" aria-hidden="true">
+                                    <circle cx="10" cy="10" r="6.75"></circle>
+                                    <path d="M10 6.8v4.7"></path>
+                                    <circle cx="10" cy="13.9" r="0.75"></circle>
+                                </svg>
+                            </span>
+                            <span>This will release any assigned room.</span>
+                        </div>
+                    </div>
+
+                    <div class="acm-modal-foot">
+                        <button class="acm-modal-keep-btn" type="button" disabled={isCancelKeepDisabled} onclick={handleCloseCancelModal}>Keep</button>
+                        <button class="acm-modal-cancel-btn" type="button" disabled={isCancelConfirmDisabled} onclick={handleConfirmCancel}>Cancel</button>
+                    </div>
+                </div>
+            </section>
+        </template>
+
+        <template if:true={isCheckoutModalOpen}>
+            <div class="acm-modal-backdrop"></div>
+            <section class="acm-modal" role="dialog" aria-modal="true" aria-labelledby="acm-checkout-modal-title">
+                <div class="acm-modal-card">
+                    <div class="acm-modal-head">
+                        <h3 id="acm-checkout-modal-title">Checkout</h3>
+                        <button class="acm-modal-close" type="button" aria-label="Close" onclick={handleCloseCheckoutModal}>
+                            <svg viewBox="0 0 20 20" aria-hidden="true">
+                                <path d="m6 6 8 8M14 6l-8 8"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="acm-modal-body">
+                        <template if:true={hasCheckoutModalStudentName}>
+                            <p class="acm-modal-copy">
+                                Checkout for <strong>{checkoutModalStudentName}</strong>?
+                            </p>
+                        </template>
+                        <template if:false={hasCheckoutModalStudentName}>
+                            <p class="acm-modal-copy">{checkoutModalPrompt}</p>
+                        </template>
+
+                        <div class="acm-modal-alert acm-modal-alert--info">
+                            <span class="acm-action-icon acm-action-icon--neutral">
+                                <svg viewBox="0 0 20 20" aria-hidden="true">
+                                    <circle cx="10" cy="10" r="6.75"></circle>
+                                    <path d="M10 6.8v4.7"></path>
+                                    <circle cx="10" cy="13.9" r="0.75"></circle>
+                                </svg>
+                            </span>
+                            <span>This will mark this stay as completed and release any assigned room.</span>
+                        </div>
+                    </div>
+
+                    <div class="acm-modal-foot">
+                        <button class="acm-modal-keep-btn" type="button" disabled={isCheckoutKeepDisabled} onclick={handleCloseCheckoutModal}>Keep</button>
+                        <button class="acm-primary-btn" type="button" disabled={isCheckoutConfirmDisabled} onclick={handleConfirmCheckout}>Checkout</button>
+                    </div>
+                </div>
+            </section>
+        </template>
+
+        <template if:true={isRejectModalOpen}>
+            <div class="acm-modal-backdrop"></div>
+            <section class="acm-modal" role="dialog" aria-modal="true" aria-labelledby="acm-reject-modal-title">
+                <div class="acm-modal-card">
+                    <div class="acm-modal-head">
+                        <h3 id="acm-reject-modal-title">Reject Application</h3>
+                        <button class="acm-modal-close" type="button" aria-label="Close" onclick={handleCloseRejectModal}>
+                            <svg viewBox="0 0 20 20" aria-hidden="true">
+                                <path d="m6 6 8 8M14 6l-8 8"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="acm-modal-body">
+                        <template if:true={hasRejectModalStudentName}>
+                            <p class="acm-modal-copy">
+                                Reject application for <strong>{rejectModalStudentName}</strong>?
+                            </p>
+                        </template>
+                        <template if:false={hasRejectModalStudentName}>
+                            <p class="acm-modal-copy">Reject this application?</p>
+                        </template>
+
+                        <label class="acm-modal-field">
+                            <span class="acm-modal-field-label">Reason <span class="acm-required">*</span></span>
+                            <textarea
+                                class="acm-modal-textarea"
+                                placeholder="Provide reason..."
+                                value={rejectModalReason}
+                                oninput={handleRejectReasonChange}
+                            ></textarea>
+                        </label>
+                    </div>
+
+                    <div class="acm-modal-foot">
+                        <button class="acm-modal-keep-btn" type="button" onclick={handleCloseRejectModal}>Cancel</button>
+                        <button class="acm-modal-danger-soft-btn" type="button" onclick={handleConfirmReject} disabled={isRejectDisabled}>Reject</button>
+                    </div>
+                </div>
+            </section>
+        </template>
+    </div>
+</template>

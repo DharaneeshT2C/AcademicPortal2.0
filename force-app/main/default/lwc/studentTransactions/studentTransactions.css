@@ -1,0 +1,383 @@
+:host {
+    display: block;
+    font-family: Roboto, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --st-brand: #145dff;
+    --st-brand-hover: #0f49d2;
+    --st-border: #d8e2f3;
+    --st-surface: #ffffff;
+    --st-muted-surface: #f6f9ff;
+    --st-text-primary: #1a2432;
+    --st-text-secondary: #5d6b80;
+    --st-success: #17824f;
+    --st-warning: #b86b00;
+    --st-danger: #c1121f;
+    --st-shadow-soft: 0 4px 12px rgba(20, 93, 255, 0.08);
+    --st-shadow-lift: 0 14px 28px rgba(15, 56, 133, 0.16);
+}
+
+.modulePanel {
+    display: grid;
+    gap: 18px;
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.toolbarLeft,
+.toolbarRight {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    min-height: 38px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 0 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition:
+        transform 140ms ease,
+        background-color 170ms ease,
+        border-color 170ms ease,
+        box-shadow 170ms ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btnSecondary {
+    color: var(--st-text-secondary);
+    border-color: #bfd0eb;
+    background: var(--st-surface);
+}
+
+.btnSecondary:hover {
+    border-color: var(--st-brand);
+    color: var(--st-brand);
+}
+
+.btnPrimary {
+    color: #ffffff;
+    background: linear-gradient(135deg, var(--st-brand) 0%, #2c7dff 100%);
+    border-color: var(--st-brand);
+    box-shadow: 0 10px 22px rgba(20, 93, 255, 0.24);
+}
+
+.btnPrimary:hover {
+    background: linear-gradient(135deg, var(--st-brand-hover) 0%, #2c71e8 100%);
+}
+
+.buttonIcon {
+    --slds-c-icon-color-foreground-default: currentColor;
+}
+
+.metricsGrid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.metricCard {
+    border: 1px solid var(--st-border);
+    border-radius: 14px;
+    background: var(--st-surface);
+    box-shadow: var(--st-shadow-soft);
+    padding: 14px;
+    transition:
+        transform 160ms ease,
+        box-shadow 180ms ease,
+        border-color 180ms ease;
+}
+
+.metricCard:hover {
+    transform: translateY(-3px);
+    border-color: #b9cbee;
+    box-shadow: var(--st-shadow-lift);
+}
+
+.metricLabel {
+    margin: 0;
+    font-size: 12px;
+    color: var(--st-text-secondary);
+    font-weight: 600;
+}
+
+.metricValue {
+    margin: 8px 0 0;
+    font-size: 30px;
+    line-height: 1.1;
+    color: var(--st-text-primary);
+    font-weight: 700;
+}
+
+.metricValueSuccess {
+    color: var(--st-success);
+}
+
+.metricValueDanger {
+    color: var(--st-danger);
+}
+
+.card {
+    border: 1px solid var(--st-border);
+    border-radius: 14px;
+    background: var(--st-surface);
+    box-shadow: var(--st-shadow-soft);
+    padding: 16px;
+}
+
+.sectionHeader {
+    margin-bottom: 12px;
+}
+
+.sectionTitle {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--st-text-primary);
+}
+
+.distributionList {
+    display: grid;
+    gap: 10px;
+}
+
+.distributionRow {
+    display: grid;
+    grid-template-columns: 180px 1fr auto;
+    gap: 12px;
+    align-items: center;
+}
+
+.distributionMeta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modeDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.modeDotBrand {
+    background: var(--st-brand);
+}
+
+.modeDotInfo {
+    background: #0f8cf0;
+}
+
+.modeDotSuccess {
+    background: var(--st-success);
+}
+
+.modeDotWarning {
+    background: var(--st-warning);
+}
+
+.modeLabel {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--st-text-primary);
+}
+
+.distributionTrack {
+    width: 100%;
+    border-radius: 999px;
+    background: var(--st-muted-surface);
+    height: 9px;
+    overflow: hidden;
+    border: 1px solid #e3ebf9;
+}
+
+.distributionFill {
+    height: 100%;
+    border-radius: inherit;
+    transition: width 280ms ease;
+}
+
+.distributionFillBrand {
+    background: linear-gradient(90deg, #2c7dff 0%, var(--st-brand) 100%);
+}
+
+.distributionValue {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--st-text-secondary);
+    min-width: 76px;
+    text-align: right;
+}
+
+.tableCard {
+    padding-bottom: 0;
+}
+
+.tableWrap {
+    border-top: 1px solid var(--st-border);
+    max-height: 390px;
+    overflow: auto;
+    border-radius: 0 0 14px 14px;
+}
+
+.dataTable {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    min-width: 900px;
+}
+
+.dataTable thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    color: var(--st-text-secondary);
+    background: #f8fbff;
+    text-align: left;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--st-border);
+}
+
+.dataTable tbody td {
+    font-size: 13px;
+    color: var(--st-text-primary);
+    padding: 13px 14px;
+    border-bottom: 1px solid #edf2fb;
+    vertical-align: middle;
+}
+
+.dataTable tbody tr {
+    transition: background-color 170ms ease;
+}
+
+.dataTable tbody tr:hover {
+    background: #f7faff;
+}
+
+.tableLink {
+    border: 0;
+    background: transparent;
+    color: var(--st-brand);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 0;
+    cursor: pointer;
+}
+
+.tableLink:hover {
+    text-decoration: underline;
+}
+
+.studentCell {
+    display: grid;
+    gap: 2px;
+}
+
+.studentName {
+    font-weight: 600;
+}
+
+.studentId {
+    font-size: 11px;
+    color: var(--st-text-secondary);
+}
+
+.amountCell {
+    font-weight: 700;
+}
+
+.statusBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 800;
+    border: 1px solid transparent;
+}
+
+.statusSuccess {
+    background: #e8f7ee;
+    color: var(--st-success);
+    border-color: #b7e4c7;
+}
+
+.statusFailed {
+    background: #ffefef;
+    color: var(--st-danger);
+    border-color: #f5c2c7;
+}
+
+.statusPending {
+    background: #fff5e6;
+    color: var(--st-warning);
+    border-color: #ffd8a8;
+}
+
+.loadingState {
+    padding: 12px 0;
+}
+
+.errorBanner {
+    margin-bottom: 12px;
+    border: 1px solid #fecaca;
+    background: #fff1f2;
+    color: #991b1b;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.emptyState {
+    text-align: center;
+    color: var(--st-text-secondary);
+    padding: 16px;
+}
+
+.btn:focus-visible,
+.tableLink:focus-visible {
+    outline: 3px solid rgba(20, 93, 255, 0.2);
+    outline-offset: 2px;
+}
+
+@media (max-width: 1200px) {
+    .metricsGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .metricsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .distributionRow {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .distributionValue {
+        text-align: left;
+    }
+}

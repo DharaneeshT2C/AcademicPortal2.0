@@ -1,0 +1,211 @@
+<template>
+    <div class="page">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <button type="button" class="crumb-button" onclick={handleGoToMasterData}>Master Data</button>
+            <span class="sep">&gt;</span>
+            <button type="button" class="crumb-button" onclick={handleGoToFeePlans}>Fee Plans</button>
+            <span class="sep">&gt;</span>
+            <span class="crumb-current">{breadcrumbModeLabel}</span>
+        </nav>
+
+        <header class="page-header">
+            <h1 class="page-title">{pageTitle}</h1>
+            <div class="top-actions">
+                <lightning-button class="btn-neutral" label="Cancel" onclick={handleCancel}></lightning-button>
+                <lightning-button class="btn-outline" label={saveButtonLabel} onclick={handleSaveDraft} disabled={isSaving}></lightning-button>
+                <lightning-button
+                    class="btn-primary"
+                    variant="brand"
+                    label="Activate"
+                    onclick={handleActivate}
+                    disabled={isActivateDisabled}>
+                </lightning-button>
+            </div>
+        </header>
+
+        <template if:true={isSaving}>
+            <div class="saving-indicator">Saving changes...</div>
+        </template>
+
+        <section class="section">
+            <h2 class="section-title">Basic Configuration</h2>
+            <div class="fields-grid">
+                <lightning-input
+                    class="field-control"
+                    label="Fee Plan Name"
+                    data-id="feePlanName"
+                    value={feePlanName}
+                    required
+                    onchange={handleFieldChange}
+                    placeholder="e.g., B.Tech 2025-26 General Admission">
+                </lightning-input>
+
+                <lightning-input class="field-control field-readonly" label="Version" value={versionLabel} disabled></lightning-input>
+
+                <lightning-textarea
+                    class="field-control field-span-2"
+                    label="Description"
+                    value={description}
+                    onchange={handleFieldChange}
+                    name="description"
+                    placeholder="Enter plan description...">
+                </lightning-textarea>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="matrix-header">
+                <h2 class="section-title">Categories, Quotas &amp; Fee Heads</h2>
+                <div class="matrix-actions">
+                    <lightning-button class="btn-primary" variant="brand" label="Set Quotas &amp; Fee Heads" onclick={openConfigureMatrixModal}></lightning-button>
+                    <template if:true={hasAnySelection}>
+                        <lightning-button class="btn-neutral" label="Edit Quotas" onclick={openQuotaStepModal}></lightning-button>
+                        <lightning-button class="btn-neutral" label="Edit Fee Heads" onclick={openFeeHeadStepModal}></lightning-button>
+                    </template>
+                </div>
+            </div>
+
+            <div class="matrix-wrap">
+                <template if:true={hasMatrix}>
+                    <template for:each={matrixSections} for:item="section">
+                        <article key={section.key} class="category-block">
+                            <h3 class="category-title">{section.label}</h3>
+                            <div class="matrix-table-wrap">
+                                <table class="matrix-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Fee Type</th>
+                                            <th>Settlement Order</th>
+                                            <th>Tax</th>
+                                            <template for:each={section.quotas} for:item="quota">
+                                                <th key={quota.key}>{quota.displayLabel}</th>
+                                            </template>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={section.rows} for:item="row">
+                                            <tr key={row.feeHeadId}>
+                                                <td class="row-head">{row.feeHeadLabel}</td>
+                                                <td>
+                                                    <lightning-input
+                                                        type="number"
+                                                        variant="label-hidden"
+                                                        min="1"
+                                                        step="1"
+                                                        value={row.settlementOrder}
+                                                        data-fee-head-id={row.feeHeadId}
+                                                        onchange={handleSettlementOrderChange}
+                                                        placeholder="Order">
+                                                    </lightning-input>
+                                                </td>
+                                                <td>
+                                                    <lightning-combobox
+                                                        class="tax-field"
+                                                        variant="label-hidden"
+                                                        value={row.taxId}
+                                                        options={taxOptions}
+                                                        dropdown-alignment="auto"
+                                                        placeholder="Select Tax"
+                                                        data-fee-head-id={row.feeHeadId}
+                                                        onchange={handleTaxChange}>
+                                                    </lightning-combobox>
+                                                </td>
+                                                <template for:each={row.cells} for:item="cell">
+                                                    <td key={cell.key}>
+                                                        <lightning-input
+                                                            type="number"
+                                                            variant="label-hidden"
+                                                            step="0.01"
+                                                            min="0"
+                                                            value={cell.amount}
+                                                            data-matrix-key={cell.key}
+                                                            onchange={handleAmountChange}
+                                                            placeholder="Amount">
+                                                        </lightning-input>
+                                                    </td>
+                                                </template>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </article>
+                    </template>
+                </template>
+                <template if:false={hasMatrix}>
+                    <div class="empty">Select at least one quota and one fee head to build the matrix.</div>
+                </template>
+            </div>
+        </section>
+
+        <template if:true={showSelectionModal}>
+            <div class="matrix-modal-overlay" onclick={handleOverlayClick}>
+                <section class="matrix-modal" role="dialog" aria-modal="true" onclick={preventModalClose}>
+                    <header class="matrix-modal-header">
+                        <div>
+                            <h2 class="matrix-modal-title">{selectionModalTitle}</h2>
+                            <p class="matrix-modal-subtitle">Choose the applicable entries to build the fee matrix.</p>
+                        </div>
+                        <button class="modal-close" type="button" title="Close" aria-label="Close" onclick={handleCloseSelectionModal}>&times;</button>
+                        <div class="stepper-row">
+                            <span class={categoryStepClass}>1. Categories</span>
+                            <span class={quotaStepClass}>2. Quotas</span>
+                            <span class={feeHeadStepClass}>3. Fee Heads</span>
+                        </div>
+                    </header>
+                    <div class="matrix-modal-content">
+                        <template if:true={hasSelectionOptions}>
+                            <div class="selector-list selector-list-modal">
+                                <template if:true={isCategoryStep}>
+                                    <template for:each={modalCategoryOptions} for:item="option">
+                                        <label key={option.key} class="selector-item selector-item-modal selector-card">
+                                            <input type="checkbox" data-key={option.key} checked={option.selected} onchange={handleCategorySelectionChange}>
+                                            <span class="selector-main">{option.label}</span>
+                                        </label>
+                                    </template>
+                                </template>
+                                <template if:true={isQuotaStep}>
+                                    <template for:each={modalQuotaOptions} for:item="option">
+                                        <label key={option.key} class="selector-item selector-item-modal selector-card">
+                                            <input type="checkbox" data-key={option.key} checked={option.selected} onchange={handleQuotaSelectionChange}>
+                                            <span class="selector-main">{option.label}</span>
+                                            <template if:true={option.subLabel}>
+                                                <span class="muted">{option.subLabel}</span>
+                                            </template>
+                                        </label>
+                                    </template>
+                                </template>
+                                <template if:true={isFeeHeadStep}>
+                                    <template for:each={modalFeeHeadOptions} for:item="option">
+                                        <label key={option.key} class="selector-item selector-item-modal selector-card">
+                                            <input type="checkbox" data-key={option.key} checked={option.selected} onchange={handleFeeHeadSelectionChange}>
+                                            <span class="selector-main">{option.label}</span>
+                                        </label>
+                                    </template>
+                                </template>
+                            </div>
+                        </template>
+                        <template if:false={hasSelectionOptions}>
+                            <div class="empty">No options available.</div>
+                        </template>
+                    </div>
+                    <footer class="matrix-modal-footer">
+                        <lightning-button class="btn-neutral" label="Cancel" onclick={handleCloseSelectionModal}></lightning-button>
+                        <template if:false={isCategoryStep}>
+                            <lightning-button class="btn-outline" label="Back" onclick={handleModalBack}></lightning-button>
+                        </template>
+                        <template if:true={isCategoryStep}>
+                            <lightning-button class="btn-primary" variant="brand" label="Next" onclick={handleModalNext}></lightning-button>
+                        </template>
+                        <template if:true={isQuotaStep}>
+                            <lightning-button class="btn-primary" variant="brand" label="Next" onclick={handleModalNext}></lightning-button>
+                        </template>
+                        <template if:true={isFeeHeadStep}>
+                            <lightning-button class="btn-primary" variant="brand" label="Apply" onclick={handleApplySelectionModal}></lightning-button>
+                        </template>
+                    </footer>
+                </section>
+            </div>
+        </template>
+    </div>
+</template>

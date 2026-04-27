@@ -1,0 +1,77 @@
+<template>
+    <div class="page">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <button type="button" class="crumb-btn" onclick={handleGoToMasterData}>Master Data</button>
+            <span class="sep">&gt;</span>
+            <button type="button" class="crumb-btn" onclick={navigateToTaxes}>Taxes</button>
+            <span class="sep">&gt;</span>
+            <span class="crumb-current">{breadcrumbCurrent}</span>
+        </nav>
+
+        <header class="builderHeader">
+            <div class="titleBlock">
+                <h1 class="pageTitle">{pageTitle}</h1>
+                <p class="pageSubtitle">Configure tax definition</p>
+            </div>
+            <div class="headerActions">
+                <lightning-button
+                    class="btnNeutral"
+                    label="Cancel"
+                    title="Cancel"
+                    onclick={handleCancel}
+                    disabled={isSaving}>
+                </lightning-button>
+                <lightning-button
+                    class="btnPrimary"
+                    variant="brand"
+                    label="Save"
+                    title="Save"
+                    onclick={handleSave}
+                    disabled={isSaving}>
+                </lightning-button>
+            </div>
+        </header>
+
+        <template if:true={isLoading}>
+            <div class="loadingWrap">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={isLoading}>
+            <section class="formCard">
+                <h2 class="sectionTitle">Basic Configuration</h2>
+                <div class="formGrid">
+                    <lightning-input
+                        name="taxName"
+                        label="Tax Name"
+                        value={taxName}
+                        required
+                        onchange={handleInputChange}>
+                    </lightning-input>
+
+                    <lightning-input
+                        type="number"
+                        name="taxRate"
+                        label="Tax Rate (%)"
+                        value={taxRate}
+                        step="0.01"
+                        min="0"
+                        onchange={handleInputChange}>
+                    </lightning-input>
+
+                    <div class="fieldSpan2">
+                        <lightning-combobox
+                            name="parentTaxId"
+                            label="Parent Tax"
+                            value={parentTaxId}
+                            options={parentTaxOptions}
+                            placeholder="Select parent tax"
+                            onchange={handleInputChange}>
+                        </lightning-combobox>
+                    </div>
+                </div>
+            </section>
+        </template>
+    </div>
+</template>

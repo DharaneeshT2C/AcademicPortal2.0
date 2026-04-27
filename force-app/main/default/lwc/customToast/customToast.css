@@ -1,0 +1,117 @@
+@font-face {
+    font-family: 'General Sans';
+    src: url('/resource/GeneralSansFont') format('woff2'),
+         url('/resource/GeneralSansFont') format('woff');
+    font-weight: var(--slds-g-font-weight-4, 400 )var(--slds-g-font-weight-7, 700);
+    font-display: swap;
+}
+
+.toast-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    pointer-events: auto; /* Block interactions behind */
+    animation: fadeIn 0.3s ease-out;
+}
+
+.toast-container {
+    background: #FFFFFF;
+    border-radius: var(--slds-g-radius-border-3, 12px);
+    padding: var(--slds-g-spacing-5, 24px);
+    width: 380px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border: var(--slds-g-sizing-border-1, 1px )solid #E5E7EB;
+    pointer-events: auto;
+    position: relative;
+}
+
+.toast-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    border: none;
+    background: transparent;
+    color: #6B7280;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+}
+
+.toast-close:hover {
+    color: #1F2937;
+}
+
+/* Icon Styles */
+.icon-container {
+    margin-bottom: var(--slds-g-spacing-4, 16px);
+    display: flex;
+    justify-content: center;
+}
+
+/* SVGs handle their own colors now */
+
+/* Content Styles */
+.title {
+    font-family: 'General Sans', sans-serif;
+    font-size: 1.125rem;
+    font-weight: var(--slds-g-font-weight-6, 600);
+    color: #1F2937;
+    margin: 0 0 var(--slds-g-spacing-2, 8px )0;
+}
+
+/* Add red asterisk if title has "Main Header" roughly, or logic in JS, 
+   but user image shows red asterisk. 
+   We can add it in HTML if needed, or CSS pseudo element if class provided. 
+   Assuming the passed title includes it or we style specific words. 
+   For now, simple title. */
+
+.message {
+    font-family: 'General Sans', sans-serif;
+    font-size: 0.95rem;
+    color: #6B7280;
+    margin: 0;
+    line-height: 1.5;
+}
+
+@keyframes toastLifecycleA {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes toastLifecycleB {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

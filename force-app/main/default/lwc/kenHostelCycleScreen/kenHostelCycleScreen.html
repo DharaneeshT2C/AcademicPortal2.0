@@ -1,0 +1,987 @@
+﻿<template>
+    <template if:false={isCreateView}>
+        <template if:false={isDetailView}>
+            <div class="hc-container">
+                <div class="hc-header">
+                    <div>
+                        <h1 class="hc-title">Hostel Cycle</h1>
+                        <p class="hc-sub-text">Manage cycle containers and their operational windows</p>
+                    </div>
+                    <button class="hc-new-btn" type="button" onclick={handleOpenCreateCycle}>
+                        <lightning-icon icon-name="utility:add" size="x-small"></lightning-icon>
+                        <span>New Cycle</span>
+                    </button>
+                </div>
+
+                <section class="hc-card">
+                    <div class="hc-card-head">
+                        <h3>Cycles</h3>
+                    </div>
+                    <div class="hc-table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>CYCLE NAME</th>
+                                    <th>ACADEMIC YEAR</th>
+                                    <th>START DATE</th>
+                                    <th>END DATE</th>
+                                    <th>STATUS</th>
+                                    <th>WINDOWS</th>
+                                    <th>APPLICATIONS</th>
+                                    <th>ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template if:true={hasRows}>
+                                    <template for:each={rows} for:item="row">
+                                        <tr key={row.id}>
+                                            <td>
+                                                <button type="button" class="hc-cycle-link" data-id={row.id} onclick={handleOpenCycleDetail}>
+                                                    {row.cycleName}
+                                                </button>
+                                            </td>
+                                            <td>{row.academicYear}</td>
+                                            <td>{row.startDate}</td>
+                                            <td>{row.endDate}</td>
+                                            <td><span class={row.statusClass}>{row.status}</span></td>
+                                            <td>
+                                                <span class="hc-windows-cell">
+                                                    <lightning-icon icon-name="utility:layers" size="xx-small"></lightning-icon>
+                                                    <span>{row.windows}</span>
+                                                </span>
+                                            </td>
+                                            <td>{row.applications}</td>
+                                            <td>
+                                                <div class="hc-actions">
+                                                    <button class="hc-icon-btn" type="button" data-id={row.id} onclick={handlePreviewRow}>
+                                                        <lightning-icon icon-name="utility:preview" size="xx-small"></lightning-icon>
+                                                    </button>
+                                                    <button class="hc-icon-btn" type="button" data-id={row.id} onclick={handleEditRow}>
+                                                        <lightning-icon icon-name="utility:edit" size="xx-small"></lightning-icon>
+                                                    </button>
+                                                    <button class="hc-icon-btn" type="button" data-id={row.id} onclick={handleDeleteRow}>
+                                                        <lightning-icon icon-name="utility:delete" size="xx-small"></lightning-icon>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </template>
+
+        <template if:true={isDetailView}>
+            <div class="hc-container">
+                <template if:false={isWindowCreateView}>
+                    <section class="hc-card hc-detail-card">
+                        <div class="hc-card-head">
+                            <h3>Cycle Configuration</h3>
+                        </div>
+                        <div class="hc-overview-grid">
+                            <div>
+                                <div class="hc-overview-label">CYCLE NAME</div>
+                                <div class="hc-overview-value">{selectedCycle.cycleName}</div>
+                            </div>
+                            <div>
+                                <div class="hc-overview-label">ACADEMIC YEAR</div>
+                                <div class="hc-overview-value">{selectedCycle.academicYear}</div>
+                            </div>
+                            <div>
+                                <div class="hc-overview-label">START DATE</div>
+                                <div class="hc-overview-value">{selectedCycle.startDate}</div>
+                            </div>
+                            <div>
+                                <div class="hc-overview-label">END DATE</div>
+                                <div class="hc-overview-value">{selectedCycle.endDate}</div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="hc-kpi-grid">
+                        <article class="hc-kpi-card">
+                            <div class="hc-kpi-icon hc-kpi-icon-purple">
+                                <lightning-icon icon-name="utility:layers" size="small"></lightning-icon>
+                            </div>
+                            <div>
+                                <div class="hc-kpi-label">Total Windows</div>
+                                <div class="hc-kpi-value">{totalWindowsCount}</div>
+                            </div>
+                        </article>
+
+                        <article class="hc-kpi-card">
+                            <div class="hc-kpi-icon hc-kpi-icon-blue">
+                                <lightning-icon icon-name="utility:preview" size="small"></lightning-icon>
+                            </div>
+                            <div>
+                                <div class="hc-kpi-label">Total Applications</div>
+                                <div class="hc-kpi-value hc-kpi-value-blue">{totalApplicationsDisplay}</div>
+                            </div>
+                        </article>
+
+                        <article class="hc-kpi-card">
+                            <div class="hc-kpi-icon hc-kpi-icon-green">
+                                <lightning-icon icon-name="utility:new_window" size="small"></lightning-icon>
+                            </div>
+                            <div>
+                                <div class="hc-kpi-label">Total Alloted</div>
+                                <div class="hc-kpi-value hc-kpi-value-green">{totalAllottedDisplay}</div>
+                            </div>
+                        </article>
+                    </section>
+
+                    <section class="hc-card hc-window-card">
+                        <div class="hc-card-head">
+                            <h3>{windowsHeading}</h3>
+                            <button class="hc-new-btn" type="button" onclick={handleOpenAddWindow}>
+                                <lightning-icon icon-name="utility:add" size="x-small"></lightning-icon>
+                                <span>Add Window</span>
+                            </button>
+                        </div>
+
+                        <div class="hc-table-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>WINDOW NAME</th>
+                                        <th>ALLOTMENT TYPE</th>
+                                        <th>START DATE</th>
+                                        <th>END DATE</th>
+                                        <th>STATUS</th>
+                                        <th>ACTIONS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template if:true={hasWindowRows}>
+                                        <template for:each={selectedCycleWindowsUi} for:item="row">
+                                            <tr key={row.id}>
+                                                <td>
+                                                    <button type="button" class="hc-cycle-link" data-id={row.id} onclick={handleEditWindow}>{row.name}</button>
+                                                </td>
+                                                <td><span class={row.allotmentTypeClass}>{row.allotmentType}</span></td>
+                                                <td>{row.startDate}</td>
+                                                <td>{row.endDate}</td>
+                                                <td>
+                                                    <template if:true={row.hasStatus}>
+                                                        <span class={row.statusClass}>{row.status}</span>
+                                                    </template>
+                                                </td>
+                                                <td>
+                                                    <div class="hc-inline-actions">
+                                                        <button class="hc-table-action" type="button" data-id={row.id} onclick={handleEditWindow}>
+                                                            <lightning-icon icon-name="utility:edit" size="xx-small"></lightning-icon>
+                                                            <span>Edit</span>
+                                                        </button>
+                                                        <button
+                                                            class="hc-table-action hc-danger-btn"
+                                                            type="button"
+                                                            data-id={row.id}
+                                                            onclick={handleDeleteWindow}
+                                                        >
+                                                            <lightning-icon icon-name="utility:close" size="xx-small"></lightning-icon>
+                                                            <span>Close</span>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </template>
+                                    <template if:false={hasWindowRows}>
+                                        <tr>
+                                            <td colspan="6">No windows added yet.</td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section class="hc-card hc-audit-card">
+                        <div class="hc-card-head">
+                            <h3>Activity &amp; Audit Log</h3>
+                        </div>
+
+                        <div class="hc-audit-body">
+                            <div class="hc-audit-meta-grid">
+                                <div>
+                                    <div class="hc-overview-label">CREATED BY</div>
+                                    <div class="hc-overview-value">{auditCreatedByText}</div>
+                                </div>
+                                <div>
+                                    <div class="hc-overview-label">CREATED DATE</div>
+                                    <div class="hc-overview-value">{auditCreatedDateText}</div>
+                                </div>
+                                <div>
+                                    <div class="hc-overview-label">LAST MODIFIED</div>
+                                    <div class="hc-overview-value">{auditLastModifiedText}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </template>
+
+                <template if:true={isWindowCreateView}>
+                    <div class="hc-create-top">
+                        <div class="hc-create-left">
+                            <button class="hc-back-btn" type="button" onclick={handleBackToList}>
+                                <lightning-icon icon-name="utility:back" size="x-small"></lightning-icon>
+                                <span>Back</span>
+                            </button>
+                            <div>
+                                <h1 class="hc-title">{windowViewTitle}</h1>
+                                <p class="hc-sub-text">Configure enrollment policies and allocation rules for this window within {selectedCycle.cycleName}</p>
+                            </div>
+                        </div>
+                        <div class="hc-create-actions">
+                            <button class="hc-btn-cancel" type="button" onclick={handleCancelWindowForm}>Cancel</button>
+                            <button class="hc-new-btn" type="button" onclick={handleSaveWindow} disabled={isSavingWindow}>{windowSaveLabel}</button>
+                        </div>
+                    </div>
+
+                    <section class="hc-range-banner">
+                        <lightning-icon icon-name="utility:info" size="x-small"></lightning-icon>
+                        <span>Window dates must fall within the parent cycle range: <b>{cycleDateRangeText}</b></span>
+                    </section>
+
+                    <section class="hc-card hc-form-card">
+                        <div class="hc-card-head">
+                            <h3>Window Overview</h3>
+                        </div>
+                        <div class="hc-form-body hc-section-body-gap">
+                            <div class="hc-field">
+                                <label>Window Name <span class="required-star">*</span></label>
+                                <input data-field="name" type="text" placeholder="e.g., Regular Enrollment Window" value={windowForm.name} onchange={handleWindowFieldChange} />
+                            </div>
+
+                            <div class="hc-field-row">
+                                <div class="hc-field">
+                                    <label>Start Date <span class="required-star">*</span></label>
+                                    <input data-field="startDate" type="date" value={windowForm.startDate} onchange={handleWindowFieldChange} />
+                                </div>
+                                <div class="hc-field">
+                                    <label>End Date <span class="required-star">*</span></label>
+                                    <input data-field="endDate" type="date" value={windowForm.endDate} onchange={handleWindowFieldChange} />
+                                </div>
+                            </div>
+
+                            <div class="hc-field-row">
+                                <div class="hc-field">
+                                    <label>Start Time <span class="required-star">*</span></label>
+                                    <input data-field="startTime" type="time" value={windowForm.startTime} onchange={handleWindowFieldChange} />
+                                </div>
+                                <div class="hc-field">
+                                    <label>End Time <span class="required-star">*</span></label>
+                                    <input data-field="endTime" type="time" value={windowForm.endTime} onchange={handleWindowFieldChange} />
+                                </div>
+                            </div>
+
+                            <div class="hc-field-row">
+                                <div class="hc-field">
+                                    <label>Room Allotment Start Date</label>
+                                    <input
+                                        data-field="roomAllotmentStartDate"
+                                        type="date"
+                                        value={windowForm.roomAllotmentStartDate}
+                                        onchange={handleWindowFieldChange}
+                                    />
+                                </div>
+                                <div class="hc-field">
+                                    <label>Room Allotment End Date</label>
+                                    <input
+                                        data-field="roomAllotmentEndDate"
+                                        type="date"
+                                        value={windowForm.roomAllotmentEndDate}
+                                        onchange={handleWindowFieldChange}
+                                    />
+                                </div>
+                            </div>
+
+                            <div class="hc-field">
+                                <label>Payment Deadline <span class="required-star">*</span></label>
+                                <input data-field="paymentDeadline" type="date" value={windowForm.paymentDeadline} onchange={handleWindowFieldChange} />
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="hc-card hc-form-card">
+                        <div class="hc-card-head">
+                            <h3>Eligibility &amp; Scope</h3>
+                        </div>
+                        <div class="hc-form-body hc-section-body-gap">
+                            <div class="hc-field">
+                                <label>Eligible Learning Program Plan <span class="required-star">*</span></label>
+                                <div class="hc-scope-select" onclick={handleDropdownContainerClick}>
+                                    <button
+                                        type="button"
+                                        class={programPathwayDropdownClass}
+                                        data-dropdown="programPathway"
+                                        onclick={handleDropdownToggle}
+                                        aria-expanded={isProgramPathwayDropdownOpen}
+                                    >
+                                        <template if:true={selectedProgramPathwaysText}>
+                                            <span class="hc-scope-trigger-value">{selectedProgramPathwaysText}</span>
+                                        </template>
+                                        <template if:false={selectedProgramPathwaysText}>
+                                            <span class="hc-scope-trigger-placeholder">Select learning program plans...</span>
+                                        </template>
+                                        <lightning-icon class="hc-scope-chevron" icon-name="utility:chevrondown" size="xx-small"></lightning-icon>
+                                    </button>
+
+                                    <template if:true={isProgramPathwayDropdownOpen}>
+                                        <div class="hc-scope-picker">
+                                            <template for:each={programPathwayUiOptions} for:item="option">
+                                                <label key={option.value} class="hc-scope-option">
+                                                    <input
+                                                        type="checkbox"
+                                                        data-field="programPathwayIds"
+                                                        data-value={option.value}
+                                                        checked={option.selected}
+                                                        onchange={handleScopeToggle}
+                                                    />
+                                                    <span>{option.label}</span>
+                                                </label>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <div class="hc-field">
+                                <label>Eligible Buildings <span class="required-star">*</span></label>
+                                <div class="hc-scope-select" onclick={handleDropdownContainerClick}>
+                                    <button
+                                        type="button"
+                                        class={buildingDropdownClass}
+                                        data-dropdown="building"
+                                        onclick={handleDropdownToggle}
+                                        aria-expanded={isBuildingDropdownOpen}
+                                    >
+                                        <template if:true={selectedBuildingsText}>
+                                            <span class="hc-scope-trigger-value">{selectedBuildingsText}</span>
+                                        </template>
+                                        <template if:false={selectedBuildingsText}>
+                                            <span class="hc-scope-trigger-placeholder">Select buildings...</span>
+                                        </template>
+                                        <lightning-icon class="hc-scope-chevron" icon-name="utility:chevrondown" size="xx-small"></lightning-icon>
+                                    </button>
+
+                                    <template if:true={isBuildingDropdownOpen}>
+                                        <div class="hc-scope-picker">
+                                            <template for:each={buildingScopeUiOptions} for:item="option">
+                                                <label key={option.value} class="hc-scope-option">
+                                                    <input
+                                                        type="checkbox"
+                                                        data-field="buildingIds"
+                                                        data-value={option.value}
+                                                        checked={option.selected}
+                                                        onchange={handleScopeToggle}
+                                                    />
+                                                    <span>{option.label}</span>
+                                                </label>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <div class="hc-field">
+                                <label>Eligible Floors</label>
+                                <div class="hc-scope-select" onclick={handleDropdownContainerClick}>
+                                    <button
+                                        type="button"
+                                        class={floorDropdownClass}
+                                        data-dropdown="floor"
+                                        onclick={handleDropdownToggle}
+                                        aria-expanded={isFloorDropdownOpen}
+                                    >
+                                        <template if:true={selectedFloorsText}>
+                                            <span class="hc-scope-trigger-value">{selectedFloorsText}</span>
+                                        </template>
+                                        <template if:false={selectedFloorsText}>
+                                            <span class="hc-scope-trigger-placeholder">Filter by building floor...</span>
+                                        </template>
+                                        <lightning-icon class="hc-scope-chevron" icon-name="utility:chevrondown" size="xx-small"></lightning-icon>
+                                    </button>
+
+                                    <template if:true={isFloorDropdownOpen}>
+                                        <div class="hc-scope-picker">
+                                            <template for:each={floorScopeUiOptions} for:item="option">
+                                                <label key={option.value} class="hc-scope-option">
+                                                    <input
+                                                        type="checkbox"
+                                                        data-field="floorValues"
+                                                        data-value={option.value}
+                                                        checked={option.selected}
+                                                        onchange={handleScopeToggle}
+                                                    />
+                                                    <span>{option.label}</span>
+                                                </label>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <div class="hc-field">
+                                <label>Eligible Room Categories</label>
+                                <div class="hc-scope-select" onclick={handleDropdownContainerClick}>
+                                    <button
+                                        type="button"
+                                        class={roomCategoryDropdownClass}
+                                        data-dropdown="roomCategory"
+                                        onclick={handleDropdownToggle}
+                                        aria-expanded={isRoomCategoryDropdownOpen}
+                                    >
+                                        <template if:true={selectedRoomCategoriesText}>
+                                            <span class="hc-scope-trigger-value">{selectedRoomCategoriesText}</span>
+                                        </template>
+                                        <template if:false={selectedRoomCategoriesText}>
+                                            <span class="hc-scope-trigger-placeholder">Select room categories...</span>
+                                        </template>
+                                        <lightning-icon class="hc-scope-chevron" icon-name="utility:chevrondown" size="xx-small"></lightning-icon>
+                                    </button>
+
+                                    <template if:true={isRoomCategoryDropdownOpen}>
+                                        <div class="hc-scope-picker">
+                                            <template for:each={roomCategoryScopeUiOptions} for:item="option">
+                                                <label key={option.value} class="hc-scope-option">
+                                                    <input
+                                                        type="checkbox"
+                                                        data-field="roomCategoryIds"
+                                                        data-value={option.value}
+                                                        checked={option.selected}
+                                                        onchange={handleScopeToggle}
+                                                    />
+                                                    <span>{option.label}</span>
+                                                </label>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                                <div class="hc-help-text">Leave empty to make all room categories eligible for the selected buildings.</div>
+                            </div>
+
+                            <template if:true={showLiveCapacitySummary}>
+                                <section class="hc-live-capacity-card">
+                                    <div class="hc-live-capacity-title">
+                                        <lightning-icon icon-name="utility:info" size="xx-small"></lightning-icon>
+                                        <span>Live Capacity Summary</span>
+                                    </div>
+                                    <div class="hc-live-capacity-grid">
+                                        <article class="hc-live-capacity-item">
+                                            <div class="hc-live-capacity-icon hc-lc-icon-blue">
+                                                <lightning-icon icon-name="utility:company" size="x-small"></lightning-icon>
+                                            </div>
+                                            <div>
+                                                <div class="hc-live-capacity-label">Buildings</div>
+                                                <div class="hc-live-capacity-value">{liveCapacityBuildingsCount}</div>
+                                            </div>
+                                        </article>
+                                        <article class="hc-live-capacity-item">
+                                            <div class="hc-live-capacity-icon hc-lc-icon-purple">
+                                                <lightning-icon icon-name="utility:home" size="x-small"></lightning-icon>
+                                            </div>
+                                            <div>
+                                                <div class="hc-live-capacity-label">Total Rooms</div>
+                                                <div class="hc-live-capacity-value">{liveCapacityTotalRooms}</div>
+                                            </div>
+                                        </article>
+                                        <article class="hc-live-capacity-item">
+                                            <div class="hc-live-capacity-icon hc-lc-icon-indigo">
+                                                <lightning-icon icon-name="utility:service_appointment" size="x-small"></lightning-icon>
+                                            </div>
+                                            <div>
+                                                <div class="hc-live-capacity-label">Total Beds</div>
+                                                <div class="hc-live-capacity-value">{liveCapacityTotalBeds}</div>
+                                            </div>
+                                        </article>
+                                        <article class="hc-live-capacity-item">
+                                            <div class="hc-live-capacity-icon hc-lc-icon-green">
+                                                <lightning-icon icon-name="utility:event" size="x-small"></lightning-icon>
+                                            </div>
+                                            <div>
+                                                <div class="hc-live-capacity-label">Available Beds</div>
+                                                <div class="hc-live-capacity-value">{liveCapacityAvailableBeds}</div>
+                                            </div>
+                                        </article>
+                                    </div>
+                                </section>
+                            </template>
+                        </div>
+                    </section>
+
+                    <section class="hc-card hc-form-card">
+                        <div class="hc-card-head">
+                            <h3>Allocation Configuration</h3>
+                        </div>
+                        <div class="hc-form-body hc-section-body-gap">
+                            <div class="hc-field">
+                                <label>Allotment Type <span class="required-star">*</span></label>
+                                <div class={directAllotmentClass}>
+                                    <label class="hc-allotment-label">
+                                        <input
+                                            type="radio"
+                                            name="allotmentType"
+                                            value="Direct"
+                                            checked={isDirectAllotment}
+                                            onchange={handleAllocationTypeChange}
+                                        />
+                                        <div>
+                                            <div class="hc-allotment-title">Direct Allotment</div>
+                                            <div class="hc-allotment-sub">Students select a room and pay immediately. Room locks upon payment.</div>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class={provisionalAllotmentClass}>
+                                    <label class="hc-allotment-label">
+                                        <input
+                                            type="radio"
+                                            name="allotmentType"
+                                            value="Provisional"
+                                            checked={isProvisionalAllotment}
+                                            onchange={handleAllocationTypeChange}
+                                        />
+                                        <div>
+                                            <div class="hc-allotment-title">Provisional Allotment</div>
+                                            <div class="hc-allotment-sub">Students submit preferences. Admin reviews and assigns rooms.</div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <template if:true={isProvisionalAllotment}>
+                                <template if:false={isEditWindowMode}>
+                                <section class="hc-provisional-box">
+                                    <div class="hc-provisional-title">PROVISIONAL SETTINGS</div>
+
+                                    <div class="hc-provisional-row">
+                                        <div>
+                                            <div class="hc-provisional-label">Enable Room Preference</div>
+                                            <div class="hc-provisional-sub">Students rank preferred rooms</div>
+                                        </div>
+                                        <label class="hc-switch">
+                                            <input
+                                                type="checkbox"
+                                                data-field="enableRoomPreference"
+                                                checked={windowForm.enableRoomPreference}
+                                                onchange={handleWindowToggleChange}
+                                            />
+                                            <span class="hc-slider"></span>
+                                        </label>
+                                    </div>
+
+                                    <template if:true={windowForm.enableRoomPreference}>
+                                        <div class="hc-provisional-input-box">
+                                            <div class="hc-field hc-field-no-gap">
+                                                <label>Maximum Room Preferences <span class="required-star">*</span></label>
+                                                <input
+                                                    class="hc-compact-input"
+                                                    data-field="maxRoomPreferences"
+                                                    type="number"
+                                                    min="1"
+                                                    value={windowForm.maxRoomPreferences}
+                                                    onchange={handleWindowNumberChange}
+                                                />
+                                                <div class="hc-help-text">Enter the maximum number of room preferences allowed.</div>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <div class="hc-provisional-divider"></div>
+
+                                    <div class="hc-provisional-row">
+                                        <div>
+                                            <div class="hc-provisional-label">Maximum Room Capacity</div>
+                                            <div class="hc-provisional-sub">Limit the maximum allowed room capacity during allotment.</div>
+                                        </div>
+                                        <label class="hc-switch">
+                                            <input
+                                                type="checkbox"
+                                                data-field="enableMaximumRoomCapacity"
+                                                checked={windowForm.enableMaximumRoomCapacity}
+                                                onchange={handleWindowToggleChange}
+                                            />
+                                            <span class="hc-slider"></span>
+                                        </label>
+                                    </div>
+
+                                    <template if:true={windowForm.enableMaximumRoomCapacity}>
+                                        <div class="hc-provisional-input-box">
+                                            <div class="hc-field hc-field-no-gap">
+                                                <label>Maximum Room Capacity <span class="required-star">*</span></label>
+                                                <input
+                                                    class="hc-compact-input"
+                                                    data-field="maxRoomCapacity"
+                                                    type="number"
+                                                    min="1"
+                                                    value={windowForm.maxRoomCapacity}
+                                                    onchange={handleWindowNumberChange}
+                                                />
+                                                <div class="hc-help-text">Enter the maximum room capacity allowed during allotment.</div>
+                                            </div>
+                                        </div>
+                                    </template>
+
+                                    <div class="hc-provisional-divider"></div>
+
+                                    <div class="hc-provisional-row">
+                                        <div>
+                                            <div class="hc-provisional-label">Allow Roommate Preference</div>
+                                            <div class="hc-provisional-sub">Students can optionally request a roommate.</div>
+                                        </div>
+                                        <label class="hc-switch">
+                                            <input
+                                                type="checkbox"
+                                                data-field="allowRoommatePreference"
+                                                checked={windowForm.allowRoommatePreference}
+                                                onchange={handleWindowToggleChange}
+                                            />
+                                            <span class="hc-slider"></span>
+                                        </label>
+                                    </div>
+
+                                    <template if:true={windowForm.allowRoommatePreference}>
+                                        <div class="hc-roommate-note">
+                                            Students can specify a preferred roommate during enrollment. The system will attempt to honor this during allotment.
+                                        </div>
+                                    </template>
+                                </section>
+                                </template>
+                            </template>
+
+                            <template if:true={showEditDirectInfo}>
+                                <div class="hc-direct-note">
+                                    <lightning-icon icon-name="utility:info" size="xx-small"></lightning-icon>
+                                    <span>Room capacity will be enforced automatically during selection.</span>
+                                </div>
+                            </template>
+                        </div>
+                    </section>
+
+                    <template if:true={showEditProvisionalCards}>
+                    <section class="hc-card hc-form-card">
+                        <div class="hc-card-head">
+                            <h3>Provisional Settings</h3>
+                        </div>
+                        <div class="hc-form-body">
+                            <div class="hc-provisional-box hc-provisional-empty">
+                                <div class="hc-provisional-row">
+                                    <div>
+                                        <div class="hc-provisional-label">Enable Room Preference</div>
+                                        <div class="hc-provisional-sub">Students rank preferred rooms</div>
+                                    </div>
+                                    <label class="hc-switch">
+                                        <input
+                                            type="checkbox"
+                                            data-field="enableRoomPreference"
+                                            checked={windowForm.enableRoomPreference}
+                                            onchange={handleWindowToggleChange}
+                                        />
+                                        <span class="hc-slider"></span>
+                                    </label>
+                                </div>
+
+                                <template if:true={windowForm.enableRoomPreference}>
+                                    <div class="hc-provisional-input-box">
+                                        <div class="hc-field hc-field-no-gap">
+                                            <label>Maximum Room Preferences <span class="required-star">*</span></label>
+                                            <input
+                                                class="hc-compact-input"
+                                                data-field="maxRoomPreferences"
+                                                type="number"
+                                                min="1"
+                                                value={windowForm.maxRoomPreferences}
+                                                onchange={handleWindowNumberChange}
+                                            />
+                                            <div class="hc-help-text">Students can rank up to this many preferred rooms.</div>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <div class="hc-provisional-divider"></div>
+
+                                <div class="hc-provisional-row">
+                                    <div>
+                                        <div class="hc-provisional-label">Allow Roommate Preference</div>
+                                        <div class="hc-provisional-sub">Students can optionally request a roommate.</div>
+                                    </div>
+                                    <label class="hc-switch">
+                                        <input
+                                            type="checkbox"
+                                            data-field="allowRoommatePreference"
+                                            checked={windowForm.allowRoommatePreference}
+                                            onchange={handleWindowToggleChange}
+                                        />
+                                        <span class="hc-slider"></span>
+                                    </label>
+                                </div>
+
+                                <template if:true={windowForm.allowRoommatePreference}>
+                                    <div class="hc-roommate-note">
+                                        Students can specify a preferred roommate during enrollment. The system will attempt to honor this during allotment.
+                                    </div>
+                                </template>
+
+                                <div class="hc-provisional-divider"></div>
+
+                                <div class="hc-provisional-label hc-block-title">Building Allocation Limits</div>
+                                <div class="hc-table-wrap hc-allocation-table">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>BUILDING</th>
+                                                <th>TOTAL CAPACITY</th>
+                                                <th>LIMIT MODE</th>
+                                                <th>ALLOCATION CAP</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={buildingAllocationLimitRows} for:item="row">
+                                                <tr key={row.key}>
+                                                    <td>{row.building}</td>
+                                                    <td>{row.totalCapacity}</td>
+                                                    <td>
+                                                        <select
+                                                            class="hc-table-select"
+                                                            data-building-id={row.buildingId}
+                                                            onchange={handleBuildingAllocationModeChange}
+                                                        >
+                                                            <option value="Use Full Capacity" selected={row.isFullCapacity}>Use Full Capacity</option>
+                                                            <option value="Custom Cap" selected={row.isCustomCap}>Set Custom Limit</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <div class="hc-allocation-input-cell">
+                                                            <input
+                                                                class={row.allocationCapInputClass}
+                                                                type="number"
+                                                                min="0"
+                                                                max={row.totalCapacity}
+                                                                data-building-id={row.buildingId}
+                                                                value={row.allocationCap}
+                                                                onchange={handleBuildingAllocationCapChange}
+                                                                disabled={row.isAllocationCapLocked}
+                                                            />
+                                                            <template if:true={row.hasAllocationCapError}>
+                                                                <div class="hc-table-input-error-text">{row.allocationCapErrorMessage}</div>
+                                                            </template>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="hc-card hc-form-card">
+                        <div class="hc-card-head hc-card-head-vertical">
+                            <h3>Provisional Allocation Controls</h3>
+                        </div>
+                        <div class="hc-form-body hc-pac-body">
+                            <div class="hc-table-wrap hc-allocation-table hc-pac-table">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>BUILDING</th>
+                                            <th>TOTAL CAPACITY</th>
+                                            <th>ALREADY ALLOCATED</th>
+                                            <th>LIMIT MODE</th>
+                                            <th>ALLOCATION CAP</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={buildingAllocationLimitRows} for:item="row">
+                                            <tr key={row.key}>
+                                                <td>{row.building}</td>
+                                                <td>{row.totalCapacity}</td>
+                                                <td>{row.alreadyAllocated}</td>
+                                                <td>
+                                                    <select
+                                                        class="hc-table-select"
+                                                        data-building-id={row.buildingId}
+                                                        onchange={handleBuildingAllocationModeChange}
+                                                    >
+                                                        <option value="Use Full Capacity" selected={row.isFullCapacity}>Use Full Capacity</option>
+                                                        <option value="Custom Cap" selected={row.isCustomCap}>Set Custom Limit</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <div class="hc-allocation-input-cell">
+                                                        <input
+                                                            class={row.allocationCapInputClass}
+                                                            type="number"
+                                                            min="0"
+                                                            max={row.totalCapacity}
+                                                            data-building-id={row.buildingId}
+                                                            value={row.allocationCap}
+                                                            onchange={handleBuildingAllocationCapChange}
+                                                            disabled={row.isAllocationCapLocked}
+                                                        />
+                                                        <template if:true={row.hasAllocationCapError}>
+                                                            <div class="hc-table-input-error-text">{row.allocationCapErrorMessage}</div>
+                                                        </template>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="hc-allocation-summary">
+                                Total Cap Across Selected Buildings: <b>{totalCapAcrossSelectedBuildings}</b>
+                                <span class="hc-summary-gap"></span>
+                                Total Provisional Caps Set: <b>{totalProvisionalCapsSet}</b>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="hc-edit-footer">
+                        <button class="hc-btn-cancel" type="button" onclick={handleCancelWindowForm}>Cancel</button>
+                        <button class="hc-new-btn" type="button" onclick={handleSaveWindow} disabled={isSavingWindow}>Save Changes</button>
+                    </div>
+                    </template>
+                </template>
+            </div>
+        </template>
+    </template>
+
+    <template if:true={isCreateView}>
+        <div class="hc-container">
+            <div class="hc-create-top">
+                <div class="hc-create-left">
+                    <button class="hc-back-btn" type="button" onclick={handleBackToList}>
+                        <lightning-icon icon-name="utility:back" size="x-small"></lightning-icon>
+                        <span>Back</span>
+                    </button>
+                    <div>
+                        <h1 class="hc-title">{createTitle}</h1>
+                        <p class="hc-sub-text">Define the cycle and configure at least one enrollment window</p>
+                    </div>
+                </div>
+                <div class="hc-create-actions">
+                    <button class="hc-btn-cancel" type="button" onclick={handleBackToList}>Cancel</button>
+                    <button class="hc-new-btn" type="button" onclick={handleCreateCycle} disabled={isSaving}>{saveButtonLabel}</button>
+                </div>
+            </div>
+
+            <section class="hc-card hc-form-card">
+                <div class="hc-card-head">
+                    <h3>Cycle Overview</h3>
+                </div>
+                <div class="hc-form-body">
+                    <div class="hc-field">
+                        <label>Cycle Name <span class="required-star">*</span></label>
+                        <input
+                            data-field="name"
+                            type="text"
+                            placeholder="e.g., 2025-26 Odd Semester"
+                            value={form.name}
+                            onchange={handleFieldChange}
+                        />
+                    </div>
+
+                    <div class="hc-field">
+                        <label>Academic Year <span class="required-star">*</span></label>
+                        <div class="hc-scope-select" onclick={handleDropdownContainerClick}>
+                            <button
+                                type="button"
+                                class={academicYearDropdownClass}
+                                data-dropdown="academicYear"
+                                onclick={handleDropdownToggle}
+                                aria-expanded={isAcademicYearDropdownOpen}
+                            >
+                                <template if:true={academicYearsDisplayValue}>
+                                    <span class="hc-scope-trigger-value">{academicYearsDisplayValue}</span>
+                                </template>
+                                <template if:false={academicYearsDisplayValue}>
+                                    <span class="hc-scope-trigger-placeholder">Select academic years...</span>
+                                </template>
+                                <lightning-icon class="hc-scope-chevron" icon-name="utility:chevrondown" size="xx-small"></lightning-icon>
+                            </button>
+
+                            <template if:true={isAcademicYearDropdownOpen}>
+                                <div class="hc-scope-picker">
+                                    <template for:each={academicYearUiOptions} for:item="option">
+                                        <label key={option.value} class="hc-scope-option">
+                                            <input
+                                                type="checkbox"
+                                                data-value={option.value}
+                                                checked={option.selected}
+                                                onchange={handleAcademicYearToggle}
+                                            />
+                                            <span>{option.label}</span>
+                                        </label>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div class="hc-field">
+                        <label>Status <span class="required-star">*</span></label>
+                        <select data-field="status" value={form.status} onchange={handleFieldChange}>
+                            <option value="">Select status...</option>
+                            <template for:each={statusOptions} for:item="option">
+                                <option key={option.value} value={option.value}>{option.label}</option>
+                            </template>
+                        </select>
+                    </div>
+
+                    <div class="hc-field-row">
+                        <div class="hc-field">
+                            <label>Cycle Start Date &amp; Time <span class="required-star">*</span></label>
+                            <input
+                                data-field="startDate"
+                                type="datetime-local"
+                                value={form.startDate}
+                                onchange={handleFieldChange}
+                            />
+                        </div>
+                        <div class="hc-field">
+                            <label>Cycle End Date &amp; Time <span class="required-star">*</span></label>
+                            <input
+                                data-field="endDate"
+                                type="datetime-local"
+                                value={form.endDate}
+                                onchange={handleFieldChange}
+                            />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="hc-card hc-form-card">
+                <div class="hc-card-head hc-toggle-head">
+                    <h3>Carry Forward from Previous Cycle</h3>
+                    <label class="hc-switch">
+                        <input type="checkbox" checked={isCarryForwardEnabled} onchange={handleCarryForwardToggle} />
+                        <span class="hc-slider"></span>
+                    </label>
+                </div>
+
+                <template if:true={isCarryForwardEnabled}>
+                    <div class="hc-form-body">
+                        <div class="hc-field">
+                            <label>Select Previous Cycle <span class="required-star">*</span></label>
+                            <select data-field="previousCycleId" value={form.previousCycleId} onchange={handleFieldChange}>
+                                <option value="">Select a cycle...</option>
+                                <template for:each={previousCycleUiOptions} for:item="option">
+                                    <option key={option.value} value={option.value}>{option.label}</option>
+                                </template>
+                            </select>
+                            <div class="hc-help-text">
+                                Students from the selected cycle will be automatically enrolled in this new cycle.
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </section>
+        </div>
+    </template>
+</template>

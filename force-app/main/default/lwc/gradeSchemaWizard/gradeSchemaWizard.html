@@ -1,0 +1,416 @@
+<template>
+    <div class="gsw-shell">
+        <!-- Breadcrumb nav -->
+        <div class="gsw-nav">
+            <nav class="gsw-breadcrumb">
+                <button class="gsw-breadcrumb-link" onclick={handleCancel}>Grade Schema</button>
+                <span class="gsw-breadcrumb-sep">&rsaquo;</span>
+                <span class="gsw-breadcrumb-current">{title}</span>
+            </nav>
+            <button class="gsw-btn-back" onclick={handleCancel}>&#8592; Back</button>
+        </div>
+
+        <!-- Hero -->
+        <div class="gsw-hero">
+            <div class="gsw-hero-left">
+                <h2 class="gsw-title">{title}</h2>
+                <p class="gsw-subtitle">Define grading criteria with relative and absolute letter grade ranges.</p>
+            </div>
+            <div class="gsw-hero-right">
+                <div class="gsw-metric">
+                    <span class="gsw-metric-label">Relative Ranges</span>
+                    <span class="gsw-metric-value">{relativeCriteriaCount}</span>
+                </div>
+                <div class="gsw-metric gsw-metric--muted">
+                    <span class="gsw-metric-label">Absolute Ranges</span>
+                    <span class="gsw-metric-value">{absoluteCriteriaCount}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- General Error -->
+        <template if:true={generalError}>
+            <div class="gsw-general-error">{generalError}</div>
+        </template>
+
+        <!-- Schema Details -->
+        <section class="gsw-card">
+            <div class="gsw-card-head">
+                <h3 class="gsw-card-title">Schema Details</h3>
+                <span class="gsw-chip">Master Record</span>
+            </div>
+            <div class="gsw-schema-row">
+                <div class="gsw-field gsw-field--name">
+                    <label class="gsw-label" for="gsw-name">Schema Name</label>
+                    <input
+                        id="gsw-name"
+                        class={schemaNameInputClass}
+                        type="text"
+                        value={draft.name}
+                        placeholder="Enter schema name..."
+                        data-field="name"
+                        oninput={handleSchemaFieldChange}
+                    />
+                    <template if:true={schemaNameError}>
+                        <span class="gsw-field-error">{schemaNameError}</span>
+                    </template>
+                </div>
+                <div class="gsw-field gsw-field--check">
+                    <label class="gsw-label">Active</label>
+                    <label class="gsw-toggle">
+                        <input
+                            type="checkbox"
+                            checked={draft.active}
+                            data-field="active"
+                            onchange={handleSchemaFieldChange}
+                        />
+                        <span class="gsw-toggle-ui"></span>
+                        <span class="gsw-toggle-text">Yes</span>
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        <!-- Grading Criteria - Two columns -->
+        <div class="gsw-criteria-grid">
+
+            <!-- Relative Grading -->
+            <section class="gsw-criteria-card">
+                <div class="gsw-criteria-head gsw-criteria-head--relative">
+                    <div class="gsw-criteria-head-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="gsw-criteria-title">Relative Grading</h3>
+                        <p class="gsw-criteria-sub">Grade relative to class performance</p>
+                    </div>
+                </div>
+
+                <div class="gsw-criteria-fields">
+                    <div class="gsw-field">
+                        <label class="gsw-label">Operator</label>
+                        <select
+                            class={relativeOperatorClass}
+                            data-criteria="relative"
+                            data-field="operator"
+                            onchange={handleCriteriaFieldChange}
+                        >
+                            <option value="">-- Select --</option>
+                            <template for:each={operatorOptions} for:item="opt">
+                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                            </template>
+                        </select>
+                        <template if:true={relativeOperatorError}>
+                            <span class="gsw-field-error">{relativeOperatorError}</span>
+                        </template>
+                    </div>
+                    <div class="gsw-field">
+                        <label class="gsw-label">Range To</label>
+                        <input
+                            class={relativeRangeToClass}
+                            type="number"
+                            value={relativeCriteria.rangeTo}
+                            placeholder="0"
+                            data-criteria="relative"
+                            data-field="rangeTo"
+                            oninput={handleCriteriaFieldChange}
+                        />
+                        <template if:true={relativeRangeToError}>
+                            <span class="gsw-field-error">{relativeRangeToError}</span>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Letter Grade Ranges -->
+                <div class="gsw-lg-head">
+                    <span class="gsw-lg-title">Letter Grade Ranges</span>
+                    <button class="gsw-btn-add" type="button" data-criteria="relative" onclick={handleAddLetterGrade}>
+                        + Add Range
+                    </button>
+                </div>
+
+                <!-- Column headers -->
+                <div class="gsw-lg-col-header">
+                    <span class="gsw-col-hd">Letter Grade</span>
+                    <span class="gsw-col-hd">Grade Point</span>
+                    <span class="gsw-col-hd gsw-col-hd--wide">Definition</span>
+                    <span class="gsw-col-hd">Range Start</span>
+                    <span class="gsw-col-hd">Range End</span>
+                    <span class="gsw-col-hd gsw-col-hd--action"></span>
+                </div>
+
+                <div class="gsw-lg-list">
+                    <template if:true={hasRelativeGrades}>
+                        <template for:each={relativeLetterGradesWithErrors} for:item="lg">
+                            <div key={lg.uiId} class="gsw-lg-row">
+                                <div class="gsw-lg-cell">
+                                    <select
+                                        class="gsw-lg-input"
+                                        data-criteria="relative"
+                                        data-lg-id={lg.uiId}
+                                        data-field="letterGrade"
+                                        onchange={handleLetterGradeFieldChange}
+                                    >
+                                        <option value="">--</option>
+                                        <template for:each={letterGradeOptions} for:item="opt">
+                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                        </template>
+                                    </select>
+                                    <template if:true={lg.errors.letterGrade}>
+                                        <span class="gsw-cell-error">{lg.errors.letterGrade}</span>
+                                    </template>
+                                </div>
+                                <div class="gsw-lg-cell">
+                                    <input
+                                        class="gsw-lg-input"
+                                        type="text"
+                                        value={lg.gradePoint}
+                                        placeholder="10.0"
+                                        data-criteria="relative"
+                                        data-lg-id={lg.uiId}
+                                        data-field="gradePoint"
+                                        oninput={handleLetterGradeFieldChange}
+                                    />
+                                    <template if:true={lg.errors.gradePoint}>
+                                        <span class="gsw-cell-error">{lg.errors.gradePoint}</span>
+                                    </template>
+                                </div>
+                                <div class="gsw-lg-cell gsw-lg-cell--wide">
+                                    <input
+                                        class="gsw-lg-input gsw-lg-input--wide"
+                                        type="text"
+                                        value={lg.definition}
+                                        placeholder="Outstanding"
+                                        data-criteria="relative"
+                                        data-lg-id={lg.uiId}
+                                        data-field="definition"
+                                        oninput={handleLetterGradeFieldChange}
+                                    />
+                                    <template if:true={lg.errors.definition}>
+                                        <span class="gsw-cell-error">{lg.errors.definition}</span>
+                                    </template>
+                                </div>
+                                <div class="gsw-lg-cell">
+                                    <input
+                                        class="gsw-lg-input"
+                                        type="text"
+                                        value={lg.rangeStart}
+                                        placeholder="90"
+                                        data-criteria="relative"
+                                        data-lg-id={lg.uiId}
+                                        data-field="rangeStart"
+                                        oninput={handleLetterGradeFieldChange}
+                                    />
+                                    <template if:true={lg.errors.rangeStart}>
+                                        <span class="gsw-cell-error">{lg.errors.rangeStart}</span>
+                                    </template>
+                                </div>
+                                <div class="gsw-lg-cell">
+                                    <input
+                                        class="gsw-lg-input"
+                                        type="text"
+                                        value={lg.rangeEnd}
+                                        placeholder="100"
+                                        data-criteria="relative"
+                                        data-lg-id={lg.uiId}
+                                        data-field="rangeEnd"
+                                        oninput={handleLetterGradeFieldChange}
+                                    />
+                                    <template if:true={lg.errors.rangeEnd}>
+                                        <span class="gsw-cell-error">{lg.errors.rangeEnd}</span>
+                                    </template>
+                                </div>
+                                <button
+                                    class="gsw-lg-delete"
+                                    type="button"
+                                    data-criteria="relative"
+                                    data-lg-id={lg.uiId}
+                                    onclick={handleDeleteLetterGrade}
+                                    title="Remove"
+                                >&#x2715;</button>
+                            </div>
+                        </template>
+                    </template>
+                    <template if:false={hasRelativeGrades}>
+                        <div class="gsw-lg-empty">No ranges yet. Click &ldquo;+ Add Range&rdquo; to start.</div>
+                    </template>
+                </div>
+            </section>
+
+            <!-- Absolute Grading -->
+            <section class="gsw-criteria-card">
+                <div class="gsw-criteria-head gsw-criteria-head--absolute">
+                    <div class="gsw-criteria-head-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="gsw-criteria-title">Absolute Grading</h3>
+                        <p class="gsw-criteria-sub">Grade based on fixed percentage thresholds</p>
+                    </div>
+                </div>
+
+                <div class="gsw-criteria-fields">
+                    <div class="gsw-field">
+                        <label class="gsw-label">Operator</label>
+                        <select
+                            class={absoluteOperatorClass}
+                            data-criteria="absolute"
+                            data-field="operator"
+                            onchange={handleCriteriaFieldChange}
+                        >
+                            <option value="">-- Select --</option>
+                            <template for:each={operatorOptions} for:item="opt">
+                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                            </template>
+                        </select>
+                        <template if:true={absoluteOperatorError}>
+                            <span class="gsw-field-error">{absoluteOperatorError}</span>
+                        </template>
+                    </div>
+                    <div class="gsw-field">
+                        <label class="gsw-label">Range To</label>
+                        <input
+                            class={absoluteRangeToClass}
+                            type="number"
+                            value={absoluteCriteria.rangeTo}
+                            placeholder="0"
+                            data-criteria="absolute"
+                            data-field="rangeTo"
+                            oninput={handleCriteriaFieldChange}
+                        />
+                        <template if:true={absoluteRangeToError}>
+                            <span class="gsw-field-error">{absoluteRangeToError}</span>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Letter Grade Ranges -->
+                <div class="gsw-lg-head">
+                    <span class="gsw-lg-title">Letter Grade Ranges</span>
+                    <button class="gsw-btn-add" type="button" data-criteria="absolute" onclick={handleAddLetterGrade}>
+                        + Add Range
+                    </button>
+                </div>
+
+                <!-- Column headers -->
+                <div class="gsw-lg-col-header">
+                    <span class="gsw-col-hd">Letter Grade</span>
+                    <span class="gsw-col-hd">Grade Point</span>
+                    <span class="gsw-col-hd gsw-col-hd--wide">Definition</span>
+                    <span class="gsw-col-hd">Range Start</span>
+                    <span class="gsw-col-hd">Range End</span>
+                    <span class="gsw-col-hd gsw-col-hd--action"></span>
+                </div>
+
+                <div class="gsw-lg-list">
+                    <template if:true={hasAbsoluteGrades}>
+                        <template for:each={absoluteLetterGradesWithErrors} for:item="lg">
+                            <div key={lg.uiId} class="gsw-lg-row">
+                                <div class="gsw-lg-cell">
+                                    <select
+                                        class="gsw-lg-input"
+                                        data-criteria="absolute"
+                                        data-lg-id={lg.uiId}
+                                        data-field="letterGrade"
+                                        onchange={handleLetterGradeFieldChange}
+                                    >
+                                        <option value="">--</option>
+                                        <template for:each={letterGradeOptions} for:item="opt">
+                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                        </template>
+                                    </select>
+                                    <template if:true={lg.errors.letterGrade}>
+                                        <span class="gsw-cell-error">{lg.errors.letterGrade}</span>
+                                    </template>
+                                </div>
+                                <div class="gsw-lg-cell">
+                                    <input
+                                        class="gsw-lg-input"
+                                        type="text"
+                                        value={lg.gradePoint}
+                                        placeholder="9.0"
+                                        data-criteria="absolute"
+                                        data-lg-id={lg.uiId}
+                                        data-field="gradePoint"
+                                        oninput={handleLetterGradeFieldChange}
+                                    />
+                                    <template if:true={lg.errors.gradePoint}>
+                                        <span class="gsw-cell-error">{lg.errors.gradePoint}</span>
+                                    </template>
+                                </div>
+                                <div class="gsw-lg-cell gsw-lg-cell--wide">
+                                    <input
+                                        class="gsw-lg-input gsw-lg-input--wide"
+                                        type="text"
+                                        value={lg.definition}
+                                        placeholder="Excellent"
+                                        data-criteria="absolute"
+                                        data-lg-id={lg.uiId}
+                                        data-field="definition"
+                                        oninput={handleLetterGradeFieldChange}
+                                    />
+                                    <template if:true={lg.errors.definition}>
+                                        <span class="gsw-cell-error">{lg.errors.definition}</span>
+                                    </template>
+                                </div>
+                                <div class="gsw-lg-cell">
+                                    <input
+                                        class="gsw-lg-input"
+                                        type="text"
+                                        value={lg.rangeStart}
+                                        placeholder="80"
+                                        data-criteria="absolute"
+                                        data-lg-id={lg.uiId}
+                                        data-field="rangeStart"
+                                        oninput={handleLetterGradeFieldChange}
+                                    />
+                                    <template if:true={lg.errors.rangeStart}>
+                                        <span class="gsw-cell-error">{lg.errors.rangeStart}</span>
+                                    </template>
+                                </div>
+                                <div class="gsw-lg-cell">
+                                    <input
+                                        class="gsw-lg-input"
+                                        type="text"
+                                        value={lg.rangeEnd}
+                                        placeholder="89"
+                                        data-criteria="absolute"
+                                        data-lg-id={lg.uiId}
+                                        data-field="rangeEnd"
+                                        oninput={handleLetterGradeFieldChange}
+                                    />
+                                    <template if:true={lg.errors.rangeEnd}>
+                                        <span class="gsw-cell-error">{lg.errors.rangeEnd}</span>
+                                    </template>
+                                </div>
+                                <button
+                                    class="gsw-lg-delete"
+                                    type="button"
+                                    data-criteria="absolute"
+                                    data-lg-id={lg.uiId}
+                                    onclick={handleDeleteLetterGrade}
+                                    title="Remove"
+                                >&#x2715;</button>
+                            </div>
+                        </template>
+                    </template>
+                    <template if:false={hasAbsoluteGrades}>
+                        <div class="gsw-lg-empty">No ranges yet. Click &ldquo;+ Add Range&rdquo; to start.</div>
+                    </template>
+                </div>
+            </section>
+        </div>
+
+        <!-- Footer actions -->
+        <div class="gsw-footer">
+            <button class="gsw-btn gsw-btn--ghost" type="button" onclick={handleCancel}>Cancel</button>
+            <button class="gsw-btn gsw-btn--primary" type="button" onclick={handleSave}>
+                Save Grade Schema
+            </button>
+        </div>
+    </div>
+</template>

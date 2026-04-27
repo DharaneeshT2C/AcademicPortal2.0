@@ -1,0 +1,267 @@
+<template>
+    <section class="page">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <button type="button" class="crumbBtn" onclick={handleBackToScholarshipAssignments}>
+                Student Financials
+            </button>
+            <span class="sep">&gt;</span>
+            <button type="button" class="crumbBtn" onclick={handleBackToScholarshipAssignments}>
+                Scholarship Assignments
+            </button>
+            <span class="sep">&gt;</span>
+            <span class="currentCrumb">Assign Scholarship</span>
+        </nav>
+
+        <header class="pageHeader">
+            <h1 class="pageTitle">Assign Scholarship</h1>
+            <div class="headerActions">
+                <button class="cancelBtn" type="button" onclick={handleCancel}>Cancel</button>
+                <button class="secondaryBtn" type="button" onclick={handleSaveDraft}>Save Draft</button>
+                <button class="primaryBtn" type="button" onclick={handleApplyScholarship} disabled={isApplyDisabled}>
+                    {applyButtonLabel}
+                </button>
+            </div>
+        </header>
+
+        <template if:true={globalError}>
+            <div class="errorBanner" role="alert">{globalError}</div>
+        </template>
+
+        <div class="layout">
+            <div class="leftColumn">
+                <section class="card">
+                    <h2 class="sectionTitle">Select Scholarship</h2>
+                    <div class="field">
+                        <lightning-combobox
+                            name="scholarship"
+                            label="Scholarship *"
+                            value={selectedScholarshipId}
+                            placeholder="Select scholarship to assign"
+                            options={scholarshipOptions}
+                            onchange={handleScholarshipChange}
+                            disabled={isScholarshipLoading}
+                            aria-label="Select scholarship">
+                        </lightning-combobox>
+                    </div>
+                    <template if:true={isScholarshipLoading}>
+                        <p class="helperText">Loading scholarships...</p>
+                    </template>
+
+                    <template if:true={selectedScholarship}>
+                        <section class="summaryPanel" aria-label="Scholarship summary">
+                            <h3 class="summaryTitle">Scholarship Summary</h3>
+                            <div class="summaryGrid">
+                                <div class="summaryItem">
+                                    <p class="summaryLabel">Type</p>
+                                    <p class="summaryValue">{selectedScholarship.type}</p>
+                                </div>
+                                <div class="summaryItem">
+                                    <p class="summaryLabel">Mode</p>
+                                    <p class="summaryValue">{selectedScholarship.mode}</p>
+                                </div>
+                                <div class="summaryItem">
+                                    <p class="summaryLabel">Value</p>
+                                    <p class="summaryValue">{selectedScholarship.value}</p>
+                                </div>
+                                <div class="summaryItem">
+                                    <p class="summaryLabel">Scope</p>
+                                    <p class="summaryValue">{selectedScholarship.scope}</p>
+                                </div>
+                                <div class="summaryItem">
+                                    <p class="summaryLabel">Approval Required</p>
+                                    <p class="summaryValue">{selectedScholarship.approvalRequired}</p>
+                                </div>
+                                <div class="summaryItem">
+                                    <p class="summaryLabel">Allows Override</p>
+                                    <p class="summaryValue">{selectedScholarship.allowsOverride}</p>
+                                </div>
+                            </div>
+                        </section>
+                    </template>
+                </section>
+
+                <section class="card">
+                    <h2 class="sectionTitle">Search Student</h2>
+                    <div class="searchRow">
+                        <lightning-input
+                            class="searchInput"
+                            type="search"
+                            label="Student Search *"
+                            value={studentSearchTerm}
+                            placeholder="Enter student name or ID"
+                            onchange={handleStudentSearchInput}
+                            onkeydown={handleStudentSearchKeydown}
+                            aria-label="Student search">
+                        </lightning-input>
+                        <button
+                            class="searchBtn"
+                            type="button"
+                            onclick={handleSearchStudent}
+                            disabled={isStudentSearching}>
+                            {searchButtonLabel}
+                        </button>
+                    </div>
+
+                    <template if:true={searchMessage}>
+                        <p class="searchMessage">{searchMessage}</p>
+                    </template>
+
+                    <template if:true={selectedStudent}>
+                        <section class="studentCard" aria-label="Student result">
+                            <div class="studentGrid">
+                                <div class="studentItem">
+                                    <p class="summaryLabel">Student Name</p>
+                                    <p class="summaryValue">{selectedStudent.name}</p>
+                                </div>
+                                <div class="studentItem">
+                                    <p class="summaryLabel">Programme</p>
+                                    <p class="summaryValue">{selectedStudent.programme}</p>
+                                </div>
+                                <div class="studentItem">
+                                    <p class="summaryLabel">Batch</p>
+                                    <p class="summaryValue">{selectedStudent.batch}</p>
+                                </div>
+                                <div class="studentItem">
+                                    <p class="summaryLabel">Student ID</p>
+                                    <p class="summaryValue">{selectedStudent.studentId}</p>
+                                </div>
+                            </div>
+                        </section>
+                    </template>
+                </section>
+
+                <section class="card">
+                    <h2 class="sectionTitle">Program and Fee Filters</h2>
+                    <div class="settingsGrid">
+                        <lightning-combobox
+                            label="Program (Learning Program Plan) *"
+                            value={selectedProgramId}
+                            placeholder="Select program"
+                            options={programOptions}
+                            onchange={handleProgramChange}
+                            disabled={isProgramLoading}>
+                        </lightning-combobox>
+
+                        <lightning-combobox
+                            label="Fee Head"
+                            value={selectedFeeHeadId}
+                            placeholder="Select fee head"
+                            options={feeHeadOptions}
+                            onchange={handleFeeHeadChange}
+                            disabled={isFeeHeadDisabled}>
+                        </lightning-combobox>
+                    </div>
+
+                    <div class="field">
+                        <lightning-combobox
+                            label="Fee Assignment Line Item *"
+                            value={selectedFeeAssignmentLineItemId}
+                            placeholder="Select fee assignment line item"
+                            options={lineItemOptions}
+                            onchange={handleFeeAssignmentLineItemChange}
+                            disabled={isFeeAssignmentLineItemDisabled}>
+                        </lightning-combobox>
+                    </div>
+
+                    <template if:true={isProgramLoading}>
+                        <p class="helperText">Loading programs...</p>
+                    </template>
+                    <template if:true={isLineItemLoading}>
+                        <p class="helperText">Loading fee assignment line items...</p>
+                    </template>
+                    <template if:true={lineItemMessage}>
+                        <p class="searchMessage">{lineItemMessage}</p>
+                    </template>
+
+                    <template if:true={selectedLineItem}>
+                        <section class="summaryPanel" aria-label="Selected fee assignment line item">
+                            <h3 class="summaryTitle">Selected Line Item</h3>
+                            <div class="summaryGrid">
+                                <div class="summaryItem">
+                                    <p class="summaryLabel">Fee Assignment</p>
+                                    <p class="summaryValue">{selectedLineItem.feeAssignmentName}</p>
+                                </div>
+                                <div class="summaryItem">
+                                    <p class="summaryLabel">Fee Head</p>
+                                    <p class="summaryValue">{selectedLineItem.feeHeadName}</p>
+                                </div>
+                                <div class="summaryItem">
+                                    <p class="summaryLabel">Student Category</p>
+                                    <p class="summaryValue">{selectedLineItem.studentCategory}</p>
+                                </div>
+                                <div class="summaryItem">
+                                    <p class="summaryLabel">Amount</p>
+                                    <p class="summaryValue">{selectedLineItem.amount}</p>
+                                </div>
+                            </div>
+                        </section>
+                    </template>
+                </section>
+
+                <section class="card">
+                    <h2 class="sectionTitle">Assignment Settings</h2>
+                    <div class="settingsGrid">
+                        <lightning-input
+                            type="date"
+                            label="Effective Date *"
+                            value={effectiveDate}
+                            onchange={handleEffectiveDateChange}
+                            aria-label="Effective date">
+                        </lightning-input>
+                        <lightning-input
+                            type="date"
+                            label="Expiry Date"
+                            value={expiryDate}
+                            onchange={handleExpiryDateChange}
+                            aria-label="Expiry date">
+                        </lightning-input>
+                    </div>
+
+                    <div class="field">
+                        <lightning-textarea
+                            label="Notes"
+                            value={notes}
+                            placeholder="Add any additional notes or comments"
+                            onchange={handleNotesChange}
+                            aria-label="Notes">
+                        </lightning-textarea>
+                    </div>
+                </section>
+            </div>
+
+            <aside class="rightColumn">
+                <section class="card summaryCard">
+                    <h2 class="sectionTitle">Assignment Summary</h2>
+                    <div class="summaryRows">
+                        <div class="summaryRow">
+                            <span class="rowLabel">Scholarship</span>
+                            <span class="rowValue">{summaryScholarshipLabel}</span>
+                        </div>
+                        <div class="summaryRow">
+                            <span class="rowLabel">Student</span>
+                            <span class="rowValue">{summaryStudentLabel}</span>
+                        </div>
+                        <div class="summaryRow">
+                            <span class="rowLabel">Program</span>
+                            <span class="rowValue">{summaryProgramLabel}</span>
+                        </div>
+                        <div class="summaryRow">
+                            <span class="rowLabel">Fee Assignment Line Item</span>
+                            <span class="rowValue">{summaryLineItemLabel}</span>
+                        </div>
+                    </div>
+
+                    <button
+                        class="panelApplyBtn"
+                        type="button"
+                        onclick={handleApplyScholarship}
+                        aria-label="Apply scholarship"
+                        disabled={isApplyDisabled}>
+                        <lightning-icon icon-name="utility:check" size="x-small" alternative-text="Apply"></lightning-icon>
+                        <span>{applyButtonLabel}</span>
+                    </button>
+                </section>
+            </aside>
+        </div>
+    </section>
+</template>

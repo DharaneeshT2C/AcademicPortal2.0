@@ -1,0 +1,50 @@
+:host { font-family: var(--font-family, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif); }
+.page { width: 100%; }
+.page-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.back-btn { background: none; border: none; cursor: pointer; color: var(--text-primary); padding: 4px; }
+.page-title { font-size: 18px; font-weight: 600; }
+.hostel-grid { display: grid; grid-template-columns: 1fr 360px; gap: 24px; }
+.card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px; }
+.section-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+.room-info { display: flex; gap: 16px; align-items: center; }
+.room-number { font-size: 16px; font-weight: 600; }
+.room-type, .room-loc { font-size: 13px; color: var(--text-secondary); }
+.warden-info { display: flex; gap: 16px; align-items: center; }
+.warden-avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--border-light); display: flex; align-items: center; justify-content: center; }
+.warden-avatar c-icon { font-size: 24px; color: var(--text-muted); }
+.warden-name { font-size: 14px; font-weight: 500; }
+.warden-detail { font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
+.si { font-size: 14px; }
+.notice-item { padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: 8px; }
+.notice-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.notice-type { font-size: 11px; padding: 2px 8px; border-radius: 6px; background: var(--primary-light); color: var(--primary); }
+.notice-msg { font-size: 13px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 4px; }
+.notice-loc { font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
+.notice-date { font-size: 11px; color: var(--text-muted); }
+.alloc-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+.alloc-desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; }
+.btn-primary { padding: 10px 20px; background: var(--primary); color: #fff; border: none; border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; cursor: pointer; }
+.full-width { width: 100%; }
+.bill-item { padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: 8px; }
+.bill-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+.bill-due { font-size: 12px; color: var(--danger); }
+.leave-item { padding: 12px; border: 1px solid var(--border); border-radius: var(--radius-md); margin-bottom: 8px; }
+.leave-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
+.leave-id { font-size: 11px; color: var(--text-muted); }
+.leave-title { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+.leave-type { font-size: 11px; color: var(--text-secondary); }
+.status-badge { font-size: 11px; padding: 2px 8px; border-radius: 8px; }
+.status-badge.review { background: var(--warning-light); color: #b45309; }
+.status-badge.closed { background: var(--border-light); color: var(--text-muted); }
+.modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,0.55); display: flex; align-items: center; justify-content: center; z-index: 9000; padding: 20px; }
+.modal { background: #fff; border-radius: var(--radius-lg); width: 100%; max-width: 460px; box-shadow: 0 20px 50px rgba(0,0,0,0.25); display: flex; flex-direction: column; max-height: 90vh; overflow: hidden; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--border-light); }
+.modal-header h3 { font-size: 16px; font-weight: 600; margin: 0; }
+.modal-body { padding: 18px 20px; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 20px; border-top: 1px solid var(--border-light); background: #f9fafb; }
+.icon-btn { background: none; border: none; cursor: pointer; padding: 4px; color: var(--text-secondary); border-radius: 4px; font-size: 16px; }
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; font-size: 13px; }
+.field span { color: var(--text-secondary); font-weight: 500; }
+.field input, .field select, .field textarea { font-family: inherit; font-size: 13px; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.btn-outline { padding: 8px 16px; border: 1px solid var(--border); background: #fff; border-radius: var(--radius-sm); font-size: 13px; cursor: pointer; }
+@media (max-width: 1024px) { .hostel-grid { grid-template-columns: 1fr; } }

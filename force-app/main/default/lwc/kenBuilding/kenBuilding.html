@@ -1,0 +1,401 @@
+<template>
+    <template if:true={isDetailView}>
+        <div class="detail-breadcrumbs">
+            <button type="button" class="crumb-link" onclick={handleBreadcrumbDashboardClick}>Dashboard</button>
+            <span class="crumb-sep">&gt;</span>
+            <button type="button" class="crumb-link" onclick={handleBreadcrumbMasterDataClick}>Master Data</button>
+            <span class="crumb-sep">&gt;</span>
+            <button type="button" class="crumb-link" onclick={handleBreadcrumbMasterTabClick}>Buildings</button>
+            <span class="crumb-sep">&gt;</span>
+            <span>{selectedBuildingName}</span>
+        </div>
+
+        <div class="detail-head">
+            <div class="detail-head-left">
+                <button class="back-btn" type="button" onclick={handleBackToList}>
+                    <lightning-icon icon-name="utility:back" size="x-small"></lightning-icon>
+                    <span>Back</span>
+                </button>
+                <div class="title-block">
+                    <div class="title-row">
+                        <h2>{selectedBuildingName}</h2>
+                        <span class={selectedBuildingStatusClass}>{selectedBuildingStatus}</span>
+                    </div>
+                    <div class="category-id">Building ID: {selectedBuildingOverview.buildingIdentifier}</div>
+                </div>
+            </div>
+
+            <div class="detail-head-actions">
+                <button type="button" class="action-btn" onclick={handleEditSelected}>
+                    <lightning-icon icon-name="utility:edit" size="x-small"></lightning-icon>
+                    <span>Edit</span>
+                </button>
+                <button type="button" class="action-btn danger" onclick={handleDeactivateSelected}>
+                    <lightning-icon icon-name="utility:delete" size="x-small"></lightning-icon>
+                    <span>Deactivate</span>
+                </button>
+            </div>
+        </div>
+
+        <section class="detail-card">
+            <h3>Overview</h3>
+            <div class="overview-grid">
+                <div class="overview-item">
+                    <div class="overview-label overview-label-strong">BUILDING NAME</div>
+                    <div class="overview-value">{selectedBuildingOverview.buildingName}</div>
+                </div>
+                <div class="overview-item">
+                    <div class="overview-label overview-label-strong">STATUS</div>
+                    <div class="overview-value">{selectedBuildingOverview.status}</div>
+                </div>
+                <div class="overview-item">
+                    <div class="overview-label overview-label-strong">TOTAL FLOORS</div>
+                    <div class="overview-value">{selectedBuildingOverview.floors}</div>
+                </div>
+                <div class="overview-item">
+                    <div class="overview-label overview-label-strong">WARDEN ASSIGNMENT MODE</div>
+                    <div class="overview-value">{selectedBuildingOverview.wardenMode}</div>
+                </div>
+                <div class="overview-item">
+                    <div class="overview-label overview-label-strong">WARDEN</div>
+                    <div class="overview-value">{selectedBuildingOverview.wardenName}</div>
+                </div>
+                <div class="overview-item">
+                    <div class="overview-label overview-label-strong">CAPACITY (COMPUTED)</div>
+                    <div class="overview-value">{selectedBuildingOverview.capacity}</div>
+                </div>
+                <div class="overview-item">
+                    <div class="overview-label overview-label-strong">CURRENT OCCUPANCY</div>
+                    <div class="overview-value">{selectedBuildingOverview.currentOccupancyText}</div>
+                </div>
+                <div class="overview-item">
+                    <div class="overview-label overview-label-strong">TOTAL ROOMS</div>
+                    <div class="overview-value">{selectedBuildingOverview.totalRooms}</div>
+                </div>
+                <div class="overview-item">
+                    <div class="overview-label overview-label-strong">OCCUPANCY %</div>
+                    <div class="overview-value">{selectedBuildingOverview.occupancyPercent}%</div>
+                </div>
+            </div>
+
+            <div class="building-utilization">
+                <div class="overview-label overview-label-strong">CAPACITY UTILIZATION</div>
+                <div class="utilization-row">
+                    <div class="utilization-track">
+                        <div class="utilization-fill" style={selectedBuildingOverview.utilizationStyle}></div>
+                    </div>
+                    <div class="utilization-value">{selectedBuildingOverview.occupancyPercent}%</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="detail-card floors-card">
+            <h3>Floors</h3>
+            <template if:true={isLoadingBuildingFloors}>
+                <div class="floors-loading">Loading floors...</div>
+            </template>
+            <template for:each={buildingFloorSections} for:item="floor">
+                <article key={floor.key} class="floor-panel">
+                    <button type="button" class="floor-summary" data-floor-key={floor.key} onclick={handleToggleFloorSection}>
+                        <div class="floor-summary-main">
+                            <div class="floor-summary-title-wrap">
+                                <div class="floor-summary-title">{floor.title}</div>
+                                <div class="floor-summary-warden">
+                                    Warden: {floor.wardenName}
+                                    <span class="floor-summary-subtle">{floor.inheritedText}</span>
+                                </div>
+                            </div>
+                            <div class="floor-summary-metrics">
+                                <div class="floor-summary-metric">Rooms: <b>{floor.roomsCount}</b></div>
+                                <div class="floor-summary-metric">Capacity: <b>{floor.capacity}</b></div>
+                                <div class="floor-summary-metric">Occupancy: <b>{floor.occupancyText}</b> ({floor.occupancyPercent}%)</div>
+                            </div>
+                        </div>
+                        <lightning-icon icon-name={floor.chevronIcon} size="x-small"></lightning-icon>
+                    </button>
+
+                    <template if:true={floor.isExpanded}>
+                        <div class="floor-panel-body">
+                            <div class="floor-section-head">
+                                <h4 class="floor-section-title">Warden Details</h4>
+                                <button
+                                    type="button"
+                                    class="new-btn floor-warden-btn"
+                                    data-floor-no={floor.floorNo}
+                                    onclick={handleOpenFloorWardenModal}
+                                >
+                                    <lightning-icon icon-name="utility:add" size="x-small"></lightning-icon>
+                                    <span>Add Warden</span>
+                                </button>
+                            </div>
+                                <div class="floor-warden-card">
+                                    <div class="floor-warden-item">
+                                        <div class="overview-label overview-label-strong">WARDEN NAME</div>
+                                        <template if:true={floor.wardenId}>
+                                            <button
+                                                type="button"
+                                                class="name-link overview-value"
+                                                data-id={floor.wardenId}
+                                                onclick={handleOpenWardenAccount}
+                                            >
+                                                {floor.detailWardenName}
+                                            </button>
+                                        </template>
+                                        <template if:false={floor.wardenId}>
+                                            <div class="overview-value">{floor.detailWardenName}</div>
+                                        </template>
+                                    </div>
+                                    <div class="floor-warden-item">
+                                        <div class="overview-label overview-label-strong">CONTACT</div>
+                                        <div class="overview-value">{floor.detailWardenPhone}</div>
+                                    </div>
+                                <div class="floor-warden-item">
+                                    <div class="overview-label overview-label-strong">ASSIGNMENT TYPE</div>
+                                    <div class="overview-value">{floor.assignmentTypeLabel}</div>
+                                </div>
+                            </div>
+                            <template if:true={floor.showInheritedNote}>
+                                <div class="floor-inherited-note">Inherited from building. All floors share the same warden.</div>
+                            </template>
+
+                            <div class="floor-rooms-head">
+                                <h4>Rooms in This Floor</h4>
+                                <button type="button" class="new-btn floor-add-room-btn" data-floor-no={floor.floorNo} onclick={handleAddRoomForFloor}>
+                                    <lightning-icon icon-name="utility:add" size="x-small"></lightning-icon>
+                                    <span>Add Room</span>
+                                </button>
+                            </div>
+
+                            <div class="floor-rooms-table-wrap">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>ROOM NUMBER</th>
+                                            <th>CATEGORY</th>
+                                            <th>CAPACITY</th>
+                                            <th>OCCUPANCY</th>
+                                            <th>STATUS</th>
+                                            <th>ACTIONS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={floor.rooms} for:item="room">
+                                            <tr key={room.id}>
+                                                <td><button type="button" class="linked-room-link" data-id={room.id} onclick={handleViewRoomFromFloor}>{room.roomNo}</button></td>
+                                                <td>{room.category}</td>
+                                                <td>{room.capacity}</td>
+                                                <td>{room.currentOccupancyText}</td>
+                                                <td><span class={room.statusClass}>{room.status}</span></td>
+                                                <td>
+                                                    <div class="actions">
+                                                        <button type="button" class="icon-action-btn" data-id={room.id} onclick={handleViewRoomFromFloor} title="View">
+                                                            <lightning-icon icon-name="utility:preview" size="x-small" class="action-blue"></lightning-icon>
+                                                        </button>
+                                                        <button type="button" class="icon-action-btn" data-id={room.id} onclick={handleEditRoomFromFloor} title="Edit">
+                                                            <lightning-icon icon-name="utility:edit" size="x-small" class="action-blue"></lightning-icon>
+                                                        </button>
+                                                        <button type="button" class="icon-action-btn" data-id={room.id} onclick={handleDeleteRoomFromFloor} title="Delete">
+                                                            <lightning-icon icon-name="utility:delete" size="x-small" class="action-red"></lightning-icon>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                        <template if:false={floor.hasRooms}>
+                                            <tr>
+                                                <td colspan="6">No rooms in this floor.</td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </template>
+                </article>
+            </template>
+        </section>
+
+        <section class="detail-card activity-history-end-card">
+            <h3>Activity &amp; History</h3>
+            <div class="activity-history-meta">
+                <div class="activity-history-meta-item">
+                    <div class="overview-label overview-label-strong">CREATED BY</div>
+                    <div class="overview-value">{buildingActivityCreatedByName}</div>
+                </div>
+                <div class="activity-history-meta-item">
+                    <div class="overview-label overview-label-strong">CREATED DATE</div>
+                    <div class="overview-value">{buildingActivityCreatedDateText}</div>
+                </div>
+                <div class="activity-history-meta-item">
+                    <div class="overview-label overview-label-strong">LAST MODIFIED</div>
+                    <div class="overview-value">{buildingActivityLastModifiedText}</div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template if:false={isDetailView}>
+        <template if:false={hideListHead}>
+            <div class="list-head">
+                <button class="new-btn" type="button" onclick={handleOpenModal}>
+                    <lightning-icon icon-name="utility:add" size="x-small"></lightning-icon>
+                    <span>{primaryActionLabel}</span>
+                </button>
+            </div>
+        </template>
+
+        <div class="filters">
+            <div class="search-wrap">
+                <lightning-icon icon-name="utility:search" size="x-small"></lightning-icon>
+                <input
+                    type="text"
+                    placeholder="Search..."
+                    value={searchTerm}
+                    oninput={handleSearchChange}
+                />
+            </div>
+            <select class="status-select" value={selectedStatus} onchange={handleStatusChange}>
+                <template for:each={statusOptions} for:item="option">
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                </template>
+            </select>
+        </div>
+
+        <c-ken-building-view rows={filteredRows} is-loading={isLoading} onrowaction={handleRowAction}></c-ken-building-view>
+    </template>
+
+    <template if:true={isModalOpen}>
+        <div class="modal-overlay" onclick={handleCloseModal}></div>
+        <section class="modal" role="dialog" aria-modal="true" aria-label={buildingModalTitle}>
+            <header class="modal-header">
+                <h2>{buildingModalTitle}</h2>
+                <button type="button" class="close-btn" onclick={handleCloseModal} aria-label="Close">
+                    <lightning-icon icon-name="utility:close" size="x-small"></lightning-icon>
+                </button>
+            </header>
+
+            <template if:true={isSavingBuilding}>
+                <div class="modal-saving">
+                    <lightning-spinner alternative-text="Saving building" size="small"></lightning-spinner>
+                </div>
+            </template>
+
+            <div class="modal-body">
+                <div class="section-title">Basic Information</div>
+                <div class="field">
+                    <label>Building Name <span>*</span></label>
+                    <input type="text" placeholder="e.g., Block E - Boys" data-field="buildingName" value={buildingForm.buildingName} onchange={handleBuildingFieldChange} />
+                </div>
+                <div class="field">
+                    <label>Gender <span>*</span></label>
+                    <select data-field="genderValue" value={buildingForm.genderValue} onchange={handleBuildingFieldChange}>
+                        <option value="">Select gender</option>
+                        <template for:each={buildingGenderOptions} for:item="option">
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        </template>
+                    </select>
+                    <p class="hint">Defines which students are eligible to stay in this building.</p>
+                </div>
+                <div class="field">
+                    <label>Status <span>*</span></label>
+                    <select data-field="statusValue" value={buildingForm.statusValue} onchange={handleBuildingFieldChange}>
+                        <template for:each={buildingStatusOptions} for:item="option">
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        </template>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Number of Floors <span>*</span></label>
+                    <input
+                        type="number"
+                        min="1"
+                        step="1"
+                        inputmode="numeric"
+                        placeholder="e.g., 4"
+                        data-field="numberOfFloors"
+                        value={buildingForm.numberOfFloors}
+                        onchange={handleBuildingFieldChange}
+                    />
+                </div>
+                <div class="field">
+                    <label>Building Warden <span>*</span></label>
+                    <select data-field="buildingWarden" value={buildingForm.buildingWarden} onchange={handleBuildingFieldChange}>
+                        <option value="">Select warden</option>
+                        <template for:each={buildingWardenOptions} for:item="option">
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        </template>
+                    </select>
+                </div>
+            </div>
+
+            <footer class="modal-footer">
+                <button type="button" class="btn-cancel" onclick={handleCloseModal}>Cancel</button>
+                <button type="button" class="btn-create" onclick={handleSaveBuilding} disabled={isSavingBuilding}>{createBuildingButtonLabel}</button>
+            </footer>
+        </section>
+    </template>
+
+    <template if:true={isFloorWardenModalOpen}>
+        <div class="modal-overlay" onclick={handleCloseFloorWarden}></div>
+        <section class="modal" role="dialog" aria-modal="true" aria-label={floorWardenModalTitle}>
+            <header class="modal-header">
+                <h2>{floorWardenModalTitle}</h2>
+                <button type="button" class="close-btn" onclick={handleCloseFloorWarden} aria-label="Close">
+                    <lightning-icon icon-name="utility:close" size="x-small"></lightning-icon>
+                </button>
+            </header>
+
+            <template if:true={isSavingFloorWarden}>
+                <div class="modal-saving">
+                    <lightning-spinner alternative-text="Saving floor warden" size="small"></lightning-spinner>
+                </div>
+            </template>
+
+            <div class="modal-body">
+                <div class="field">
+                    <label>Warden Name <span>*</span></label>
+                    <select data-field="wardenId" value={floorWardenForm.wardenId} onchange={handleFloorWardenFieldChange}>
+                        <option value="">Select warden</option>
+                        <template for:each={buildingWardenOptions} for:item="option">
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        </template>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Assignment Type <span>*</span></label>
+                    <select
+                        data-field="assignmentType"
+                        value={floorWardenForm.assignmentType}
+                        onchange={handleFloorWardenFieldChange}
+                    >
+                        <template for:each={floorWardenAssignmentTypeOptions} for:item="option">
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        </template>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Phone (Phone)</label>
+                    <input type="text" value={floorWardenForm.phone} readonly />
+                </div>
+
+                <div class="field">
+                    <label>Description</label>
+                    <textarea
+                        rows="3"
+                        data-field="description"
+                        value={floorWardenForm.description}
+                        oninput={handleFloorWardenFieldChange}
+                    ></textarea>
+                </div>
+            </div>
+
+            <footer class="modal-footer">
+                <button type="button" class="btn-cancel" onclick={handleCloseFloorWarden}>Cancel</button>
+                <button type="button" class="btn-create" onclick={handleSaveFloorWarden} disabled={isSavingFloorWarden}>
+                    {saveFloorWardenButtonLabel}
+                </button>
+            </footer>
+        </section>
+    </template>
+</template>

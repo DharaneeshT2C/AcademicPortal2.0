@@ -1,0 +1,86 @@
+<template>
+    <div class="enrollment-page notranslate" lang="en" translate="no">
+        <template if:true={showSkeleton}>
+            <section class="skeleton-wrap" aria-busy="true" aria-live="polite">
+                <div class="skeleton-banner">
+                    <div class="skeleton-line skeleton-title"></div>
+                    <div class="skeleton-line skeleton-subtitle"></div>
+                </div>
+                <div class="skeleton-section">
+                    <div class="skeleton-line skeleton-header"></div>
+                    <div class="skeleton-grid">
+                        <div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div>
+                        <div class="skeleton-card"></div>
+                    </div>
+                </div>
+            </section>
+        </template>
+
+        <template if:false={showSkeleton}>
+            <template if:true={showPathwayBanner}>
+                <section class="pathway-banner">
+                    <div class="banner-copy">
+                        <h1>Choose Program Pathways</h1>
+                        <p>Please select your minor programs to start course enrolment.</p>
+                    </div>
+                    <div class="banner-actions">
+                        <p>Last date to choose: 25th May 2024</p>
+                        <button class="choose-program-button" type="button">
+                            Choose Program(s)
+                            <img src={rightArrowUrl} class="arrow-image" alt="" aria-hidden="true" />
+                        </button>
+                    </div>
+                </section>
+            </template>
+
+            <section class="semester-section" style={semesterSectionStyle}>
+                <div class="page-header">
+                    <h2>All Semesters</h2>
+                    <div class="page-header-meta">
+                        <p class="completion-tracker">{completionTrackerText}</p>
+                        <p class="page-header-note">Major and Minor credits are shown for each semester.</p>
+                    </div>
+                </div>
+
+                <template if:true={errorMessage}>
+                    <div class="empty">{errorMessage}</div>
+                </template>
+
+                <template if:false={errorMessage}>
+                    <template if:true={displayCards.length}>
+                        <div class="semester-grid">
+                            <template for:each={displayCards} for:item="card">
+                                <article key={card.id} class={card.cardClass}>
+                                    <div class="card-head">
+                                        <h3>{card.title}</h3>
+                                        <template if:true={card.showBadge}>
+                                            <span class={card.badgeClass}>
+                                                <template if:true={card.isActionable}>
+                                                    <span class="ongoing-dot"></span>
+                                                </template>
+                                                {card.badgeLabel}
+                                            </span>
+                                        </template>
+                                    </div>
+                                    <p class="credit-line">Start Date: <span>{card.startDateText}</span></p>
+                                    <p class="credit-line">End Date: <span>{card.endDateText}</span></p>
+
+                                    <button class={card.actionClass} type="button" data-term={card.termNumber}
+                                        data-session={card.academicSessionId} data-actionable={card.isActionable}
+                                        data-target={card.targetPath} onclick={handleEnroll}>
+                                        {card.actionLabel}
+                                    </button>
+                                </article>
+                            </template>
+                        </div>
+                    </template>
+                    <template if:false={displayCards.length}>
+                        <div class="empty">No active academic sessions found.</div>
+                    </template>
+                </template>
+            </section>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,473 @@
+.category-tabs {
+    display: inline-flex;
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.category-tab {
+    border: 1px solid #d8dde6;
+    border-radius: 8px;
+   background: var(--secondary-color);
+    color: var(--secondary-font-color);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 14px;
+    cursor: pointer;
+}
+
+.category-tab:hover {
+    transform: translateY(-1px);
+}
+
+.category-tab.active {
+  border-color: var(--primary-color);
+   background: var(--secondary-color);
+    color: var(--secondary-font-color);
+}
+
+
+.toggle-icon {
+    --slds-c-icon-color-foreground-default: currentColor;
+}
+
+.semester-card{
+background:white;
+/* border-radius:12px;
+border:1px solid #e6e8f0; */
+margin-bottom:18px;
+/* padding:14px; */
+}
+
+
+.semester-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+cursor:pointer;
+gap:12px;
+}
+
+
+.semester-title{
+font-size:16px;
+font-weight:500;
+display:flex;
+align-items:center;
+gap:12px;
+flex-wrap:wrap;
+line-height:1.2;
+flex:1;
+min-width:0;
+}
+
+
+.semester-status{
+display:inline-flex;
+align-items:center;
+padding:4px 12px;
+border-radius:16px;
+font-size:12px;
+border:1px solid #d5d8e4;
+white-space:nowrap;
+flex-shrink:0;
+}
+
+
+.semester-status.ongoing{
+color:#2563eb;
+border-color:#2563eb;
+}
+
+
+.status-dot{
+width:6px;
+height:6px;
+background:#ff4d4f;
+border-radius:50%;
+display:inline-block;
+margin-right:6px;
+}
+
+
+.summary-row{
+display:grid;
+grid-template-columns:repeat(2, minmax(0, 1fr));
+gap:14px 24px;
+margin-top:14px;
+padding-bottom:14px;
+border-bottom:1px solid #e6e8f0;
+}
+
+
+.summary-item{
+font-size:12px;
+display:flex;
+align-items:baseline;
+gap:8px;
+min-width:0;
+flex-wrap:wrap;
+line-height:1.35;
+}
+
+.summary-item strong{
+font-weight:500;
+word-break:break-word;
+}
+
+
+.fee-parent{
+padding:14px;
+border-radius:8px;
+margin-top:14px;
+border:1px solid var(--border-color);
+}
+
+.fee-parent--plain{
+padding:14px;
+border-radius:8px;
+background:transparent;
+border:1px solid var(--border-color);
+margin-top:14px;
+}
+
+
+.fee-parent-main{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:12px;
+}
+
+
+.fee-left{
+display:flex;
+align-items:center;
+gap:10px;
+flex:1;
+min-width:0;
+}
+
+
+.fee-name{
+font-weight:600;
+font-size:15px;
+line-height:1.3;
+color: var(--secondary-font-color);
+}
+
+
+.fee-right{
+display:flex;
+align-items:center;
+gap:10px;
+flex-shrink:0;
+}
+
+
+.fee-summary{
+display:grid;
+grid-template-columns:repeat(2, minmax(0, 1fr));
+gap:12px 20px;
+margin-top:14px;
+padding-top:14px;
+border-top:1px solid #e6e8f0;
+}
+
+
+.fee-summary-item{
+display:flex;
+align-items:baseline;
+gap:8px;
+min-width:0;
+flex-wrap:wrap;
+font-size:12px;
+line-height:1.35;
+color: var(--teritary-font-color);
+}
+
+
+.fee-summary-item strong{
+font-size:14px;
+font-weight:500;
+color: var(--secondary-font-color);
+word-break:break-word;
+}
+
+
+.fee-summary-item-full{
+grid-column:1 / -1;
+}
+
+
+.payment-status{
+padding:4px 12px;
+border-radius:16px;
+font-size:12px;
+border:1px solid var(--border-color);
+}
+
+
+.payment-status.partially-paid{
+background:#fff6df;
+color:#b7791f;
+border-color:#f4d28c;
+}
+
+
+.payment-status.fully-paid{
+background:#e8f7ee;
+color:#2f855a;
+border-color:#a7e1c3;
+}
+
+
+.payment-status.pending{
+background:#eef2ff;
+color:#3f5bf6;
+border-color:#cbd5ff;
+}
+
+
+.payment-status.overdue{
+background:#ffe9e9;
+color:#d93025;
+border-color:#ffbcbc;
+}
+
+
+.info-chip-wrap{
+position:relative;
+display:inline-flex;
+}
+
+
+.info-chip{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+width:14px;
+height:14px;
+border-radius:50%;
+border:1px solid #585A64;
+color:#585A64;
+font-size:9px;
+font-weight:700;
+background:#ffffff;
+padding:0;
+cursor:pointer;
+}
+
+
+.info-popover{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%, -50%);
+z-index:1000;
+width:calc(100vw - 32px);
+max-width:340px;
+border:none;
+border-radius:12px;
+background:#ffffff;
+padding:20px 24px 24px;
+box-sizing:border-box;
+box-shadow:0 0 0 9999px rgba(31, 34, 44, 0.45);
+}
+
+
+.info-modal-header{
+display:flex;
+align-items:flex-start;
+justify-content:space-between;
+gap:16px;
+margin-bottom:16px;
+}
+
+
+.info-modal-close{
+border:none;
+background:transparent;
+padding:0;
+color:#5d6270;
+font-size:20px;
+line-height:1;
+cursor:pointer;
+flex-shrink:0;
+}
+
+
+.info-popover-title{
+color:#3b4150;
+font-size:16px;
+font-weight:700;
+line-height:1.2;
+}
+
+
+.info-primary-block{
+display:flex;
+flex-direction:column;
+gap:8px;
+}
+
+
+.info-label{
+color:#3b4150;
+font-size:14px;
+font-weight:700;
+}
+
+
+.info-value{
+color:#4d5566;
+font-size:14px;
+font-weight:400;
+line-height:1.35;
+}
+
+
+.info-divider{
+height:1px;
+background:#d8dde6;
+margin:20px 0;
+}
+
+
+.info-grid{
+display:grid;
+grid-template-columns:repeat(2, minmax(0, 1fr));
+gap:18px 24px;
+}
+
+
+.info-grid-cell{
+display:flex;
+flex-direction:column;
+gap:8px;
+}
+
+
+.installment-card{
+border:1px solid var(--border-color);
+border-radius:8px;
+margin-top:12px;
+background:white;
+overflow:hidden;
+}
+
+
+.installment-header{
+display:grid;
+grid-template-columns:auto minmax(0, 1fr) auto;
+align-items:center;
+column-gap:10px;
+font-weight:600;
+padding:14px;
+background:var(--teritary-color);
+border-bottom:1px solid var(--border-color);
+}
+
+.installment-name{
+line-height:1.3;
+min-width:0;
+font-size: 14px;
+color: var(--secondary-font-color);
+}
+
+
+.installment-body{
+display:grid;
+grid-template-columns:1fr 1fr;
+column-gap:16px;
+row-gap:12px;
+font-size:12px;
+line-height:1.45;
+padding:14px;
+color: var(--teritary-font-color);
+}
+
+
+.installment-body > div{
+min-width:0;
+}
+
+
+.selected-amount-row{
+display:flex;
+justify-content:space-between;
+align-items:center;
+background:#f5f6fb;
+padding:10px;
+border-radius:8px;
+margin:10px 14px 14px;
+}
+
+
+.selected-amount-input{
+width:120px;
+border:1px solid var(--border-color);
+border-radius:8px;
+background:#ffffff;
+color:#4d5566;
+font-size:14px;
+font-weight:600;
+line-height:1.2;
+padding:10px 12px;
+text-align:right;
+outline:none;
+}
+
+
+.payment-footer{
+margin-top:18px;
+    /* padding-top: 18px;
+    position: fixed;
+    bottom: 0px;
+    background: white;
+    width: 87%; */
+}
+
+
+.selected-bar{
+background:#eef1f7;
+border-radius:8px;
+padding:12px;
+display:flex;
+justify-content:space-between;
+font-size:15px;
+margin-bottom:14px;
+color: var(--secondary-font-color);
+}
+
+
+.pay-btn{
+width:100%;
+padding:14px;
+border:none;
+border-radius:8px;
+background:var(--primary-color);
+color:white;
+font-size:14px;
+font-weight:600;
+cursor:pointer;
+}
+
+
+.toggle-btn{
+border:none;
+background:transparent;
+cursor:pointer;
+padding:0;
+display:inline-flex;
+align-items:center;
+justify-content:center;
+width:20px;
+height:20px;
+flex:0 0 20px;
+line-height:1;
+}
+
+
+.toggle-btn .toggle-icon{
+display:block;
+}

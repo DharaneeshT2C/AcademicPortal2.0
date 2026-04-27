@@ -1,0 +1,345 @@
+:host {
+    display: block;
+    width: 100%;
+    --primary-color: #3061ff;
+    --secondary-color: #eaefff;
+}
+
+.after-enrollment-layout {
+    height : calc(100vh - 150px);
+    border: 1px solid #e1e5ec;
+    border-radius: 16px;
+    background: #ffffff;
+    padding: 16px 18px 24px;
+    overflow-y: auto;
+}
+
+.skeleton-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.skeleton-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.skeleton-line {
+    height: 14px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #e7ebf2 0%, #f3f5f9 50%, #e7ebf2 100%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.1s ease-in-out infinite;
+}
+
+.skeleton-title {
+    width: min(240px, 60%);
+    height: 18px;
+}
+
+.skeleton-button {
+    width: 160px;
+    height: 34px;
+    border-radius: 10px;
+}
+
+.skeleton-banner {
+    height: 86px;
+    border-radius: 12px;
+    background: linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--primary-color, #3061ff) 10%, #f3f5f9) 0%,
+        #f3f5f9 50%,
+        color-mix(in srgb, var(--primary-color, #3061ff) 10%, #f3f5f9) 100%
+    );
+}
+
+.skeleton-table {
+    border: 1px solid #bfc4ce;
+    border-radius: 14px;
+    background: #ffffff;
+    padding: 12px;
+    overflow: hidden;
+}
+
+.skeleton-table-head {
+    width: min(520px, 90%);
+    height: 16px;
+}
+
+.skeleton-row {
+    margin-top: 12px;
+    height: 44px;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #e7ebf2 0%, #f3f5f9 50%, #e7ebf2 100%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.1s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.page-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.page-header h1 {
+    margin: 0;
+    color: #1f2737;
+    font-size: 16px;
+    line-height: 1.25;
+    font-weight: 600;
+}
+
+.header-outline-button,
+.help-button {
+    border: 1px solid var(--primary-color, #3061ff);
+    border-radius: 10px;
+    background: #f8f9fc;
+    color: #30384a;
+    font-size: 14px;
+    line-height: 1.25;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.status-banner {
+    margin-top: 14px;
+    border-radius: 12px;
+    background: #f3ecdb;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.status-banner-warning {
+    background: #f3ecdb;
+}
+
+.status-banner-approved {
+    background: #eaf5ed;
+}
+
+.status-banner-rejected {
+    background: #f8e8e8;
+}
+
+.status-copy h2 {
+    margin: 0;
+    color: #1f2635;
+    font-size: 16px;
+    line-height: 1.25;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.status-copy p {
+    margin: 10px 0 0;
+    color: #535c6d;
+    font-size: 14px;
+    line-height: 1.25;
+}
+
+.status-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.banner-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    line-height: 1;
+    font-weight: 700;
+}
+
+.banner-icon-warning {
+    background: #daa52d;
+}
+
+.banner-icon-approved {
+    background: #2f9a49;
+}
+
+.banner-icon-rejected {
+    background: #d44e4e;
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #e3c67f;
+    border-radius: 999px;
+    background: #f5efde;
+    color: #3e4657;
+    font-size: 14px;
+    line-height: 1.25;
+    padding: 6px 14px;
+    white-space: nowrap;
+}
+
+.status-pill-warning {
+    border-color: #e3c67f;
+    background: #f5efde;
+    color: #555e6f;
+}
+
+.status-pill-approved {
+    border-color: #b8d3bf;
+    background: #dcebe0;
+    color: #3f4656;
+}
+
+.status-pill-rejected {
+    border-color: #e5c1c1;
+    background: #f2dfdf;
+    color: #3f4656;
+}
+
+.edit-button {
+    border: 1px solid var(--primary-color, #3061ff);
+    border-radius: 10px;
+    background: var(--primary-color, #3061ff);
+    color: #ffffff;
+    font-size: 14px;
+    line-height: 1.25;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.pathway-section {
+    margin-top: 18px;
+}
+
+.pathway-header h3 {
+    margin: 0;
+    color: #313848;
+    font-size: 16px;
+    line-height: 1.25;
+    font-weight: 600;
+}
+
+.pathway-header p {
+    margin: 8px 0 0;
+    color: #525a6a;
+    font-size: 14px;
+    line-height: 1.25;
+}
+
+.table-card {
+    margin-top: 10px;
+    border: 1px solid #bfc4ce;
+    border-radius: 14px;
+    background: #ffffff;
+    padding: 8px 12px 12px;
+    overflow-x: auto;
+}
+
+.table-row {
+    display: grid;
+    grid-template-columns: minmax(260px, 2fr) 1.3fr 0.8fr 1.3fr 1.3fr 1fr;
+    gap: 10px;
+    align-items: center;
+    padding: 12px 8px;
+}
+
+.table-row p {
+    margin: 0;
+    color: #5d6575;
+    font-size: 14px;
+    line-height: 1.25;
+}
+
+.table-head {
+    border-bottom: 1px solid #d2d6de;
+}
+
+.table-head p {
+    color: var(--primary-color, #3061ff);
+    font-size: 16px;
+    line-height: 1.25;
+    font-weight: 500;
+}
+
+.type-head {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.type-head lightning-icon {
+    --sds-c-icon-color-foreground-default: #4e5668;
+    --sds-c-icon-color-foreground: #4e5668;
+}
+
+.status-info-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #404754;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    line-height: 1;
+    font-weight: 600;
+}
+
+@media (max-width: 1000px) {
+    .status-banner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .page-header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .status-actions {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+}

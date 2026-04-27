@@ -1,0 +1,111 @@
+/* ═══════════════════════════════════════════════════════════════
+   Evaluation Schema Detail — all colors from ExamManagementTheme__c custom setting
+═══════════════════════════════════════════════════════════════ */
+:host { display: block; }
+
+.esd-card {
+    background: var(--brand-surface);
+    border-radius: 20px;
+    border: 1.5px solid var(--brand-border);
+    box-shadow: var(--brand-shadow-xs);
+    overflow: hidden;
+    border-top: 3px solid var(--brand-primary);
+}
+
+/* Header */
+.esd-card-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 1.5rem; padding: 1.45rem; border-bottom: 1.5px solid var(--brand-border-sub); flex-wrap: wrap;
+}
+.esd-header-left { flex: 1; min-width: 0; }
+
+.esd-breadcrumb { display: flex; align-items: center; gap: 0.375rem; margin-bottom: 0.625rem; }
+.esd-breadcrumb-link { background: transparent; border: none; cursor: pointer; font-size: 0.8rem; color: var(--brand-primary); padding: 0; font-family: inherit; transition: color 0.15s; }
+.esd-breadcrumb-link:hover { color: var(--brand-primary-d); text-decoration: underline; }
+.esd-breadcrumb-sep     { color: var(--brand-text-subtle); font-size: 0.9rem; }
+.esd-breadcrumb-current { font-size: 0.8rem; color: var(--brand-text-secondary); }
+
+.esd-title { font-size: 1.25rem; font-weight: 700; color: var(--brand-text); margin: 0 0 0.375rem; letter-spacing: -0.02em; }
+.esd-desc  { font-size: 0.875rem; color: var(--brand-text-secondary); margin: 0 0 0.875rem; line-height: 1.5; }
+
+.esd-meta-badges { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.esd-badge { display: inline-flex; align-items: center; padding: 0.25rem 0.7rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
+.esd-badge-blue  { background: var(--brand-secondary); color: var(--brand-primary); }
+.esd-badge-amber { background: var(--brand-secondary); color: var(--brand-warning); }
+.esd-badge-gray  { background: var(--brand-bg-soft); color: var(--brand-text-secondary); }
+
+.esd-header-actions { display: flex; gap: 0.5rem; flex-shrink: 0; align-items: flex-start; }
+
+.esd-btn-ghost {
+    background: transparent; border: 1px solid var(--brand-border-sub); color: var(--brand-text-secondary);
+    border-radius: 10px; padding: 0.55rem 1.2rem; font-size: 0.875rem; font-weight: 650;
+    cursor: pointer; transition: background 0.15s, border-color 0.15s, color 0.15s;
+    font-family: inherit; white-space: nowrap;
+}
+.esd-btn-ghost:hover { background: var(--brand-secondary); border-color: var(--brand-border); color: var(--brand-primary); }
+
+.esd-btn-primary {
+    background: linear-gradient(135deg, var(--brand-btn-hover-bg) 0%, var(--brand-btn-bg) 100%);
+    color: var(--brand-btn-text); border: none; border-radius: 10px;
+    padding: 0.55rem 1.2rem; font-size: 0.875rem; font-weight: 650;
+    cursor: pointer; transition: filter 0.18s, box-shadow 0.18s, transform 0.18s;
+    font-family: inherit; white-space: nowrap;
+    box-shadow: 0 4px 14px var(--brand-primary-28);
+}
+.esd-btn-primary:hover { filter: brightness(1.06); transform: translateY(-2px); box-shadow: 0 8px 22px var(--brand-primary-36); }
+
+.esd-btn-danger {
+    background: transparent; color: var(--brand-danger); border: 1px solid var(--brand-danger);
+    border-radius: 10px; padding: 0.55rem 1.2rem; font-size: 0.875rem; font-weight: 650;
+    cursor: pointer; transition: background 0.15s, border-color 0.15s;
+    font-family: inherit; white-space: nowrap;
+}
+.esd-btn-danger:hover { background: var(--brand-primary-10); border-color: var(--brand-danger); }
+
+/* Components list */
+.esd-components { padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+.esd-component { border: 1px solid var(--brand-border-sub); border-radius: 10px; overflow: hidden; transition: box-shadow 0.2s; }
+.esd-component:hover { box-shadow: 0 4px 12px var(--brand-primary-10); }
+
+.esd-component-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding: 1rem 1.25rem; background: var(--brand-bg-soft); border-bottom: 1px solid var(--brand-border-sub); flex-wrap: wrap; }
+.esd-component-title-group { display: flex; flex-direction: column; gap: 0.2rem; }
+.esd-component-name { font-size: 0.9rem; font-weight: 700; color: var(--brand-text); margin: 0; text-transform: uppercase; letter-spacing: 0.04em; }
+.esd-component-label { font-size: 0.8rem; color: var(--brand-text-secondary); }
+.esd-component-meta { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+
+.esd-comp-stat { display: flex; flex-direction: column; gap: 0.15rem; }
+.esd-comp-stat-lbl { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--brand-text-secondary); }
+.esd-comp-stat-val { font-size: 1.1rem; font-weight: 700; color: var(--brand-text); line-height: 1; }
+
+.es-type-badge { display: inline-flex; align-items: center; padding: 0.25rem 0.7rem; border-radius: 999px; font-size: 0.74rem; font-weight: 700; }
+.es-type-internal { background: var(--brand-secondary); color: var(--brand-primary); }
+.es-type-external { background: var(--brand-secondary); color: var(--brand-primary); }
+
+.es-enroll-badge { display: inline-flex; align-items: center; padding: 0.2rem 0.55rem; border-radius: 6px; font-size: 0.74rem; font-weight: 600; }
+.es-enroll-auto   { background: var(--brand-secondary); color: var(--brand-primary); }
+.es-enroll-manual { background: var(--brand-bg-soft); color: var(--brand-text-secondary); }
+
+/* Table */
+.esd-table-wrap { overflow-x: auto; }
+.esd-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.esd-th { background: var(--brand-bg-soft); padding: 0.65rem 1rem; text-align: left; font-size: 0.71rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--brand-text-secondary); border-bottom: 1px solid var(--brand-border-sub); white-space: nowrap; }
+.esd-row { border-bottom: 1px solid var(--brand-border-sub); transition: background 0.15s; }
+.esd-row:last-child { border-bottom: none; }
+.esd-row:hover { background: var(--brand-secondary); }
+.esd-td { padding: 0.75rem 1rem; color: var(--brand-text); vertical-align: middle; }
+.esd-td-name { font-weight: 600; }
+.esd-empty-state { padding: 3rem 1.5rem; text-align: center; color: var(--brand-text-secondary); font-size: 0.875rem; }
+
+/* ── Unified Compact Theme (Exam Module) ───────────────────────────────── */
+.esd-card {
+    border-radius: 10px;
+    box-shadow: none;
+    border-top-width: 2px;
+}
+.esd-card-header { padding: 1rem; }
+.esd-component {
+    border-radius: 8px;
+    transition: border-color 0.18s ease, background 0.18s ease;
+}
+.esd-component:hover { box-shadow: none; background: var(--brand-bg-soft); }
+.esd-th, .esd-td { padding-top: 0.6rem; padding-bottom: 0.6rem; }

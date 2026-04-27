@@ -1,0 +1,228 @@
+<template>
+    <section class="question-paper-page">
+        <div class="exam-meta-card">
+            <div class="meta-item">
+                <span class="meta-label">Term</span>
+                <span class="meta-value">2026 - OCT - MBAG - term 1 - Singapore</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Course</span>
+                <span class="meta-value">Marketing management</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Exam</span>
+                <span class="meta-value">End term</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Format</span>
+                <span class="meta-value">Written</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Exam date</span>
+                <span class="meta-value">05-05-2025</span>
+            </div>
+        </div>
+
+        <div class="question-bank-card">
+            <div class="section-head">
+                <h2 class="section-title">Question paper bank</h2>
+                <div class="section-ctas">
+                    <button type="button" class="btn btn-primary">Submit</button>
+                    <button type="button" class="btn btn-secondary" onclick={handleAddQuestionPaper}>
+                        <span class="btn-icon">+</span>
+                        Add Question Paper
+                    </button>
+                </div>
+            </div>
+
+            <template if:true={showPaper1Panel}>
+                <div class="paper-panel">
+                    <div class="paper-panel-head">
+                        <div class="panel-head-left">
+                            <h3 class="paper-title">Question paper 1</h3>
+                            <template if:true={hasAddedQuestionPaper}>
+                                <span class="uploaded-link">2 documents uploaded</span>
+                            </template>
+                        </div>
+                        <button type="button" class="icon-only" onclick={togglePaper1} aria-label="Toggle question paper 1">
+                            <span>{paper1ToggleIcon}</span>
+                        </button>
+                    </div>
+
+                    <template if:true={isPaper1Open}>
+                        <div class="resource-row">
+                            <span>Question paper set</span>
+                            <div class="resource-actions">
+                                <button
+                                    type="button"
+                                    class="icon-btn icon-danger"
+                                    aria-label="Delete"
+                                    onclick={openDeleteConfirmModal}>
+                                    <lightning-icon icon-name="utility:delete" size="x-small"></lightning-icon>
+                                </button>
+                                <button type="button" class="icon-btn icon-brand" aria-label="View" onclick={openPreviewModal}>
+                                    <lightning-icon icon-name="utility:preview" size="x-small"></lightning-icon>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="resource-row">
+                            <span>Model answer set</span>
+                            <button type="button" class="btn btn-outline" onclick={openUploadModal}>
+                                <lightning-icon icon-name="utility:upload" size="x-small"></lightning-icon>
+                                Upload
+                            </button>
+                        </div>
+
+                        <button type="button" class="btn btn-outline add-doc">
+                            <span class="btn-icon">+</span>
+                            Add Additional Document
+                        </button>
+                    </template>
+                </div>
+            </template>
+
+            <template if:true={hasAddedQuestionPaper}>
+                <div class="paper-panel paper-panel-secondary">
+                    <div class="paper-panel-head">
+                        <div class="panel-head-left">
+                            <h3 class="paper-title">Question paper 2</h3>
+                            <span class="status-pill">Alteration Requested</span>
+                        </div>
+                        <button type="button" class="icon-only" onclick={togglePaper2} aria-label="Toggle question paper 2">
+                            <span>{paper2ToggleIcon}</span>
+                        </button>
+                    </div>
+
+                    <template if:true={isPaper2Open}>
+                        <div class="resource-row">
+                            <span>Question paper set</span>
+                            <button type="button" class="btn btn-primary btn-row-action" onclick={openUploadModal}>
+                                <lightning-icon icon-name="utility:refresh" size="x-small"></lightning-icon>
+                                Re -Upload
+                            </button>
+                        </div>
+
+                        <div class="resource-row">
+                            <span>Model answer set</span>
+                            <button type="button" class="btn btn-primary btn-row-action" onclick={openUploadModal}>
+                                <lightning-icon icon-name="utility:upload" size="x-small"></lightning-icon>
+                                Upload
+                            </button>
+                        </div>
+
+                        <button type="button" class="btn btn-outline add-doc">
+                            <span class="btn-icon">+</span>
+                            Add Additional Document
+                        </button>
+                    </template>
+                </div>
+            </template>
+        </div>
+    </section>
+
+    <template if:true={showDeleteConfirmModal}>
+        <section class="modal-backdrop" onclick={closeDeleteConfirmModal}>
+            <div class="modal-card modal-confirm" onclick={stopPropagation}>
+                <p class="confirm-text">Are you sure you want to delete question paper 1?</p>
+                <div class="confirm-actions">
+                    <button type="button" class="btn modal-btn btn-outline-lite" onclick={closeDeleteConfirmModal}>No</button>
+                    <button type="button" class="btn modal-btn btn-primary" onclick={confirmDeletePaper1}>Yes</button>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template if:true={showDeleteSuccessModal}>
+        <section class="modal-backdrop" onclick={closeDeleteSuccessModal}>
+            <div class="modal-card modal-success" onclick={stopPropagation}>
+                <div class="success-icon-wrap">
+                    <span class="success-icon">✓</span>
+                </div>
+                <p class="success-title">Question paper 1 deleted!</p>
+                <p class="success-subtitle">Question paper 1 has been deleted successfully</p>
+            </div>
+        </section>
+    </template>
+
+    <template if:true={showUploadModal}>
+        <section class="modal-backdrop modal-upload-backdrop" onclick={closeUploadModal}>
+            <div class="modal-card modal-upload" onclick={stopPropagation}>
+                <h3 class="upload-title">Upload files</h3>
+
+                <div class="upload-drop-zone">
+                    <div class="upload-art" aria-hidden="true">
+                        <div class="upload-art-back"></div>
+                        <div class="upload-art-front"></div>
+                    </div>
+                    <p class="upload-text">Drop your file here, or <span class="upload-link">browse</span></p>
+                    <p class="upload-subtext">Supports: PNG, JPG, JPEG, PDF, PPT</p>
+                    <p class="upload-subtext">Max file size: 12 mb</p>
+                </div>
+
+                <div class="upload-file-row">
+                    <div class="upload-file-left">
+                        <span class="file-icon">📎</span>
+                        <div class="file-meta">
+                            <p class="file-name">ECE_sem1.pdf</p>
+                            <p class="file-size">12 MB</p>
+                        </div>
+                    </div>
+                    <div class="upload-file-actions">
+                        <button type="button" class="tiny-icon-btn">Ⅱ</button>
+                        <button type="button" class="tiny-icon-btn tiny-icon-danger">✕</button>
+                    </div>
+                    <div class="upload-progress-wrap">
+                        <div class="upload-progress"></div>
+                        <span class="upload-percent">0%</span>
+                    </div>
+                </div>
+
+                <div class="upload-actions">
+                    <button type="button" class="btn modal-action btn-outline-lite" onclick={closeUploadModal}>Cancel</button>
+                    <button type="button" class="btn modal-action btn-primary" onclick={handleUploadDone}>Done</button>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template if:true={showUploadSuccessModal}>
+        <section class="modal-backdrop" onclick={closeUploadSuccessModal}>
+            <div class="modal-card modal-upload-success" onclick={stopPropagation}>
+                <div class="upload-success-icon-wrap">
+                    <span class="upload-success-icon">✓</span>
+                </div>
+                <p class="upload-success-title">Model answer set has been uploaded</p>
+                <p class="upload-success-subtitle">Model answer set has been successfully uploaded !</p>
+            </div>
+        </section>
+    </template>
+
+    <template if:true={showPreviewModal}>
+        <section class="modal-backdrop modal-preview-backdrop" onclick={closePreviewModal}>
+            <div class="modal-card modal-preview" onclick={stopPropagation}>
+                <div class="preview-head">
+                    <h3 class="preview-title">Question paper set</h3>
+                    <button type="button" class="preview-close" aria-label="Close preview" onclick={closePreviewModal}>×</button>
+                </div>
+
+                <div class="preview-workspace">
+                    <aside class="preview-sidebar">
+                        <template for:each={previewPagesForUi} for:item="page">
+                            <div key={page.id} class="preview-thumb-wrap">
+                                <button type="button" class={page.thumbClass} data-id={page.id} onclick={handlePreviewSelect}>
+                                    <img src={page.thumbnailSrc} alt={page.altText} />
+                                </button>
+                                <span class="preview-page-no">{page.numberLabel}</span>
+                            </div>
+                        </template>
+                    </aside>
+
+                    <div class="preview-main">
+                        <img class="preview-image" src={selectedPreviewPage.previewSrc} alt={selectedPreviewPage.altText} />
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+</template>

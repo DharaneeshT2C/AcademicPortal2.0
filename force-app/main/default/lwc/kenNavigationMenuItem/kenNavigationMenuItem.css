@@ -1,0 +1,175 @@
+:host {
+    /* Navigation menu item */
+}
+
+.nav-item {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    margin-bottom: var(--slds-g-spacing-1, 4px);
+    position: relative;
+}
+
+.nav-item-main {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px var(--slds-g-spacing-4, 16px);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    background: transparent;
+    width: 100%;
+    border-radius: var(--slds-g-radius-border-2, 8px);
+}
+
+.nav-item-main:hover {
+    background: #F3F4F6; /* Gray-100 */
+}
+
+.nav-item.selected .nav-item-main {
+    background: var(--secondary-color, #EFF6FF);
+}
+
+.nav-item.selected .nav-item-main:hover {
+    background: var(--secondary-color, #EFF6FF);
+}
+
+.nav-icon {
+    width: var(--slds-g-sizing-6, 20px);
+    height: var(--slds-g-sizing-6, 20px);
+    margin-right: var(--slds-g-spacing-3, 12px);
+    flex-shrink: 0;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.nav-icon-utility {
+    margin-right: var(--slds-g-spacing-3, 12px);
+    --slds-c-icon-color-foreground-default: #9CA3AF; /* Default Gray */
+}
+
+.nav-item.selected .nav-icon-utility {
+    --slds-c-icon-color-foreground-default: var(--primary-color, #2563EB);
+}
+
+.nav-icon-mask {
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    background-color: #9CA3AF; /* Gray-400 */
+}
+
+.nav-item.selected .nav-icon-mask {
+    background-color: var(--primary-color, #2563EB);
+}
+
+.nav-item:not(.selected) .nav-icon-mask {
+    background-color: #9CA3AF; /* Gray-400 */
+}
+
+.nav-text {
+    font-weight: var(--slds-g-font-weight-4, 400);
+    font-size: 15px;
+    line-height: 20px;
+    color: #374151; /* Gray-700 */
+    transition: color 0.2s ease-in-out;
+    flex: 1;
+}
+
+.nav-item.selected .nav-text {
+    color: var(--primary-color, #2563EB);
+    font-weight: var(--slds-g-font-weight-6, 600);
+}
+
+.toggle-icon-wrapper {
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.toggle-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.toggle-icon lightning-button-icon {
+    --slds-c-icon-color-foreground-default: #9ca3af;
+}
+
+.nav-item.selected .toggle-icon lightning-button-icon {
+    --slds-c-icon-color-foreground-default: var(--primary-color);
+}
+
+.sidenav-submenu {
+    list-style: none;
+    padding: 0;
+    margin: var(--slds-g-spacing-1, 4px )0 0 0;
+    padding-left: var(--slds-g-spacing-6, 32px);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+}
+
+.submenu-item {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    display: block;
+}
+
+.nav-text.collapsed {
+    
+    font-weight: var(--slds-g-font-weight-4, 400);
+    font-size: var(--slds-g-font-scale-2, 16px);
+    line-height: 140%;
+    letter-spacing: 0%;
+    color: #373A45;
+    transition: color 0.2s ease-in-out;
+    display: inline-block;
+    width: 200px;
+    padding-left: 10px;
+}
+
+.nav-tooltip {
+    position: fixed;
+    background: rgba(23, 32, 52, 0.92);
+    color: #ffffff;
+    padding: 6px var(--slds-g-spacing-3, 12px);
+    border-radius: var(--slds-g-radius-border-2, 8px);
+    font-size: var(--slds-g-font-scale-neg-1, 12px);
+    font-weight: var(--slds-g-font-weight-5, 500);
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.25);
+    pointer-events: none;
+    z-index: 2147483647;
+}
+
+.nav-tooltip::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -6px;
+    transform: translateY(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: transparent rgba(23, 32, 52, 0.92) transparent transparent;
+}
+
+@media (max-width: 768px) {
+    .nav-item {
+        padding: var(--slds-g-spacing-2, 8px )10px;
+
+    }
+
+    .nav-text {
+        font-size: var(--slds-g-font-scale-2, 16px )!important;
+    }
+
+    .nav-item.selected {
+        background: var(--primary-color);
+        border-radius: 7px !important;
+    }
+}

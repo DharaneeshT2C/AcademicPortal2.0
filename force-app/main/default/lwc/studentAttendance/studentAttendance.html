@@ -1,0 +1,21 @@
+<template>
+    <section class="student-attendance-module">
+        <template lwc:if={isDashboardView}>
+            <c-student-attendance-dashboard onattendanceoverview={handleAttendanceOverview}></c-student-attendance-dashboard>
+        </template>
+
+        <template lwc:elseif={isHistoryView}>
+            <c-student-attendance-history
+                onbacktodashboard={handleBackToDashboard}
+                onviewdetails={handleViewDetails}
+            ></c-student-attendance-history>
+        </template>
+
+        <template lwc:else>
+            <c-student-attendance-course-details
+                selected-course={selectedCourse}
+                onbacktohistory={handleBackToHistory}
+            ></c-student-attendance-course-details>
+        </template>
+    </section>
+</template>

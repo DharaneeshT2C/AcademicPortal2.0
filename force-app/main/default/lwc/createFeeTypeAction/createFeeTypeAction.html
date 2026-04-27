@@ -1,0 +1,300 @@
+<!-- createFeeTypeAction.html -->
+<template>
+    <lightning-quick-action-panel header="Create Fee Type">
+        <div class="slds-p-around_medium">
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </template>
+
+            <template if:false={isLoading}>
+                <!-- Header fields -->
+                <lightning-layout multiple-rows>
+                    <lightning-layout-item size="12" padding="around-small">
+                        <lightning-combobox
+                            name="feeTypeRecordTypeId"
+                            label="Fee Type Record Type"
+                            value={feeTypeRecordTypeId}
+                            options={feeTypeRecordTypeOptions}
+                            onchange={handleHeaderChange}
+                            required>
+                        </lightning-combobox>
+                    </lightning-layout-item>
+
+                    <lightning-layout-item size="6" padding="around-small">
+                        <lightning-combobox
+                            name="linkLevel"
+                            label="Link Level"
+                            value={linkLevel}
+                            options={linkLevelOptions}
+                            onchange={handleHeaderChange}
+                            required>
+                        </lightning-combobox>
+                    </lightning-layout-item>
+
+                    <template if:true={isLearningProgramPlanLinkLevel}>
+                        <lightning-layout-item size="6" padding="around-small">
+                            <lightning-record-picker
+                                label="Learning Program Plan"
+                                placeholder="Search Learning Program Plan"
+                                object-api-name="LearningProgramPlan"
+                                value={learningProgramPlanId}
+                                onchange={handleLearningProgramPlanPicked}
+                                required>
+                            </lightning-record-picker>
+                        </lightning-layout-item>
+                    </template>
+
+                    <template if:true={isInstituteProgramPlanLinkLevel}>
+                        <lightning-layout-item size="6" padding="around-small">
+                            <lightning-record-picker
+                                label="Institute Program Plan"
+                                placeholder="Search Institute Program Plan"
+                                object-api-name="Institute_Program_Plan__c"
+                                value={instituteProgramPlanId}
+                                onchange={handleInstituteProgramPlanPicked}
+                                required>
+                            </lightning-record-picker>
+                        </lightning-layout-item>
+                    </template>
+
+                    <lightning-layout-item size="6" padding="around-small">
+                        <lightning-input
+                            name="feeTypeName"
+                            label="Fee Type Name"
+                            value={feeTypeName}
+                            onchange={handleHeaderChange}>
+                        </lightning-input>
+                    </lightning-layout-item>
+
+                    <lightning-layout-item size="6" padding="around-small">
+                        <lightning-combobox
+                            name="feeCategory"
+                            label="Fee Category"
+                            value={feeCategory}
+                            options={feeCategoryOptions}
+                            onchange={handleHeaderChange}
+                            required>
+                        </lightning-combobox>
+                    </lightning-layout-item>
+
+                    <lightning-layout-item size="6" padding="around-small">
+                        <lightning-combobox
+                            name="frequency"
+                            label="Fee Collection Frequency"
+                            value={frequency}
+                            options={frequencyOptions}
+                            onchange={handleHeaderChange}
+                            required>
+                        </lightning-combobox>
+                    </lightning-layout-item>
+
+                    <lightning-layout-item size="6" padding="around-small">
+                        <lightning-combobox
+                            name="status"
+                            label="Status"
+                            value={status}
+                            options={statusOptions}
+                            onchange={handleHeaderChange}
+                            required>
+                        </lightning-combobox>
+                    </lightning-layout-item>
+
+                    <lightning-layout-item size="6" padding="around-small">
+                        <lightning-record-picker
+                            label="Payment Schedule"
+                            placeholder="Search Payment Schedule"
+                            object-api-name="Payment_Schedule__c"
+                            value={paymentScheduleId}
+                            onchange={handlePaymentSchedulePicked}
+                            required>
+                        </lightning-record-picker>
+                    </lightning-layout-item>
+
+                    <lightning-layout-item size="6" padding="around-small">
+                        <lightning-record-picker
+                            label="Default Tax (optional)"
+                            placeholder="Search Tax Definition"
+                            object-api-name="Ken_Tax_Definition__c"
+                            value={defaultTaxId}
+                            filter={taxFilter}
+                            onchange={handleDefaultTaxPicked}>
+                        </lightning-record-picker>
+                    </lightning-layout-item>
+
+                    <lightning-layout-item size="6" padding="around-small">
+                        <lightning-record-picker
+                            label="Late Fee Plan (optional)"
+                            placeholder="Search Late Fee Fee Type"
+                            object-api-name="Ken_Fee_Type__c"
+                            value={lateFeePlanId}
+                            filter={lateFeeFilter}
+                            onchange={handleLateFeePlanPicked}>
+                        </lightning-record-picker>
+                    </lightning-layout-item>
+
+                    <lightning-layout-item size="6" padding="around-small">
+                        <lightning-input
+                            type="number"
+                            name="programDurationYears"
+                            label="Program Duration (Years)"
+                            min="1"
+                            value={programDurationYears}
+                            onchange={handleProgramDurationChange}
+                            required>
+                        </lightning-input>
+                    </lightning-layout-item>
+                </lightning-layout>
+
+                <!-- Year Configuration -->
+                <div class="slds-m-top_large slds-text-title_bold">Year Configuration</div>
+
+                <!-- Header row -->
+                <div class="slds-grid slds-gutters_small slds-p-horizontal_small slds-p-vertical_x-small slds-text-title_caps slds-border_bottom">
+                    <div class="slds-col slds-size_2-of-12">Program Year</div>
+                    <div class="slds-col slds-size_6-of-12">Fee Set</div>
+                    <div class="slds-col slds-size_4-of-12">Due Date</div>
+                </div>
+
+                <template for:each={yearConfigurations} for:item="row">
+                    <div key={row.key} class="slds-grid slds-gutters_small slds-p-horizontal_small slds-p-vertical_small slds-border_bottom">
+                        <!-- Program Year + preview icon -->
+                        <div class="slds-col slds-size_2-of-12 slds-p-top_x-small">
+                            <div class="slds-grid slds-grid_vertical-align-center slds-gutters_x-small">
+                                <div class="slds-col slds-grow">
+                                    <span>Year {row.yearNumber}</span>
+                                </div>
+
+                                <div class="slds-col slds-shrink-none">
+                                    <lightning-button-icon
+                                        icon-name="utility:preview"
+                                        alternative-text="Preview Fee Set"
+                                        title="Preview Fee Set"
+                                        variant="bare"
+                                        data-key={row.key}
+                                        onclick={handlePreviewRow}
+                                        disabled={row.isPreviewDisabled}>
+                                    </lightning-button-icon>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fee Set -->
+                        <div class="slds-col slds-size_6-of-12">
+                            <lightning-record-picker
+                                label="Fee Set"
+                                variant="label-hidden"
+                                placeholder="Search Fee Set"
+                                object-api-name="Ken_Fee_Set__c"
+                                value={row.feeSetId}
+                                data-key={row.key}
+                                onchange={handleFeeSetPicked}
+                                required>
+                            </lightning-record-picker>
+
+                            <template if:true={row.feeSetError}>
+                                <div class="slds-form-element__help">{row.feeSetError}</div>
+                            </template>
+                        </div>
+
+                        <!-- Due Date -->
+                        <div class="slds-col slds-size_4-of-12">
+                            <lightning-input
+                                type="date"
+                                label=""
+                                variant="label-hidden"
+                                data-key={row.key}
+                                value={row.dueDate}
+                                onchange={handleDueDateChange}
+                                required>
+                            </lightning-input>
+
+                            <template if:true={row.dueDateError}>
+                                <div class="slds-form-element__help">{row.dueDateError}</div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <div class="slds-m-top_small">
+                    <lightning-button
+                        label="Copy Year 1 to all Years"
+                        variant="neutral"
+                        onclick={handleCopyYearOneToAll}
+                        disabled={isCopyDisabled}>
+                    </lightning-button>
+                </div>
+            </template>
+        </div>
+
+        <!-- Footer (Preview left, Cancel/Create right) -->
+        <div slot="footer"
+             class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center slds-wrap slds-gutters_small">
+            <div class="slds-col slds-shrink-none">
+                <lightning-button
+                    label="Preview"
+                    variant="neutral"
+                    onclick={handlePreviewFooter}
+                    disabled={isFooterPreviewDisabled}>
+                </lightning-button>
+            </div>
+
+            <div class="slds-col slds-shrink-none">
+                <div class="slds-grid slds-grid_align-end slds-gutters_small slds-wrap">
+                    <div class="slds-col slds-shrink-none">
+                        <lightning-button
+                            variant="neutral"
+                            label="Cancel"
+                            onclick={handleCancel}>
+                        </lightning-button>
+                    </div>
+
+                    <div class="slds-col slds-shrink-none">
+                        <lightning-button
+                            variant="brand"
+                            label="Create"
+                            onclick={handleCreate}
+                            disabled={isCreateDisabled}>
+                        </lightning-button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </lightning-quick-action-panel>
+
+    <!-- Preview modal -->
+    <template if:true={isPreviewOpen}>
+        <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <h2 class="slds-modal__title slds-hyphenate">
+                        Fee Set Preview (Year {previewYearNumber})
+                    </h2>
+                </header>
+
+                <div class="slds-modal__content slds-p-around_medium">
+                    <template if:true={isPreviewLoading}>
+                        <lightning-spinner alternative-text="Loading preview" size="small"></lightning-spinner>
+                    </template>
+
+                    <template if:false={isPreviewLoading}>
+                        <lightning-datatable
+                            key-field="rowKey"
+                            data={previewRows}
+                            columns={previewColumns}
+                            hide-checkbox-column>
+                        </lightning-datatable>
+                    </template>
+                </div>
+
+                <footer class="slds-modal__footer">
+                    <lightning-button
+                        label="Close"
+                        variant="neutral"
+                        onclick={handleClosePreview}>
+                    </lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

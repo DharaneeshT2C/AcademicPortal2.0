@@ -1,0 +1,177 @@
+:host {
+    --primary-color: #3061ff;
+    --secondary-color: #eaefff;
+}
+
+.grade-cards-page {
+    height: calc(100vh - 153px);
+    overflow-y: auto;
+    border-radius: 12px;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    padding: 16px;
+}
+
+.grade-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.grade-card {
+    border: 1px solid #E6E6E8;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.card-body {
+    padding: 20px 20px 28px;
+    flex: 1;
+}
+
+.semester-title {
+    margin: 0 0 10px;
+    font-size: 18px;
+    font-weight: 500;
+    color: #1a2030;
+}
+
+.credits-text {
+    margin: 0;
+    font-size: 14px;
+    color: #7a8294;
+}
+
+.credits-text strong {
+    font-weight: 500;
+    color: #1a2030;
+}
+
+.card-footer {
+    border-top: 1px solid #e8ecf3;
+    padding: 14px 20px;
+}
+
+.download-btn {
+    width: 100%;
+    height: 38px;
+    border: 1.5px solid var(--primary-color, #3061ff);
+    border-radius: 10px;
+    background: #ffffff;
+    /* color: var(--primary-color, #3061ff); */
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.download-btn:hover {
+    background: color-mix(in srgb, var(--primary-color, #3061ff) 6%, #ffffff);
+}
+
+.na-btn {
+    width: 100%;
+    height: 38px;
+    border: none;
+    border-radius: 10px;
+    background: #e8eaf0;
+    color: #8a909e;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: not-allowed;
+}
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.download-success-modal {
+    width: min(320px, calc(100vw - 40px));
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 28px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+}
+
+.dl-icon-wrap {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #c8e6c9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+
+.dl-icon-inner {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #43a047;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dl-check {
+    color: #ffffff;
+    font-size: 20px;
+    line-height: 1;
+}
+
+.dl-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e2330;
+    text-align: center;
+}
+
+.dl-subtitle {
+    margin: 0;
+    font-size: 13px;
+    color: #6b7280;
+    text-align: center;
+}
+
+@media (max-width: 1280px) {
+    .grade-cards-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .grade-cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .grade-cards-page {
+        padding: 12px;
+    }
+
+    .grade-cards-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .semester-title {
+        font-size: 16px;
+    }
+}

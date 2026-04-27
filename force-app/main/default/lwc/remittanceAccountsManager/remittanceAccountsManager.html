@@ -1,0 +1,559 @@
+<template>
+    <div class="page">
+        <div class="breadcrumb">
+            <a href="javascript:void(0)" onclick={navigateToMasterData}>Master Data</a>
+            <span class="sep">&gt;</span>
+            <template if:true={isListView}>
+                <span>Remittance Accounts</span>
+            </template>
+            <template if:true={isFormView}>
+                <a href="javascript:void(0)" onclick={handleFormCancel}>Remittance Accounts</a>
+                <span class="sep">&gt;</span>
+                <span>{formPageTitle}</span>
+            </template>
+            <template if:true={isRemittanceAccountDetailView}>
+                <a href="javascript:void(0)" onclick={handleBackToAccountList}>Remittance Accounts</a>
+                <span class="sep">&gt;</span>
+                <span>{selectedRemittanceAccount.detailHeaderTitle}</span>
+            </template>
+        </div>
+
+        <template if:true={notification}>
+            <section class={notification.className} role="alert">
+                <div class="notificationContent">
+                    <div>
+                        <div class="notificationTitle">{notification.title}</div>
+                        <div class="notificationMessage">{notification.message}</div>
+                    </div>
+                    <button type="button" class="notificationDismiss" onclick={handleNotificationDismiss} aria-label="Dismiss notification">
+                        <lightning-icon icon-name="utility:close" size="x-small" alternative-text="Dismiss"></lightning-icon>
+                    </button>
+                </div>
+            </section>
+        </template>
+
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+        </template>
+
+        <template if:false={isLoading}>
+            <template if:true={isListView}>
+                <div class="titleRow">
+                    <div class="titleBlock">
+                        <div class="title">Remittance Accounts</div>
+                        <div class="subtitle">{remittanceAccountCountText} - Bank accounts for fee collection</div>
+                    </div>
+                    <lightning-button class="primaryActionBtn" variant="brand" label="New Account" onclick={openNewAccountModal}></lightning-button>
+                </div>
+
+                <div class="infoStrip">
+                    <div class="infoStripInner">
+                        <lightning-icon icon-name="utility:info" size="x-small" alternative-text="Info"></lightning-icon>
+                        <div>
+                            <div class="infoTitle">Account Hierarchy</div>
+                            <div class="infoText">
+                                Programme-level accounts override Head-level accounts, which override Institution-level accounts.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="toolbar">
+                    <div class="searchBox">
+                        <lightning-input
+                            class="searchInput"
+                            type="search"
+                            variant="label-hidden"
+                            value={searchText}
+                            onchange={handleSearchChange}
+                            placeholder="Search accounts..."
+                        ></lightning-input>
+                    </div>
+                </div>
+
+                <template if:true={hasRemittanceAccounts}>
+                    <div class="tableWrap">
+                        <div class="header accountGrid">
+                            <div>Account Name</div>
+                            <div>Bank</div>
+                            <div>Account Number</div>
+                            <div>Ledger Code</div>
+                            <div>Status</div>
+                            <div class="actionsHeader">Actions</div>
+                        </div>
+
+                        <template for:each={filteredRemittanceAccounts} for:item="row">
+                            <div key={row.id} class="accountGrid dataRow">
+                                <div class="nameCell">
+                                    <button class="nameLink" data-account-id={row.id} onclick={handleOpenRemittanceAccountDetails}>
+                                        {row.listAccountName}
+                                    </button>
+                                </div>
+                                <div>{row.bankName}</div>
+                                <div>{row.accountNumber}</div>
+                                <div class="ledgerCode">{row.ledgerCode}</div>
+                                <div><span class={row.statusClass}>{row.statusText}</span></div>
+                                <div class={row.actionsCellClass}>
+                                    <button
+                                        class="actionsButton"
+                                        title="Actions"
+                                        aria-label="Account actions"
+                                        data-account-id={row.id}
+                                        onclick={handleToggleActionMenu}
+                                    >
+                                        <lightning-icon icon-name="utility:threedots_vertical" size="x-small" alternative-text="Actions"></lightning-icon>
+                                    </button>
+                                    <template if:true={row.isActionMenuOpen}>
+                                        <div class="actionsMenu">
+                                            <button class="actionItem" data-account-id={row.id} data-action="view" onclick={handleRowAction}>View</button>
+                                            <button class="actionItem" data-account-id={row.id} data-action="edit" onclick={handleRowAction}>Edit</button>
+                                            <button class="actionItem actionItemDisabled" type="button" disabled aria-disabled="true">Clone</button>
+                                            <button class="actionItem actionDelete" data-account-id={row.id} data-action="delete" onclick={handleRowAction}>Delete</button>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <template if:false={hasRemittanceAccounts}>
+                    <div class="empty">No remittance accounts found.</div>
+                </template>
+            </template>
+
+            <template if:true={isFormView}>
+                <div class="builderHeader">
+                    <div class="builderTitleBlock">
+                        <div class="builderTitle">{formPageTitle}</div>
+                        <div class="builderSubtitle">Configure remittance account details</div>
+                    </div>
+                    <div class="formHeaderActions">
+                        <lightning-button class="btnNeutral" label="Cancel" onclick={handleFormCancel} disabled={formIsSaving}></lightning-button>
+                        <lightning-button class="btnPrimary" variant="brand" label={formSaveLabel} onclick={handleFormSave} disabled={formIsSaving}></lightning-button>
+                    </div>
+                </div>
+
+                <section class="builderCard">
+                    <div class="builderSectionTitle">Basic Configuration</div>
+
+                    <div class="builderGrid twoColGrid">
+                        <lightning-input
+                            class="builderField"
+                            name="accountName"
+                            label="Account Name"
+                            value={formAccountName}
+                            placeholder="e.g., SBI Main Account"
+                            required
+                            onchange={handleFormFieldChange}
+                        ></lightning-input>
+                        <lightning-input
+                            class="builderField"
+                            name="bankName"
+                            label="Bank"
+                            value={formBankName}
+                            placeholder="e.g., State Bank of India"
+                            required
+                            onchange={handleFormFieldChange}
+                        ></lightning-input>
+                        <lightning-input
+                            class="builderField"
+                            name="accountNumber"
+                            label="Account Number"
+                            value={formAccountNumber}
+                            required
+                            onchange={handleFormFieldChange}
+                        ></lightning-input>
+                        <lightning-input
+                            class="builderField"
+                            name="ledgerCode"
+                            label="Ledger Code"
+                            value={formLedgerCode}
+                            required
+                            onchange={handleFormFieldChange}
+                        ></lightning-input>
+                        <lightning-combobox
+                            class="builderField"
+                            name="currencyIsoCode"
+                            label="Currency"
+                            value={formCurrencyIsoCode}
+                            options={currencyOptions}
+                            required
+                            onchange={handleFormFieldChange}
+                        ></lightning-combobox>
+                    </div>
+                    <div class="toggleRow">
+                        <lightning-input
+                            class="builderToggle"
+                            type="toggle"
+                            name="isActive"
+                            label="Active"
+                            checked={formIsActive}
+                            message-toggle-active="Active"
+                            message-toggle-inactive="Inactive"
+                            onchange={handleFormFieldChange}
+                        ></lightning-input>
+                    </div>
+                </section>
+
+                <template if:false={isEditMode}>
+                    <section class="builderCard">
+                        <div class="builderSectionTitle">Linked Mapping</div>
+                        <div class="builderGrid oneColGrid">
+                            <lightning-combobox
+                                class="builderField"
+                                name="linkedLevel"
+                                label="Linked Level"
+                                value={formLinkedLevel}
+                                placeholder="Select linked level"
+                                options={linkedLevelOptions}
+                                required
+                                onchange={handleFormFieldChange}
+                            ></lightning-combobox>
+                            <div class="dualListShell">
+                                <lightning-dual-listbox
+                                    class="builderDualList"
+                                    name="linkedEntityIds"
+                                    label={linkedEntityLabel}
+                                    source-label="Available Records"
+                                    selected-label="Selected Records"
+                                    options={formLinkedEntityOptions}
+                                    value={formSelectedLinkedEntityIds}
+                                    disabled={isLinkedEntityDisabled}
+                                    required
+                                    onchange={handleFormFieldChange}
+                                ></lightning-dual-listbox>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="builderCard">
+                        <div class="builderSectionTitle">Payment Gateway Links</div>
+                        <div class="gatewayFormWrap">
+                            <div class="gatewayDraftGrid">
+                                <div class="gatewaySearchCol">
+                                    <lightning-input
+                                        class="builderField"
+                                        type="search"
+                                        label="Payment Gateway"
+                                        value={gatewaySearchText}
+                                        onchange={handleGatewaySearchInput}
+                                        placeholder="Search payment gateways..."
+                                    ></lightning-input>
+                                    <template if:true={showGatewaySearchDropdown}>
+                                        <div class="gatewaySearchDropdown">
+                                            <template if:true={isGatewaySearching}>
+                                                <div class="gatewaySearchEmpty">Searching...</div>
+                                            </template>
+                                            <template if:false={isGatewaySearching}>
+                                                <template if:true={hasGatewaySearchResults}>
+                                                    <template for:each={gatewaySearchResults} for:item="option">
+                                                        <button
+                                                            key={option.value}
+                                                            class="gatewaySearchOption"
+                                                            data-gateway-id={option.value}
+                                                            onclick={handleSelectGatewayOption}
+                                                        >
+                                                            {option.label}
+                                                        </button>
+                                                    </template>
+                                                </template>
+                                                <template if:false={hasGatewaySearchResults}>
+                                                    <div class="gatewaySearchEmpty">No matching payment gateways.</div>
+                                                </template>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                                <lightning-input
+                                    class="builderField"
+                                    name="newLinkParentMerchantId"
+                                    label="Parent Merchant Id"
+                                    value={newLinkParentMerchantId}
+                                    onchange={handleGatewayDraftFieldChange}
+                                ></lightning-input>
+                                <lightning-input
+                                    class="builderField"
+                                    name="newLinkSubMerchantId"
+                                    label="Sub Merchant Id"
+                                    value={newLinkSubMerchantId}
+                                    onchange={handleGatewayDraftFieldChange}
+                                ></lightning-input>
+                                <lightning-input
+                                    class="builderField builderFieldCheckbox"
+                                    type="toggle"
+                                    name="newLinkIsActive"
+                                    label="Active"
+                                    checked={newLinkIsActive}
+                                    message-toggle-active="Active"
+                                    message-toggle-inactive="Inactive"
+                                    onchange={handleGatewayDraftFieldChange}
+                                ></lightning-input>
+                            </div>
+                            <div class="gatewayFormActions">
+                                <lightning-button
+                                    class="btnPrimary"
+                                    variant="brand"
+                                    label="Add Gateway Link"
+                                    onclick={handleSaveGatewayLink}
+                                    disabled={isSavingGatewayLink}
+                                ></lightning-button>
+                            </div>
+                        </div>
+
+                        <template if:true={hasFormGatewayLinks}>
+                            <div class="gatewayLinksTable">
+                                <div class="header gatewayGrid">
+                                    <div>Payment Gateway</div>
+                                    <div>Parent Merchant Id</div>
+                                    <div>Sub Merchant Id</div>
+                                    <div>Status</div>
+                                    <div class="actionsHeader">Actions</div>
+                                </div>
+                                <template for:each={formGatewayLinks} for:item="linkRow">
+                                    <div key={linkRow.key} class="gatewayGrid dataRow">
+                                        <div>{linkRow.gatewayName}</div>
+                                        <div>{linkRow.parentMerchantId}</div>
+                                        <div>{linkRow.subMerchantId}</div>
+                                        <div><span class={linkRow.statusClass}>{linkRow.statusText}</span></div>
+                                        <div class={linkRow.actionsCellClass}>
+                                            <button
+                                                class="actionsButton"
+                                                title="Actions"
+                                                aria-label="Gateway link draft actions"
+                                                data-link-id={linkRow.key}
+                                                onclick={handleToggleFormGatewayActionMenu}
+                                            >
+                                                <lightning-icon icon-name="utility:threedots_vertical" size="x-small" alternative-text="Actions"></lightning-icon>
+                                            </button>
+                                            <template if:true={linkRow.isActionMenuOpen}>
+                                                <div class="actionsMenu">
+                                                    <button class="actionItem" data-link-id={linkRow.key} data-action="view" onclick={handleFormGatewayRowAction}>View</button>
+                                                    <button class="actionItem" data-link-id={linkRow.key} data-action="edit" onclick={handleFormGatewayRowAction}>Edit</button>
+                                                    <button class="actionItem actionDelete" data-link-id={linkRow.key} data-action="delete" onclick={handleFormGatewayRowAction}>Delete</button>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </section>
+                </template>
+            </template>
+
+            <template if:true={isRemittanceAccountDetailView}>
+                <template if:true={selectedRemittanceAccount}>
+                    <div class="detailHeader">
+                        <div class="detailHeaderTop">
+                            <div>
+                                <div class="detailTitleRow">
+                                    <div class="detailTitle">{selectedRemittanceAccount.detailHeaderTitle}</div>
+                                    <span class={selectedRemittanceAccount.statusClass}>{selectedRemittanceAccount.statusText}</span>
+                                </div>
+                                <div class="detailMetaRow">
+                                    <div class="muted">Created by {selectedRemittanceAccount.createdByName}</div>
+                                    <div class="muted">Last modified {selectedRemittanceAccount.lastModifiedRelative}</div>
+                                </div>
+                            </div>
+                            <div class="detailActions">
+                                <lightning-button class="detailActionBtn" label="Edit" onclick={handleDetailEdit}></lightning-button>
+                                <lightning-button class="detailActionBtn" label="Clone" onclick={handleDetailClone}></lightning-button>
+                                <lightning-button class="detailActionBtn detailDeleteBtn" label="Delete" onclick={handleDetailDelete}></lightning-button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="detailsCard">
+                        <div class="tabRow">
+                            <button class={detailsTabClass} data-tab="details" onclick={handleSwitchDetailTab}>Details</button>
+                            <button class={paymentGatewayTabClass} data-tab="paymentGateway" onclick={handleSwitchDetailTab}>Payment Gateway</button>
+                        </div>
+
+                        <template if:true={isDetailInfoTab}>
+                            <div class="detailInfoCards">
+                                <section class="detailSectionCard">
+                                    <div class="detailSectionTitle">Account Information</div>
+                                    <div class="detailGrid">
+                                        <div>
+                                            <div class="fieldLabel">Bank Name</div>
+                                            <div class="fieldValue">{selectedRemittanceAccount.bankName}</div>
+                                        </div>
+                                        <div>
+                                            <div class="fieldLabel">Account Number</div>
+                                            <div class="fieldValue">{selectedRemittanceAccount.accountNumber}</div>
+                                        </div>
+                                        <div>
+                                            <div class="fieldLabel">Ledger Code</div>
+                                            <div class="fieldValue">{selectedRemittanceAccount.ledgerCode}</div>
+                                        </div>
+                                        <div>
+                                            <div class="fieldLabel">Active</div>
+                                            <div class="fieldValue"><span class={selectedRemittanceAccount.statusClass}>{selectedRemittanceAccount.statusText}</span></div>
+                                        </div>
+                                        <div>
+                                            <div class="fieldLabel">Currency</div>
+                                            <div class="fieldValue">{selectedRemittanceAccount.currencyIsoCode}</div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="detailSectionCard">
+                                    <div class="detailSectionTitle">Metadata</div>
+                                    <div class="detailGrid">
+                                        <div>
+                                            <div class="fieldLabel">Created By</div>
+                                            <div class="fieldValue">{selectedRemittanceAccount.createdByName}</div>
+                                        </div>
+                                        <div>
+                                            <div class="fieldLabel">Created Date</div>
+                                            <div class="fieldValue">{selectedRemittanceAccount.createdDateOnly}</div>
+                                        </div>
+                                        <div>
+                                            <div class="fieldLabel">Last Modified</div>
+                                            <div class="fieldValue">{selectedRemittanceAccount.lastModifiedRelative}</div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </template>
+
+                        <template if:true={isPaymentGatewayTab}>
+                            <div class="detailSectionTitle">Payment Gateway Links</div>
+                            <div class="gatewayFormWrap">
+                                <div class="gatewayDraftGrid">
+                                    <div class="gatewaySearchCol">
+                                        <lightning-input
+                                            type="search"
+                                            label="Payment Gateway"
+                                            value={gatewaySearchText}
+                                            onchange={handleGatewaySearchInput}
+                                            placeholder="Search payment gateways..."
+                                        ></lightning-input>
+                                        <template if:true={showGatewaySearchDropdown}>
+                                            <div class="gatewaySearchDropdown">
+                                                <template if:true={isGatewaySearching}>
+                                                    <div class="gatewaySearchEmpty">Searching...</div>
+                                                </template>
+                                                <template if:false={isGatewaySearching}>
+                                                    <template if:true={hasGatewaySearchResults}>
+                                                        <template for:each={gatewaySearchResults} for:item="option">
+                                                            <button
+                                                                key={option.value}
+                                                                class="gatewaySearchOption"
+                                                                data-gateway-id={option.value}
+                                                                onclick={handleSelectGatewayOption}
+                                                            >
+                                                                {option.label}
+                                                            </button>
+                                                        </template>
+                                                    </template>
+                                                    <template if:false={hasGatewaySearchResults}>
+                                                        <div class="gatewaySearchEmpty">No matching payment gateways.</div>
+                                                    </template>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <lightning-input
+                                        name="newLinkParentMerchantId"
+                                        label="Parent Merchant Id"
+                                        value={newLinkParentMerchantId}
+                                        onchange={handleGatewayDraftFieldChange}
+                                    ></lightning-input>
+                                    <lightning-input
+                                        name="newLinkSubMerchantId"
+                                        label="Sub Merchant Id"
+                                        value={newLinkSubMerchantId}
+                                        onchange={handleGatewayDraftFieldChange}
+                                    ></lightning-input>
+                                    <lightning-input
+                                        type="checkbox"
+                                        name="newLinkIsActive"
+                                        label="Active"
+                                        checked={newLinkIsActive}
+                                        onchange={handleGatewayDraftFieldChange}
+                                    ></lightning-input>
+                                </div>
+                                <div class="gatewayFormActions">
+                                    <lightning-button
+                                        variant="brand"
+                                        label={gatewaySaveLabel}
+                                        onclick={handleSaveGatewayLink}
+                                        disabled={isSavingGatewayLink}
+                                    ></lightning-button>
+                                </div>
+                            </div>
+
+                            <template if:true={gatewayLinksLoading}>
+                                <lightning-spinner alternative-text="Loading gateway links" size="small"></lightning-spinner>
+                            </template>
+                            <template if:false={gatewayLinksLoading}>
+                                <template if:true={hasGatewayLinks}>
+                                    <div class="gatewayLinksTable">
+                                        <div class="header gatewayGrid">
+                                            <div>Payment Gateway</div>
+                                            <div>Parent Merchant Id</div>
+                                            <div>Sub Merchant Id</div>
+                                            <div>Status</div>
+                                            <div class="actionsHeader">Actions</div>
+                                        </div>
+                                        <template for:each={gatewayLinks} for:item="linkRow">
+                                            <div key={linkRow.id} class="gatewayGrid dataRow">
+                                                <div>{linkRow.gatewayName}</div>
+                                                <div>{linkRow.parentMerchantId}</div>
+                                                <div>{linkRow.subMerchantId}</div>
+                                                <div><span class={linkRow.statusClass}>{linkRow.statusText}</span></div>
+                                                <div class={linkRow.actionsCellClass}>
+                                                    <button
+                                                        class="actionsButton"
+                                                        title="Actions"
+                                                        aria-label="Gateway link actions"
+                                                        data-link-id={linkRow.id}
+                                                        onclick={handleToggleGatewayActionMenu}
+                                                    >
+                                                        <lightning-icon icon-name="utility:threedots_vertical" size="x-small" alternative-text="Actions"></lightning-icon>
+                                                    </button>
+                                                    <template if:true={linkRow.isActionMenuOpen}>
+                                                        <div class="actionsMenu">
+                                                            <button class="actionItem" data-link-id={linkRow.id} data-action="view" onclick={handleGatewayRowAction}>View</button>
+                                                            <button class="actionItem" data-link-id={linkRow.id} data-action="edit" onclick={handleGatewayRowAction}>Edit</button>
+                                                            <button class="actionItem actionDelete" data-link-id={linkRow.id} data-action="delete" onclick={handleGatewayRowAction}>Delete</button>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                                <template if:false={hasGatewayLinks}>
+                                    <div class="empty gatewayEmpty">No payment gateway links added.</div>
+                                </template>
+                            </template>
+                        </template>
+                    </div>
+                </template>
+            </template>
+        </template>
+
+        <template if:true={confirmDialog}>
+            <section class="dialogBackdrop" role="presentation">
+                <div class="dialogCard" role="dialog" aria-modal="true" aria-labelledby="remittance-confirm-title">
+                    <div class="dialogHeader">
+                        <div class="dialogIconWrap">
+                            <lightning-icon icon-name="utility:warning" size="small"></lightning-icon>
+                        </div>
+                        <div>
+                            <h2 id="remittance-confirm-title" class="dialogTitle">{confirmDialog.title}</h2>
+                            <p class="dialogMessage">{confirmDialog.message}</p>
+                        </div>
+                    </div>
+                    <div class="dialogFooter">
+                        <button type="button" class="dialogBtn dialogBtnNeutral" onclick={closeConfirmDialog}>Cancel</button>
+                        <button type="button" class="dialogBtn dialogBtnDanger" onclick={handleConfirmDelete}>{confirmDialog.confirmLabel}</button>
+                    </div>
+                </div>
+            </section>
+        </template>
+    </div>
+</template>

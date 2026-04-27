@@ -1,0 +1,256 @@
+:host {
+    --primary-color: #3061ff;
+    --secondary-color: #eaefff;
+}
+
+.my-students-page {
+    height: calc(100vh - 153px);
+    overflow-y: scroll;
+    border-radius: 8px;
+    display: grid;
+    gap: 12px;
+}
+
+.course-overview-card,
+.student-list-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 16px;
+}
+
+.course-overview-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+}
+
+.course-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #363d4a;
+}
+
+.course-title span {
+    font-weight: 500;
+    color: #5b6270;
+}
+
+.course-program {
+    margin: 8px 0 0;
+    font-size: 16px;
+    color: #343b48;
+}
+
+.overview-metrics {
+    display: flex;
+    gap: 12px;
+}
+
+.metric-card {
+    min-width: 170px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--secondary-color, #eaefff) 35%, #ffffff);
+    padding: 14px 16px;
+}
+
+.metric-card p {
+    margin: 0;
+    font-size: 16px;
+    color: #4c5361;
+}
+
+.metric-card strong {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 18px;
+    color: #373e4b;
+}
+
+.risk-card {
+    background: #f9ecec;
+    border: 1px solid #efc4c4;
+}
+
+.risk-card strong {
+    color: #d93a3a;
+}
+
+.student-list-card {
+    min-height: 620px;
+}
+
+.student-list-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.student-list-head h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 500;
+    color: #363d4a;
+}
+
+.help-btn,
+.view-details-btn {
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid var(--primary-color, #3061ff);
+    background: #ffffff;
+    color: #343b48;
+    font-size: 16px;
+    padding: 0 16px;
+}
+
+.table-shell {
+    margin-top: 14px;
+    border: 1px solid #d8dee8;
+    border-radius: 12px;
+    overflow: auto;
+}
+
+.students-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1180px;
+}
+
+.students-table th {
+    text-align: left;
+    padding: 16px 14px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #1f3a8a;
+    border-bottom: 1px solid #d8dee8;
+    white-space: nowrap;
+}
+
+.students-table td {
+    padding: 16px 14px;
+    font-size: 16px;
+    color: #565d6b;
+}
+
+.attendance-value.good {
+    color: #2f8d3f;
+}
+
+.attendance-value.risk {
+    color: #dd3232;
+}
+
+.score-pill,
+.status-pill {
+    height: 36px;
+    border-radius: 999px;
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.score-pill {
+    min-width: 44px;
+    padding: 0 14px;
+}
+
+.good-pill {
+    background: #e6f0e7;
+    border: 1px solid #b7d3bc;
+    color: #374151;
+}
+
+.warn-pill {
+    background: #f5efdf;
+    border: 1px solid #e9d7a7;
+    color: #374151;
+}
+
+.danger-pill {
+    background: #f8e8e8;
+    border: 1px solid #efb9b9;
+    color: #374151;
+}
+
+.na-pill {
+    background: #e5e7eb;
+    border: 1px solid #b8bec7;
+    color: #4b5563;
+}
+
+.status-pill {
+    padding: 0 12px;
+    gap: 8px;
+}
+
+.on-track {
+    background: #e6f0e7;
+    border: 1px solid #b7d3bc;
+    color: #374151;
+}
+
+.needs-attention {
+    background: #f8e8e8;
+    border: 1px solid #efb9b9;
+    color: #374151;
+}
+
+.status-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #d93a3a;
+    color: #ffffff;
+    font-size: 12px;
+    line-height: 16px;
+    text-align: center;
+    font-weight: 700;
+}
+
+@media (max-width: 1200px) {
+    .course-overview-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .overview-metrics {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 768px) {
+    .my-students-page {
+        padding: 8px;
+    }
+
+    .course-overview-card,
+    .student-list-card {
+        padding: 12px;
+    }
+
+    .course-title,
+    .student-list-head h3,
+    .metric-card strong,
+    .help-btn,
+    .view-details-btn,
+    .students-table th,
+    .score-pill,
+    .status-pill {
+        font-size: 14px;
+    }
+
+    .course-program,
+    .metric-card p,
+    .students-table td {
+        font-size: 12px;
+    }
+
+    .metric-card {
+        min-width: 140px;
+    }
+}

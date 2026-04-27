@@ -1,0 +1,42 @@
+<template>
+    <div class="page">
+        <div class="page-header">
+            <h2 class="page-title">Minor Program 1</h2>
+            <p class="breadcrumb">Course Enrolment &gt; Semester 2</p>
+        </div>
+        <div class="content-header">
+            <div>
+                <h3 class="section-title">Choose a Program</h3>
+                <p class="section-desc">You can select a maximum of one program</p>
+            </div>
+            <div class="search-box">
+                <c-icon name="search" size="20"></c-icon>
+                <input type="text" placeholder="Search by keywords..." class="search-input" />
+            </div>
+        </div>
+        <div class="programs-list">
+            <template for:each={programs} for:item="prog">
+                <div key={prog.id} class={prog.cardClass} data-id={prog.id} onclick={handleSelect}>
+                    <div class="prog-radio">
+                        <div class={prog.dotClass}></div>
+                    </div>
+                    <div class="prog-info">
+                        <h4 class="prog-name">{prog.name}</h4>
+                        <p class="prog-credits">{prog.mandatoryCredits} Mandatory Credits &bull; {prog.electiveCredits} Elective Credits</p>
+                    </div>
+                    <div class="prog-actions">
+                        <button class="btn-outline" data-id={prog.id} onclick={handleDownloadBrochure}>Program Brochure <c-icon name="download" size="20"></c-icon></button>
+                        <button class="btn-outline" data-id={prog.id} onclick={handleViewCourses}>View Courses</button>
+                    </div>
+                </div>
+            </template>
+        </div>
+        <template lwc:if={hasError}>
+            <div class="error-banner">{errorMessage}</div>
+        </template>
+        <div class="footer-actions">
+            <button class="btn-outline" onclick={handleDiscard} disabled={isSubmitDisabled}>Discard Changes</button>
+            <button class="btn-primary" onclick={handleSubmit} disabled={isSubmitDisabled}>{submitLabel}</button>
+        </div>
+    </div>
+</template>

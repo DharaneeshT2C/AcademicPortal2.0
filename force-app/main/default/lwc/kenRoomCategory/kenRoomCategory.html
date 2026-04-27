@@ -1,0 +1,385 @@
+<template>
+    <template if:true={isDetailView}>
+        <div class="detail-breadcrumbs">
+            <button type="button" class="crumb-link" onclick={handleBreadcrumbDashboardClick}>Dashboard</button>
+            <span class="crumb-sep">&gt;</span>
+            <button type="button" class="crumb-link" onclick={handleBreadcrumbMasterDataClick}>Master Data</button>
+            <span class="crumb-sep">&gt;</span>
+            <span class="crumb-link">Room Categories</span>
+            <span class="crumb-sep">&gt;</span>
+            <span>{selectedRoomCategoryName}</span>
+        </div>
+
+        <div class="detail-head">
+            <div class="detail-head-left">
+                <button class="back-btn" type="button" onclick={handleBackToList}>
+                    <lightning-icon icon-name="utility:back" size="x-small"></lightning-icon>
+                    <span>Back</span>
+                </button>
+                <div class="title-block">
+                    <div class="title-row">
+                        <h2>{selectedRoomCategoryName}</h2>
+                        <span class={selectedRoomCategoryStatusClass}>{selectedRoomCategoryStatus}</span>
+                    </div>
+                    <div class="category-id">Category ID: {selectedRoomCategoryIdentifier}</div>
+                </div>
+            </div>
+
+            <div class="detail-head-actions">
+                <button type="button" class="action-btn" onclick={handleEditSelectedRoomCategory}>
+                    <lightning-icon icon-name="utility:edit" size="x-small"></lightning-icon>
+                    <span>Edit</span>
+                </button>
+                <button type="button" class="action-btn danger" onclick={handleDeactivateSelectedRoomCategory}>
+                    <lightning-icon icon-name="utility:delete" size="x-small"></lightning-icon>
+                    <span>Deactivate</span>
+                </button>
+            </div>
+        </div>
+
+        <section class="detail-card room-category-card">
+            <h3>Overview</h3>
+            <div class="overview-grid">
+                <div class="overview-item">
+                    <div class="overview-label overview-label-strong">CATEGORY NAME</div>
+                    <div class="overview-value">{selectedRoomCategoryName}</div>
+                </div>
+                <div class="overview-item">
+                    <div class="overview-label overview-label-strong">DEFAULT FEE TYPES</div>
+                    <div class="overview-value link">{selectedRoomCategoryDefaultFeeType}</div>
+                </div>
+                <div class="overview-item">
+                    <div class="overview-label overview-label-strong">TOTAL ROOMS USING THIS CATEGORY</div>
+                    <div class="overview-value">{linkedRoomsCount}</div>
+                </div>
+                <div class="overview-item">
+                    <div class="overview-label overview-label-strong">STATUS</div>
+                    <div class="overview-value">{selectedRoomCategoryStatus}</div>
+                </div>
+                <div class="overview-item">
+                    <div class="overview-label overview-label-strong">OCCUPANCY</div>
+                    <div class="overview-value">{selectedRoomCategorySharing}</div>
+                </div>
+                <div class="overview-item">
+                    <div class="overview-label overview-label-strong">AC / NON AC</div>
+                    <div class="overview-value">{selectedRoomCategoryAc}</div>
+                </div>
+                <div class="overview-item">
+                    <div class="overview-label overview-label-strong">BATHROOM</div>
+                    <div class="overview-value">{selectedRoomCategoryBathroom}</div>
+                </div>
+            </div>
+
+            <div class="amenities-section">
+                <div class="overview-label overview-label-strong">AMENITIES</div>
+                <div class="amenity-pills">
+                    <template for:each={selectedRoomCategoryAmenities} for:item="amenity">
+                        <span key={amenity} class="amenity-pill">{amenity}</span>
+                    </template>
+                </div>
+                <div class="used-rooms"><span class="used-rooms-label">Used in Rooms:</span> {linkedRoomsCount}</div>
+            </div>
+        </section>
+
+        <section class="detail-card linked-rooms-card room-category-card">
+            <div class="linked-rooms-head">
+                <h3>{linkedRoomsHeading}</h3>
+                <button type="button" class="action-btn linked-rooms-btn" onclick={handleViewAllLinkedRooms}>
+                    View All Rooms
+                </button>
+            </div>
+
+            <div class="linked-rooms-table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ROOM NO</th>
+                            <th>BUILDING</th>
+                            <th>STATUS</th>
+                            <th>CURRENT OCCUPANCY</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={linkedRoomRows} for:item="row">
+                            <tr key={row.id}>
+                                <td>
+                                    <button type="button" class="linked-room-link" data-id={row.id} onclick={handleOpenLinkedRoom}>
+                                        {row.roomNo}
+                                    </button>
+                                </td>
+                                <td>
+                                    <button
+                                        type="button"
+                                        class="linked-building-link"
+                                        data-id={row.id}
+                                        onclick={handleOpenLinkedBuilding}
+                                    >
+                                        {row.building}
+                                    </button>
+                                </td>
+                                <td><span class={row.statusClass}>{row.status}</span></td>
+                                <td>{row.currentOccupancyText}</td>
+                            </tr>
+                        </template>
+                        <template if:true={isLoadingLinkedRooms}>
+                            <tr>
+                                <td colspan="4">Loading linked rooms...</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="detail-card activity-history-end-card room-category-card">
+            <h3>Activity &amp; History</h3>
+            <div class="activity-history-meta">
+                <div class="activity-history-meta-item">
+                    <div class="overview-label overview-label-strong">CREATED BY</div>
+                    <div class="overview-value">{roomCategoryActivityCreatedByName}</div>
+                </div>
+                <div class="activity-history-meta-item">
+                    <div class="overview-label overview-label-strong">CREATED DATE</div>
+                    <div class="overview-value">{roomCategoryActivityCreatedDateText}</div>
+                </div>
+                <div class="activity-history-meta-item">
+                    <div class="overview-label overview-label-strong">LAST MODIFIED</div>
+                    <div class="overview-value">{roomCategoryActivityLastModifiedText}</div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template if:false={isDetailView}>
+        <template if:false={hideListHead}>
+            <div class="list-head">
+                <button class="new-btn" type="button" onclick={handleOpenNewModal}>
+                    <lightning-icon icon-name="utility:add" size="x-small"></lightning-icon>
+                    <span>New Room Category</span>
+                </button>
+            </div>
+        </template>
+        <div class="filters">
+            <div class="search-wrap">
+                <lightning-icon icon-name="utility:search" size="x-small"></lightning-icon>
+                <input
+                    type="text"
+                    placeholder="Search..."
+                    value={searchTerm}
+                    oninput={handleSearchChange}
+                    onchange={handleSearchChange}
+                />
+            </div>
+            <select class="status-select" value={selectedStatus} onchange={handleStatusChange}>
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+        </div>
+        <div class="table-wrap">
+            <c-ken-room-category-view
+                rows={filteredRoomCategoryRows}
+                is-loading={isLoadingRoomCategories}
+                onrowaction={handleRowAction}
+            ></c-ken-room-category-view>
+        </div>
+    </template>
+
+    <template if:true={isNewRoomCategoryModalOpen}>
+        <div class="modal-overlay" onclick={handleCloseNewRoomCategoryModal}></div>
+        <section class="modal" role="dialog" aria-modal="true" aria-label={roomCategoryModalTitle}>
+            <header class="modal-header">
+                <h2>{roomCategoryModalTitle}</h2>
+                <button type="button" class="close-btn" onclick={handleCloseNewRoomCategoryModal} aria-label="Close">
+                    <lightning-icon icon-name="utility:close" size="x-small"></lightning-icon>
+                </button>
+            </header>
+
+            <template if:true={isSavingRoomCategory}>
+                <div class="modal-saving">
+                    <lightning-spinner alternative-text="Saving room category" size="small"></lightning-spinner>
+                </div>
+            </template>
+
+            <div class="modal-body">
+                <div class="field">
+                    <label>Category Name <span>*</span></label>
+                    <input
+                        type="text"
+                        placeholder="e.g., AC Double Occupancy"
+                        data-field="categoryName"
+                        value={roomCategoryForm.categoryName}
+                        onchange={handleRoomCategoryFieldChange}
+                    />
+                </div>
+
+                <div class="field">
+                    <label>Description</label>
+                    <textarea
+                        rows="4"
+                        placeholder="Brief description..."
+                        data-field="description"
+                        value={roomCategoryForm.description}
+                        onchange={handleRoomCategoryFieldChange}
+                    ></textarea>
+                </div>
+
+                <div class="field">
+                    <label>Default Fee Types</label>
+                    <div class="dropdown-select" onclick={handleDropdownContainerClick}>
+                        <button
+                            type="button"
+                            class={feeTypeDropdownClass}
+                            data-dropdown="feeType"
+                            onclick={handleDropdownToggle}
+                            aria-expanded={isFeeTypeDropdownOpen}
+                        >
+                            <template if:true={selectedFeeTypesText}>
+                                <span class="dropdown-trigger-value">{selectedFeeTypesText}</span>
+                            </template>
+                            <template if:false={selectedFeeTypesText}>
+                                <span class="dropdown-trigger-placeholder">Select hostel fee types</span>
+                            </template>
+                            <lightning-icon class="dropdown-chevron" icon-name="utility:chevrondown" size="xx-small"></lightning-icon>
+                        </button>
+
+                        <template if:true={isFeeTypeDropdownOpen}>
+                            <div class="dropdown-menu">
+                                <div class="amenities-picker">
+                                    <template if:true={hasRoomCategoryFeeTypeOptions}>
+                                        <template for:each={roomCategoryFeeTypeUiOptions} for:item="option">
+                                            <label key={option.value} class="amenity-option">
+                                                <input
+                                                    type="checkbox"
+                                                    data-value={option.value}
+                                                    checked={option.checked}
+                                                    onchange={handleFeeTypeToggle}
+                                                />
+                                                <span>{option.label}</span>
+                                            </label>
+                                        </template>
+                                    </template>
+                                    <template if:false={hasRoomCategoryFeeTypeOptions}>
+                                        <div class="field-empty-text">No active hostel fee types available.</div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>Status <span>*</span></label>
+                    <select data-field="statusValue" value={roomCategoryForm.statusValue} onchange={handleRoomCategoryFieldChange}>
+                        <template for:each={roomCategoryStatusOptions} for:item="option">
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        </template>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Occupancy <span>*</span></label>
+                    <input
+                        type="number"
+                        min="1"
+                        step="1"
+                        placeholder="e.g., 2"
+                        data-field="sharing"
+                        value={roomCategoryForm.sharing}
+                        onchange={handleRoomCategoryFieldChange}
+                    />
+                </div>
+
+                <div class="field">
+                    <label>AC / Non AC <span>*</span></label>
+                    <select data-field="ac" value={roomCategoryForm.ac} onchange={handleRoomCategoryFieldChange}>
+                        <option value="">Select AC / Non AC</option>
+                        <template for:each={roomCategoryAcOptions} for:item="option">
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        </template>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Bathroom <span>*</span></label>
+                    <select data-field="bathroom" value={roomCategoryForm.bathroom} onchange={handleRoomCategoryFieldChange}>
+                        <option value="">Select bathroom</option>
+                        <template for:each={roomCategoryBathroomOptions} for:item="option">
+                            <option key={option.value} value={option.value}>{option.label}</option>
+                        </template>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Amenities</label>
+                    <div class="dropdown-select" onclick={handleDropdownContainerClick}>
+                        <button
+                            type="button"
+                            class={amenitiesDropdownClass}
+                            data-dropdown="amenities"
+                            onclick={handleDropdownToggle}
+                            aria-expanded={isAmenitiesDropdownOpen}
+                        >
+                            <template if:true={selectedAmenitiesText}>
+                                <span class="dropdown-trigger-value">{selectedAmenitiesText}</span>
+                            </template>
+                            <template if:false={selectedAmenitiesText}>
+                                <span class="dropdown-trigger-placeholder">Select amenities</span>
+                            </template>
+                            <lightning-icon class="dropdown-chevron" icon-name="utility:chevrondown" size="xx-small"></lightning-icon>
+                        </button>
+
+                        <template if:true={isAmenitiesDropdownOpen}>
+                            <div class="dropdown-menu">
+                                <div class="amenities-picker">
+                                    <template for:each={roomCategoryAmenitiesUiOptions} for:item="option">
+                                        <div key={option.value} class="amenity-option-row">
+                                            <label class="amenity-option">
+                                                <input type="checkbox" data-value={option.value} checked={option.checked} onchange={handleAmenityToggle} />
+                                                <span>{option.label}</span>
+                                            </label>
+                                            <template if:true={option.canEdit}>
+                                                <button
+                                                    type="button"
+                                                    class="amenity-edit-link"
+                                                    data-value={option.value}
+                                                    onclick={handleEditCustomAmenity}
+                                                >
+                                                    Edit
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </template>
+                                    <div class="custom-amenity-title">Add Custom Amenity</div>
+                                    <input
+                                        type="text"
+                                        placeholder="Enter custom amenity"
+                                        value={customAmenityInput}
+                                        onchange={handleCustomAmenityInputChange}
+                                    />
+                                    <div class="custom-amenity-actions">
+                                        <button type="button" class="add-custom-link" onclick={handleAddCustomAmenity}>
+                                            {customAmenityActionLabel}
+                                        </button>
+                                        <template if:true={isEditingCustomAmenity}>
+                                            <button type="button" class="add-custom-link secondary" onclick={handleCancelCustomAmenityEdit}>
+                                                Cancel
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="modal-footer">
+                <button type="button" class="btn-cancel" onclick={handleCloseNewRoomCategoryModal}>Cancel</button>
+                <button type="button" class="btn-create" onclick={handleCreateRoomCategory} disabled={isSavingRoomCategory}>
+                    {createRoomCategoryButtonLabel}
+                </button>
+            </footer>
+        </section>
+    </template>
+</template>

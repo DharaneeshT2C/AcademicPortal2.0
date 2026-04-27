@@ -1,0 +1,115 @@
+<template>
+    <template lwc:if={showToast}>
+        <c-toast message={toastMessage} variant={toastVariant} onclose={handleToastClose}></c-toast>
+    </template>
+    <div class="page">
+        <h2 class="page-title">Service &amp; Support</h2>
+
+        <div class="search-hero">
+            <h3 class="hero-heading">Hi, Joshua! What Can We Help You With?</h3>
+            <div class="hero-search-bar">
+                <c-icon name="search" size="20"></c-icon>
+                <input type="text" placeholder="Search for help topics..." class="hero-search-input" />
+                <button class="mic-btn" onclick={handleMicClick}><c-icon name="mic" size="20"></c-icon></button>
+            </div>
+        </div>
+
+        <div class="top-row">
+            <div class="faq-section">
+                <div class="faq-header">
+                    <h3 class="section-title">Frequently Asked Questions</h3>
+                    <button class="btn-outline" onclick={handleFaqs}>View More</button>
+                </div>
+                <template for:each={formattedFaqs} for:item="faq">
+                    <div key={faq.category} class="faq-group">
+                        <div class={faq.categoryClass} data-key={faq.category} onclick={handleFaqToggle}>
+                            <span class="faq-cat-text">{faq.category}</span>
+                            <c-icon name={faq.expandIconName} size="18"></c-icon>
+                        </div>
+                        <template lwc:if={faq.isOpen}>
+                            <template for:each={faq.formattedQuestions} for:item="q">
+                                <div key={q.key} class={q.questionClass} data-qkey={q.key} onclick={handleQuestionToggle}>
+                                    <span class="faq-plus">{q.plusMinus}</span>
+                                    <div class="faq-question-wrap">
+                                        <span class="faq-question">{q.q}</span>
+                                        <template lwc:if={q.isQOpen}>
+                                            <template lwc:if={q.hasAnswer}>
+                                                <p class="faq-answer">{q.a}</p>
+                                            </template>
+                                            <template lwc:else>
+                                                <p class="faq-answer faq-answer-empty">Answer coming soon.</p>
+                                            </template>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
+                    </div>
+                </template>
+            </div>
+
+            <div class="service-card" onclick={handleServiceRequest}>
+                <div class="service-card-header">
+                    <h3>Request for a Service</h3>
+                    <div class="service-arrow"><c-icon name="arrow_forward" size="20"></c-icon></div>
+                </div>
+                <div class="service-tags">
+                    <span class="service-tag">Academics</span>
+                    <span class="service-tag">Housing</span>
+                    <span class="service-tag">Finance</span>
+                </div>
+                <div class="service-illustration">
+                    <c-icon name="support_agent" size="72"></c-icon>
+                </div>
+            </div>
+
+            <div class="help-card" onclick={handleHelpChat}>
+                <div class="help-card-header">
+                    <h3>Need Help?</h3>
+                    <div class="help-arrow"><c-icon name="arrow_forward" size="20"></c-icon></div>
+                </div>
+                <p class="help-desc">Chat with our support team or browse self-service guides</p>
+                <div class="help-illustration">
+                    <c-icon name="help_center" size="72"></c-icon>
+                </div>
+            </div>
+        </div>
+
+        <div class="requests-section">
+            <div class="tabs-bar">
+                <button class={serviceTabClass} data-tab="service" onclick={handleRequestTab}>Service Requests</button>
+                <button class={ticketTabClass} data-tab="ticket" onclick={handleRequestTab}>Support Tickets</button>
+                <div class="tab-spacer"></div>
+                <button class="btn-outline" onclick={handleViewAll}>View All</button>
+            </div>
+
+            <template lwc:if={isServiceTab}>
+                <template for:each={formattedRequests} for:item="sr">
+                    <div key={sr.id} class="sr-item">
+                        <div class="sr-left">
+                            <span class="sr-id">{sr.requestId}</span>
+                            <h4 class="sr-title">{sr.title}</h4>
+                            <p class="sr-subtitle">{sr.subtitle}</p>
+                            <template lwc:if={sr.hasAttachment}>
+                                <div class="sr-attachment" onclick={handleAttachmentClick} style="cursor:pointer"><c-icon name="attach_file" size="14"></c-icon> {sr.attachment}</div>
+                            </template>
+                        </div>
+                        <div class="sr-right">
+                            <template lwc:if={sr.closedOn}><span class="sr-date">Closed on: {sr.closedOn}</span></template>
+                            <span class={sr.srStatusClass}>{sr.status}</span>
+                            <template lwc:if={sr.showFeedback}><button class="btn-feedback" onclick={handleFeedback}>Leave Feedback</button></template>
+                        </div>
+                    </div>
+                </template>
+            </template>
+
+            <template lwc:if={isTicketTab}>
+                <div class="empty-tickets">
+                    <c-icon name="confirmation_number" size="48"></c-icon>
+                    <p>No support tickets yet</p>
+                    <span>Create a ticket for technical issues or escalations</span>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>

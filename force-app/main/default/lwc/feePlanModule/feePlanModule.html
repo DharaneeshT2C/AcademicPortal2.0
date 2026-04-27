@@ -1,0 +1,124 @@
+<template>
+    <section class="fee-plan-shell">
+        <template for:each={semesterRows} for:item="semester">
+            <article key={semester.id} class="semester-section">
+                <header class="semester-header">
+                    <button
+                        class="semester-trigger"
+                        data-semester-id={semester.id}
+                        onclick={handleSemesterToggle}
+                        type="button"
+                        aria-label={semester.toggleLabel}
+                    >
+                        <h2 class="semester-title">{semester.program} - {semester.semester}</h2>
+                    </button>
+
+                    <div class="semester-summary">
+                        <span class="summary-label">Total Fee Amount:</span>
+                        <strong class="summary-value">{semester.totalFeeAmount}</strong>
+                        <button
+                            class="semester-toggle"
+                            data-semester-id={semester.id}
+                            onclick={handleSemesterToggle}
+                            type="button"
+                            aria-label={semester.toggleLabel}
+                        >
+                            <lightning-icon
+                                icon-name={semester.toggleIcon}
+                                size="xx-small"
+                                alternative-text={semester.toggleLabel}
+                                class="toggle-icon"
+                            ></lightning-icon>
+                        </button>
+                    </div>
+                </header>
+
+                <template if:true={semester.expanded}>
+                    <div class="plan-card">
+                        <div class="table-scroll">
+                            <table class="plan-table">
+                                <thead>
+                                    <tr>
+                                        <th>Fee Item</th>
+                                        <th>
+                                            <button class="sort-button" type="button" onclick={handleDueDateSort}>
+                                                <span>Due Date</span>
+                                                <img src={sortIcon} alt="Sort" class="sort-mark" />
+                                            </button>
+                                        </th>
+                                        <th>Currency</th>
+                                        <th>Total Amount</th>
+                                        <th>Concession</th>
+                                        <th>Tax</th>
+                                        <th>TDS</th>
+                                        <th>Total Payable</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template if:true={semester.hasItems}>
+                                        <template for:each={semester.rows} for:item="row">
+                                            <tr key={row.key} class={row.rowClass}>
+                                                <td class="item-cell">
+                                                    <template if:true={row.isParent}>
+                                                        <div class="item-main">
+                                                            <span class="item-name">{row.name}</span>
+                                                            <template if:true={row.hasChildren}>
+                                                                <button
+                                                                    class="fee-toggle"
+                                                                    data-semester-id={semester.id}
+                                                                    data-item-id={row.id}
+                                                                    onclick={handleFeeToggle}
+                                                                    type="button"
+                                                                    aria-label={row.toggleLabel}
+                                                                >
+                                                                    <lightning-icon
+                                                                        icon-name={row.toggleIcon}
+                                                                        size="xx-small"
+                                                                        alternative-text={row.toggleLabel}
+                                                                        class="toggle-icon"
+                                                                    ></lightning-icon>
+                                                                </button>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+                                                    <template if:true={row.isChild}>
+                                                        <span class="child-item-name">{row.name}</span>
+                                                    </template>
+                                                </td>
+                                                <td>{row.dueDate}</td>
+                                                <td>{row.currency}</td>
+                                                <td>{row.totalAmount}</td>
+                                                <td>{row.concession}</td>
+                                                <td>{row.tax}</td>
+                                                <td>{row.tds}</td>
+                                                <td>{row.totalPayable}</td>
+                                                <td>
+                                                    <template if:true={row.isParent}>
+                                                        <span class={row.statusClass}>{row.status}</span>
+                                                    </template>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="card-footer">
+                            <button class="download-button" type="button">
+                                <lightning-icon
+                                    icon-name="utility:download"
+                                    size="x-small"
+                                    alternative-text="Download"
+                                    class="download-icon"
+                                ></lightning-icon>
+                                <span>Download Fee Plan</span>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </article>
+        </template>
+    </section>
+</template>

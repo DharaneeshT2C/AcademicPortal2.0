@@ -1,0 +1,85 @@
+<template>
+    <div class="dashboard">
+        <section class="toolbar card">
+            <div class="toolbarLeft">
+                <button class="toolbarBtn" type="button" aria-label="Open fee assignment filters">
+                    <lightning-icon icon-name="utility:filterList" size="x-small" alternative-text="Filters"></lightning-icon>
+                    <span>Filters</span>
+                </button>
+            </div>
+            <div class="toolbarRight">
+                <button class="toolbarBtn" type="button" aria-label="Bulk assignment">
+                    Bulk Assignment
+                </button>
+                <button class="toolbarBtn toolbarBtnPrimary" type="button" aria-label="Assign additional fee">
+                    Assign Additional Fee
+                </button>
+            </div>
+        </section>
+
+        <section class="metricsGrid" aria-label="Fee assignment metrics">
+            <template for:each={metrics} for:item="metric">
+                <article key={metric.key} class="metricCard card">
+                    <p class="metricLabel">{metric.label}</p>
+                    <p class="metricValue">{metric.value}</p>
+                </article>
+            </template>
+        </section>
+
+        <section class="card section">
+            <div class="sectionHeader">
+                <h2 class="sectionTitle">Student Fee Assignment Table</h2>
+            </div>
+            <template if:true={errorMessage}>
+                <div class="errorBanner" role="alert">{errorMessage}</div>
+            </template>
+            <div class="tableWrap">
+                <template if:true={isLoading}>
+                    <div class="loading">
+                        <lightning-spinner alternative-text="Loading fee assignments" size="small"></lightning-spinner>
+                    </div>
+                </template>
+
+                <template if:false={isLoading}>
+                    <table class="table" aria-label="Student fee assignment table">
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Programme</th>
+                                <th>Batch</th>
+                                <th>Fee Plan</th>
+                                <th>Total Fee</th>
+                                <th>Scholarship Applied</th>
+                                <th>Final Payable</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template if:true={hasStudents}>
+                                <template for:each={studentRows} for:item="student">
+                                    <tr key={student.key}>
+                                        <td>{student.name}</td>
+                                        <td>{student.programme}</td>
+                                        <td>{student.batch}</td>
+                                        <td>{student.feePlan}</td>
+                                        <td>{student.totalFee}</td>
+                                        <td>{student.scholarshipApplied}</td>
+                                        <td>{student.finalPayable}</td>
+                                        <td>
+                                            <span class={student.statusClass}>{student.status}</span>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </template>
+                            <template if:false={hasStudents}>
+                                <tr>
+                                    <td class="empty" colspan="8">No fee assignments found.</td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </template>
+            </div>
+        </section>
+    </div>
+</template>

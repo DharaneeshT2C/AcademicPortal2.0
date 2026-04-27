@@ -1,0 +1,390 @@
+<template>
+    <template lwc:if={showToast}>
+        <c-toast message={toastMessage} variant={toastVariant} onclose={handleToastClose}></c-toast>
+    </template>
+    <div class="dashboard">
+
+        <!-- ── GREETING ROW ── -->
+        <div class="greeting-row">
+            <div class="greeting-text">
+                <h1 class="greeting-main">{greetingText}, {displayName}</h1>
+                <p class="greeting-sub">{greetingSub}</p>
+            </div>
+            <div class="global-search">
+                <c-icon name="search" size="18"></c-icon>
+                <input type="text" class="search-field" placeholder="Search, ask a question, or start an action..." />
+                <div class="search-user-badge">KK</div>
+            </div>
+        </div>
+
+        <!-- ── KPI STRIP ── -->
+        <div class="kpi-strip">
+            <template for:each={kpiCards} for:item="card">
+                <div key={card.id} class="kpi-card">
+                    <div class={card.accentClass}></div>
+                    <div class="kpi-body">
+                        <div class="kpi-label-row">
+                            <span class={card.dotClass}></span>
+                            <span class="kpi-label">{card.label}</span>
+                            <svg class="sparkline" viewBox="0 0 40 16" style={card.sparklineStyle} xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <polyline points={card.sparkPoints} fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <template lwc:if={card.isCheckValue}>
+                            <div class="kpi-value kpi-value-check">
+                                <svg class="kpi-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <circle cx="12" cy="12" r="10" fill="#059669"/>
+                                    <path d="M7 12 L10.5 15.5 L17 9" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                {card.value}
+                            </div>
+                        </template>
+                        <template lwc:if={card.isClockValue}>
+                            <div class="kpi-value kpi-value-clock">
+                                <svg class="kpi-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <circle cx="12" cy="12" r="10" stroke="#D97706" stroke-width="2"/>
+                                    <path d="M12 6 L12 12 L16 14" stroke="#D97706" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                                {card.value}
+                            </div>
+                        </template>
+                        <template lwc:if={card.isPlainValue}>
+                            <div class="kpi-value">{card.value}</div>
+                        </template>
+                        <div class={card.pillClass}>
+                            <template lwc:if={card.pillHasArrow}>
+                                <svg class="delta-arrow" viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path d="M5 1 L5 9 M2 4 L5 1 L8 4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </template>
+                            <template lwc:if={card.pillHasDot}>
+                                <span class={card.pillDotClass}></span>
+                            </template>
+                            {card.pill}
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- ── ABOVE FOLD (Starting only) ── -->
+        <template lwc:if={isStarting}>
+            <div class="above-fold">
+
+                <!-- Getting Started Checklist -->
+                <div class="checklist-card">
+                    <div class="checklist-header">
+                        <div class="checklist-header-left">
+                            <svg class="checklist-icon" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path d="M9 11l3 3L22 4" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span class="checklist-title">Getting started</span>
+                            <span class="checklist-count">{checklistDoneCount}/{checklistTotal} done</span>
+                        </div>
+                        <button class="checklist-toggle" onclick={handleToggleChecklist} aria-label={checklistToggleLabel}>
+                            <svg class={checklistChevronClass} viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path d="M4 6 L8 10 L12 6" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="checklist-progress-bar">
+                        <div class="checklist-progress-fill" style={checklistProgressStyle}></div>
+                    </div>
+                    <template lwc:if={checklistExpanded}>
+                        <div class="checklist-items">
+                            <template for:each={checklistItems} for:item="item">
+                                <div key={item.id} class={item.rowClass}>
+                                    <template lwc:if={item.isDone}>
+                                        <svg class="cl-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                            <rect width="16" height="16" rx="4" fill="#059669"/>
+                                            <path d="M4 8 L6.5 10.5 L12 5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </template>
+                                    <template lwc:else>
+                                        <svg class="cl-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                            <rect x="0.75" y="0.75" width="14.5" height="14.5" rx="3.25" stroke="#CBD5E1" stroke-width="1.5"/>
+                                        </svg>
+                                    </template>
+                                    <span class={item.textClass}>{item.text}</span>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Campus Guide Grid -->
+                <div class="campus-guide-section">
+                    <h3 class="section-heading" style="margin-bottom:10px">Campus guide</h3>
+                    <div class="campus-guide-grid">
+                        <template for:each={campusGuideItems} for:item="tile">
+                            <button key={tile.id} class="guide-tile" data-route={tile.route} onclick={handleCampusGuide}>
+                                <div class={tile.tileClass}><c-icon name={tile.icon} size="20"></c-icon></div>
+                                <span class="guide-label">{tile.label}</span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+            </div>
+        </template>
+
+        <!-- ── THREE-COLUMN BODY ── -->
+        <div class="home-body">
+
+            <!-- LEFT: Campus Updates + Feed -->
+            <div class="campus-col">
+                <div class="section-row">
+                    <h3 class="section-heading">Campus Updates</h3>
+                    <button class="view-all-link" onclick={handleViewAll}>View all &#8594;</button>
+                </div>
+
+                <!-- Pinned Hero (Middle + Ending only) -->
+                <template lwc:if={showPinnedCard}>
+                    <div class="pinned-card">
+                        <div class="pinned-pattern" aria-hidden="true"></div>
+                        <div class="pinned-radial" aria-hidden="true"></div>
+                        <div class="pinned-vignette" aria-hidden="true"></div>
+                        <span class="pinned-label">{pinnedCard.label}</span>
+                        <h2 class="pinned-title">{pinnedCard.title}</h2>
+                        <p class="pinned-desc">{pinnedCard.desc}</p>
+                        <button class="pinned-cta" onclick={handlePinnedCta}>{pinnedCard.cta}</button>
+                    </div>
+                </template>
+
+                <!-- Activity Feed -->
+                <div class="activity-feed">
+                    <template for:each={feedItems} for:item="row">
+                        <div key={row.id} class="feed-item-wrap">
+                            <template lwc:if={row.isSocial}>
+                                <div class="feed-social">
+                                    <div class="social-avatars">
+                                        <span class="social-av av-indigo">A</span>
+                                        <span class="social-av av-emerald">B</span>
+                                    </div>
+                                    <span class="social-text">{row.socialText}</span>
+                                    <button class="social-link" data-id={row.id} onclick={handleViewFeedItem}>View &#8594;</button>
+                                </div>
+                            </template>
+                            <template lwc:else>
+                                <div class="feed-row">
+                                    <div class="feed-date">
+                                        <span class="feed-month">{row.month}</span>
+                                        <span class="feed-day">{row.day}</span>
+                                    </div>
+                                    <div class="feed-tag-col">
+                                        <span class={row.tagClass}>{row.tag}</span>
+                                    </div>
+                                    <div class="feed-text">
+                                        <span class="feed-title">{row.title}</span>
+                                        <span class="feed-desc">{row.desc}</span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- MIDDLE: Side Panels -->
+            <div class="mid-col">
+
+                <!-- For you / Start here / Before you go -->
+                <div class="section-row">
+                    <h3 class="section-heading">{forYouTitle}</h3>
+                </div>
+                <div class="module-card">
+                    <template for:each={forYouItems} for:item="item">
+                        <div key={item.id} class="for-you-row" data-route={item.route} data-toast={item.toastMsg} onclick={handleForYouRow} style="cursor:pointer">
+                            <div class={item.tileClass}><c-icon name={item.icon} size="18"></c-icon></div>
+                            <div class="for-you-text">
+                                <p class="for-you-title">{item.title}</p>
+                                <p class="for-you-ctx">{item.context}</p>
+                            </div>
+                            <svg class="for-you-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path d="M6 4 L10 8 L6 12" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Meet KAI (Starting only) -->
+                <template lwc:if={isStarting}>
+                    <div class="kai-card">
+                        <p class="kai-title">&#10022; Meet KAI &#8212; your campus assistant</p>
+                        <p class="kai-desc">Type in the search bar above. Try asking:</p>
+                        <div class="kai-chips">
+                            <button class="kai-chip" onclick={handleKaiChat}>Where is my next class?</button>
+                            <button class="kai-chip" onclick={handleKaiChat}>How does attendance work?</button>
+                            <button class="kai-chip" onclick={handleKaiChat}>Where do I get my ID card?</button>
+                            <button class="kai-chip" onclick={handleKaiChat}>Which clubs can I join?</button>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Next step for you (Ending only) -->
+                <template lwc:if={isEnding}>
+                    <div class="section-row" style="margin-top:16px">
+                        <h3 class="section-heading next-steps-heading">Next step for you</h3>
+                    </div>
+                    <div class="module-card">
+                        <template for:each={nextStepsItems} for:item="item">
+                            <div key={item.id} class="for-you-row" data-route={item.route} data-toast={item.toastMsg} onclick={handleNextStepRow} style="cursor:pointer">
+                                <div class={item.tileClass}><c-icon name={item.icon} size="18"></c-icon></div>
+                                <div class="for-you-text">
+                                    <p class="for-you-title">{item.title}</p>
+                                    <p class="for-you-ctx">{item.desc}</p>
+                                </div>
+                                <svg class="for-you-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path d="M6 4 L10 8 L6 12" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- Needs Attention (Starting + Middle) -->
+                <template lwc:if={showNeedsAttention}>
+                    <div class="section-row" style="margin-top:16px">
+                        <h3 class="section-heading">Needs attention</h3>
+                    </div>
+                    <div class="module-card">
+                        <template for:each={needsAttentionItems} for:item="item">
+                            <div key={item.id} class={item.rowClass}>
+                                <span class={item.dotClass}></span>
+                                <div class="needs-text">
+                                    <p class="needs-title">{item.title}</p>
+                                    <p class="needs-ctx">{item.context}</p>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+                <!-- Clearance Checklist (Ending only) -->
+                <template lwc:if={isEnding}>
+                    <div class="section-row" style="margin-top:16px">
+                        <h3 class="section-heading">Clearance checklist</h3>
+                    </div>
+                    <div class="module-card">
+                        <template for:each={clearanceItems} for:item="item">
+                            <div key={item.id} class={item.rowClass}>
+                                <template lwc:if={item.isDone}>
+                                    <svg class="cl-check" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <rect width="16" height="16" rx="4" fill="#059669"/>
+                                        <path d="M4 8 L6.5 10.5 L12 5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </template>
+                                <template lwc:else>
+                                    <svg class="cl-check" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                        <rect x="0.75" y="0.75" width="14.5" height="14.5" rx="3.25" stroke="#CBD5E1" stroke-width="1.5"/>
+                                    </svg>
+                                </template>
+                                <span class={item.textClass}>{item.text}</span>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+
+            </div>
+
+            <!-- RIGHT RAIL -->
+            <div class="right-rail">
+
+                <!-- Today's Schedule -->
+                <div class="rail-card">
+                    <div class="rail-head">
+                        <span class="section-heading">Today</span>
+                        <span class="rail-date">{todayLabel}</span>
+                    </div>
+                    <div class="today-list">
+                        <template for:each={todayItems} for:item="cls">
+                            <div key={cls.id} class="today-item">
+                                <span class="today-time">{cls.startTime}</span>
+                                <div class="today-stripe" style={cls.stripeStyle}></div>
+                                <div class="today-info">
+                                    <div class="today-title-row">
+                                        <span class="today-subject">{cls.subject}</span>
+                                        <template lwc:if={cls.isLive}>
+                                            <span class="now-pill">NOW</span>
+                                        </template>
+                                    </div>
+                                    <span class="today-loc">{cls.location}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                    <button class="rail-link" onclick={handleViewCalendar}>View full calendar &#8594;</button>
+                </div>
+
+                <!-- Spotlight -->
+                <div class="spotlight-card">
+                    <div class="spotlight-deco" aria-hidden="true"></div>
+                    <p class="spotlight-eyebrow">SPOTLIGHT</p>
+                    <template lwc:if={isSpotlightTextHero}>
+                        <div class="spotlight-text-hero">{spotlight.heroText}</div>
+                    </template>
+                    <template lwc:if={isSpotlightCountHero}>
+                        <div class="spotlight-count">{spotlight.heroText}</div>
+                    </template>
+                    <p class="spotlight-label">{spotlight.subText}</p>
+                    <p class="spotlight-range">{spotlight.date}</p>
+                    <button class="spotlight-cta" onclick={handleSpotlightCta}>{spotlight.cta}</button>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="rail-card">
+                    <div class="rail-head">
+                        <span class="section-heading">Quick Actions</span>
+                    </div>
+                    <div class="qa-grid">
+                        <template for:each={quickActionsItems} for:item="qa">
+                            <button key={qa.id} class="qa-card" data-route={qa.route} data-toast={qa.toastMsg} onclick={handleQuickAction}>
+                                <div class={qa.tileClass}><c-icon name={qa.icon} size="18"></c-icon></div>
+                                <span class="qa-label">{qa.label}</span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Mood Check -->
+                <div class="mood-card">
+                    <div class="mood-header">
+                        <svg class="mood-heart" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                            <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" fill="#E11D48"/>
+                        </svg>
+                        <p class="mood-heading">{moodQuestion}</p>
+                    </div>
+                    <div class="mood-pills">
+                        <button class={moodGoodClass} data-mood="good" onclick={handleMoodSelect}>
+                            <svg class="mood-face" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M8 14s1.5 2 4 2 4-2 4-2" stroke-linecap="round"/>
+                                <circle cx="9" cy="9" r="0.5" fill="currentColor"/><circle cx="15" cy="9" r="0.5" fill="currentColor"/>
+                            </svg>
+                            Good
+                        </button>
+                        <button class={moodOkayClass} data-mood="okay" onclick={handleMoodSelect}>
+                            <svg class="mood-face" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="8" y1="14" x2="16" y2="14" stroke-linecap="round"/>
+                                <circle cx="9" cy="9" r="0.5" fill="currentColor"/><circle cx="15" cy="9" r="0.5" fill="currentColor"/>
+                            </svg>
+                            Okay
+                        </button>
+                        <button class={moodRoughClass} data-mood="rough" onclick={handleMoodSelect}>
+                            <svg class="mood-face" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M8 16s1.5-2 4-2 4 2 4 2" stroke-linecap="round"/>
+                                <circle cx="9" cy="9" r="0.5" fill="currentColor"/><circle cx="15" cy="9" r="0.5" fill="currentColor"/>
+                            </svg>
+                            Rough
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</template>

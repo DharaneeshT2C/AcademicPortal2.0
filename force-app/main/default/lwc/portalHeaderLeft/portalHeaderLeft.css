@@ -1,0 +1,14 @@
+.heaber-label{
+	font-size: 20px;
+    padding-left: 40px;
+    padding-top: 23px;
+    padding-bottom: 23px;
+    padding-right: 40px;
+    /* border: 1px solid rgba(0, 0, 0, 0.1); */
+    border-radius: 6px;
+    color: #111111;
+    font-weight: bold;
+    /* margin-right: 20px;
+    margin-bottom: 13px; */
+    background-color: white;
+}

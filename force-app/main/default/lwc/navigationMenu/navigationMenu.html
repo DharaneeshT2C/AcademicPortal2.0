@@ -1,0 +1,42 @@
+<template>
+    <div class="sidebar">
+        <!-- Profile -->
+        <div class="profile">
+            <h2>{studentName}</h2>
+            <p class="student-id">URK17MT026</p>
+        </div>
+
+        <!-- Menu -->
+        <ul class="menu">
+            <ul class="menu">
+    <li onclick={handleHomeClick} class={homeClass}>
+        <lightning-icon icon-name="utility:home" size="small"></lightning-icon>
+        <span>Home</span>
+    </li>
+
+    <li onclick={handleLearnClick} class={learnClass}>
+        <lightning-icon icon-name="utility:education" size="small"></lightning-icon>
+        <span>Learn</span>
+    </li>
+
+    <li onclick={handleProgramPathClick} class={programPathClass}>
+        <lightning-icon icon-name="utility:favorite" size="small"></lightning-icon>
+        <span>Program Path</span>
+    </li>
+    <li onclick={handleScheduleClick} class={scheduleClass}>
+        <lightning-icon icon-name="utility:favorite" size="small"></lightning-icon>
+        <span>Schedule</span>
+    </li>
+</ul>
+
+
+           
+        </ul>
+
+        <!-- Logout -->
+        <div class="logout">
+            <lightning-icon icon-name="utility:logout" size="small"></lightning-icon>
+            <span>Logout</span>
+        </div>
+    </div>
+</template>

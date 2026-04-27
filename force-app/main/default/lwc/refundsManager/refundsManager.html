@@ -1,0 +1,159 @@
+<template>
+    <section class="modulePanel">
+        <div class="toolbar">
+            <div class="toolbarLeft">
+                <button class="btn btnSecondary" type="button">
+                    <lightning-icon class="buttonIcon" icon-name="utility:filterList" size="x-small"
+                        alternative-text="Filters"></lightning-icon>
+                    <span>Filters</span>
+                </button>
+            </div>
+
+            <div class="toolbarRight">
+                <template if:true={hasSelectedRows}>
+                    <button class="btn btnSecondary" type="button" onclick={openBulkModal}>
+                        Update UTR & Mark Refunded
+                    </button>
+                </template>
+                <button class="btn btnSecondary" type="button">Export</button>
+                <button class="btn btnPrimary" type="button" onclick={openModal}>
+                    Initiate Refund
+                </button>
+            </div>
+        </div>
+
+        <div class="metricsGrid">
+            <template for:each={metrics} for:item="metric">
+                <article key={metric.id} class="metricCard">
+                    <p class="metricLabel">{metric.label}</p>
+                    <p class={metric.valueClass}>{metric.value}</p>
+                </article>
+            </template>
+        </div>
+
+        <section class="overviewSection">
+            <header class="sectionHeader">
+                <h2 class="sectionTitle">Refund Status Overview</h2>
+            </header>
+            <div class="overviewGrid overviewGridThree">
+                <template for:each={overviewBlocks} for:item="block">
+                    <article key={block.id} class={block.blockClass}>
+                        <p class="overviewLabel">{block.label}</p>
+                        <p class="overviewValue">{block.value}</p>
+                    </article>
+                </template>
+            </div>
+        </section>
+        <section class="card tableCard">
+            <header class="sectionHeader">
+                <h2 class="sectionTitle">Refund Transactions</h2>
+            </header>
+
+            <div class="tableWrap">
+                <table class="dataTable">
+                    <thead>
+                        <tr>
+                            <th class="checkboxCol">
+                                <input type="checkbox" onchange={handleSelectAll} />
+                            </th>
+                            <th>Refund ID</th>
+                            <th>Student Name</th>
+                            <th>Amount</th>
+                            <th>Withdrawal Charges</th>
+                            <th>Refund Amount</th>
+                            <th>UTR Number</th>
+                            <th>Status</th>
+                            <th>Refund Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={refundRows} for:item="row">
+                            <tr key={row.id}>
+                                <td class="checkboxCol">
+                                    <input type="checkbox" data-id={row.id} checked={row.isChecked}
+                                        onchange={handleRowSelect} />
+                                </td>
+                                <td>
+                                    <button class="tableLink" type="button" data-id={row.id}
+                                        onclick={handleRefundClick}>
+                                        {row.refundId}
+                                    </button>
+                                </td>
+                                <td>
+                                    <div class="studentCell">
+                                        <span class="studentName">{row.studentName}</span>
+                                        <span class="studentId">{row.studentId}</span>
+                                    </div>
+                                </td>
+                                <td class="amountCell">{row.amount}</td>
+                                <td class="amountCell">{row.withdrawalAmount}</td>
+                                <td class="amountCell">{row.refundAmount}</td>
+                                <td>{row.utrNumber}</td>
+                                <td>
+                                    <span class={row.statusClass}>{row.status}</span>
+                                </td>
+                                <td>{row.refundDate}</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <template if:true={showModal}>
+            <section class="modalBackdrop">
+                <div class="modalContainer">
+                    <header class="modalHeader">
+                        <h2 class="modalTitle">Initiate Refund</h2>
+                        <button class="closeBtn" type="button" onclick={closeModal}>×</button>
+                    </header>
+
+                    <lightning-record-edit-form class="createRefundForm" object-api-name={refundObjectApiName}
+                        onsuccess={handleSuccess} onsubmit={handleSubmit} onerror={handleError}>
+                        <div class="modalBody">
+                            <lightning-messages></lightning-messages>
+                            <lightning-input-field field-name="Account__c"></lightning-input-field>
+                            <lightning-input-field field-name="Amount__c"></lightning-input-field>
+                            <lightning-input-field field-name="Withdrawal_Amount__c"></lightning-input-field>
+                        </div>
+
+                        <footer class="modalFooter">
+                            <button class="btn btnSecondary" type="button" onclick={closeModal}>
+                                Cancel
+                            </button>
+                            <button class="btn btnPrimary" type="submit" disabled={isSaving}>
+                                Save
+                            </button>
+                        </footer>
+                    </lightning-record-edit-form>
+                </div>
+            </section>
+        </template>
+
+        <template if:true={showBulkModal}>
+            <section class="modalBackdrop">
+                <div class="modalContainer modalContainerSmall">
+                    <header class="modalHeader">
+                        <h2 class="modalTitle">Update UTR & Mark Refunded</h2>
+                        <button class="closeBtn" type="button" onclick={closeBulkModal}>×</button>
+                    </header>
+                    <div class="modalBody">
+                        <lightning-input type="text" label="UTR Number" value={utrNumber} onchange={handleUtrChange}
+                            required></lightning-input>
+
+                        <lightning-input type="date" label="Refunded Date" value={bulkRefundDate}
+                            onchange={handleBulkDateChange} required></lightning-input>
+                    </div>
+                    <footer class="modalFooter">
+                        <button class="btn btnSecondary" type="button" onclick={closeBulkModal}>
+                            Cancel
+                        </button>
+                        <button class="btn btnPrimary" type="button" onclick={handleBulkUpdate} disabled={isSaving}>
+                            Update
+                        </button>
+                    </footer>
+                </div>
+            </section>
+        </template>
+    </section>
+</template>

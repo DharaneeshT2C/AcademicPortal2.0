@@ -1,0 +1,51 @@
+<template>
+    <template lwc:if={showToast}>
+        <c-toast message={toastMessage} variant={toastVariant} onclose={handleToastClose}></c-toast>
+    </template>
+    <div class="page">
+        <div class="page-header">
+            <h2 class="page-title">Refunds</h2>
+            <p class="breadcrumb">Home &gt; Fee Payment</p>
+        </div>
+        <div class="tabs-row">
+            <div class="tabs">
+                <button class="tab" onclick={goFeePayment}>Fee Payment</button>
+                <button class="tab" onclick={goFeePlan}>Fee Plan</button>
+                <button class="tab" onclick={goInvoices}>Invoices</button>
+                <button class="tab" onclick={goTransactions}>Transaction History</button>
+                <button class="tab active">Refunds</button>
+            </div>
+            <div class="search-actions">
+                <div class="search-bar"><c-icon name="search" size="16"></c-icon><input type="text" placeholder="Search by Keywords or Refund ID" class="search-input" oninput={handleSearchInput} /></div>
+                <button class="btn-outline" onclick={handleGetHelp}>Get Help</button>
+            </div>
+        </div>
+        <div class="card">
+            <template lwc:if={hasRefunds}>
+                <table class="refund-table">
+                    <thead><tr><th>Refund ID</th><th>Request Date</th><th>Fee Item</th><th>Currency</th><th>Refund Amount</th><th>Status</th><th>Processed On</th></tr></thead>
+                    <tbody>
+                        <template for:each={filteredRefunds} for:item="ref">
+                            <tr key={ref.id}>
+                                <td>{ref.id}</td>
+                                <td>{ref.requestDate}</td>
+                                <td>{ref.feeItem}</td>
+                                <td>{ref.currency}</td>
+                                <td>{ref.amount}</td>
+                                <td><span class={ref.statusClass}>{ref.status}</span></td>
+                                <td>{ref.processedOn}</td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </template>
+            <template lwc:else>
+                <div class="empty-state">
+                    <c-icon name="receipt_long" size="64"></c-icon>
+                    <h3>No Refunds Yet</h3>
+                    <p>You have not requested any refunds. If you have queries regarding fees, please contact the finance department.</p>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>

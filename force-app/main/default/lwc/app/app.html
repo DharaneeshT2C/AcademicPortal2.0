@@ -1,0 +1,75 @@
+<template>
+    <template lwc:if={isLoginPage}>
+        <c-login onlogin={handleLogin}></c-login>
+    </template>
+
+    <template lwc:if={showLayout}>
+        <div class={layoutClass}>
+            <div class={sidebarClass}>
+                <c-sidebar
+                    current-route={currentRoute}
+                    onnavigate={handleNavigate}
+                    onclose={handleCloseSidebar}
+                ></c-sidebar>
+            </div>
+            <template lwc:if={sidebarOpen}>
+                <div class="sidebar-overlay" onclick={handleOverlayClick}></div>
+            </template>
+            <div class="main-area">
+                <c-header
+                    ontogglesidebar={handleToggleSidebar}
+                    onnavigate={handleNavigate}
+                ></c-header>
+                <main class="content-area">
+                    <template lwc:if={isHome}><c-dashboard stage={devStage} career-path={devCareerPath} onnavigate={handleNavigate}></c-dashboard></template>
+                    <template lwc:if={isCourseEnrollment}><c-course-enrollment onnavigate={handleNavigate}></c-course-enrollment></template>
+                    <template lwc:if={isSemesterDetail}><c-semester-detail onnavigate={handleNavigate}></c-semester-detail></template>
+                    <template lwc:if={isProgramSelection}><c-program-selection onnavigate={handleNavigate}></c-program-selection></template>
+                    <template lwc:if={isLearn}><c-learn onnavigate={handleNavigate}></c-learn></template>
+                    <template lwc:if={isAttendance}><c-attendance onnavigate={handleNavigate}></c-attendance></template>
+                    <template lwc:if={isThesis}><c-thesis-management onnavigate={handleNavigate}></c-thesis-management></template>
+                    <template lwc:if={isMentors}><c-mentorship onnavigate={handleNavigate}></c-mentorship></template>
+                    <template lwc:if={isFeePayment}><c-fee-payment onnavigate={handleNavigate}></c-fee-payment></template>
+                    <template lwc:if={isFeePaymentDetail}><c-fee-payment-detail onnavigate={handleNavigate}></c-fee-payment-detail></template>
+                    <template lwc:if={isFeePlan}><c-fee-plan onnavigate={handleNavigate}></c-fee-plan></template>
+                    <template lwc:if={isTransactionHistory}><c-transaction-history onnavigate={handleNavigate}></c-transaction-history></template>
+                    <template lwc:if={isInvoices}><c-invoices onnavigate={handleNavigate}></c-invoices></template>
+                    <template lwc:if={isMyExams}><c-my-exams onnavigate={handleNavigate}></c-my-exams></template>
+                    <template lwc:if={isExamEnrollment}><c-exam-enrollment onnavigate={handleNavigate}></c-exam-enrollment></template>
+                    <template lwc:if={isResults}><c-results onnavigate={handleNavigate}></c-results></template>
+                    <template lwc:if={isMarksBreakdown}><c-marks-breakdown onnavigate={handleNavigate}></c-marks-breakdown></template>
+                    <template lwc:if={isPlacements}><c-placements onnavigate={handleNavigate}></c-placements></template>
+                    <template lwc:if={isCampusLife}><c-campus-life onnavigate={handleNavigate}></c-campus-life></template>
+                    <template lwc:if={isClubs}><c-clubs onnavigate={handleNavigate}></c-clubs></template>
+                    <template lwc:if={isGatePass}><c-gate-pass onnavigate={handleNavigate}></c-gate-pass></template>
+                    <template lwc:if={isCreateGatePass}><c-create-gate-pass onnavigate={handleNavigate}></c-create-gate-pass></template>
+                    <template lwc:if={isHostelDetails}><c-hostel-details onnavigate={handleNavigate}></c-hostel-details></template>
+                    <template lwc:if={isMessMenu}><c-mess-menu onnavigate={handleNavigate}></c-mess-menu></template>
+                    <template lwc:if={isServiceSupport}><c-service-support onnavigate={handleNavigate}></c-service-support></template>
+                    <template lwc:if={isFaqs}><c-faqs onnavigate={handleNavigate}></c-faqs></template>
+                    <template lwc:if={isFeedback}><c-feedback-page onnavigate={handleNavigate}></c-feedback-page></template>
+                    <template lwc:if={isSchedule}><c-schedule onnavigate={handleNavigate}></c-schedule></template>
+                    <template lwc:if={isChat}><c-chat onnavigate={handleNavigate}></c-chat></template>
+                    <template lwc:if={isSettings}><c-settings onnavigate={handleNavigate}></c-settings></template>
+                    <template lwc:if={isNotifications}><c-notifications-page onnavigate={handleNavigate}></c-notifications-page></template>
+                    <template lwc:if={isRefunds}><c-refunds onnavigate={handleNavigate}></c-refunds></template>
+                    <template lwc:if={isEvents}><c-events onnavigate={handleNavigate}></c-events></template>
+                    <template lwc:if={isResearch}><c-research onnavigate={handleNavigate}></c-research></template>
+                </main>
+            </div>
+        </div>
+
+        <template lwc:if={isDevMode}>
+        <c-dev-toolbar
+            current-stage={devStage}
+            current-path={devCareerPath}
+            current-view-mode={devViewMode}
+            current-brand={devBrand}
+            onstagechange={handleStageChange}
+            onpathchange={handlePathChange}
+            onviewmodechange={handleViewModeChange}
+            onbrandchange={handleBrandChange}
+        ></c-dev-toolbar>
+        </template>
+    </template>
+</template>

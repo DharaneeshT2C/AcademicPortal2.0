@@ -1,0 +1,103 @@
+<template>
+    <section class="learn-shell">
+        <div class="learn-header">
+            <div class="top-row">
+                <div class="tabs" role="tablist" aria-label="Program tabs">
+                    <template for:each={tabs} for:item="tab">
+                        <button
+                            key={tab.value}
+                            class={tab.className}
+                            data-value={tab.value}
+                            onclick={handleTabChange}
+                            role="tab"
+                            aria-selected={tab.isActive}
+                            type="button"
+                        >
+                            {tab.label}
+                        </button>
+                    </template>
+                </div>
+
+                <div class="semester-wrap">
+                    <template if:true={isDropdownOpen}>
+                        <div class="sem-backdrop" onclick={closeDropdown}></div>
+                    </template>
+
+                    <button
+                        class="semester-trigger"
+                        type="button"
+                        aria-haspopup="listbox"
+                        aria-expanded={isDropdownOpen}
+                        aria-label="Select semester"
+                        onclick={handleDropdownToggle}
+                    >
+                        <span class="semester-label-text">{selectedSemesterLabel}</span>
+                        <template if:true={selectedSemesterIsCurrent}>
+                            <span class="current-pill"><span class="dot"></span>Current</span>
+                        </template>
+                        <span class="semester-caret">⌄</span>
+                    </button>
+
+                    <template if:true={isDropdownOpen}>
+                        <ul class="semester-dropdown" role="listbox">
+                            <template for:each={semesterOptionsForDropdown} for:item="opt">
+                                <li
+                                    key={opt.value}
+                                    class="semester-option"
+                                    role="option"
+                                    data-value={opt.value}
+                                    onclick={handleOptionSelect}
+                                >
+                                    <span class="option-label">{opt.label}</span>
+                                    <template if:true={opt.isCurrent}>
+                                        <span class="current-pill"><span class="dot"></span>Current</span>
+                                    </template>
+                                </li>
+                            </template>
+                        </ul>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <div class="course-scroll">
+            <div class="course-grid">
+                <template for:each={courses} for:item="course">
+                    <article class="course-card" key={course.id}>
+                        <img src={course.imageUrl} alt="" class="card-banner" />
+                        <div class="card-body">
+                            <h3 class="course-title">{course.title}</h3>
+                            <p class="course-meta">{course.code} | {course.credits}</p>
+                            <div class="info-block">
+                                <p class="info-row">
+                                     <img class="accept-icon" src={calendarIconUrl} alt="info-icon" />
+                                    <lightning-icon
+                                        icon-name="utility:user"
+                                        alternative-text="Instructor"
+                                        size="xx-small"
+                                        class="info-icon"
+                                    ></lightning-icon>
+                                    <span>{course.instructor}</span>
+                                </p>
+                                <p class="info-row">
+                                     <img class="accept-icon" src={acceptIconUrl} alt="info-icon" />
+                                    <!-- <lightning-icon
+                                        icon-name="utility:location"
+                                        alternative-text="Location"
+                                        size="xx-small"
+                                        class="info-icon"
+                                    ></lightning-icon> -->
+                                    <span>{course.room}</span>
+                                </p>
+                            </div>
+                            <div class="tag-row">
+                                <span class={course.requirementClass}>{course.requirementLabel}</span>
+                                <span class="tag tag-mode">{course.mode}</span>
+                            </div>
+                        </div>
+                    </article>
+                </template>
+            </div>
+        </div>
+    </section>
+</template>

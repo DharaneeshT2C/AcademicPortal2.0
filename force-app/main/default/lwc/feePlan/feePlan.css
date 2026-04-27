@@ -1,0 +1,28 @@
+:host { font-family: var(--font-family, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif); }
+.page { width: 100%; }
+.page-header { margin-bottom: 4px; }
+.page-title { font-size: 20px; font-weight: 600; letter-spacing: -0.02em; }
+.breadcrumb { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.tabs-row { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid var(--border); margin-bottom: 24px; flex-wrap: wrap; }
+.tabs { display: flex; }
+.tab { padding: 12px 24px; border: none; background: none; cursor: pointer; font-size: 14px; font-family: inherit; color: var(--text-secondary); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color 0.15s; font-weight: 500; }
+.tab:hover { color: var(--text-primary); }
+.tab.active { color: var(--text-primary); font-weight: 600; border-bottom-color: var(--primary); }
+.card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 20px; box-shadow: var(--shadow-sm); }
+.semester-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; cursor: pointer; }
+.semester-title { font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+.semester-meta { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-secondary); }
+.semester-meta strong { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.fee-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.fee-table th { text-align: left; padding: 12px 12px; border-bottom: 2px solid var(--border); color: var(--primary); font-weight: 500; font-size: 12px; }
+.fee-table td { padding: 14px 12px; border-bottom: 1px solid var(--border-light); font-variant-numeric: tabular-nums; }
+.fee-table tr { transition: background 0.15s; }
+.fee-table tr:hover { background: #FAFBFF; }
+.parent-row { background: #fafafa; }
+.child-row td { font-size: 12px; }
+.indent { padding-left: 28px !important; }
+.status-pill { font-size: 11px; padding: 4px 12px; border-radius: var(--radius-full); background: var(--warning-light); color: #b45309; font-weight: 500; }
+.download-row { display: flex; justify-content: flex-end; margin-top: 14px; }
+.btn-download { display: flex; align-items: center; gap: 6px; padding: 10px 20px; background: linear-gradient(180deg, #4F46E5, #4338CA); color: #fff; border: none; border-radius: var(--radius-sm); font-size: 12px; font-family: inherit; cursor: pointer; font-weight: 500; transition: all 0.2s ease; }
+.btn-download:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(76,110,245,0.3); }
+@media (max-width: 768px) { .fee-table { display: block; overflow-x: auto; } .tabs { overflow-x: auto; } }

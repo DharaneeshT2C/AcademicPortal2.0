@@ -1,0 +1,1166 @@
+@font-face {
+    font-family: 'General Sans';
+    src: url('/resource/GeneralSansFont') format('woff2'),
+        url('/resource/GeneralSansFont') format('woff');
+    font-weight: 400 700;
+    font-display: swap;
+}
+
+.hidden {
+    display: none !important;
+}
+
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.skeleton-wrap {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: calc(100vh - 160px);
+    font-family: Inter, Roboto, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.skeleton-row {
+    display: flex;
+    gap: 20px;
+    flex: 1;
+}
+
+.skeleton-card-large,
+.skeleton-card-small,
+.skeleton-card-medium {
+    border-radius: 16px;
+    background: linear-gradient(90deg, #e7ebf2 0%, #f3f5f9 50%, #e7ebf2 100%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.1s ease-in-out infinite;
+}
+
+.skeleton-card-large {
+    flex: 2;
+}
+
+.skeleton-card-small {
+    flex: 1;
+}
+
+.skeleton-card-medium {
+    flex: 1;
+}
+
+.dashboard-container {
+    /* padding: 24px; */
+    /* background-color: #F8F9FA; */
+    height: calc(100vh - 160px);
+    font-family: Inter, Roboto, system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: #111827;
+    display: grid;
+    grid-template-columns: 2.5fr 1fr;
+    gap: 24px;
+    overflow-y: hidden;
+    /* Prevent double scrollbar if content fits */
+}
+
+@media (max-width: 1024px) {
+    .dashboard-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Common Card Styles */
+.card {
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 24px;
+    height: fit-content;
+}
+
+.left-column,
+.right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* -- Hostel Details Section -- */
+.details-row {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 24px;
+    background-color: #FFFFFF;
+    padding: 24px;
+    border-radius: 16px;
+}
+
+@media (max-width: 768px) {
+    .details-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Details Wrapper to Stack Header and Card */
+.details-wrapper {
+    display: flex;
+    flex-direction: column;
+    /* gap: 16px; handled by margin-bottom in section-header */
+}
+
+/* Updated Section Header */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    /* Ensure it behaves nicely in the wrapper */
+}
+
+.section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--primary-color, #2563EB);
+    padding: 6px 16px;
+    /* Slightly wider padding */
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #374151;
+    /* Dark text */
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.btn-outline:hover {
+    background: var(--secondary-color, #EFF6FF);
+}
+
+.btn-outline:disabled {
+    background: #F3F4F6;
+    border: 1px solid #D1D5DB;
+    color: #9CA3AF;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btn-outline:disabled:hover {
+    background: #F3F4F6;
+}
+
+/* Unified Card */
+.details-section-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+    /* Use divider margin instead */
+    padding: 24px;
+}
+
+/* Inner Card Style */
+.details-inner-card {
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 16px;
+    background: #FFFFFF;
+}
+
+.room-card-mb {
+    margin-bottom: 24px;
+}
+
+.room-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.room-number {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--primary-color, #3061FF);
+    line-height: 140%;
+    letter-spacing: 0;
+}
+
+.room-badge {
+    background: var(--secondary-color, #EFF6FF);
+    color: var(--primary-color, #3061FF);
+    font-size: 14px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: 500;
+    line-height: 140%;
+    letter-spacing: 0;
+}
+
+.room-details-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.loc-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    background-color: #E5E7EB;
+    object-fit: cover;
+}
+
+.loc-info h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: #373A45;
+    line-height: 140%;
+    letter-spacing: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.loc-info p {
+    margin: 4px 0 0 0;
+    font-family: Inter, Roboto, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 140%;
+    letter-spacing: 0;
+    color: #585A64;
+}
+
+/* People Grid */
+.people-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    /* Removing gap, using padding for divider */
+}
+
+.roommates-section {
+    padding-right: 24px;
+    border-right: 1px solid #E5E7EB;
+}
+
+.warden-section {
+    padding-left: 24px;
+}
+
+/* End People Grid */
+
+.person-group-title {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 12px;
+    color: #374151;
+}
+
+.person-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.person-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.person-details h5 {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1F2937;
+}
+
+.person-details p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #6B7280;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: #4B5563;
+    margin-top: 4px;
+}
+
+.contact-icon {
+    width: 14px;
+    height: 14px;
+    fill: #4B5563;
+}
+
+/* Unified Card */
+.details-section-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+    /* Use divider margin instead */
+    padding: 0;
+    flex: 1;
+    /* Stretch to fill height */
+}
+
+/* -- Allocation Card -- */
+.allocation-card {
+    background: var(--primary-color, #3061FF);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-align: left;
+    height: auto;
+    /* Allow it to stretch naturally or being constrained */
+}
+
+/* Wrapper to stretch */
+.details-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.alloc-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.alloc-desc {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin-bottom: 20px;
+}
+
+.alloc-illustration {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.illustration-svg {
+    height: 160px;
+    width: auto;
+}
+
+.btn-white {
+    width: 100%;
+    background: #FFFFFF;
+    color: #1F2937;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.2s;
+}
+
+.btn-white:hover {
+    background: #F9FAFB;
+}
+
+.btn-white:disabled {
+    background: #E5E7EB;
+    color: #9CA3AF;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btn-white:disabled:hover {
+    background: #E5E7EB;
+}
+
+/* -- Bills Section -- */
+.btn-primary {
+    background: var(--primary-color, #2563EB);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.875rem;
+}
+
+.bill-item {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.bill-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.bill-name {
+    font-weight: 600;
+    color: #1F2937;
+    font-size: 0.95rem;
+}
+
+.bill-due-tag {
+    background: #FCA5A5;
+    color: #7F1D1D;
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.bill-total {
+    font-size: 0.875rem;
+    color: #4B5563;
+}
+
+/* -- Notices -- */
+.notice-card {
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.notice-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.notice-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.notice-icon-circle {
+    width: 32px;
+    height: 32px;
+    background: var(--secondary-color, #DBEAFE);
+    color: var(--primary-color, #2563EB);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notice-tag {
+    background: #FFF7ED;
+    border: 1px solid #FFEDD5;
+    color: #9A3412;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.notice-content {
+    font-size: 0.9rem;
+    color: #374151;
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+.notice-meta {
+    font-size: 0.75rem;
+    color: #9CA3AF;
+}
+
+/* -- In & Out Section -- */
+.in-out-section {
+    width: 100%;
+    flex: 1;
+    overflow: hidden;
+    /* Constrain content */
+    background-color: #FFFFFF;
+    padding: 24px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    /* Important for flex child size calculation */
+}
+
+.notices-section {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.notice-list {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+    /* Space for scrollbar */
+}
+
+.tabs {
+    display: flex;
+    gap: 32px;
+    border-bottom: 1px solid #E5E7EB;
+    margin-bottom: 24px;
+}
+
+.tab {
+    padding-bottom: 12px;
+    font-weight: 500;
+    color: #6B7280;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+}
+
+.tab.active {
+    color: #1F2937;
+    border-bottom: 2px solid var(--primary-color, #2563EB);
+    font-weight: 600;
+}
+
+.in-out-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.tab-actions {
+    display: flex;
+    align-items: center;
+}
+
+/* Table */
+.table-card {
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 0 24px 24px 24px;
+    /* Remove top padding for sticky header if needed, but keeping consistent */
+    box-shadow: none;
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.data-table {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.header-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 16px;
+    font-weight: 600;
+    color: #1F2937;
+    padding: 12px 0;
+    border-bottom: 1px solid #E5E7EB;
+    /* Sticky Header */
+    position: sticky;
+    top: 0;
+    background: #FFFFFF;
+    z-index: 10;
+}
+
+.header-cell {
+    /* padding: 12px 0; removed to avoid double padding logic */
+    color: #172E7D;
+    font-weight: 500;
+    font-style: normal;
+    font-size: 16px;
+    line-height: 140%;
+    letter-spacing: 0%;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 16px;
+    padding: 16px 0;
+    align-items: center;
+}
+
+.cell {
+    /* padding: 16px 0; removed */
+    color: #585A64;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 16px;
+    line-height: 140%;
+    letter-spacing: 0%;
+    /* border-bottom: 1px solid #F3F4F6; removed per image */
+    display: flex;
+    align-items: center;
+}
+
+/* .status-cell {
+    justify-content: flex-end;
+} */
+
+/* Status Badges */
+/* Status Badges */
+.badge {
+    padding: 6px 20px;
+    border-radius: 24px;
+    display: inline-block;
+    min-width: 80px;
+    text-align: center;
+
+    /* Common Typography from user spec */
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 140%;
+    letter-spacing: 0;
+    text-transform: capitalize;
+}
+
+.badge.present {
+    background: #EBF4EC;
+    color: #1F2937;
+    /* Keeping text dark for readability, user didn't specify text color but usually implied dark/inherited or defined elsewhere. Assuming standard text color. */
+    border: 1px solid #C1DCC3;
+}
+
+.badge.absent {
+    background: #FBEAEA;
+    color: #1F2937;
+    border: 1px solid #F1BFBF;
+}
+
+/* Icons */
+svg {
+    display: block;
+}
+
+/* Leave Requests Styles */
+.leave-requests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+    min-height: 0;
+}
+
+.leave-req-card {
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 20px;
+    background: #FFFFFF;
+}
+
+.req-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    /* Handle mobile */
+    gap: 8px;
+}
+
+.req-id {
+    font-size: 0.85rem;
+    color: #9CA3AF;
+    font-family: monospace;
+}
+
+.req-meta-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.85rem;
+    color: #4B5563;
+}
+
+.meta-label strong {
+    color: #1F2937;
+}
+
+/* Status Tags */
+.status-tag {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-tag.in-review {
+    background: #FEF3C7;
+    color: #B45309;
+    /* Yellow/Orange */
+    border: 1px solid #FDE68A;
+}
+
+.status-tag.closed {
+    background: #E5E7EB;
+    /* Light Gray */
+    color: #374151;
+    border: 1px solid #D1D5DB;
+    /* The image shows greenish for Closed? Or plain gray?
+       First image shows "In Review" is yellowish. 
+       Second image "Closed" is greenish light gray logic?
+       Let's stick to Greenish if it's "Closed" like "Present" or similar.
+       Wait, usually closed is gray. The "Present" was green.
+       Let's use a subtle gray-green for closed to match the image if possible.
+       Image shows "Closed" as a light greenish badge.
+    */
+    background: #ECFDF5;
+    color: #047857;
+    border: 1px solid #A7F3D0;
+}
+
+/* Buttons */
+.btn-sm {
+    padding: 6px 16px;
+    font-size: 0.85rem;
+    height: 32px;
+    display: flex;
+    align-items: center;
+}
+
+.req-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1F2937;
+    margin-bottom: 4px;
+}
+
+.req-type {
+    font-size: 0.9rem;
+    color: #6B7280;
+    margin-bottom: 12px;
+}
+
+.text-gray {
+    color: #4B5563;
+}
+
+.req-desc {
+    font-size: 0.9rem;
+    color: #6B7280;
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+
+.req-dates {
+    font-size: 0.9rem;
+    color: #4B5563;
+}
+
+/* -- Modal Styles -- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9010;
+    /* Highest priority */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    /* Let clicks pass through empty space */
+}
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 9005;
+    /* Behind overlay */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    cursor: pointer;
+}
+
+/* Hide the inner blur div as we use the outer backdrop */
+.modal-backdrop-blur {
+    display: none;
+}
+
+.modal-container-wrapper {
+    position: relative;
+    z-index: 9011;
+    /* Ensure wrapper content is part of the high z-index stack */
+    padding: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.modal-container {
+    background: #FFFFFF;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    pointer-events: auto;
+    /* Re-enable interaction */
+}
+
+.modal-header {
+    padding: 24px 24px 16px;
+    /* border-bottom: 1px solid #E5E7EB; - Design doesn't show a line */
+}
+
+.modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0;
+}
+
+.modal-content {
+    padding: 0 24px 24px;
+    overflow-y: auto;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 6px;
+}
+
+.required {
+    color: #EF4444;
+    margin-left: 2px;
+}
+
+.form-input {
+    width: 100%;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+    color: #1F2937;
+    outline: none;
+    transition: border-color 0.2s;
+    background: #FFFFFF;
+}
+
+.form-input:focus {
+    border-color: var(--primary-color, #2563EB);
+    box-shadow: 0 0 0 1px var(--primary-color, #2563EB);
+}
+
+.custom-select-wrapper,
+.date-input-wrapper,
+.file-upload-wrapper {
+    position: relative;
+}
+
+/* Make date picker indicator invisible but clickable over the custom icon */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
+    opacity: 0;
+    z-index: 10;
+}
+
+.file-input-hidden {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.calendar-icon,
+.upload-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6B7280;
+    pointer-events: none;
+    z-index: 5;
+    /* Below the native picker click area */
+}
+
+.read-only-input {
+    background: #F3F4F6;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: #1F2937;
+}
+
+.textarea-input {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px 24px;
+    /* border-top: 1px solid #E5E7EB; */
+}
+
+/* Specific button overrides for modal if needed */
+.modal-footer .btn-outline {
+    border-color: #D1D5DB;
+    color: #374151;
+}
+
+.modal-footer .btn-primary {
+    padding: 8px 20px;
+}
+
+/* =========================================
+   MOBILE & TABLET RESPONSIVENESS
+   ========================================= */
+
+@media screen and (max-width: 1024px) {
+    .dashboard-container {
+        /* Reset fixed height for mobile scrolling */
+        display: flex;
+        flex-direction: column;
+        grid-template-columns: unset;
+        /* Override grid */
+        height: auto;
+        overflow-y: visible;
+        padding-bottom: 0;
+    }
+
+    .left-column,
+    .right-column {
+        height: auto;
+        overflow: visible;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    /* Unset fixed heights/overflows for internal cards to allow page scrolling */
+    .in-out-section,
+    .notices-section,
+    .table-card,
+    .card {
+        flex: none;
+        height: auto;
+        min-height: auto;
+        overflow: visible;
+    }
+
+    .data-table,
+    .leave-requests-list,
+    .notice-list {
+        flex: none;
+        height: auto;
+        overflow-y: visible;
+        max-height: none;
+    }
+
+    /* Ensure table can scroll horizontally if needed */
+    .table-card {
+        overflow-x: auto;
+        padding-bottom: 16px;
+    }
+
+    .header-row,
+    .row {
+        min-width: 600px;
+        /* Force minimum width to trigger scroll on small screens */
+    }
+}
+
+@media screen and (max-width: 768px) {
+
+    /* Adjust Spacing */
+    .dashboard-container {
+        padding-bottom: 0;
+        gap: 24px;
+    }
+
+    /* Details Section Stacking */
+    .details-row {
+        grid-template-columns: 1fr;
+        padding: 16px;
+        gap: 24px;
+    }
+
+    /* People Grid Stacking (Roommates & Warden) */
+    .people-grid {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .roommates-section {
+        border-right: none;
+        padding-right: 0;
+        border-bottom: 1px solid #E5E7EB;
+        padding-bottom: 24px;
+        margin-bottom: 24px;
+    }
+
+    .warden-section {
+        padding-left: 0;
+    }
+
+    /* In-Out Section / Tabs */
+    .in-out-actions {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .tabs {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 8px;
+        /* Space for scrollbar */
+        margin-bottom: 16px;
+        gap: 24px;
+        border-bottom: 1px solid #E5E7EB;
+    }
+
+    .tab {
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .tab-actions {
+        width: 100%;
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+
+    .tab-actions button {
+        width: 100%;
+        margin-right: 0 !important;
+        /* Override inline style */
+        margin-bottom: 0;
+    }
+
+    /* Room Details */
+    .room-details-row {
+        flex-wrap: wrap;
+    }
+
+    /* Modal Adjustments */
+    .modal-container {
+        max-height: 85vh;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .dashboard-container {
+        padding-bottom: 0;
+        gap: 16px;
+    }
+
+    .details-row {
+        padding: 16px;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .section-header button {
+        width: 100%;
+    }
+
+    .room-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    .bill-head {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .notice-top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .notice-tag {
+        align-self: flex-start;
+    }
+
+    /* Modal Buttons Stack */
+    .modal-footer {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .modal-footer button {
+        width: 100%;
+        margin-left: 0;
+    }
+}

@@ -1,0 +1,73 @@
+<template>
+    <template lwc:if={showToast}>
+        <c-toast message={toastMessage} variant={toastVariant} onclose={handleToastClose}></c-toast>
+    </template>
+    <div class="page">
+        <div class="page-header">
+            <button class="back-btn" onclick={handleBack}><c-icon name="arrow_back" size="20"></c-icon></button>
+            <div>
+                <h2 class="page-title">Create Gate Pass Request</h2>
+                <p class="breadcrumb">Campus Life &gt; Gate Pass &gt; Create Request</p>
+            </div>
+        </div>
+        <div class="card">
+            <form onsubmit={handleSubmit}>
+                <template lwc:if={hasError}>
+                    <div class="error-banner">{errorMessage}</div>
+                </template>
+
+                <div class="form-group">
+                    <label class="form-label">Request Type</label>
+                    <select class="form-select" data-field="requestType" value={formRequestType} onchange={handleFieldChange}>
+                        <option value="Student Exit Request">Student Exit Request</option>
+                        <option value="Visitor Request">Visitor Request</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Destination</label>
+                    <input type="text" class="form-input" data-field="destination" value={formDestination}
+                           oninput={handleFieldChange} placeholder="e.g. Apollo Hospital, Anna Nagar" />
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Exit Date</label>
+                        <input type="date" class="form-input" data-field="exitDate" value={formExitDate} onchange={handleFieldChange} />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Exit Time</label>
+                        <input type="time" class="form-input" data-field="exitTime" value={formExitTime} onchange={handleFieldChange} />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Return Date</label>
+                        <input type="date" class="form-input" data-field="returnDate" value={formReturnDate} onchange={handleFieldChange} />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Return Time</label>
+                        <input type="time" class="form-input" data-field="returnTime" value={formReturnTime} onchange={handleFieldChange} />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Reason</label>
+                    <textarea class="form-textarea" rows="3" data-field="reason" value={formReason}
+                              oninput={handleFieldChange} placeholder="Describe the reason for your request..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Attachment</label>
+                    <div class="file-upload"><c-icon name="cloud_upload" size="20"></c-icon><p>Drag and drop or click to upload (optional)</p></div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-outline" onclick={handleBack}>Cancel</button>
+                    <button type="submit" class="btn-primary" disabled={isSubmitDisabled}>{submitLabel}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</template>

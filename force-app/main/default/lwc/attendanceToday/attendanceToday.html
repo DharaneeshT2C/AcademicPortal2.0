@@ -1,0 +1,199 @@
+<template>
+    <section class="attendance-today-shell">
+        <div class="course-summary-card">
+            <div class="course-meta">
+                <h2 class="course-title">Applied Physics <span>|&nbsp; KJ9844763</span></h2>
+                <p class="course-subtitle">B.Tech., Electronics & Engineering</p>
+            </div>
+            <div class="summary-metrics">
+                <div class="metric-box">
+                    <span class="metric-label">Timing</span>
+                    <span class="metric-value">11:00 AM -12:00 AM</span>
+                </div>
+                <div class="metric-box">
+                    <span class="metric-label">Venue</span>
+                    <span class="metric-value">ECE - I</span>
+                </div>
+                <div class="metric-box">
+                    <span class="metric-label">Type</span>
+                    <span class="metric-value">Theory</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="attendance-card">
+            <div class="attendance-head">
+                <h3 class="section-title">Attendance</h3>
+                <div class="head-controls">
+                    <span class="info-chip">32/40 Present</span>
+                    <button type="button" class="help-btn">Get Help</button>
+                    <button type="button" class="submit-btn" onclick={handleSubmit}>Submit</button>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-scroll">
+                    <table class="attendance-table">
+                        <thead>
+                            <tr>
+                                <th>Roll Number <span class="tiny-caret">⌃</span></th>
+                                <th>Student Name</th>
+                                <th>
+                                    <span class="check-head">
+                                        <input class="box" type="checkbox" checked={isSelectAllChecked} onchange={handleSelectAllChange} />
+                                        Present
+                                    </span>
+                                </th>
+                                <th>Absent</th>
+                                <th>Do not Consider</th>
+                                <th>Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={tableRows} for:item="row">
+                                <tr key={row.id}>
+                                    <td>{row.rollNumber}</td>
+                                    <td>{row.studentName}</td>
+                                    <td>
+                                        <input
+                                            class="box"
+                                            type="checkbox"
+                                            checked={row.present}
+                                            data-id={row.id}
+                                            data-status="present"
+                                            onchange={handleStatusChange} />
+                                    </td>
+                                    <td>
+                                        <input
+                                            class="box"
+                                            type="checkbox"
+                                            checked={row.absent}
+                                            data-id={row.id}
+                                            data-status="absent"
+                                            onchange={handleStatusChange} />
+                                    </td>
+                                    <td>
+                                        <input
+                                            class="box"
+                                            type="checkbox"
+                                            checked={row.doNotConsider}
+                                            data-id={row.id}
+                                            data-status="doNotConsider"
+                                            onchange={handleStatusChange} />
+                                    </td>
+                                    <td>
+                                        <template if:true={row.absent}>
+                                            <select
+                                                class={row.reasonSelectClass}
+                                                data-id={row.id}
+                                                onchange={handleReasonChange}>
+                                                <template for:each={reasonOptions} for:item="option">
+                                                    <option key={option.value} value={option.value}>{option.label}</option>
+                                                </template>
+                                            </select>
+                                        </template>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mobile-card-list">
+                <template for:each={tableRows} for:item="row">
+                    <article class="mobile-row-card" key={row.id}>
+                        <div class="mobile-row-top">
+                            <p class="mobile-roll">{row.rollNumber}</p>
+                            <p class="mobile-name">{row.studentName}</p>
+                        </div>
+
+                        <div class="mobile-checks">
+                            <label class="mobile-check-item">
+                                <input
+                                    class="box"
+                                    type="checkbox"
+                                    checked={row.present}
+                                    data-id={row.id}
+                                    data-status="present"
+                                    onchange={handleStatusChange} />
+                                <span>Present</span>
+                            </label>
+                            <label class="mobile-check-item">
+                                <input
+                                    class="box"
+                                    type="checkbox"
+                                    checked={row.absent}
+                                    data-id={row.id}
+                                    data-status="absent"
+                                    onchange={handleStatusChange} />
+                                <span>Absent</span>
+                            </label>
+                            <label class="mobile-check-item">
+                                <input
+                                    class="box"
+                                    type="checkbox"
+                                    checked={row.doNotConsider}
+                                    data-id={row.id}
+                                    data-status="doNotConsider"
+                                    onchange={handleStatusChange} />
+                                <span>Do not Consider</span>
+                            </label>
+                        </div>
+
+                        <template if:true={row.absent}>
+                            <div class="mobile-reason-wrap">
+                                <label class="mobile-reason-label">Reason</label>
+                                <select class={row.reasonSelectClass} data-id={row.id} onchange={handleReasonChange}>
+                                    <template for:each={reasonOptions} for:item="option">
+                                        <option key={option.value} value={option.value}>{option.label}</option>
+                                    </template>
+                                </select>
+                            </div>
+                        </template>
+                    </article>
+                </template>
+            </div>
+        </div>
+    </section>
+
+    <template if:true={showSubmitConfirmModal}>
+        <section class="modal-backdrop" onclick={closeSubmitConfirmModal}>
+            <div class="modal-card confirm-modal" onclick={stopModalClose}>
+                <h3 class="modal-title">Are you sure you want to submit?</h3>
+
+                <div class="summary-grid">
+                    <article class="summary-box">
+                        <p class="summary-label">Class</p>
+                        <p class="summary-value">ECE - I</p>
+                    </article>
+                    <article class="summary-box">
+                        <p class="summary-label">Subject</p>
+                        <p class="summary-value">Applied Physics</p>
+                    </article>
+                    <article class="summary-box">
+                        <p class="summary-label">Attendance</p>
+                        <p class="summary-value">{presentCount} present <span>out of {totalCount}</span></p>
+                    </article>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-outline" onclick={closeSubmitConfirmModal}>Cancel</button>
+                    <button type="button" class="btn-primary" onclick={confirmSubmitAttendance}>Submit</button>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template if:true={showSubmitSuccessModal}>
+        <section class="modal-backdrop" onclick={closeSubmitSuccessModal}>
+            <div class="modal-card success-modal" onclick={stopModalClose}>
+                <div class="success-icon-wrap">
+                    <span class="success-icon">✓</span>
+                </div>
+                <h3 class="success-title">Submitted successfully</h3>
+                <p class="success-subtitle">Successfully marked attendance for 13 May 2025</p>
+            </div>
+        </section>
+    </template>
+</template>

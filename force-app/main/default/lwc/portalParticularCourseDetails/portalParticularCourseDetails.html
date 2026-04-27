@@ -1,0 +1,94 @@
+<template>
+  <div class="course-page">
+    <template if:true={showSkeleton}>
+      <section class="skeleton-wrap" aria-busy="true" aria-live="polite">
+        <div class="skeleton-header-row">
+          <div class="skeleton-line skeleton-tab"></div>
+          <div class="skeleton-line skeleton-search"></div>
+        </div>
+        <div class="skeleton-grid">
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+        </div>
+        <div class="skeleton-footer-row">
+          <div class="skeleton-line skeleton-footer-btn"></div>
+          <div class="skeleton-line skeleton-footer-btn primary"></div>
+        </div>
+      </section>
+    </template>
+
+    <template if:false={showSkeleton}>
+    <div class="header">
+      <div class="tabs">
+        <span class={mandatoryTabClass} onclick={showMandatory}>
+          Mandatory courses
+        </span>
+        <span class={electiveTabClass} onclick={showElective}>
+          Elective courses
+        </span>
+      </div>
+
+      <div class="search">
+        <lightning-input
+          type="search"
+          label="Search courses"
+          placeholder="Search"
+          variant="label-hidden"
+          onchange={handleSearch}
+        >
+        </lightning-input>
+      </div>
+    </div>
+
+    <div class="grid">
+      <template if:true={groupedCourses.length}>
+        <template for:each={groupedCourses} for:item="group">
+          <section key={group.templateId} class="template-section">
+            <h2 class="template-title accordion-header" data-id={group.templateId} onclick={toggleAccordion}>
+              {group.templateName}({group.templateType})
+              <span class="accordion-icon">{group.indicator}</span>
+            </h2>
+
+            <template if:true={group.isOpen}>
+              <div class="template-grid accordion-content">
+                <template for:each={group.courses} for:item="course">
+                  <div key={course.uniqueKey} class="card">
+                    <div class="image-wrapper">
+                      <img src={course.imageUrl} alt="Course image" />
+
+                      <button class="add-btn" data-key={course.uniqueKey} onclick={handleToggleAdd}>
+                        <template if:true={course.isAdded}> ✓ Added </template>
+                        <template if:false={course.isAdded}> + Add </template>
+                      </button>
+                    </div>
+
+                    <div class="content">
+                      <h3>{course.courseName}</h3>
+                      <p>Credits: {course.credits}</p>
+                      <p>Sequence: {course.sequence}</p>
+                      <p>Year: {course.year}</p>
+                      <p>Course code: {course.courseCode}</p>
+
+                      <button class="faculty-btn">Select faculty (2)</button>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </template>
+          </section>
+        </template>
+      </template>
+
+      <template if:false={groupedCourses.length}>
+        <div class="empty">No courses available</div>
+      </template>
+    </div>
+
+    <div class="footer-actions">
+      <button class="btn-secondary">Deselect all</button>
+      <button class="btn-primary" onclick={handleAddSelected}>Add selected courses</button>
+    </div>
+    </template>
+  </div>
+</template>

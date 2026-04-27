@@ -1,0 +1,45 @@
+<template>
+    <template lwc:if={showToast}>
+        <c-toast message={toastMessage} variant={toastVariant} onclose={handleToastClose}></c-toast>
+    </template>
+    <div class="page">
+        <div class="page-header">
+            <h2 class="page-title">Transaction History</h2>
+            <p class="breadcrumb">Home &gt; Fee Payment</p>
+        </div>
+        <div class="tabs-row">
+            <div class="tabs">
+                <button class="tab" onclick={goFeePayment}>Fee Payment</button>
+                <button class="tab" onclick={goFeePlan}>Fee Plan</button>
+                <button class="tab" onclick={goInvoices}>Invoices</button>
+                <button class="tab active">Transaction History</button>
+                <button class="tab" onclick={goRefunds}>Refunds</button>
+            </div>
+            <div class="search-actions">
+                <div class="search-bar"><c-icon name="search" size="16"></c-icon><input type="text" placeholder="Search by Keywords or Transaction ID" class="search-input" oninput={handleSearchInput} /></div>
+                <button class="btn-outline" onclick={handleGetHelp}>Get Help</button>
+            </div>
+        </div>
+        <div class="card">
+            <table class="txn-table">
+                <thead><tr><th>Transaction ID</th><th>Transaction Date</th><th>Payment Mode</th><th>Currency</th><th>Total Paid</th><th>Status</th><th>Receipt</th></tr></thead>
+                <tbody>
+                    <template for:each={transactions} for:item="txn">
+                        <tr key={txn.id}>
+                            <td>{txn.id}</td>
+                            <td>{txn.date}</td>
+                            <td>{txn.paymentMode}</td>
+                            <td>{txn.currency}</td>
+                            <td>{txn.totalPaid}</td>
+                            <td>
+                                <span class={txn.statusClass}>{txn.status}</span>
+                                <template lwc:if={txn.isFailed}><button class="btn-retry" data-id={txn.id} onclick={handleRetry} disabled={txn.isRetrying}>{txn.retryLabel}</button></template>
+                            </td>
+                            <td><template lwc:if={txn.hasReceipt}><button class="dl-btn" data-id={txn.id} title="Download receipt" onclick={handleDownloadReceipt}><c-icon name="download" size="18"></c-icon></button></template></td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</template>

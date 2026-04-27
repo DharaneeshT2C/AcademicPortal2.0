@@ -1,0 +1,666 @@
+<template>
+    <section class="faculty-profile-page">
+        <article class="profile-card">
+            <div class="profile-main">
+                <div class="avatar-wrap">
+                    <div class="avatar-image"></div>
+                    <span class="online-dot"></span>
+                </div>
+
+                <div class="profile-info">
+                    <h2 class="faculty-name">Mallika K <span>| ID9824</span></h2>
+                    <button type="button" class="id-card-btn" onclick={handleViewIdCard}>View ID Card</button>
+                </div>
+
+                <div class="profile-kpis">
+                    <div class="kpi-card">
+                        <h3>Dept. of Engineering</h3>
+                        <p>Department</p>
+                    </div>
+                    <div class="kpi-card">
+                        <h3>Assistant Professor</h3>
+                        <p>Role</p>
+                    </div>
+                    <div class="kpi-card">
+                        <h3>Specialization</h3>
+                        <p>Electronics &amp; Engineering</p>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <article class="content-panel">
+            <nav class="tabs-bar" aria-label="Faculty tabs">
+                <template for:each={tabs} for:item="tab">
+                    <button
+                        key={tab.id}
+                        type="button"
+                        class={tab.className}
+                        data-tab={tab.id}
+                        onclick={handleTabChange}
+                    >
+                        {tab.label}
+                    </button>
+                </template>
+            </nav>
+
+            <template if:true={isMyPathTab}>
+                <div class="courses-header">
+                    <h3>Courses taught</h3>
+                    <div class="term-select-wrap">
+                        <select class="term-select" onchange={handleTermChange}>
+                            <template for:each={termOptions} for:item="option">
+                                <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                            </template>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="courses-grid">
+                    <template for:each={courses} for:item="course">
+                        <article class="course-card" key={course.id}>
+                            <div class={course.imageClass}>
+                                <div class="badge-row">
+                                    <span class="badge mandatory">• {course.badge}</span>
+                                    <span class="badge students">{course.students}</span>
+                                </div>
+                            </div>
+
+                            <div class="course-body">
+                                <h4>{course.title}</h4>
+                                <p class="course-code">{course.code}</p>
+                                <p class="course-meta">{course.type}</p>
+                                <p class="course-meta">{course.audience}</p>
+                            </div>
+                        </article>
+                    </template>
+                </div>
+            </template>
+
+            <template if:true={isAchievementsTab}>
+                <div class="achievements-wrap">
+                    <div class="achievements-header">
+                        <h3>All Achievements</h3>
+                        <button type="button" class="add-achievement-btn" onclick={handleAddAchievement}>+ Add New</button>
+                    </div>
+
+                    <div class="achievements-list">
+                        <template for:each={achievements} for:item="item">
+                            <article class="achievement-card" key={item.id}>
+                                <header class="achievement-top">
+                                    <p class="achievement-category">{item.category}</p>
+                                    <template lwc:if={item.dateRange}>
+                                        <span class="achievement-date-pill">{item.dateRange}</span>
+                                    </template>
+                                </header>
+
+                                <h4 class="achievement-title">{item.title}</h4>
+                                <p class="achievement-meta">{item.metaLine}</p>
+                                <p class="achievement-description">{item.description}</p>
+
+                                <template lwc:if={item.outcome}>
+                                    <div class="achievement-outcome">
+                                        <p>Outcome:</p>
+                                        <ul>
+                                            <li>{item.outcome}</li>
+                                        </ul>
+                                    </div>
+                                </template>
+
+                                <div class="achievement-file-pill">{item.attachment}</div>
+                            </article>
+                        </template>
+                    </div>
+                </div>
+            </template>
+
+            <template if:true={isEducationTab}>
+                <div class="education-wrap">
+                    <div class="education-list">
+                        <template for:each={educationItems} for:item="item">
+                            <article class="education-item" key={item.id}>
+                                <h4>{item.title}</h4>
+                                <p class="education-institute">{item.institute}</p>
+                                <p class="education-timeline">{item.timeline}</p>
+                            </article>
+                        </template>
+                    </div>
+                </div>
+            </template>
+
+            <template if:true={isResearchTab}>
+                <div class="research-wrap">
+                    <div class="research-header">
+                        <h3>All Academic Research</h3>
+                        <button type="button" class="add-achievement-btn" onclick={handleOpenResearchModal}>+ Add More</button>
+                    </div>
+
+                    <div class="research-list">
+                        <template for:each={researchItems} for:item="item">
+                            <article class="research-card" key={item.id}>
+                                <h4>{item.title}</h4>
+                                <p class="research-meta">
+                                    Type - {item.type}
+                                    <span>|</span>
+                                    Journal / Conference Name - {item.venue}
+                                    <span>|</span>
+                                    Publication Year - {item.publicationYear}
+                                </p>
+                                <p class="research-link">Publication Link - <a href={item.link} target="_blank">{item.link}</a></p>
+                            </article>
+                        </template>
+                    </div>
+                </div>
+            </template>
+
+            <template if:true={isFeedbackTab}>
+                <div class="feedback-wrap">
+                    <aside class="feedback-sidebar">
+                        <h3>Categories</h3>
+                        <div class="feedback-categories">
+                            <template for:each={feedbackCategories} for:item="item">
+                                <button
+                                    key={item.id}
+                                    type="button"
+                                    class={item.className}
+                                    data-category={item.id}
+                                    onclick={handleFeedbackCategoryChange}
+                                >
+                                    {item.label}
+                                </button>
+                            </template>
+                        </div>
+                    </aside>
+
+                    <section class="feedback-main-panel">
+                        <div class="feedback-main-header">
+                            <h3>
+                                <template lwc:if={isFeedbackOverall}>Overall</template>
+                                <template lwc:elseif={isFeedbackAppraisal}>Appraisal</template>
+                                <template lwc:elseif={isFeedbackGoals}>Goals &amp; milestones</template>
+                                <template lwc:else>Performance</template>
+                            </h3>
+                            <select class="feedback-year-select" onchange={handleFeedbackYearChange}>
+                                <template for:each={feedbackYearOptions} for:item="option">
+                                    <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                                </template>
+                            </select>
+                        </div>
+
+                        <template if:true={isFeedbackOverall}>
+                            <div class="feedback-summary-card">
+                                <div class="feedback-summary-item">
+                                    <h4>84%</h4>
+                                    <p>Overall feedback score</p>
+                                </div>
+                                    <div class="feedback-trend-pill">+ 2.2%</div>
+                                <div class="feedback-summary-item with-divider">
+                                    <h4>82%</h4>
+                                    <p>Student feedback score</p>
+                                </div>
+                                <div class="feedback-summary-item with-divider">
+                                    <h4>89%</h4>
+                                    <p>Peer feedback score</p>
+                                </div>
+                                <div class="feedback-summary-item with-divider">
+                                    <h4>87%</h4>
+                                    <p>Institute feedback score</p>
+                                </div>
+                            </div>
+
+                            <div class="feedback-grid-two">
+                                <article class="feedback-card">
+                                    <header class="feedback-card-header">
+                                        <h4>Goals &amp; Milestones</h4>
+                                        <button type="button" class="feedback-link-btn">View All ></button>
+                                    </header>
+                                    <div class="goals-progress-row">
+                                        <div class="goals-ring"></div>
+                                        <p><strong>8/10</strong> milestones completed</p>
+                                    </div>
+                                    <ul class="goals-list">
+                                        <li class="is-positive">Improve student feedback</li>
+                                        <li class="is-positive">Research publications</li>
+                                        <li class="is-warning">Institutional activities</li>
+                                    </ul>
+                                </article>
+
+                                <article class="feedback-card">
+                                    <h4 class="appraisal-title">Appraisal feedback</h4>
+                                    <p class="appraisal-score">4.2/5</p>
+                                    <p class="appraisal-status">Exceeds Expectations</p>
+                                    <p class="appraisal-caption">Final appraisal rating for this cycle</p>
+                                    <p class="appraisal-meta">Increment : <span>Approved</span></p>
+                                    <p class="appraisal-meta">Promotion Review: <span>Eligible</span></p>
+                                </article>
+                            </div>
+                        </template>
+
+                        <template if:true={isFeedbackPerformance}>
+                            <div class="feedback-performance-top">
+                                <div>
+                                    <h4>84%</h4>
+                                    <p>Overall feedback score</p>
+                                </div>
+                                <span class="feedback-trend-pill">+ 2.2%</span>
+                            </div>
+
+                            <div class="feedback-metric-grid">
+                                <article class="feedback-metric-card">
+                                    <h4>82%</h4>
+                                    <p>Student feedback score</p>
+                                    <span>Trending up vs last sem</span>
+                                </article>
+                                <article class="feedback-metric-card">
+                                    <h4>89%</h4>
+                                    <p>Peer feedback score</p>
+                                    <span>Trending up vs last sem</span>
+                                </article>
+                                <article class="feedback-metric-card">
+                                    <h4>87%</h4>
+                                    <p>Institute feedback score</p>
+                                    <span>Trending up vs last sem</span>
+                                </article>
+                            </div>
+                        </template>
+
+                        <template if:true={isFeedbackGoals}>
+                            <div class="feedback-goals-header">
+                                <span></span>
+                                <button type="button" class="add-achievement-btn">+ Add New Goals &amp; Milestone</button>
+                            </div>
+                            <div class="feedback-goals-list">
+                                <template for:each={feedbackMilestones} for:item="item">
+                                    <article key={item.id} class="feedback-goal-item">
+                                        <div class="goal-col title">
+                                            <p class="goal-label">{item.milestoneLabel}</p>
+                                            <span class="goal-chip">{item.status}</span>
+                                            <h5>{item.title}</h5>
+                                        </div>
+                                        <div class="goal-col">
+                                            <p class="goal-label">Duration</p>
+                                            <p class="goal-value">{item.duration}</p>
+                                        </div>
+                                        <div class="goal-col">
+                                            <p class="goal-label">Progress &amp; Status</p>
+                                            <p class="goal-progress">{item.progress}</p>
+                                        </div>
+                                        <div class="goal-col">
+                                            <p class="goal-label">Updated on</p>
+                                            <p class="goal-value">{item.updatedOn}</p>
+                                        </div>
+                                        <button type="button" class="goal-menu-btn">...</button>
+                                    </article>
+                                </template>
+                            </div>
+                        </template>
+
+                        <template if:true={isFeedbackAppraisal}>
+                            <article class="appraisal-top-card">
+                                <div>
+                                    <p class="appraisal-score">4.2/5</p>
+                                    <p class="appraisal-status">Exceeds Expectations</p>
+                                    <p class="appraisal-caption">Final appraisal rating for this cycle</p>
+                                </div>
+                                <div class="appraisal-right-meta">
+                                    <p>Increment : <span>Approved</span></p>
+                                    <p>Promotion Review: <span>Eligible</span></p>
+                                </div>
+                            </article>
+
+                            <div class="feedback-grid-two">
+                                <article class="feedback-card ai-card">
+                                    <header class="feedback-card-header tinted">
+                                        <h4>AI Recommendations based on 2023-24 Cycle</h4>
+                                    </header>
+                                    <div class="ai-body">
+                                        <p class="ai-strong">Strengths</p>
+                                        <p>Student engagement scores (82%)</p>
+                                        <p>Innovative teaching methods</p>
+                                        <p class="ai-strong warning">Areas for Improvement</p>
+                                        <p>Research publication volume</p>
+                                        <p>Cross-departmental collaboration</p>
+                                    </div>
+                                    <button type="button" class="feedback-link-btn end">View Feedback ></button>
+                                </article>
+
+                                <article class="feedback-card focus-card">
+                                    <header class="feedback-card-header">
+                                        <h4>Focus Goals for Next Cycle</h4>
+                                    </header>
+                                    <ul class="focus-list">
+                                        <li>Improve research publications</li>
+                                        <li>Increase grant applications</li>
+                                        <li>Improve Cross-departmental collaboration</li>
+                                    </ul>
+                                    <button type="button" class="set-goals-btn">+ Set As Goals For 2025-26</button>
+                                </article>
+                            </div>
+                        </template>
+                    </section>
+                </div>
+            </template>
+
+            <template if:true={isAssetsTab}>
+                <div class="assets-wrap">
+                    <div class="assets-table-card">
+                        <div class="assets-table-scroll">
+                            <table class="assets-table" role="table" aria-label="Allocated assets">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">S.No</th>
+                                        <th scope="col">Asset category</th>
+                                        <th scope="col">Asset</th>
+                                        <th scope="col">Quantity</th>
+                                        <th scope="col">Issued date &amp; time</th>
+                                        <th scope="col">Return date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={allocatedAssetRows} for:item="row">
+                                        <tr key={row.id}>
+                                            <template lwc:if={row.showGroupDetails}>
+                                                <td rowspan={row.rowSpan}>{row.serialNo}</td>
+                                                <td rowspan={row.rowSpan}>{row.category}</td>
+                                            </template>
+                                            <td>{row.name}</td>
+                                            <td>{row.quantity}</td>
+                                            <td>{row.issuedDateTime}</td>
+                                            <td>{row.returnDate}</td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+        </article>
+    </section>
+
+    <template if:true={isAchievementModalOpen}>
+        <section class="faculty-modal-backdrop" onclick={handleAchievementBackdropClick}>
+            <article class="faculty-modal-card achievement-modal-card" onclick={stopAchievementModalClose}>
+                <h3 class="faculty-modal-title">Add Achievement</h3>
+                <div class="faculty-modal-divider"></div>
+
+                <div class="faculty-modal-field full">
+                    <label>Type <span class="required-star">*</span></label>
+                    <select class="faculty-modal-input" data-field="type" onchange={handleAchievementFormChange}>
+                        <template for:each={achievementTypeOptions} for:item="option">
+                            <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                        </template>
+                    </select>
+                </div>
+
+                <div class="achievement-modal-grid">
+                    <template if:true={isAchievementTypeEvents}>
+                        <div class="faculty-modal-field">
+                            <label>Event Title <span class="required-star">*</span></label>
+                            <input class="faculty-modal-input" type="text" placeholder="e.g. International Conference on AI" data-field="title" value={achievementForm.title} oninput={handleAchievementFormChange} />
+                        </div>
+                        <div class="faculty-modal-field">
+                            <label>Event Type <span class="required-star">*</span></label>
+                            <select class="faculty-modal-input" data-field="eventType" onchange={handleAchievementFormChange}>
+                                <template for:each={achievementEventTypeOptions} for:item="option">
+                                    <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                                </template>
+                            </select>
+                        </div>
+                        <div class="faculty-modal-field">
+                            <label>Role <span class="required-star">*</span></label>
+                            <select class="faculty-modal-input" data-field="role" onchange={handleAchievementFormChange}>
+                                <template for:each={achievementRoleOptions} for:item="option">
+                                    <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                                </template>
+                            </select>
+                        </div>
+                        <div class="faculty-modal-field">
+                            <label>Date <span class="required-star">*</span></label>
+                            <input class="faculty-modal-input" type="date" data-field="date" value={achievementForm.date} onchange={handleAchievementFormChange} />
+                        </div>
+                        <div class="faculty-modal-field">
+                            <label>Location <span class="required-star">*</span></label>
+                            <input class="faculty-modal-input" type="text" placeholder="e.g. Bangalore / Online" data-field="location" value={achievementForm.location} oninput={handleAchievementFormChange} />
+                        </div>
+                    </template>
+
+                    <template if:true={isAchievementTypeConsulting}>
+                        <div class="faculty-modal-field">
+                            <label>Title of the project <span class="required-star">*</span></label>
+                            <input class="faculty-modal-input" type="text" placeholder="Enter title" data-field="title" value={achievementForm.title} oninput={handleAchievementFormChange} />
+                        </div>
+                        <div class="faculty-modal-field">
+                            <label>Project Industry <span class="required-star">*</span></label>
+                            <select class="faculty-modal-input" data-field="projectIndustry" onchange={handleAchievementFormChange}>
+                                <template for:each={achievementIndustryOptions} for:item="option">
+                                    <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                                </template>
+                            </select>
+                        </div>
+                        <div class="faculty-modal-field">
+                            <label>Client / Organization Name <span class="required-star">*</span></label>
+                            <input class="faculty-modal-input" type="text" placeholder="Enter organization name" data-field="clientOrganization" value={achievementForm.clientOrganization} oninput={handleAchievementFormChange} />
+                        </div>
+                        <div class="faculty-modal-field">
+                            <label>Role <span class="required-star">*</span></label>
+                            <input class="faculty-modal-input" type="text" placeholder="Enter role" data-field="role" value={achievementForm.role} oninput={handleAchievementFormChange} />
+                        </div>
+                        <div class="faculty-modal-field">
+                            <label>Start Date <span class="required-star">*</span></label>
+                            <input class="faculty-modal-input" type="date" data-field="startDate" value={achievementForm.startDate} onchange={handleAchievementFormChange} />
+                        </div>
+                        <div class="faculty-modal-field">
+                            <label>End Date <span class="required-star">*</span></label>
+                            <input class="faculty-modal-input" type="date" data-field="endDate" value={achievementForm.endDate} onchange={handleAchievementFormChange} />
+                        </div>
+                    </template>
+
+                    <template if:true={isAchievementTypePatent}>
+                        <div class="faculty-modal-field">
+                            <label>Patent Title <span class="required-star">*</span></label>
+                            <input class="faculty-modal-input" type="text" placeholder="Name of the invention" data-field="title" value={achievementForm.title} oninput={handleAchievementFormChange} />
+                        </div>
+                        <div class="faculty-modal-field">
+                            <label>Application Number <span class="required-star">*</span></label>
+                            <input class="faculty-modal-input" type="text" placeholder="Official patent number" data-field="applicationNumber" value={achievementForm.applicationNumber} oninput={handleAchievementFormChange} />
+                        </div>
+                        <div class="faculty-modal-field">
+                            <label>Issuing Authority <span class="required-star">*</span></label>
+                            <input class="faculty-modal-input" type="text" placeholder="e.g. Indian Patent Office" data-field="issuingAuthority" value={achievementForm.issuingAuthority} oninput={handleAchievementFormChange} />
+                        </div>
+                        <div class="faculty-modal-field">
+                            <label>Status <span class="required-star">*</span></label>
+                            <select class="faculty-modal-input" data-field="patentStatus" onchange={handleAchievementFormChange}>
+                                <template for:each={achievementPatentStatusOptions} for:item="option">
+                                    <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                                </template>
+                            </select>
+                        </div>
+                        <div class="faculty-modal-field">
+                            <label>Date <span class="required-star">*</span></label>
+                            <input class="faculty-modal-input" type="date" data-field="date" value={achievementForm.date} onchange={handleAchievementFormChange} />
+                        </div>
+                    </template>
+
+                    <template if:true={isAchievementTypeGrants}>
+                        <div class="faculty-modal-field">
+                            <label>Grant Title <span class="required-star">*</span></label>
+                            <input class="faculty-modal-input" type="text" placeholder="e.g. AI-based Smart Healthcare Research" data-field="title" value={achievementForm.title} oninput={handleAchievementFormChange} />
+                        </div>
+                        <div class="faculty-modal-field">
+                            <label>Funding Agency <span class="required-star">*</span></label>
+                            <input class="faculty-modal-input" type="text" placeholder="e.g. UGC, DST, European Commission" data-field="fundingAgency" value={achievementForm.fundingAgency} oninput={handleAchievementFormChange} />
+                        </div>
+                        <div class="faculty-modal-field">
+                            <label>Grant Amount <span class="required-star">*</span></label>
+                            <input class="faculty-modal-input" type="number" placeholder="e.g. 200000" data-field="grantAmount" value={achievementForm.grantAmount} oninput={handleAchievementFormChange} />
+                        </div>
+                        <div class="faculty-modal-field">
+                            <label>Currency <span class="required-star">*</span></label>
+                            <select class="faculty-modal-input" data-field="currency" onchange={handleAchievementFormChange}>
+                                <template for:each={achievementCurrencyOptions} for:item="option">
+                                    <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                                </template>
+                            </select>
+                        </div>
+                        <div class="faculty-modal-field">
+                            <label>Year <span class="required-star">*</span></label>
+                            <select class="faculty-modal-input" data-field="year" onchange={handleAchievementFormChange}>
+                                <template for:each={achievementYearOptions} for:item="option">
+                                    <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                                </template>
+                            </select>
+                        </div>
+                    </template>
+
+                    <template if:true={isAchievementTypePublications}>
+                        <div class="faculty-modal-field">
+                            <label>Type of Publication <span class="required-star">*</span></label>
+                            <select class="faculty-modal-input" data-field="publicationType" onchange={handleAchievementFormChange}>
+                                <template for:each={achievementPublicationTypeOptions} for:item="option">
+                                    <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                                </template>
+                            </select>
+                        </div>
+                        <div class="faculty-modal-field">
+                            <label>Title of the Paper <span class="required-star">*</span></label>
+                            <input class="faculty-modal-input" type="text" placeholder="Enter paper title" data-field="title" value={achievementForm.title} oninput={handleAchievementFormChange} />
+                        </div>
+                        <div class="faculty-modal-field">
+                            <label>Journal / Conference Name <span class="required-star">*</span></label>
+                            <input class="faculty-modal-input" type="text" placeholder="e.g. IEEE Transactions on..." data-field="journalConferenceName" value={achievementForm.journalConferenceName} oninput={handleAchievementFormChange} />
+                        </div>
+                        <div class="faculty-modal-field">
+                            <label>Year of Publication <span class="required-star">*</span></label>
+                            <select class="faculty-modal-input" data-field="publicationYear" onchange={handleAchievementFormChange}>
+                                <template for:each={achievementPublicationYearOptions} for:item="option">
+                                    <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                                </template>
+                            </select>
+                        </div>
+                        <div class="faculty-modal-field achievement-field-span-2">
+                            <label>Publication Link</label>
+                            <input class="faculty-modal-input" type="url" placeholder="Link to the publication" data-field="publicationLink" value={achievementForm.publicationLink} oninput={handleAchievementFormChange} />
+                        </div>
+                    </template>
+                </div>
+
+                <template if:true={isAchievementTypeConsulting}>
+                    <div class="faculty-modal-field achievement-description-field">
+                        <label>Project Description</label>
+                        <textarea class="achievement-textarea short" placeholder="Enter short description" data-field="description" oninput={handleAchievementFormChange}>{achievementForm.description}</textarea>
+                    </div>
+                    <div class="faculty-modal-field achievement-description-field">
+                        <label>Outcome</label>
+                        <textarea class="achievement-textarea" placeholder="Brief details about the outcome" data-field="outcome" oninput={handleAchievementFormChange}>{achievementForm.outcome}</textarea>
+                    </div>
+                </template>
+
+                <template if:true={isAchievementTypePatent}>
+                    <div class="faculty-modal-field achievement-description-field">
+                        <label>Description</label>
+                        <textarea class="achievement-textarea" placeholder="Brief explanation of the invention" data-field="description" oninput={handleAchievementFormChange}>{achievementForm.description}</textarea>
+                    </div>
+                </template>
+
+                <template if:true={isAchievementTypeGrants}>
+                    <div class="faculty-modal-field achievement-description-field">
+                        <label>Description</label>
+                        <textarea class="achievement-textarea" placeholder="About the book" data-field="description" oninput={handleAchievementFormChange}>{achievementForm.description}</textarea>
+                    </div>
+                </template>
+
+                <template if:true={isAchievementTypePublications}>
+                    <div class="faculty-modal-field achievement-description-field">
+                        <label>Description</label>
+                        <textarea class="achievement-textarea" placeholder="Summary or contribution" data-field="description" oninput={handleAchievementFormChange}>{achievementForm.description}</textarea>
+                    </div>
+                </template>
+
+                <template if:true={isAchievementTypeEvents}>
+                    <div class="faculty-modal-field achievement-description-field">
+                        <label>Description</label>
+                        <textarea class="achievement-textarea" placeholder="Brief details about the achievement" data-field="description" oninput={handleAchievementFormChange}>{achievementForm.description}</textarea>
+                    </div>
+                </template>
+
+                <div class="faculty-modal-field achievement-upload-field">
+                    <label>Supporting Document</label>
+                    <label class="achievement-upload-box" for="achievement-file-input">
+                        <input id="achievement-file-input" class="achievement-upload-input" type="file" accept=".png,.jpg,.jpeg,.pdf" onchange={handleAchievementFileChange} />
+                        <p><span>Click to upload</span> or drag and drop</p>
+                        <small>PNG, JPG or PDF (Max 5 MB)</small>
+                    </label>
+                    <template if:true={achievementForm.attachment}>
+                        <p class="achievement-file-name">{achievementForm.attachment}</p>
+                    </template>
+                </div>
+
+                <div class="faculty-modal-actions">
+                    <button type="button" class="modal-back-btn" onclick={handleCloseAchievementModal}>Back</button>
+                    <button type="button" class="modal-save-btn" onclick={handleSaveAchievement}>Save</button>
+                </div>
+            </article>
+        </section>
+    </template>
+
+    <template if:true={isResearchModalOpen}>
+        <section class="faculty-modal-backdrop" onclick={handleResearchBackdropClick}>
+            <article class="faculty-modal-card" onclick={stopResearchModalClose}>
+                <h3 class="faculty-modal-title">Academic research</h3>
+                <div class="faculty-modal-divider"></div>
+
+                <div class="faculty-modal-field full">
+                    <label>Type of Research <span class="required-star">*</span></label>
+                    <select class="faculty-modal-input" data-field="type" onchange={handleResearchFormChange}>
+                        <template for:each={researchTypeOptions} for:item="option">
+                            <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                        </template>
+                    </select>
+                </div>
+
+                <div class="faculty-modal-grid">
+                    <div class="faculty-modal-field">
+                        <label>Title of the Paper <span class="required-star">*</span></label>
+                        <input class="faculty-modal-input" type="text" placeholder="Enter title" data-field="title" value={researchForm.title} oninput={handleResearchFormChange} />
+                    </div>
+                    <div class="faculty-modal-field">
+                        <label>Journal / Conference Name <span class="required-star">*</span></label>
+                        <input class="faculty-modal-input" type="text" placeholder="e.g. IEEE, Springer Conference" data-field="venue" value={researchForm.venue} oninput={handleResearchFormChange} />
+                    </div>
+                    <div class="faculty-modal-field">
+                        <label>Publication Year <span class="required-star">*</span></label>
+                        <select class="faculty-modal-input" data-field="publicationYear" onchange={handleResearchFormChange}>
+                            <template for:each={researchYearOptions} for:item="option">
+                                <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                            </template>
+                        </select>
+                    </div>
+                    <div class="faculty-modal-field">
+                        <label>Publication Link</label>
+                        <input class="faculty-modal-input" type="url" placeholder="Link to the publication" data-field="link" value={researchForm.link} oninput={handleResearchFormChange} />
+                    </div>
+                </div>
+
+                <div class="faculty-modal-actions">
+                    <button type="button" class="modal-back-btn" onclick={handleCloseResearchModal}>Back</button>
+                    <button type="button" class="modal-save-btn" onclick={handleSaveResearch}>Save</button>
+                </div>
+            </article>
+        </section>
+    </template>
+
+    <template if:true={isResearchSuccessOpen}>
+        <section class="faculty-modal-backdrop">
+            <article class="faculty-success-card">
+                <div class="faculty-success-icon-wrap">
+                    <span>✓</span>
+                </div>
+                <h3>Submitted Successfully.</h3>
+                <p>Academic research data saved successfully!</p>
+            </article>
+        </section>
+    </template>
+</template>

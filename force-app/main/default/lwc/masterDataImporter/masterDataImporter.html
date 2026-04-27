@@ -1,0 +1,79 @@
+<template>
+    <template if:true={isThemeLoading}>
+        <div class="master-layout skeleton-shell" aria-busy="true">
+            <div class="master-shell">
+                <div class="master-header">
+                    <div class="master-hero skeleton-hero">
+                        <div class="skeleton-icon skeleton-shimmer" aria-hidden="true"></div>
+                        <div class="skeleton-hero-text">
+                            <div class="skeleton-line skeleton-shimmer w-40"></div>
+                            <div class="skeleton-line skeleton-shimmer w-65"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="master-body skeleton-body">
+                    <div class="skeleton-tabs" role="presentation">
+                        <div class="skeleton-pill skeleton-shimmer w-20"></div>
+                        <div class="skeleton-pill skeleton-shimmer w-22"></div>
+                        <div class="skeleton-pill skeleton-shimmer w-20"></div>
+                        <div class="skeleton-pill skeleton-shimmer w-18"></div>
+                    </div>
+                    <div class="skeleton-content skeleton-shimmer"></div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template if:false={isThemeLoading}>
+        <div class="master-layout">
+            <div class="master-shell">
+                <div class="master-header">
+                <div class="master-hero">
+                    <div class="hero-icon" aria-hidden="true">
+                        <lightning-icon icon-name="utility:upload" size="small"></lightning-icon>
+                    </div>
+                    <div class="hero-copy">
+                            <div class="hero-title">Master Data Import</div>
+                            <div class="hero-subtitle">Manage bulk imports for accounts, programs, courses, and users.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="master-body">
+                    <div class="tab-list" role="tablist" aria-label="Master data import sections">
+                        <template for:each={tabs} for:item="tab">
+                            <button
+                                key={tab.id}
+                                type="button"
+                                class={tab.className}
+                                data-tab={tab.id}
+                                data-label={tab.label}
+                                role="tab"
+                                aria-selected={tab.ariaSelected}
+                                tabindex={tab.tabIndex}
+                                onclick={handleTabClick}
+                            >
+                                <span class="tab-label">{tab.label}</span>
+                            </button>
+                        </template>
+                    </div>
+                    <div class="tab-panels">
+                        <template if:true={renderActiveTab}>
+                            <section class="tab-panel" role="tabpanel" if:true={isAccountTab}>
+                                <c-account-import onrefreshimport={handleRefreshImport}></c-account-import>
+                            </section>
+                            <section class="tab-panel" role="tabpanel" if:true={isProgramTab}>
+                                <c-program-importer onrefreshimport={handleRefreshImport}></c-program-importer>
+                            </section>
+                            <section class="tab-panel" role="tabpanel" if:true={isCourseTab}>
+                                <c-course-importer onrefreshimport={handleRefreshImport}></c-course-importer>
+                            </section>
+                            <section class="tab-panel" role="tabpanel" if:true={isUserTab}>
+                                <c-user-importer onrefreshimport={handleRefreshImport}></c-user-importer>
+                            </section>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+</template>

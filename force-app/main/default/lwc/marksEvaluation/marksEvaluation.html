@@ -1,0 +1,151 @@
+<template>
+    <section class="marks-evaluation-page">
+        <article class="evaluation-card">
+            <header class="evaluation-header">
+                <div>
+                    <h2 class="course-title">Network Analysis &amp; Synthesis | #NJF234</h2>
+                    <p class="course-meta">12 Booklets <span class="meta-separator">|</span> Theory</p>
+                </div>
+                <button type="button" class="save-button" onclick={handleSave}>Save</button>
+            </header>
+
+            <div class="alerts-wrap">
+                <article class="alert alert-note">
+                    <div class="alert-title-wrap">
+                        <span class="alert-icon alert-icon-note" aria-hidden="true">!</span>
+                        <p class="alert-title">Please note!</p>
+                    </div>
+                    <p class="alert-body">If you leave a field blank, it will automatically be counted as 0.</p>
+                </article>
+
+                <template lwc:if={hasLimitError}>
+                    <article class="alert alert-error">
+                        <div class="alert-title-wrap">
+                            <span class="alert-icon alert-icon-error" aria-hidden="true">!</span>
+                            <p class="alert-title">Marks exceed maximum limit</p>
+                        </div>
+                        <p class="alert-body">
+                            Some questions have marks higher than the allowed maximum. Please review and correct the
+                            marks to be within the specified limit.
+                        </p>
+                    </article>
+                </template>
+            </div>
+
+            <div class="table-wrap">
+                <table class="evaluation-table" aria-label="Marks evaluation table">
+                    <thead>
+                        <tr>
+                            <th class="group-blank"></th>
+                            <th class="group-blank"></th>
+                            <template for:each={sectionGroups} for:item="group">
+                                <th key={group.key} colspan={group.colspan} class={group.className}>
+                                    <div>{group.title}</div>
+                                    <p class="group-subtitle">{group.subtitle}</p>
+                                </th>
+                            </template>
+                        </tr>
+                        <tr>
+                            <th scope="col" class="small-col">S No</th>
+                            <th scope="col" class="booklet-col">Booklet No</th>
+                            <template for:each={questionColumns} for:item="question">
+                                <th scope="col" key={question.key}>{question.label}</th>
+                            </template>
+                            <th scope="col" class="total-col">Total Marks (75)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={tableRows} for:item="row">
+                            <tr key={row.id}>
+                                <td>{row.serial}</td>
+                                <td>{row.bookletNo}</td>
+                                <template for:each={row.cells} for:item="cell">
+                                    <td key={cell.key}>
+                                        <div class="mark-field">
+                                            <input
+                                                type="text"
+                                                value={cell.value}
+                                                class={cell.inputClass}
+                                                aria-label={cell.label}
+                                                data-row-id={row.id}
+                                                data-question-key={cell.questionKey}
+                                                inputmode="numeric"
+                                                maxlength="2"
+                                                oninput={handleMarkInput}
+                                            />
+                                            <template lwc:if={cell.showSuccess}>
+                                                <span class="field-icon field-icon-success" aria-hidden="true">✓</span>
+                                            </template>
+                                            <template lwc:if={cell.showError}>
+                                                <span class="field-icon field-icon-error" aria-hidden="true">!</span>
+                                            </template>
+                                        </div>
+                                    </td>
+                                </template>
+                                <td>
+                                    <span class="total-pill">{row.totalMarks}</span>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mobile-cards" aria-label="Marks evaluation cards">
+                <template for:each={tableRows} for:item="row">
+                    <article key={row.id} class="evaluation-mobile-card">
+                        <div class="mobile-card-head">
+                            <div>
+                                <p class="mobile-serial">S No: {row.serial}</p>
+                                <p class="mobile-booklet">Booklet No: {row.bookletNo}</p>
+                            </div>
+                            <span class="total-pill">{row.totalMarks}</span>
+                        </div>
+
+                        <div class="mobile-questions-grid">
+                            <template for:each={row.cells} for:item="cell">
+                                <div key={cell.key} class="mobile-question-item">
+                                    <label class="mobile-question-label" for={cell.key}>{cell.label}</label>
+                                    <div class="mark-field">
+                                        <input
+                                            id={cell.key}
+                                            type="text"
+                                            value={cell.value}
+                                            class={cell.inputClass}
+                                            aria-label={cell.label}
+                                            data-row-id={row.id}
+                                            data-question-key={cell.questionKey}
+                                            inputmode="numeric"
+                                            maxlength="2"
+                                            oninput={handleMarkInput}
+                                        />
+                                        <template lwc:if={cell.showSuccess}>
+                                            <span class="field-icon field-icon-success" aria-hidden="true">✓</span>
+                                        </template>
+                                        <template lwc:if={cell.showError}>
+                                            <span class="field-icon field-icon-error" aria-hidden="true">!</span>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </article>
+                </template>
+            </div>
+        </article>
+
+        <template lwc:if={isSaveModalOpen}>
+            <section class="save-modal-backdrop" role="dialog" aria-modal="true" aria-label="Save status">
+                <article class="save-modal">
+                    <div class="save-check-wrap">
+                        <span class={saveIconClass}>{saveIconText}</span>
+                    </div>
+                    <p class="save-message">
+                        {saveModalMessage}<template lwc:if={isSaveSuccessful}><span class="save-message-star">*</span></template>
+                    </p>
+                    <button type="button" class="save-modal-close" onclick={closeSaveModal}>OK</button>
+                </article>
+            </section>
+        </template>
+    </section>
+</template>

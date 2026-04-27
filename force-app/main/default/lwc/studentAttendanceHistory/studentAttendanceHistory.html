@@ -1,0 +1,89 @@
+<template>
+    <section class="attendance-shell">
+        <div class="top-row">
+            <div class="title-group">
+                <h2 class="title">Attendance Overview</h2>
+            </div>
+        </div>
+
+        <div class="parent-tab-row">
+            <button
+                type="button"
+                class={attendanceTabClass}
+                data-tab="attendance"
+                onclick={handleMainTabChange}
+            >
+                Attendance
+            </button>
+            <button
+                type="button"
+                class={leaveRequestTabClass}
+                data-tab="leaveRequest"
+                onclick={handleMainTabChange}
+            >
+                Leave Request
+            </button>
+        </div>
+
+        <template lwc:if={isAttendanceTab}>
+            <div class="top-actions">
+                <div class="semester-wrap">
+                    <select class="semester-select" onchange={handleSemesterChange}>
+                        <template for:each={selectedSemesterOptions} for:item="option">
+                            <option key={option.value} value={option.value} selected={option.selected}>{option.label}</option>
+                        </template>
+                    </select>
+                    <span class="current-pill"><span class="dot"></span>Current</span>
+                    <span class="caret">⌄</span>
+                </div>
+                <button type="button" class="secondary-btn">Get Help</button>
+                <button type="button" class="primary-btn">Request Leave of Absence</button>
+            </div>
+
+            <div class="table-card">
+                <div class="table-scroll">
+                    <table class="attendance-table">
+                        <thead>
+                            <tr>
+                                <th class="col-sn">S.No</th>
+                                <th>Course Name</th>
+                                <th>Course Code</th>
+                                <th>Attendance (%)</th>
+                                <th>All Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={tableRows} for:item="row">
+                                <tr key={row.id}>
+                                    <td class="col-sn">{row.serialNo}</td>
+                                    <td>{row.courseName}</td>
+                                    <td>{row.courseCode}</td>
+                                    <td><span class={row.attendanceClass}>{row.attendance}</span></td>
+                                    <td><span class={row.statusClass}>{row.status}</span></td>
+                                    <td class="col-action">
+                                        <button type="button" class="view-btn" data-id={row.id} onclick={handleViewDetails}>View Details</button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </template>
+
+        <template lwc:else>
+            <div class="leave-request-shell">
+                <template lwc:if={isLeaveRequestListView}>
+                    <c-attendane-leave-requests onrequestselect={handleLeaveRequestSelect}></c-attendane-leave-requests>
+                </template>
+                <template lwc:else>
+                    <div class="leave-detail-header">
+                        <button type="button" class="secondary-btn" onclick={handleBackToLeaveRequestList}>← Back to Requests</button>
+                    </div>
+                    <c-leave-request-details request-data={selectedLeaveRequest}></c-leave-request-details>
+                </template>
+            </div>
+        </template>
+    </section>
+</template>

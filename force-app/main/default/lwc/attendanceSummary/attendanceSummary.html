@@ -1,0 +1,267 @@
+<template>
+    <section class="attendance-summary-page">
+        <article class="summary-card">
+            <header class="summary-head">
+                <nav class="top-tabs" aria-label="Attendance tabs">
+                    <button type="button" class={attendanceTabClass} onclick={showAttendanceTab}>Attendance</button>
+                    <button type="button" class={leaveRequestsTabClass} onclick={showLeaveRequestsTab}>Leave Requests</button>
+                </nav>
+
+                <div class="head-actions">
+                    <div class="semester-wrap">
+                        <select class="semester-select">
+                            <option>Semester 1</option>
+                            <option>Semester 2</option>
+                        </select>
+                        <span class="current-pill"><span class="dot" aria-hidden="true"></span>Current</span>
+                    </div>
+                    <button type="button" class="ghost-btn" onclick={openHelpModal}>Get Help</button>
+                    <button type="button" class="primary-btn" onclick={openApplyModal}>Apply For Leave/Swap</button>
+                </div>
+            </header>
+
+            <template lwc:if={isAttendanceTab}>
+                <div class="attendance-table-wrap">
+                    <table class="attendance-table" aria-label="Attendance summary table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Date</th>
+                                <th scope="col">Day</th>
+                                <th scope="col">Punch In</th>
+                                <th scope="col">Punch Out</th>
+                                <th scope="col">Late Punch In (min)</th>
+                                <th scope="col">Early Punch Out (min)</th>
+                                <th scope="col">Overtime</th>
+                                <th scope="col">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={attendanceRows} for:item="row">
+                                <tr key={row.id}>
+                                    <td>{row.date}</td>
+                                    <td>{row.day}</td>
+                                    <td>{row.punchIn}</td>
+                                    <td>{row.punchOut}</td>
+                                    <td>{row.lateIn}</td>
+                                    <td>{row.earlyOut}</td>
+                                    <td>{row.overtime}</td>
+                                    <td>
+                                        <span class={row.statusClass}>{row.status}</span>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="attendance-cards" aria-label="Attendance summary cards">
+                    <template for:each={attendanceRows} for:item="row">
+                        <article key={row.id} class="attendance-card">
+                            <div class="attendance-card-head">
+                                <p class="attendance-card-date">{row.date}</p>
+                                <span class={row.statusClass}>{row.status}</span>
+                            </div>
+                            <p class="attendance-card-day">{row.day}</p>
+
+                            <dl class="attendance-card-grid">
+                                <div class="attendance-card-item">
+                                    <dt>Punch In</dt>
+                                    <dd>{row.punchIn}</dd>
+                                </div>
+                                <div class="attendance-card-item">
+                                    <dt>Punch Out</dt>
+                                    <dd>{row.punchOut}</dd>
+                                </div>
+                                <div class="attendance-card-item">
+                                    <dt>Late Punch In (min)</dt>
+                                    <dd>{row.lateIn}</dd>
+                                </div>
+                                <div class="attendance-card-item">
+                                    <dt>Early Punch Out (min)</dt>
+                                    <dd>{row.earlyOut}</dd>
+                                </div>
+                                <div class="attendance-card-item attendance-card-item-full">
+                                    <dt>Overtime</dt>
+                                    <dd>{row.overtime}</dd>
+                                </div>
+                            </dl>
+                        </article>
+                    </template>
+                </div>
+            </template>
+
+            <template lwc:if={isLeaveRequestsTab}>
+                <section class="leave-panel">
+                    <header class="leave-panel-head">
+                        <h3 class="leave-panel-title">All Leave Requests</h3>
+                        <button type="button" class="filter-btn">Filters</button>
+                    </header>
+
+                    <div class="leave-list">
+                        <template for:each={leaveRequests} for:item="item">
+                            <article key={item.id} class="leave-request-card" onclick={navigateToLeaveRequest}>
+                                <div class="request-topline">
+                                    <p class="request-number">#{item.requestNo}</p>
+                                    <div class="request-meta-wrap">
+                                        <p class="request-meta">{item.submittedText}: <span>{item.submittedDate}</span></p>
+                                        <span class={item.statusClass}>{item.status}</span>
+                                    </div>
+                                </div>
+
+                                <h4 class="request-title">{item.title}</h4>
+                                <p class="request-description">{item.description}</p>
+                                <p class="request-dates">Leave Dates: <span>{item.leaveDates}</span></p>
+                            </article>
+                        </template>
+                    </div>
+                </section>
+            </template>
+        </article>
+
+        <template lwc:if={isHelpModalOpen}>
+            <section class="help-modal-backdrop" role="dialog" aria-modal="true" aria-label="Get Help">
+                <div class="help-modal">
+                    <h3>Get Help</h3>
+                    <div class="help-divider"></div>
+
+                    <label class="field-label" for="help-description">Description of the Issue (Optional)</label>
+                    <div class="description-wrap">
+                        <textarea id="help-description" class="modal-textarea" placeholder="Enter description"></textarea>
+                        <button type="button" class="auto-create-button">Auto-Create Form Now</button>
+                    </div>
+
+                    <label class="field-label required" for="help-type">Choose Issue Type</label>
+                    <select id="help-type" class="modal-input">
+                        <option>Examinations</option>
+                        <option>Course Selection</option>
+                        <option>Fee Related</option>
+                    </select>
+
+                    <label class="field-label required" for="help-subject">Issue Subject</label>
+                    <input id="help-subject" class="modal-input" type="text" placeholder="Enter issue subject" />
+
+                    <p class="field-label upload-label">Upload Supporting Document (Optional)</p>
+                    <div class="upload-box">
+                        <p><span>Click to upload</span> or drag and drop</p>
+                        <p>PNG, JPG or PDF (Max 5 MB)</p>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="cancel-button" onclick={closeHelpModal}>Cancel</button>
+                        <button type="button" class="modal-submit-button">Submit</button>
+                    </div>
+                </div>
+            </section>
+        </template>
+
+        <template lwc:if={isApplyModalOpen}>
+            <section class="apply-modal-backdrop" role="dialog" aria-modal="true" aria-label="Apply for Leave or Swap">
+                <article class="apply-modal">
+                    <header class="apply-modal-head">
+                        <h3 class="apply-modal-title">Apply for Leave/Swap</h3>
+                    </header>
+
+                    <section class="apply-block">
+                        <p class="field-label">Choose request type</p>
+                        <div class="request-type-row">
+                            <label class="radio-line">
+                                <input type="radio" name="requestType" value="leave" checked={isLeaveMode} onchange={handleRequestTypeChange} />
+                                <span>Leave</span>
+                            </label>
+                            <label class="radio-line">
+                                <input type="radio" name="requestType" value="swap" checked={isSwapMode} onchange={handleRequestTypeChange} />
+                                <span>Swap</span>
+                            </label>
+                        </div>
+                    </section>
+
+                    <template lwc:if={isLeaveMode}>
+                        <section class="apply-block">
+                            <label class="field-group">
+                                <span class="field-label">Leave Type</span>
+                                <select class="field-input">
+                                    <option>Select</option>
+                                    <option>Sick Leave</option>
+                                    <option>Personal Leave</option>
+                                    <option>Emergency Leave</option>
+                                </select>
+                            </label>
+                        </section>
+
+                        <section class="apply-block">
+                            <label class="field-group">
+                                <span class="field-label">Choose Dates</span>
+                                <span class="icon-input-wrap">
+                                    <input type="date" class="field-input" />
+                                    <lightning-icon icon-name="utility:event" size="x-small" class="field-trailing-icon"></lightning-icon>
+                                </span>
+                            </label>
+                        </section>
+
+                        <section class="apply-block">
+                            <label class="field-group">
+                                <span class="field-label">No of Days</span>
+                                <input type="text" class="field-input" value="2" />
+                            </label>
+                        </section>
+                    </template>
+
+                    <template lwc:if={isSwapMode}>
+                        <section class="apply-block">
+                            <label class="field-group">
+                                <span class="field-label">Reason for Swap</span>
+                                <select class="field-input">
+                                    <option>Select</option>
+                                    <option>Medical</option>
+                                    <option>Personal Emergency</option>
+                                    <option>Academic Conflict</option>
+                                </select>
+                            </label>
+                        </section>
+                    </template>
+
+                    <section class="apply-block">
+                        <label class="field-group">
+                            <span class="field-label">Reason</span>
+                            <textarea class="field-textarea" placeholder="Enter description"></textarea>
+                        </label>
+                    </section>
+
+                    <template lwc:if={isSwapMode}>
+                        <section class="apply-block">
+                            <label class="field-group">
+                                <span class="field-label">Choose the Class you want to Swap</span>
+                                <select class="field-input">
+                                    <option>Select Class</option>
+                                    <option>AP304</option>
+                                    <option>CS304</option>
+                                    <option>ECE-II</option>
+                                </select>
+                            </label>
+                        </section>
+
+                        <section class="apply-block">
+                            <label class="field-group">
+                                <span class="field-label">Choose from a List of Available Faculties for a Swap</span>
+                                <select class="field-input">
+                                    <option>Select option 1</option>
+                                </select>
+                                <select class="field-input field-input-gap">
+                                    <option>Select option 2</option>
+                                </select>
+                                <select class="field-input field-input-gap">
+                                    <option>Select option 3</option>
+                                </select>
+                            </label>
+                        </section>
+                    </template>
+
+                    <footer class="apply-modal-actions">
+                        <button type="button" class="ghost-btn" onclick={closeApplyModal}>Cancel</button>
+                        <button type="button" class="primary-btn" onclick={submitApplyModal}>Submit</button>
+                    </footer>
+                </article>
+            </section>
+        </template>
+    </section>
+</template>

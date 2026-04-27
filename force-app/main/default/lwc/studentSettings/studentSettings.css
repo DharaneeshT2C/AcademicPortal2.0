@@ -1,0 +1,704 @@
+:host {
+    display: block;
+    --primary-color: #2C58E8;
+    --primary-color-dark: #1f4de0;
+    --primary-soft: #eaf0ff;
+}
+
+.student-settings-page {
+    padding: 1rem;
+    background: #ffffff;
+    border-radius: 12px;
+    height: calc(100vh - 153px);
+    overflow-y: scroll;
+}
+
+.settings-section {
+    background: #ffffff;
+    border-radius: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.section-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #2d3550;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1rem 0;
+}
+
+.settings-section > .section-title {
+    padding: 1rem 1rem 0;
+}
+
+.section-body {
+    padding: 1rem;
+}
+
+.profile-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.profile-photo-wrap {
+    width: 6rem;
+    height: 6rem;
+    border-radius: 0.4rem;
+    background: #16325c;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.photo-title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.photo-hint {
+    margin: 0.2rem 0;
+    font-size: 0.8rem;
+    color: #706e6b;
+}
+
+.edit-icon-btn {
+    width: 28px;
+    height: 28px;
+    border: 1px solid #c2c6cc;
+    border-radius: 8px;
+    background: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+}
+
+.form-grid {
+    display: grid;
+    gap: 0.75rem 1rem;
+}
+
+.form-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.form-grid-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.basic-fields-grid {
+    gap: 1.25rem 1rem;
+}
+
+.basic-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.basic-label {
+    font-size: 14px;
+    line-height: 1;
+    color: #3e3f4a;
+    font-weight: 500;
+}
+
+.basic-input {
+    width: 100%;
+    height: 36px;
+    border: 1px solid #c2c6cc;
+    border-radius: 12px;
+    background: #ffffff;
+    font-size: 14px;
+    color: #373b45;
+    padding: 0 0.75rem;
+    outline: none;
+}
+
+.basic-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary-color) 35%, #ffffff);
+}
+
+.with-icon {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-right: 0.75rem;
+}
+
+.plain-input {
+    flex: 1;
+    height: 100%;
+    border: 0;
+    background: transparent;
+    outline: none;
+    font-size: 14px;
+    color: #373b45;
+}
+
+.select-wrap {
+    position: relative;
+}
+
+.plain-select {
+    appearance: none;
+    padding-right: 1.9rem;
+}
+
+.select-wrap::after {
+    content: '';
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #6a7fd6;
+    transform: translateY(-15%);
+    pointer-events: none;
+}
+
+.request-row {
+    min-height: 36px;
+    border: 1px solid #dddbda;
+    border-radius: 0.25rem;
+    background: #fafaf9;
+    padding: 0.35rem 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.request-row-basic {
+    border-color: #bfd0ff;
+    border-radius: 12px;
+    background: var(--primary-soft);
+    padding: 0 0.75rem;
+    font-size: 14px;
+    color: #373b45;
+}
+
+.request-link {
+    border: 0;
+    background: transparent;
+    color: var(--primary-color);
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    padding: 0;
+}
+
+.request-link:hover {
+    color: var(--primary-color-dark);
+}
+
+.request-outline-btn {
+    height: 36px;
+    border: 1px solid var(--primary-color);
+    border-radius: 10px;
+    background: #ffffff;
+    color: var(--primary-color);
+    font-size: 14px;
+    padding: 0 14px;
+    cursor: pointer;
+}
+
+.request-outline-btn:hover {
+    border-color: var(--primary-color-dark);
+    color: var(--primary-color-dark);
+}
+
+.request-outline-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-color) 30%, #ffffff);
+}
+
+.save-btn {
+    height: 36px;
+    border: 1px solid var(--primary-color);
+    border-radius: 10px;
+    background: var(--primary-color);
+    color: #ffffff;
+    font-size: 14px;
+    padding: 0 16px;
+    cursor: pointer;
+}
+
+.save-btn:hover {
+    background: var(--primary-color-dark);
+    border-color: var(--primary-color-dark);
+}
+
+.save-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-color) 30%, #ffffff);
+}
+
+.footer-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.faculty-settings-page {
+    background: #ffffff;
+}
+
+.faculty-profile-section {
+    /* border: 1px solid #e4e8f0; */
+}
+
+.faculty-profile-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    align-items: start;
+}
+
+.faculty-avatar-wrap {
+    width: 110px;
+    height: 110px;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    background: #dbe0ea;
+}
+
+.faculty-avatar-img,
+.faculty-avatar-fallback {
+    width: 100%;
+    height: 100%;
+}
+
+.faculty-avatar-img {
+    object-fit: cover;
+    display: block;
+}
+
+.faculty-avatar-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #21335b;
+    color: #fff;
+    font-size: 26px;
+    font-weight: 600;
+}
+
+.faculty-edit-photo-btn {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+}
+
+.faculty-name {
+    margin: 0;
+    font-size: 24px;
+    line-height: 1.1;
+    font-weight: 600;
+    color: #2f3445;
+}
+
+.faculty-id {
+    margin: 0.15rem 0 0.9rem;
+    font-size: 18px;
+    color: #5f6779;
+}
+
+.faculty-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.75rem 1rem;
+}
+
+.faculty-meta-item p {
+    margin: 0;
+    font-size: 13px;
+    color: #7a8293;
+}
+
+.faculty-meta-item span {
+    display: inline-block;
+    margin-top: 0.2rem;
+    font-size: 15px;
+    color: #2f3445;
+}
+
+.faculty-status-pill {
+    border-radius: 999px;
+    padding: 2px 8px;
+    background: #d9efda;
+    color: #2f7a3a !important;
+    font-size: 12px !important;
+}
+
+.faculty-details-section > .section-title {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.faculty-section-body {
+    padding-top: 0.5rem;
+}
+
+.faculty-divider {
+    border-top: 1px solid #e7ebf2;
+    margin: 0.25rem 0 0.9rem;
+}
+
+.faculty-block {
+    padding-bottom: 0.6rem;
+}
+
+.faculty-block-title {
+    margin: 0 0 0.85rem;
+    font-size: 15px;
+    font-weight: 500;
+    color: #32384a;
+}
+
+.faculty-check-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: 0.45rem;
+    font-size: 14px;
+    color: #4b5364;
+}
+
+.faculty-check-wrap input {
+    width: 16px;
+    height: 16px;
+}
+
+.faculty-footer-actions {
+    margin-top: 0.2rem;
+    padding: 0.7rem 0;
+    border-top: 1px solid #e2e7f2;
+}
+
+.settings-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.42);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1200;
+    padding: 16px;
+}
+
+.settings-modal-card {
+    width: min(610px, 100%);
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 34px 42px 30px;
+}
+
+.settings-modal-title {
+    margin: 0 0 22px;
+    font-size: 18px;
+    line-height: 1.2;
+    color: #2f3445;
+    font-weight: 500;
+}
+
+.settings-modal-input {
+    width: 100%;
+    height: 46px;
+    border: 1px solid #ccd2de;
+    border-radius: 14px;
+    padding: 0 18px;
+    font-size: 16px;
+    color: #44495a;
+    outline: none;
+}
+
+.settings-modal-input::placeholder {
+    color: #9aa1ae;
+}
+
+.settings-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 26px;
+}
+
+.settings-action-btn {
+    min-width: 160px;
+}
+
+.settings-modal-card-otp {
+    width: min(540px, 100%);
+    text-align: center;
+    padding: 30px 34px 26px;
+}
+
+.otp-title {
+    margin-bottom: 12px;
+}
+
+.settings-modal-subtitle {
+    margin: 0;
+    font-size: 16px;
+    color: #4f5667;
+}
+
+.otp-input-row {
+    margin: 24px 0 18px;
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+}
+
+.otp-box {
+    width: 56px;
+    height: 56px;
+    border: 1px solid #c8ceda;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 18px;
+    color: #353a4a;
+    outline: none;
+}
+
+.otp-resend-text {
+    margin: 0;
+    font-size: 16px;
+    color: #404756;
+}
+
+.otp-resend-link {
+    border: 0;
+    background: transparent;
+    color: var(--primary-color);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0 0 0 4px;
+}
+
+.settings-modal-card-email {
+    width: min(560px, 100%);
+}
+
+.settings-modal-card-password {
+    width: min(700px, 100%);
+    padding: 36px 34px 28px;
+}
+
+.settings-modal-field-label {
+    display: block;
+    margin: 0 0 8px;
+    font-size: 14px;
+    color: #313747;
+}
+
+.settings-password-input-wrap {
+    position: relative;
+    margin-bottom: 18px;
+}
+
+.settings-password-input-wrap .settings-modal-input {
+    font-size: 16px;
+    padding-right: 54px;
+}
+
+.settings-eye-btn {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.settings-modal-card-success {
+    width: min(620px, 100%);
+    text-align: center;
+    padding: 32px 24px 28px;
+}
+
+.settings-success-icon-wrap {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin: 0 auto 14px;
+    background: #d4ead5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.settings-success-check {
+    color: #2d9a44;
+    font-size: 34px;
+    line-height: 1;
+    font-weight: 700;
+}
+
+.settings-success-title {
+    margin: 0;
+    font-size: 18px;
+    color: #252a39;
+    font-weight: 600;
+}
+
+.settings-success-subtitle {
+    margin: 10px 0 0;
+    font-size: 14px;
+    color: #636b7b;
+}
+
+.settings-modal-actions .request-outline-btn,
+.settings-modal-actions .save-btn,
+.settings-action-btn {
+    font-size: 14px;
+}
+
+.settings-modal-card-discard {
+    width: min(760px, 100%);
+    padding: 28px 32px;
+    position: relative;
+}
+
+.discard-close-btn {
+    position: absolute;
+    top: 14px;
+    right: 20px;
+    border: 0;
+    background: transparent;
+    font-size: 46px;
+    color: #555c6d;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+}
+
+.discard-title {
+    max-width: 560px;
+    font-size: 18px;
+    line-height: 1.35;
+    margin: 0 0 28px;
+}
+
+.discard-actions-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.discard-action-btn {
+    width: 100%;
+}
+
+@media (max-width: 1024px) {
+    .form-grid-3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .form-grid-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .faculty-meta-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .faculty-name {
+        font-size: 32px;
+    }
+
+    .settings-modal-title { font-size: 18px; }
+    .settings-modal-input { font-size: 16px; height: 46px; }
+}
+
+@media (max-width: 768px) {
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .form-grid-2,
+    .form-grid-3,
+    .form-grid-4 {
+        grid-template-columns: 1fr;
+    }
+
+    .footer-actions {
+        flex-direction: column;
+    }
+
+    .faculty-profile-row {
+        grid-template-columns: 1fr;
+    }
+
+    .faculty-avatar-wrap {
+        width: 86px;
+        height: 86px;
+    }
+
+    .faculty-name {
+        font-size: 28px;
+    }
+
+    .settings-modal-card {
+        padding: 20px;
+    }
+
+    .settings-modal-title { font-size: 18px; margin-bottom: 16px; }
+
+    .settings-modal-input {
+        height: 46px;
+        font-size: 16px;
+        border-radius: 10px;
+    }
+
+    .settings-modal-actions {
+        margin-top: 16px;
+        justify-content: stretch;
+    }
+
+    .settings-action-btn,
+    .settings-modal-actions .request-outline-btn {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .discard-actions-row {
+        grid-template-columns: 1fr;
+    }
+
+    .otp-box {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+    }
+}

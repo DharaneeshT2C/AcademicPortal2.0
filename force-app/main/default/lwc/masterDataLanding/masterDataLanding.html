@@ -1,0 +1,110 @@
+<template>
+    <div class="page">
+        <header class="pageHeader">
+            <div class="headingBlock">
+                <h1 class="pageTitle">Finance Master Data</h1>
+                <p class="pageSubtitle">Configure academic and financial fee structures</p>
+            </div>
+            <!-- <div class="searchWrap">
+                <lightning-input
+                    class="searchInput"
+                    type="search"
+                    variant="label-hidden"
+                    label="Search configurations"
+                    placeholder="Search configurations..."
+                    aria-label="Search configurations">
+                </lightning-input>
+            </div> -->
+        </header>
+
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+        </template>
+
+        <template if:false={isLoading}>
+            <section class="section">
+                <h2 class="sectionTitle">Academic Configuration</h2>
+                <div class="cardGrid">
+                    <template for:each={academicCards} for:item="card">
+                        <button
+                            key={card.key}
+                            class="configCard"
+                            type="button"
+                            data-key={card.key}
+                            aria-label={card.title}
+                            onclick={handleCardClick}
+                        >
+                            <span class="countBadge">{card.recordCount}</span>
+
+                            <div class="cardHead">
+                                <div class="iconBox" aria-hidden="true">
+                                    <lightning-icon
+                                        class="cardIcon"
+                                        icon-name={card.iconName}
+                                        size="x-small">
+                                    </lightning-icon>
+                                </div>
+
+                                <div class="cardTitle">{card.title}</div>
+                            </div>
+
+                            <div class="cardContent">
+                                <div class="cardDesc">{card.description}</div>
+                                <div class="cardMeta">
+                                    Updated {card.lastUpdatedText}
+                                </div>
+                            </div>
+                        </button>
+                    </template>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2 class="sectionTitle">Financial Configuration</h2>
+                <div class="cardGrid">
+                    <template for:each={financialCards} for:item="card">
+                        <button
+                            key={card.key}
+                            class="configCard"
+                            type="button"
+                            data-key={card.key}
+                            aria-label={card.title}
+                            onclick={handleCardClick}
+                        >
+                            <span class="countBadge">{card.recordCount}</span>
+
+                            <div class="cardHead">
+                                <div class="iconBox" aria-hidden="true">
+                                    <lightning-icon
+                                        class="cardIcon"
+                                        icon-name={card.iconName}
+                                        size="x-small">
+                                    </lightning-icon>
+                                </div>
+
+                                <div class="cardTitle">{card.title}</div>
+                            </div>
+
+                            <div class="cardContent">
+                                <div class="cardDesc">{card.description}</div>
+                                <div class="cardMeta">
+                                    Updated {card.lastUpdatedText}
+                                </div>
+                            </div>
+                        </button>
+                    </template>
+                </div>
+            </section>
+
+            <!-- <section class="section">
+                <h2 class="sectionTitle">Governance</h2>
+                <div class="cardGrid">
+                    <article class="emptyCard" aria-label="No governance modules available">
+                        <div class="emptyTitle">Governance modules</div>
+                        <p class="emptyDesc">No governance configurations are available yet.</p>
+                    </article>
+                </div>
+            </section> -->
+        </template>
+    </div>
+</template>

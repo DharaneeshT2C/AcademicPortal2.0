@@ -1,0 +1,15 @@
+<template>
+    <div class={itemClass} onclick={handleClick}>
+        <div class="submenu-content">
+            <template if:true={iconUrl}>
+                <template if:true={isUtilityIcon}>
+                    <lightning-icon icon-name={iconUrl} size="x-small" class="nav-icon-utility"></lightning-icon>
+                </template>
+                <template if:false={isUtilityIcon}>
+                    <img src={iconUrl} alt={label} class="nav-icon" />
+                </template>
+            </template>
+            <span class={textClass}>{label}</span>
+        </div>
+    </div>
+</template>

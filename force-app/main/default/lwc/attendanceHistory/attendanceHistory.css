@@ -1,0 +1,316 @@
+:host {
+    --primary-color: #3061ff;
+    --secondary-color: #eaefff;
+}
+
+.attendance-shell {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 20px 26px 18px;
+    min-height: calc(100vh - 153px);
+    color: #3a404d;
+}
+
+.top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    gap: 16px;
+}
+
+.title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 500;
+    color: #383f4a;
+}
+
+.top-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.semester-wrap {
+    height: 36px;
+    min-width: 240px;
+    border: 1px solid #d8dee8;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px;
+    position: relative;
+    background: #ffffff;
+}
+
+.semester-select {
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    color: #2f3644;
+    outline: none;
+    appearance: none;
+    padding-right: 8px;
+}
+
+.current-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--primary-color, #4d74f6);
+    border-radius: 999px;
+    padding: 3px 10px;
+    color: #2f3644;
+    font-size: 12px;
+    line-height: 1;
+    background: #ffffff;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #e25454;
+}
+
+.caret {
+    color: #697182;
+    font-size: 12px;
+}
+
+.help-btn {
+    height: 36px;
+    border: 1px solid var(--primary-color, #3f68f0);
+    border-radius: 9px;
+    background: transparent;
+    color: #2f3644;
+    font-size: 16px;
+    padding: 0 16px;
+    cursor: pointer;
+}
+
+.table-card {
+    border: 1px solid #d8dee8;
+    border-radius: 12px;
+    background: #ffffff;
+}
+
+.mobile-card-list {
+    display: none;
+}
+
+.table-scroll {
+    overflow: auto;
+}
+
+.attendance-table {
+    width: 100%;
+    min-width: 1220px;
+    border-collapse: collapse;
+}
+
+.attendance-table th {
+    text-align: left;
+    padding: 14px 10px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #213a8c;
+    border-bottom: 1px solid #d8dee8;
+    white-space: nowrap;
+}
+
+.attendance-table td {
+    padding: 13px 10px;
+    color: #666d7a;
+    font-size: 14px;
+    border-bottom: 0;
+}
+
+.col-sn {
+    width: 56px;
+}
+
+.col-action {
+    width: 220px;
+}
+
+.tiny-caret {
+    font-size: 12px;
+    color: #7e8796;
+    margin-left: 6px;
+}
+
+.attendance-value {
+    font-weight: 500;
+}
+
+.attendance-ok {
+    color: #2f8d3f;
+}
+
+.attendance-warning {
+    color: #ef3232;
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 14px;
+    line-height: 1;
+    border: 1px solid transparent;
+}
+
+.status-on-track {
+    background: #deeadf;
+    border-color: #b8d4bc;
+    color: #2f3644;
+}
+
+.status-attention {
+    background: #f7e6e6;
+    border-color: #e7bcbc;
+    color: #2f3644;
+}
+
+.attention-icon {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #e24545;
+    color: #ffffff;
+    font-size: 9px;
+    line-height: 14px;
+    text-align: center;
+    font-weight: 700;
+}
+
+.view-btn {
+    height: 32px;
+    border: 1px solid var(--primary-color, #3d67f1);
+    border-radius: 8px;
+    background: transparent;
+    color: #2f3644;
+    font-size: 14px;
+    padding: 0 14px;
+    cursor: pointer;
+}
+
+.progress-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #25a851;
+    vertical-align: middle;
+}
+
+.progress-line {
+    display: inline-block;
+    width: 120px;
+    margin-left: 4px;
+    border-top: 3px dashed #25a851;
+    vertical-align: middle;
+}
+
+@media (max-width: 1280px) {
+    .title {
+        font-size: 18px;
+    }
+
+    .help-btn,
+    .attendance-table th,
+    .attendance-table td {
+        font-size: 14px;
+    }
+
+    .semester-select {
+        font-size: 14px;
+    }
+
+    .current-pill,
+    .view-btn,
+    .status-pill {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .attendance-shell {
+        padding: 14px 12px 12px;
+    }
+
+    .top-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .top-actions {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .semester-wrap {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .help-btn {
+        width: 100%;
+    }
+
+    .table-card {
+        display: none;
+    }
+
+    .mobile-card-list {
+        display: grid;
+        gap: 10px;
+    }
+
+    .mobile-card {
+        border: 1px solid #d8dee8;
+        border-radius: 12px;
+        background: #ffffff;
+        padding: 12px;
+    }
+
+    .mobile-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .mobile-course {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #2f3644;
+    }
+
+    .mobile-code,
+    .mobile-class {
+        margin: 6px 0 0;
+        font-size: 14px;
+        color: #596171;
+    }
+
+    .mobile-footer {
+        margin-top: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .mobile-footer .status-pill {
+        padding: 7px 10px;
+    }
+}

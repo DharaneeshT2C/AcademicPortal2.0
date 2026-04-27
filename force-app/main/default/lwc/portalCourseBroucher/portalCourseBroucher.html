@@ -1,0 +1,172 @@
+<template>
+    <section class="broucher-layout">
+        <template if:true={isLoading}>
+            <div class="skeleton-wrap" aria-busy="true" aria-live="polite">
+                <div class="skeleton-header">
+                    <div class="skeleton-line skeleton-title"></div>
+                    <div class="skeleton-line skeleton-search"></div>
+                </div>
+                <div class="skeleton-list">
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                </div>
+                <div class="skeleton-footer">
+                    <div class="skeleton-line skeleton-footer-btn"></div>
+                    <div class="skeleton-line skeleton-footer-btn skeleton-footer-btn-primary"></div>
+                </div>
+            </div>
+        </template>
+
+        <template if:false={isLoading}>
+        <div class="content-panel">
+            <header class="section-header">
+                <div>
+                    <h1>Choose a Program</h1>
+                    <p>You can select a maximum of one program</p>
+                </div>
+                <label class="search-wrap" for="program-search">
+                    <lightning-icon
+                        class="search-icon"
+                        icon-name="utility:search"
+                        size="x-small"
+                        alternative-text="Search"
+                    ></lightning-icon>
+                    <input
+                        id="program-search"
+                        type="text"
+                        placeholder="Search by keywords..."
+                        value={searchKeyword}
+                        oninput={handleSearchInput}
+                    />
+                    <lightning-icon
+                        class="mic-icon"
+                        icon-name="utility:mic"
+                        size="x-small"
+                        alternative-text="Voice search"
+                    ></lightning-icon>
+                </label>
+            </header>
+
+            <template if:true={errorMessage}>
+                <div class="empty-message">{errorMessage}</div>
+            </template>
+
+            <template if:false={errorMessage}>
+                <template if:true={hasPrograms}>
+                    <div class="program-list">
+                        <template for:each={programs} for:item="program">
+                            <article key={program.id} class={program.cardClass}>
+                                <div class="program-main">
+                                    <button
+                                        type="button"
+                                        class={program.checkboxClass}
+                                        data-id={program.id}
+                                        onclick={handleProgramSelect}
+                                        disabled={program.isSelectDisabled}
+                                        aria-label={program.name}
+                                    >
+                                        <template if:true={program.isSelected}>✓</template>
+                                    </button>
+                                    <div class="program-copy">
+                                        <h2>{program.name}</h2>
+                                        <p>{program.credits}</p>
+                                    </div>
+                                </div>
+
+                                <div class="program-actions">
+                                    <button type="button" class="outline-button" disabled={program.isViewDisabled}>
+                                        Program Brochure
+                                        <lightning-icon
+                                            class="download-icon"
+                                            icon-name="utility:download"
+                                            size="x-small"
+                                            alternative-text="Download"
+                                        ></lightning-icon>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="outline-button"
+                                        data-id={program.id}
+                                        onclick={handleViewCourses}
+                                        disabled={program.isViewDisabled}
+                                    >
+                                        View Courses
+                                    </button>
+                                </div>
+                            </article>
+                        </template>
+                    </div>
+                </template>
+                <template if:false={hasPrograms}>
+                    <div class="empty-message">No pathway templates found for this semester/type.</div>
+                </template>
+            </template>
+        </div>
+
+        <footer class="footer-bar">
+            <button type="button" class="outline-footer-button" onclick={handleDiscardChanges}>Discard Changes</button>
+            <button type="button" class="submit-button" onclick={handleSubmitSelection}
+                disabled={isSubmitDisabled}>Submit Selection</button>
+        </footer>
+
+        <template if:true={isCourseModalOpen}>
+            <section class="course-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="course-modal-title">
+                <div class="course-modal-backdrop" onclick={handleCloseCoursesModal}></div>
+                <div class="course-modal">
+                    <header class="course-modal-header">
+                        <div>
+                            <h2 id="course-modal-title" class="course-modal-title">{activeProgram.name}</h2>
+                            <p class="course-modal-meta">
+                                Mandatory: <strong>{activeProgram.mandatoryCredits} credits</strong> |
+                                Electives: <strong>{activeProgram.electiveCredits} credits</strong>
+                            </p>
+                        </div>
+                        <button type="button" class="course-modal-close" onclick={handleCloseCoursesModal} aria-label="Close">×</button>
+                    </header>
+
+                    <div class="course-section">
+                        <h3 class="course-section-title">Mandatory Courses</h3>
+                        <template if:true={activeProgram.hasMandatoryCourses}>
+                            <div class="course-items">
+                                <template for:each={activeProgram.mandatoryCourses} for:item="course">
+                                    <article key={course.id} class="course-item">
+                                        <div>
+                                            <p class="course-name">{course.name}</p>
+                                            <p class="course-code">{course.code}</p>
+                                        </div>
+                                        <p class="course-credits">{course.credits} credits</p>
+                                    </article>
+                                </template>
+                            </div>
+                        </template>
+                        <template if:false={activeProgram.hasMandatoryCourses}>
+                            <p class="course-empty">No mandatory courses for this semester.</p>
+                        </template>
+                    </div>
+
+                    <div class="course-section">
+                        <h3 class="course-section-title">Elective Courses</h3>
+                        <template if:true={activeProgram.hasElectiveCourses}>
+                            <div class="course-items">
+                                <template for:each={activeProgram.electiveCourses} for:item="course">
+                                    <article key={course.id} class="course-item">
+                                        <div>
+                                            <p class="course-name">{course.name}</p>
+                                            <p class="course-code">{course.code}</p>
+                                        </div>
+                                        <p class="course-credits">{course.credits} credits</p>
+                                    </article>
+                                </template>
+                            </div>
+                        </template>
+                        <template if:false={activeProgram.hasElectiveCourses}>
+                            <p class="course-empty">No elective courses for this semester.</p>
+                        </template>
+                    </div>
+                </div>
+            </section>
+        </template>
+        </template>
+    </section>
+</template>

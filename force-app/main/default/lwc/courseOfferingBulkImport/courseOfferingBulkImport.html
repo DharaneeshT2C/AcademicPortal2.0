@@ -1,0 +1,152 @@
+<template>
+    <lightning-card title="Course Offering Bulk Import" icon-name="standard:record">
+        <div class="import-body">
+            <template if:false={hasRecordId}>
+                <div class="empty-state">
+                    Add this component to an Academic Term record page before importing.
+                </div>
+            </template>
+
+            <template if:true={hasRecordId}>
+                <div class="summary">
+                    <div>
+                        <div class="summary-title">Academic Term Import</div>
+                        <div class="summary-text">
+                            Course offerings will be created for sessions under this Academic Term. Credit is mapped from the Learning Course component that matches Course Type.
+                        </div>
+                    </div>
+                    <div class="summary-actions">
+                        <lightning-button label="Download Template" icon-name="utility:download" onclick={handleDownloadTemplate}></lightning-button>
+                        <lightning-button label="View Help" icon-name="utility:info" onclick={handleOpenHelp}></lightning-button>
+                    </div>
+                </div>
+
+                <div class="upload-box">
+                    <template if:false={hasFile}>
+                        <div class="file-content">
+                            <lightning-icon icon-name="doctype:csv" size="medium"></lightning-icon>
+                            <div>
+                                <div class="file-title">Upload CSV file</div>
+                                <div class="file-subtitle">Use the template headers exactly.</div>
+                            </div>
+                            <input id="bulkImportFileInput" class="hidden-input" type="file" accept=".csv" onchange={handleFileChange} />
+                            <label for="bulkImportFileInput" class="file-button">Choose file</label>
+                        </div>
+                    </template>
+
+                    <template if:true={hasFile}>
+                        <div class="selected-file">
+                            <div class="selected-file-main">
+                                <lightning-icon icon-name="doctype:csv" size="medium"></lightning-icon>
+                                <div class="selected-copy">
+                                    <button class="selected-name" type="button" onclick={handlePreview}>{fileName}</button>
+                                    <div class="selected-meta">{rows.length} rows ready</div>
+                                </div>
+                            </div>
+                            <lightning-button-icon icon-name="utility:delete" alternative-text="Remove file" title="Remove file" variant="bare" onclick={handleDeleteFile}></lightning-button-icon>
+                        </div>
+                    </template>
+                </div>
+
+                <template if:true={hasValidationErrors}>
+                    <div class="client-errors">
+                        <div class="error-title">Fix these rows before import</div>
+                        <template for:each={validationErrors} for:item="error">
+                            <div key={error.key} class="error-line">{error.message}</div>
+                        </template>
+                    </div>
+                </template>
+
+                <div class="footer-actions">
+                    <lightning-button label="Download Failed" icon-name="utility:download" onclick={handleDownloadFailed} disabled={failedDownloadDisabled}></lightning-button>
+                    <lightning-button label="Import" variant="brand" icon-name="utility:upload" onclick={handleImport} disabled={importDisabled}></lightning-button>
+                </div>
+
+                <template if:true={jobId}>
+                    <div class="batch-status">
+                        Status: {jobStatus} - Processed {processedDisplay}/{totalRecords} - Errors {failedCount}
+                    </div>
+                </template>
+
+                <template if:true={showPreview}>
+                    <div class="preview-section">
+                        <div class="preview-header">
+                            <div class="preview-title">Preview</div>
+                            <div class="preview-meta">Showing {displayedRows.length} of {rows.length}</div>
+                        </div>
+                        <div class="preview-table-wrap">
+                            <table class="preview-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <template for:each={headers} for:item="header">
+                                            <th key={header}>{header}</th>
+                                        </template>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={previewRowValues} for:item="row">
+                                        <tr key={row.key}>
+                                            <td>{row.number}</td>
+                                            <template for:each={row.cells} for:item="cell">
+                                                <td key={cell.key}>{cell.value}</td>
+                                            </template>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </template>
+            </template>
+        </div>
+    </lightning-card>
+
+    <template if:true={showHelpModal}>
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="bulk-import-help-heading" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container import-help-modal">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={handleCloseHelp}>
+                        <lightning-icon icon-name="utility:close" alternative-text="Close" size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 id="bulk-import-help-heading" class="slds-text-heading_medium">Course Offering Bulk Import Help</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium import-help-content">
+                    <ul class="help-list">
+                        <li><span>Academic Session</span> must exist under the current Academic Term.</li>
+                        <li>Each Academic Session can have only one row for the same <span>Course Code</span> and <span>Course Type</span>.</li>
+                        <li><span>Course Type</span> must match the Learning Course component: CourseType, Course Type 2, or Course Type 3.</li>
+                        <li>Credit is copied from the matching component credit field on Learning Course.</li>
+                        <li>Dates should be in <span>YYYY-MM-DD</span> format.</li>
+                    </ul>
+                    <div class="example-title">Example rows</div>
+                    <div class="preview-table-wrap">
+                        <table class="preview-table">
+                            <thead>
+                                <tr>
+                                    <template for:each={headers} for:item="header">
+                                        <th key={header}>{header}</th>
+                                    </template>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={helpRows} for:item="row">
+                                    <tr key={row.key}>
+                                        <template for:each={row.cells} for:item="cell">
+                                            <td key={cell.key}>{cell.value}</td>
+                                        </template>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Close" onclick={handleCloseHelp}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

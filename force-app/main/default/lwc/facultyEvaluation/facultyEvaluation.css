@@ -1,0 +1,138 @@
+:host {
+    --primary-color: #3061ff;
+    --secondary-color: #eaefff;
+}
+
+button {
+    font-size: 14px !important;
+}
+
+.evaluation-panel {
+    border-radius: 14px;
+    height: calc(100vh - 153px);
+    color: #3a404d;
+    overflow-y: scroll;
+    background-color: #ffffff;
+    padding: 16px;
+}
+
+.panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.panel-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 500;
+    color: #383f4a;
+}
+
+.btn-view-all {
+    border: 1px solid #2d5bff;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #363e4b;
+    height: 32px;
+    min-width: 76px;
+    padding: 0 14px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.request-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    align-content: start;
+}
+
+.request-card {
+    background: #f6f8fb;
+    border-radius: 10px;
+    padding: 16px 14px 14px;
+}
+
+.request-title {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.25;
+    color: #383f4a;
+    font-weight: 600;
+}
+
+.bundle-code {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: #8a919d;
+}
+
+.request-meta {
+    margin: 12px 0 20px;
+    font-size: 14px;
+    color: #666d7a;
+}
+
+.meta-separator {
+    margin: 0 6px;
+    color: #8d95a4;
+}
+
+.card-action {
+    width: 100%;
+    border: 0;
+    border-radius: 10px;
+    min-height: 42px;
+    padding: 8px 12px;
+    font-size: 14px;
+    line-height: 1.2;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.action-primary {
+    background: var(--primary-color, #3061ff);
+    color: #fff;
+}
+
+.action-dominant {
+    /* box-shadow: 0 8px 16px color-mix(in srgb, var(--primary-color, #3061ff) 35%, transparent); */
+}
+
+@media (max-width: 1200px) {
+    .request-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 960px) {
+    .request-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .evaluation-panel {
+        min-height: unset;
+        padding: 12px;
+    }
+
+    .panel-title {
+        font-size: 18px;
+    }
+
+    .request-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .request-title {
+        font-size: 16px;
+    }
+
+    .request-meta {
+        font-size: 14px;
+    }
+}

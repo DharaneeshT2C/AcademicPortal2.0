@@ -1,0 +1,186 @@
+<template>
+    <section class="upload-stage">
+        <div class="section-title upload-stage-title">Upload Exam Import File</div>
+        <div class="import-controls">
+            <div class="upload-layout">
+                <div class="file-area">
+                    <div class="file-card">
+                        <div class="provider-group upload-provider-group">
+                            <div class="field-group">
+                                <label class="field-label">Learning Program</label>
+                                <lightning-combobox variant="label-hidden" label="Learning Program"
+                                    value={selectedLearningProgramId} options={learningProgramOptions}
+                                    placeholder="Select Learning Program"
+                                    onchange={handleLearningProgramChange}></lightning-combobox>
+                            </div>
+                        </div>
+                        <template if:false={hasFile}>
+                            <div class="file-content">
+                                <div class="file-icon" aria-hidden="true">
+                                    <lightning-icon icon-name="doctype:csv" size="medium"></lightning-icon>
+                                </div>
+                                <div class="file-meta">
+                                    <div class="file-title">Drag and drop CSV file here</div>
+                                    <div class="file-subtitle">or choose a file to continue.</div>
+                                </div>
+                                <div class="file-actions">
+                                    <input id="examFileInput" class="hidden-input" type="file" accept=".csv"
+                                        onchange={handleFileChange} />
+                                    <label for="examFileInput" class="file-button">Choose file</label>
+                                </div>
+                            </div>
+                        </template>
+                        <template if:true={hasFile}>
+                            <div class="selected-file-card">
+                                <div class="selected-file-main">
+                                    <div class="file-icon" aria-hidden="true">
+                                        <lightning-icon icon-name="doctype:csv" size="medium"></lightning-icon>
+                                    </div>
+                                    <div class="selected-file-copy">
+                                        <button class="selected-file-name" type="button"
+                                            onclick={handleFileNameClick}>{fileName}</button>
+                                        <div class="selected-file-meta">
+                                            <span class="selected-file-count">{rows.length} rows</span>
+                                            <span>Click the file name to preview imported data.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <lightning-button-icon class="selected-file-delete" icon-name="utility:delete"
+                                    alternative-text="Remove file" title="Remove file" onclick={handleDeleteFile}
+                                    variant="bare">
+                                </lightning-button-icon>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+                <div class="action-panel">
+                    <div class="actions">
+                        <lightning-button label="Download Template" icon-name="utility:download"
+                            onclick={handleDownloadTemplate} stretch></lightning-button>
+                        <lightning-button label="View Help" icon-name="utility:info" onclick={handleOpenHelp}
+                            stretch></lightning-button>
+                        <lightning-button label="Download Failed" icon-name="utility:download"
+                            onclick={handleDownloadFailed} disabled={failedDownloadDisabled} stretch></lightning-button>
+                        <lightning-button class="import-button" label="Import" variant="brand"
+                            icon-name="utility:upload" onclick={handleImport} disabled={importDisabled}
+                            stretch></lightning-button>
+                    </div>
+                    <template if:true={jobId}>
+                        <div class="batch-status">
+                            Status: {jobStatus} - Processed {processedDisplay}/{totalRecords} - Errors {failedCount}
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <template if:true={showPreview}>
+        <section class="import-section slds-m-top_medium" data-preview-section>
+            <div class="section-title">Import Preview</div>
+            <div class="preview">
+                <div class="preview-header">
+                    <div class="preview-title">Preview</div>
+                    <div class="preview-meta">Showing {displayedRows.length} of {filteredRows.length}</div>
+                </div>
+                <template if:true={file}>
+                    <div class="preview-controls">
+                        <div class="search-group">
+                            <lightning-icon icon-name="utility:search" size="x-small"
+                                class="search-icon"></lightning-icon>
+                            <input class="search-input" type="search" placeholder="Search..."
+                                oninput={handleSearchChange} />
+                        </div>
+                        <div class="page-size-group">
+                            <label class="page-size-label">Rows:</label>
+                            <select class="page-size-select" onchange={handlePageSizeChange} value={pageSizeValue}>
+                                <option value="10">10</option>
+                                <option value="5">5</option>
+                                <option value="25">25</option>
+                                <option value="2147483647">All</option>
+                            </select>
+                        </div>
+                    </div>
+                </template>
+                <div class="sort-status" if:true={sortActive}>Sorted by {sortStatusText}</div>
+                <div class="preview-table-wrap">
+                    <table class="preview-table">
+                        <thead>
+                            <tr>
+                                <template for:each={previewHeaders} for:item="h">
+                                    <th key={h.field} data-field={h.field} class="sortable" onclick={handleSort}>
+                                        {h.label}</th>
+                                </template>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={previewRowValues} for:item="rowVals">
+                                <tr key={rowVals.rowKey}>
+                                    <template for:each={rowVals.cells} for:item="cell">
+                                        <td key={cell.key}>{cell.value}</td>
+                                    </template>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <lightning-button class="page-btn" label="Previous" onclick={handlePrevPage}
+                        disabled={prevDisabled}></lightning-button>
+                    <span class="page-info">Page {currentPage} of {totalPages}</span>
+                    <lightning-button class="page-btn" label="Next" onclick={handleNextPage}
+                        disabled={nextDisabled}></lightning-button>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template if:true={showHelpModal}>
+        <section role="dialog" tabindex="-1" aria-modal="true" aria-labelledby="exam-import-help-heading"
+            class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container import-help-modal">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close" onclick={handleCloseHelp}>
+                        <lightning-icon icon-name="utility:close" alternative-text="Close"
+                            size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 id="exam-import-help-heading" class="slds-text-heading_medium">Exam Import Help</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around_medium import-help-content">
+                    <ul class="import-help-list">
+                        <li><span>Learning Program</span> is required before importing.</li>
+                        <li>Each row represents one student's term result. <span>REGNO</span> must match a Person Account Student ID.</li>
+                        <li><span>SEMESTER</span> is used to locate the student's Academic Term Enrollment via Current Cadence Number.</li>
+                        <li>Each <span>CD_n</span> course code creates Internal (I_n) and External (E_n) activity grades and one result (T_n/GR_n).</li>
+                        <li>Non-numeric marks like <span>DT</span> or <span>F</span> are stored in the activity grade Comments field.</li>
+                    </ul>
+                    <div class="import-help-example-title">Example row (trimmed)</div>
+                    <div class="import-help-table-wrap">
+                        <table class="import-help-table">
+                            <thead>
+                                <tr>
+                                    <template for:each={helpExampleHeaders} for:item="header">
+                                        <th key={header}>{header}</th>
+                                    </template>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <template for:each={helpExampleRow} for:item="cell">
+                                        <td key={cell.key}>{cell.value}</td>
+                                    </template>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Close" onclick={handleCloseHelp}></lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>
