@@ -1,8 +1,10 @@
 import { LightningElement, wire, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { examData, studentProfile } from 'c/mockData';
 import getResultsBundle from '@salesforce/apex/KenResultsController.getResultsBundle';
 
-export default class Results extends LightningElement {
+export default class Results extends NavigationMixin(LightningElement) {
     @track _apex;
     // Seed fallback retained for template bindings.
     student = studentProfile;
@@ -74,7 +76,12 @@ export default class Results extends LightningElement {
         return labels;
     }
 
-    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
+    navigateTo(route) {
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute(route) }
+        });
+    }
     handleMarksBreakdown() { this.navigateTo('marks-breakdown'); }
     handleViewGradeCards() { this.navigateTo('marks-breakdown'); }
 }

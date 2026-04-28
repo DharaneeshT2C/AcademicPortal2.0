@@ -1,8 +1,10 @@
 import { LightningElement, api, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { semesterPrograms } from 'c/mockData';
 import getSemesterDetail from '@salesforce/apex/KenResultsController.getSemesterDetail';
 
-export default class SemesterDetail extends LightningElement {
+export default class SemesterDetail extends NavigationMixin(LightningElement) {
     @track _apex;
     @api semesterId;
     // Seed fallback.
@@ -31,7 +33,10 @@ export default class SemesterDetail extends LightningElement {
     }
 
     navigateTo(route) {
-        this.dispatchEvent(new CustomEvent('navigate', { detail: { route } }));
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute(route) }
+        });
     }
 
     handleEnroll() { this.navigateTo('program-selection'); }

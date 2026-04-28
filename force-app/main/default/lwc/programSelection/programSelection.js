@@ -1,8 +1,10 @@
 import { LightningElement, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { programOptions } from 'c/mockData';
 import selectProgram from '@salesforce/apex/KenLearnController.selectProgram';
 
-export default class ProgramSelection extends LightningElement {
+export default class ProgramSelection extends NavigationMixin(LightningElement) {
     @track programs = programOptions.map(p => ({ ...p, cardClass: p.selected ? 'prog-card selected' : 'prog-card', dotClass: p.selected ? 'radio-dot checked' : 'radio-dot' }));
     @track _saving = false;
     @track _error;
@@ -29,7 +31,10 @@ export default class ProgramSelection extends LightningElement {
         selectProgram({ programName: picked.title || picked.name || picked.id })
             .then(() => {
                 this._saving = false;
-                this.dispatchEvent(new CustomEvent('navigate', { detail: { route: 'semester-detail' } }));
+                this[NavigationMixin.Navigate]({
+                    type: 'comm__namedPage',
+                    attributes: { name: pageNameForRoute('semester-detail') }
+                });
             })
             .catch(err => {
                 this._saving = false;
@@ -43,7 +48,10 @@ export default class ProgramSelection extends LightningElement {
     get isSubmitDisabled() { return this._saving; }
 
     handleDiscard() {
-        this.dispatchEvent(new CustomEvent('navigate', { detail: { route: 'semester-detail' } }));
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute('semester-detail') }
+        });
     }
 
     handleDownloadBrochure(event) {
@@ -69,6 +77,9 @@ export default class ProgramSelection extends LightningElement {
 
     handleViewCourses(event) {
         event.stopPropagation();
-        this.dispatchEvent(new CustomEvent('navigate', { detail: { route: 'learn' } }));
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute('learn') }
+        });
     }
 }

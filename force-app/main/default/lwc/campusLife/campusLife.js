@@ -1,11 +1,13 @@
 import { LightningElement, wire, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { campusLifeData } from 'c/mockData';
 import SP_IMAGES from '@salesforce/resourceUrl/StudentPortalImages';
 import getCampusOverview from '@salesforce/apex/KenCampusLifeController.getCampusOverview';
 
 const IMG = (p) => (SP_IMAGES ? `${SP_IMAGES}/${p}` : p);
 
-export default class CampusLife extends LightningElement {
+export default class CampusLife extends NavigationMixin(LightningElement) {
     roommateAvatars = [
         IMG('images/avatars/avatar2.jpg'),
         IMG('images/avatars/avatar5.jpg'),
@@ -45,7 +47,12 @@ export default class CampusLife extends LightningElement {
         }));
     }
 
-    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
+    navigateTo(route) {
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute(route) }
+        });
+    }
     handleEvents() { this.navigateTo('events'); }
     handleClubs() { this.navigateTo('clubs'); }
     handleGatePass() { this.navigateTo('gate-pass'); }

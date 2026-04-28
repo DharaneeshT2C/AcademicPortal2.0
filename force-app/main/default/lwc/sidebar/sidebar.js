@@ -1,8 +1,10 @@
 import { LightningElement, api, track, wire } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { sidebarNavItems, studentProfile } from 'c/mockData';
 import getStudentHeader from '@salesforce/apex/KenHomeDashboardController.getStudentHeader';
 
-export default class Sidebar extends LightningElement {
+export default class Sidebar extends NavigationMixin(LightningElement) {
     _currentRoute = 'home';
 
     @api
@@ -94,17 +96,26 @@ export default class Sidebar extends LightningElement {
             };
             this.rebuildNav();
         } else {
-            this.dispatchEvent(new CustomEvent('navigate', { detail: { route } }));
+            this[NavigationMixin.Navigate]({
+                type: 'comm__namedPage',
+                attributes: { name: pageNameForRoute(route) }
+            });
         }
     }
 
     handleChildClick(event) {
         const route = event.currentTarget.dataset.route;
-        this.dispatchEvent(new CustomEvent('navigate', { detail: { route } }));
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute(route) }
+        });
     }
 
     handleLogout() {
-        this.dispatchEvent(new CustomEvent('navigate', { detail: { route: 'login' } }));
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute('login') }
+        });
     }
 
     handleClose() {
@@ -112,6 +123,9 @@ export default class Sidebar extends LightningElement {
     }
 
     handleOpenSettings() {
-        this.dispatchEvent(new CustomEvent('navigate', { detail: { route: 'settings' } }));
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute('settings') }
+        });
     }
 }

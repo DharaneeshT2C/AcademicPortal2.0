@@ -1,10 +1,12 @@
 import { LightningElement, wire, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { refreshApex } from '@salesforce/apex';
 import { hostelDetailData } from 'c/mockData';
 import getHostelDetails from '@salesforce/apex/KenHostelDetailsController.getHostelDetails';
 import submitAllocationRequest from '@salesforce/apex/KenHostelDetailsController.submitAllocationRequest';
 
-export default class HostelDetails extends LightningElement {
+export default class HostelDetails extends NavigationMixin(LightningElement) {
     @track _apex;
     // Seed fallback retained for template bindings.
     _seed = hostelDetailData;
@@ -72,6 +74,11 @@ export default class HostelDetails extends LightningElement {
             });
     }
 
-    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
+    navigateTo(route) {
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute(route) }
+        });
+    }
     handleBack() { this.navigateTo('campus-life'); }
 }

@@ -1,9 +1,11 @@
 import { LightningElement, wire, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { messMenuData } from 'c/mockData';
 import getWeeklyMenu from '@salesforce/apex/KenMessMenuController.getWeeklyMenu';
 import submitMessFeedback from '@salesforce/apex/KenMessMenuController.submitMessFeedback';
 
-export default class MessMenu extends LightningElement {
+export default class MessMenu extends NavigationMixin(LightningElement) {
     @track _apex;
     @track _viewMode = 'day';
     @track _showAllBreakfast = false;
@@ -53,7 +55,12 @@ export default class MessMenu extends LightningElement {
     handleViewDay() { this._viewMode = 'day'; }
     handleViewWeek() { this._viewMode = 'week'; }
     handleToggleViewMore() { this._showAllBreakfast = !this._showAllBreakfast; }
-    handleGetHelp() { this.dispatchEvent(new CustomEvent('navigate', { detail: { route: 'service-support' } })); }
+    handleGetHelp() {
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute('service-support') }
+        });
+    }
     handleOpenFeedback(event) {
         this._feedbackMeal = event.currentTarget.dataset.meal || '';
         this._feedbackRating = 5;
@@ -135,6 +142,11 @@ export default class MessMenu extends LightningElement {
             });
     }
 
-    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
+    navigateTo(route) {
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute(route) }
+        });
+    }
     handleBack() { this.navigateTo('campus-life'); }
 }

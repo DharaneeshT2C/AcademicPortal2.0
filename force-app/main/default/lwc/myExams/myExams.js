@@ -1,10 +1,12 @@
 import { LightningElement, wire, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { refreshApex } from '@salesforce/apex';
 import { examData } from 'c/mockData';
 import getMyExams from '@salesforce/apex/KenMyExamsController.getMyExams';
 import enrollInExam from '@salesforce/apex/KenMyExamsController.enrollInExam';
 
-export default class MyExams extends LightningElement {
+export default class MyExams extends NavigationMixin(LightningElement) {
     @track _apex;
     @track _wireResp;
     @track _toastVisible = false;
@@ -41,7 +43,12 @@ export default class MyExams extends LightningElement {
         }));
     }
 
-    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
+    navigateTo(route) {
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute(route) }
+        });
+    }
     handleEnroll(event) {
         const examId = event && event.currentTarget && event.currentTarget.dataset
             ? event.currentTarget.dataset.id : null;

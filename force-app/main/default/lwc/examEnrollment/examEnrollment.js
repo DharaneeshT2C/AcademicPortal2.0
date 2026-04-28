@@ -1,9 +1,11 @@
 import { LightningElement, wire, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { examData } from 'c/mockData';
 import getMyExams from '@salesforce/apex/KenMyExamsController.getMyExams';
 import confirmExamEnrollment from '@salesforce/apex/KenMyExamsController.confirmExamEnrollment';
 
-export default class ExamEnrollment extends LightningElement {
+export default class ExamEnrollment extends NavigationMixin(LightningElement) {
     @track _apex;
     @track _submitting = false;
     @track _confirmation;
@@ -59,7 +61,12 @@ export default class ExamEnrollment extends LightningElement {
         return !!this._errorMessage;
     }
 
-    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
+    navigateTo(route) {
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute(route) }
+        });
+    }
     handleBack() { this.navigateTo('my-exams'); }
 
     handlePayAndConfirm() {

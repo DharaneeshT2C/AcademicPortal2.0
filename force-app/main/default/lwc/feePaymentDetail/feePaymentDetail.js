@@ -1,9 +1,11 @@
 import { LightningElement, api, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { feeData } from 'c/mockData';
 import getInstallmentDetail from '@salesforce/apex/KenFeePaymentController.getInstallmentDetail';
 import initiatePayment       from '@salesforce/apex/KenFeePaymentController.initiatePayment';
 
-export default class FeePaymentDetail extends LightningElement {
+export default class FeePaymentDetail extends NavigationMixin(LightningElement) {
     @api installmentId;
     @track _apex;
     @track _payRef;
@@ -51,7 +53,12 @@ export default class FeePaymentDetail extends LightningElement {
     }
     handleToastClose() { this._toastVisible = false; }
 
-    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
+    navigateTo(route) {
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute(route) }
+        });
+    }
     handleBack() { this.navigateTo('fee-payment'); }
 
     handleMakePayment() {

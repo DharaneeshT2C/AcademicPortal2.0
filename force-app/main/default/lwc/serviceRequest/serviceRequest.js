@@ -1,4 +1,6 @@
 import { LightningElement, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import raiseTicket from '@salesforce/apex/KenServiceSupportController.raiseTicket';
 
 const CATEGORIES = [
@@ -10,7 +12,7 @@ const CATEGORIES = [
     { id: 'Other',     label: 'Other',      hint: 'Anything else' }
 ];
 
-export default class ServiceRequest extends LightningElement {
+export default class ServiceRequest extends NavigationMixin(LightningElement) {
     @track category = '';
     @track title = '';
     @track description = '';
@@ -70,6 +72,11 @@ export default class ServiceRequest extends LightningElement {
     }
     handleToastClose() { this._toast = null; }
 
-    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
+    navigateTo(route) {
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute(route) }
+        });
+    }
     handleBack() { this.navigateTo('service-support'); }
 }

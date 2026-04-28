@@ -1,10 +1,12 @@
 import { LightningElement, wire, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { refreshApex } from '@salesforce/apex';
 import { refundsData } from 'c/mockData';
 import getRefunds from '@salesforce/apex/KenRefundsController.getRefunds';
 import createRefundRequest from '@salesforce/apex/KenRefundsController.createRefundRequest';
 
-export default class Refunds extends LightningElement {
+export default class Refunds extends NavigationMixin(LightningElement) {
     @track _apex;
     @track _wireResp;
     @track _toastVisible = false;
@@ -70,7 +72,12 @@ export default class Refunds extends LightningElement {
         );
     }
 
-    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
+    navigateTo(route) {
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute(route) }
+        });
+    }
     goFeePayment() { this.navigateTo('fee-payment'); }
     goFeePlan() { this.navigateTo('fee-plan'); }
     goInvoices() { this.navigateTo('invoices'); }

@@ -1,4 +1,6 @@
 import { LightningElement, api, track, wire } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { studentProfile } from 'c/mockData';
 import {
     kpiData, feedData, forYouData, nextStepsData, needsAttentionData,
@@ -8,7 +10,7 @@ import {
 import getDashboard  from '@salesforce/apex/KenHomeDashboardController.getDashboard';
 import recordMoodApex from '@salesforce/apex/KenHomeDashboardController.recordMood';
 
-export default class Dashboard extends LightningElement {
+export default class Dashboard extends NavigationMixin(LightningElement) {
     @track _stage = 'middle';
     @track _careerPath = 'placements';
     @track _brand = 'ken';
@@ -269,7 +271,12 @@ export default class Dashboard extends LightningElement {
     }
 
     // ── Events / actions ────────────────────────────────────────────────────
-    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
+    navigateTo(route) {
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute(route) }
+        });
+    }
 
     _showToast(msg, variant) {
         this.toastMessage = msg;

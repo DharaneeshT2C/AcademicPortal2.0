@@ -1,6 +1,8 @@
 import { LightningElement, wire } from 'lwc';
 import OrganizationDefaultsApiController from '@salesforce/apex/OrganizationDefaultsApiController.getOrganizationDefaults';
 import KEN42LOGO from '@salesforce/resourceUrl/KEN42LOGO';
+import INTER_FONT from '@salesforce/resourceUrl/InterFont';
+import { applyStaticTokens, applyBrandTheme, injectInterFont } from 'c/themeService';
 
 const DEFAULT_PRIMARY = '#3061FF';
 const DEFAULT_SECONDARY = '#EAEFFF';
@@ -13,6 +15,14 @@ export default class PortalHeader extends LightningElement {
     ken42Logo = KEN42LOGO;
 
     connectedCallback() {
+        // Apply design-system tokens and fonts globally so every component on
+        // the page inherits them via CSS custom property inheritance. This runs
+        // on every Experience Builder page because portalHeader lives in the
+        // theme layout — no dependency on c-app being mounted.
+        injectInterFont(INTER_FONT);
+        applyStaticTokens();
+        applyBrandTheme('ken');
+
         const storedTheme = this.getStoredTheme();
         if (storedTheme) {
             this.applyTheme(storedTheme.primary, storedTheme.secondary);

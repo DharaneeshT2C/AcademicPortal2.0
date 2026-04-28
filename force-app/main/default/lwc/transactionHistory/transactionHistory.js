@@ -1,10 +1,12 @@
 import { LightningElement, wire, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { refreshApex } from '@salesforce/apex';
 import { feeData } from 'c/mockData';
 import getTransactions from '@salesforce/apex/KenTransactionHistoryController.getTransactions';
 import initiatePayment from '@salesforce/apex/KenFeePaymentController.initiatePayment';
 
-export default class TransactionHistory extends LightningElement {
+export default class TransactionHistory extends NavigationMixin(LightningElement) {
     @track _apex;
     @track _wireResp;
     @track _searchTerm = '';
@@ -92,7 +94,12 @@ export default class TransactionHistory extends LightningElement {
         } catch (e) { this.showAToast('Download failed', 'error'); }
     }
 
-    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
+    navigateTo(route) {
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute(route) }
+        });
+    }
     handleBack() { this.navigateTo('fee-payment'); }
     goFeePayment() { this.navigateTo('fee-payment'); }
     goFeePlan() { this.navigateTo('fee-plan'); }

@@ -1,10 +1,12 @@
 import { LightningElement, wire, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { refreshApex } from '@salesforce/apex';
 import { feeData } from 'c/mockData';
 import getPlans from '@salesforce/apex/KenFeePlanController.getPlans';
 import switchToPlan from '@salesforce/apex/KenFeePlanController.switchToPlan';
 
-export default class FeePlan extends LightningElement {
+export default class FeePlan extends NavigationMixin(LightningElement) {
     @track _apex;
     @track _wireResp;
     _seed = feeData;
@@ -108,7 +110,12 @@ export default class FeePlan extends LightningElement {
         }
     }
 
-    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
+    navigateTo(route) {
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute(route) }
+        });
+    }
     handleBack() { this.navigateTo('fee-payment'); }
     goFeePayment() { this.navigateTo('fee-payment'); }
     goInvoices() { this.navigateTo('invoices'); }

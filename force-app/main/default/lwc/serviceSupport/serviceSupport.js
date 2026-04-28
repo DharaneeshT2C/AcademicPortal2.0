@@ -1,10 +1,12 @@
 import { LightningElement, wire, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { refreshApex } from '@salesforce/apex';
 import { serviceSupportData } from 'c/mockData';
 import getTickets from '@salesforce/apex/KenServiceSupportController.getTickets';
 import raiseTicket from '@salesforce/apex/KenServiceSupportController.raiseTicket';
 
-export default class ServiceSupport extends LightningElement {
+export default class ServiceSupport extends NavigationMixin(LightningElement) {
     @track activeRequestTab = 'service';
     @track openFaqKeys = {};
     @track openQuestionKeys = {};
@@ -68,7 +70,12 @@ export default class ServiceSupport extends LightningElement {
         });
     }
 
-    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
+    navigateTo(route) {
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute(route) }
+        });
+    }
     handleFaqs() { this.navigateTo('faqs'); }
     handleServiceRequest() { this.navigateTo('service-request'); }
     handleHelpChat() { this.navigateTo('chat'); }

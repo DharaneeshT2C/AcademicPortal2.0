@@ -1,4 +1,6 @@
 import { LightningElement, wire, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { refreshApex } from '@salesforce/apex';
 import SP_IMAGES from '@salesforce/resourceUrl/StudentPortalImages';
 import { eventsData } from 'c/mockData';
@@ -7,7 +9,7 @@ import registerForEvent from '@salesforce/apex/KenEventsController.registerForEv
 import cancelRegistration from '@salesforce/apex/KenEventsController.cancelRegistration';
 import submitHostedEvent from '@salesforce/apex/KenEventsController.submitHostedEvent';
 
-export default class Events extends LightningElement {
+export default class Events extends NavigationMixin(LightningElement) {
     @track _apex;
     @track _searchTerm = '';
     @track _filterMode = 'all';
@@ -110,7 +112,10 @@ export default class Events extends LightningElement {
     get upcomingCount() { return this.upcomingEvents.length; }
 
     navigateTo(route) {
-        this.dispatchEvent(new CustomEvent('navigate', { detail: { route } }));
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute(route) }
+        });
     }
     handleBack() { this.navigateTo('campus-life'); }
 

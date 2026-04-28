@@ -1,9 +1,11 @@
 import { LightningElement, wire, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { feeData } from 'c/mockData';
 import getInvoices from '@salesforce/apex/KenInvoicesController.getInvoices';
 import getDownloadUrl from '@salesforce/apex/KenInvoicesController.getDownloadUrl';
 
-export default class Invoices extends LightningElement {
+export default class Invoices extends NavigationMixin(LightningElement) {
     @track _apex;
     // Seed fallback.
     _seed = feeData.invoices;
@@ -60,7 +62,12 @@ export default class Invoices extends LightningElement {
         );
     }
 
-    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
+    navigateTo(route) {
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute(route) }
+        });
+    }
     handleBack() { this.navigateTo('fee-payment'); }
     goFeePayment() { this.navigateTo('fee-payment'); }
     goFeePlan() { this.navigateTo('fee-plan'); }

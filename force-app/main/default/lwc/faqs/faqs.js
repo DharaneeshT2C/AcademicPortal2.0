@@ -1,8 +1,10 @@
 import { LightningElement, wire, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { serviceSupportData } from 'c/mockData';
 import getFaqs from '@salesforce/apex/KenFaqsController.getFaqs';
 
-export default class Faqs extends LightningElement {
+export default class Faqs extends NavigationMixin(LightningElement) {
     @track _apex;
     @track _openCats = {}; // category name → bool
     @track _openQs = {};   // question key → bool
@@ -87,6 +89,11 @@ export default class Faqs extends LightningElement {
 
     handleSearchChange(event) { this._searchTerm = event.target.value || ''; }
 
-    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
+    navigateTo(route) {
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute(route) }
+        });
+    }
     handleBack() { this.navigateTo('service-support'); }
 }

@@ -1,9 +1,11 @@
 import { LightningElement, wire, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { examData } from 'c/mockData';
 import getAllBreakdowns from '@salesforce/apex/KenMarksBreakdownController.getAllBreakdowns';
 import getBreakdown from '@salesforce/apex/KenMarksBreakdownController.getBreakdown';
 
-export default class MarksBreakdown extends LightningElement {
+export default class MarksBreakdown extends NavigationMixin(LightningElement) {
     @track _apex;           // list of breakdowns from @wire
     @track _selectedBreakdown; // drill-down from imperative call
     // Seed fallback retained for template bindings.
@@ -41,6 +43,11 @@ export default class MarksBreakdown extends LightningElement {
             });
     }
 
-    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
+    navigateTo(route) {
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute(route) }
+        });
+    }
     handleBack() { this.navigateTo('results'); }
 }

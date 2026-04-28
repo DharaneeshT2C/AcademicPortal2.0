@@ -1,7 +1,9 @@
 import { LightningElement, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import createGatePass from '@salesforce/apex/KenGatePassController.createGatePass';
 
-export default class CreateGatePass extends LightningElement {
+export default class CreateGatePass extends NavigationMixin(LightningElement) {
     @track _form = {
         requestType: 'Student Exit Request',
         destination: '',
@@ -40,7 +42,12 @@ export default class CreateGatePass extends LightningElement {
         this._form = Object.assign({}, this._form, { [f]: event.target.value });
     }
 
-    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
+    navigateTo(route) {
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute(route) }
+        });
+    }
     handleBack() { this.navigateTo('gate-pass'); }
 
     _composeIso(dateStr, timeStr) {

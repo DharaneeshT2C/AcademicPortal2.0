@@ -1,4 +1,6 @@
 import { LightningElement, track, wire } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { refreshApex } from '@salesforce/apex';
 import { placementCycle, studentPlacementStatus, jobs, applications, savedJobs, placementSummary, placementInstructions } from 'c/placementData';
 import savePreferences from '@salesforce/apex/KenCareerCompassController.savePreferences';
@@ -7,7 +9,7 @@ import withdrawApplication from '@salesforce/apex/KenPlacementsController.withdr
 import toggleSaveJob from '@salesforce/apex/KenPlacementsController.toggleSaveJob';
 import getOfferLetterText from '@salesforce/apex/KenPlacementsController.getOfferLetterText';
 
-export default class PlacementsLanding extends LightningElement {
+export default class PlacementsLanding extends NavigationMixin(LightningElement) {
     // localStorage fallback removed — Salesforce Locker Service disallows it.
     // Career module is hidden in nav; this component only runs if re-enabled later.
     @track currentPhase = studentPlacementStatus.currentPhase;
@@ -323,7 +325,10 @@ export default class PlacementsLanding extends LightningElement {
     }
     handleCounsellor() {
         // Counsellor chat opens the campus Chat (KAI) so the student can request a slot.
-        this.dispatchEvent(new CustomEvent('navigate', { detail: { route: 'chat' } }));
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute('chat') }
+        });
     }
     @track _bookmarkedRecs = new Set();
     handleToggleRecBookmark(event) {
@@ -353,7 +358,10 @@ export default class PlacementsLanding extends LightningElement {
         this.dispatchEvent(new CustomEvent('subnavigate', { detail: { route: 'compare-offers' } }));
     }
     handleRaiseQuery() {
-        this.dispatchEvent(new CustomEvent('navigate', { detail: { route: 'service-support' }, bubbles: true, composed: true }));
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute('service-support') }
+        });
     }
     handleDownloadOffer(event) {
         const id = event && event.currentTarget && event.currentTarget.dataset

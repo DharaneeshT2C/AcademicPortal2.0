@@ -1,8 +1,10 @@
 import { LightningElement, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { jobs, studentPlacementStatus } from 'c/placementData';
 import toggleSaveJob from '@salesforce/apex/KenPlacementsController.toggleSaveJob';
 
-export default class AllJobsPage extends LightningElement {
+export default class AllJobsPage extends NavigationMixin(LightningElement) {
     @track jobsTab = 'recommended';
     @track railTab = 'applied';
     @track preferenceTags = [...studentPlacementStatus.preferences];
@@ -125,6 +127,9 @@ export default class AllJobsPage extends LightningElement {
     }
 
     handleSupport() {
-        this.dispatchEvent(new CustomEvent('navigate', { detail: { route: 'service-support' } }));
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute('service-support') }
+        });
     }
 }

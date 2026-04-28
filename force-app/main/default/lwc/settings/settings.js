@@ -1,4 +1,6 @@
 import { LightningElement, track, wire } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { refreshApex } from '@salesforce/apex';
 import { studentProfile } from 'c/mockData';
 import getProfile             from '@salesforce/apex/KenSettingsController.getProfile';
@@ -7,7 +9,7 @@ import updateProfile          from '@salesforce/apex/KenSettingsController.updat
 import updateNotificationPref from '@salesforce/apex/KenSettingsController.updateNotificationPref';
 import resetMyPassword from '@salesforce/apex/KenSettingsController.resetMyPassword';
 
-export default class Settings extends LightningElement {
+export default class Settings extends NavigationMixin(LightningElement) {
     // Fallback seed shown until the @wire calls resolve.
     student = studentProfile;
     @track _apexProfile;
@@ -65,7 +67,10 @@ export default class Settings extends LightningElement {
     handleContactAdmin() {
         // Routes to the existing service-support page; no Apex call needed,
         // and avoids the previous misleading "message sent" toast.
-        this.dispatchEvent(new CustomEvent('navigate', { detail: { route: 'service-support' } }));
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute('service-support') }
+        });
     }
 
     handleSaveProfile(event) {

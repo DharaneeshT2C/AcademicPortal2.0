@@ -1,4 +1,6 @@
 import { LightningElement, wire, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { refreshApex } from '@salesforce/apex';
 import { feeData } from 'c/mockData';
 import getFeeSummary    from '@salesforce/apex/KenFeePaymentController.getFeeSummary';
@@ -12,7 +14,7 @@ const PAY_METHODS = [
     { id: 'Wallet',      label: 'Wallet',        hint: 'Paytm, Mobikwik, etc.',        icon: 'account_balance_wallet' }
 ];
 
-export default class FeePayment extends LightningElement {
+export default class FeePayment extends NavigationMixin(LightningElement) {
     @track _apex;
     _seed = feeData;
     @track showToast = false;
@@ -95,7 +97,12 @@ export default class FeePayment extends LightningElement {
     get selectedDueDate()         { return (this.selectedInstallment && this.selectedInstallment.dueDate) || ''; }
 
     // ── Routing helpers ──────────────────────────────────────────────────────
-    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
+    navigateTo(route) {
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute(route) }
+        });
+    }
     handleViewPlan()      { this.navigateTo('fee-plan'); }
     handleViewDetails()   { this.navigateTo('fee-payment-detail'); }
     handleTransactions()  { this.navigateTo('transaction-history'); }

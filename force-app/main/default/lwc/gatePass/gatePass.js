@@ -1,8 +1,10 @@
 import { LightningElement, wire, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { gatePassList } from 'c/mockData';
 import getGatePasses from '@salesforce/apex/KenGatePassController.getGatePasses';
 
-export default class GatePass extends LightningElement {
+export default class GatePass extends NavigationMixin(LightningElement) {
     @track _apex;
     // Seed fallback.
     passes = gatePassList;
@@ -28,7 +30,12 @@ export default class GatePass extends LightningElement {
         }));
     }
 
-    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
+    navigateTo(route) {
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute(route) }
+        });
+    }
     handleCreate() { this.navigateTo('create-gate-pass'); }
     handleBack() { this.navigateTo('campus-life'); }
 }

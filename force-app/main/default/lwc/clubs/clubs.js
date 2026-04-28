@@ -1,4 +1,6 @@
 import { LightningElement, wire, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { refreshApex } from '@salesforce/apex';
 import { clubsData } from 'c/mockData';
 import SP_IMAGES from '@salesforce/resourceUrl/StudentPortalImages';
@@ -26,7 +28,7 @@ const MOCK_MEMBERS = [
     { id: 3, initial: 'K', cls: 'av-violet' }
 ];
 
-export default class Clubs extends LightningElement {
+export default class Clubs extends NavigationMixin(LightningElement) {
     friendAvatarsA = [IMG('images/avatars/avatar2.jpg'), IMG('images/avatars/avatar5.jpg'), IMG('images/avatars/avatar6.jpg')];
     friendAvatarsB = [IMG('images/avatars/avatar3.jpg'), IMG('images/avatars/avatar4.jpg'), IMG('images/avatars/avatar7.jpg')];
 
@@ -76,7 +78,12 @@ export default class Clubs extends LightningElement {
 
     handleToastClose() { this.showToast = false; }
 
-    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
+    navigateTo(route) {
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute(route) }
+        });
+    }
     handleBack() { this.navigateTo('campus-life'); }
 
     _clubImg(c) {

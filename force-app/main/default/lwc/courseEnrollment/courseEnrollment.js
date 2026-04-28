@@ -1,7 +1,9 @@
 import { LightningElement } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import { semesters } from 'c/mockData';
 
-export default class CourseEnrollment extends LightningElement {
+export default class CourseEnrollment extends NavigationMixin(LightningElement) {
     semesters = semesters;
     majorCredits = '12/78';
     minorCredits = '03/56';
@@ -24,7 +26,10 @@ export default class CourseEnrollment extends LightningElement {
     }
 
     navigateTo(route) {
-        this.dispatchEvent(new CustomEvent('navigate', { detail: { route } }));
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: { name: pageNameForRoute(route) }
+        });
     }
 
     handleSemesterClick() {
