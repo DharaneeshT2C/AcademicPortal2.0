@@ -8,7 +8,7 @@
  *  the per-student task list is real.
  * ************************************************************************************************
  */
-public with sharing class KenMentorshipController {
+public without sharing class KenMentorshipController {
 
     public class TaskDTO {
         @AuraEnabled public Id      id;
@@ -29,7 +29,7 @@ public with sharing class KenMentorshipController {
                 SELECT Id, Title__c, Description__c, Mentor_Name__c, Status__c, Due_Date__c
                 FROM Mentorship_Task__c
                 WHERE Student__c = :studentId
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 ORDER BY CreatedDate DESC
                 LIMIT 50
             ]) out.add(toDto(t));
@@ -54,7 +54,7 @@ public with sharing class KenMentorshipController {
                     SELECT Id FROM Mentorship_Task__c
                     WHERE Student__c = :studentId AND Title__c = :title
                       AND CreatedDate >= :cutoff
-                    WITH USER_MODE LIMIT 1
+                    WITH SECURITY_ENFORCED LIMIT 1
                 ];
                 if (!dupes.isEmpty()) {
                     return toDto([

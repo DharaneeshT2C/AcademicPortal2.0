@@ -25,6 +25,7 @@
 @suppressWarnings('PMD.ExcessiveParameterList,PMD.CognitiveComplexity,PMD.EagerlyLoadedDescribeSObjectResult,PMD.NcssMethodCount,PMD.StdCyclomaticComplexity,PMD.CyclomaticComplexity,PMD.ApexSOQLInjection')
 public with sharing class KenCourseOfferingSplitController {
     private static Id courseOfferingActivePlannedRtId;
+    private static Map<String, Id> courseOfferingRecordTypeIdsByDeveloperName = new Map<String, Id>();
     
     /**
      * @description DTO for Learning Program Plan details shown in split UI.
@@ -118,7 +119,7 @@ public with sharing class KenCourseOfferingSplitController {
             ' FROM Program_Plan_Course_Junction__c' +
             ' WHERE Course_Offering__c = :courseOfferingId' +
             ' AND ' + enrollmentTypeField + ' != null' +
-            ' ';
+            ' WITH USER_MODE';
         
         Set<String> types = new Set<String>();
         for (Program_Plan_Course_Junction__c j : Database.query(soql)) {
@@ -146,7 +147,7 @@ public with sharing class KenCourseOfferingSplitController {
             SELECT Id, Name, Start_Year__c, End_Year__c, Sequence__c, AcademicYearId
             FROM AcademicTerm
             WHERE IsActive = true
-            
+            WITH USER_MODE
             ORDER BY Start_Year__c DESC, Name
         ];
     }
@@ -165,7 +166,7 @@ public with sharing class KenCourseOfferingSplitController {
             FROM AcademicSession
             WHERE AcademicTermId = :academicTermId
             AND IsActive = true
-            
+            WITH USER_MODE
             ORDER BY Name
         ];
     }
@@ -218,7 +219,7 @@ public with sharing class KenCourseOfferingSplitController {
             (String.isNotBlank(learningCourseType2Field) ? ', LearningCourse.' + learningCourseType2Field : '') +
             (String.isNotBlank(learningCourseType3Field) ? ', LearningCourse.' + learningCourseType3Field : '') +
             ' FROM CourseOffering WHERE ' +
-            String.join(whereParts, ' AND ') + '  ORDER BY Name';
+            String.join(whereParts, ' AND ') + ' WITH USER_MODE ORDER BY Name';
         List<CourseOffering> offerings = Database.query(soql);
         if (offerings.isEmpty()) {
             return new List<PlaceholderOfferingDTO>();
@@ -239,7 +240,7 @@ public with sharing class KenCourseOfferingSplitController {
                 String jSoql = 'SELECT Course_Offering__c, ' + enrollmentTypeField +
                     ' FROM Program_Plan_Course_Junction__c' +
                     ' WHERE Course_Offering__c IN :offeringIds' +
-                    ' ';
+                    ' WITH USER_MODE';
                 Map<Id, Set<String>> typesByOffering = new Map<Id, Set<String>>();
                 for (Program_Plan_Course_Junction__c j : Database.query(jSoql)) {
                     Id offeringId = j.Course_Offering__c;
@@ -325,7 +326,7 @@ public with sharing class KenCourseOfferingSplitController {
             (enrollmentTypeField != null ? ', ' + enrollmentTypeField : '') +
             ' FROM Program_Plan_Course_Junction__c' +
             ' WHERE Course_Offering__c = :courseOfferingId' +
-            ' ';
+            ' WITH USER_MODE';
         for (Program_Plan_Course_Junction__c j : Database.query(jSoql)) {
             Id planId = j.Learning_Program_Plan__c;
             if (planId == null) {continue;}
@@ -342,7 +343,7 @@ public with sharing class KenCourseOfferingSplitController {
             SELECT Id, Name
             FROM LearningProgramPlan
             WHERE Id IN :planIds
-            
+            WITH USER_MODE
         ]);
         
         for (Id pid : planIds) {
@@ -369,7 +370,7 @@ public with sharing class KenCourseOfferingSplitController {
             FROM LearnerProgram
             WHERE LearningProgramPlanId = :learningProgramPlanId
             AND ClassCohort != null
-            
+            WITH USER_MODE
             GROUP BY ClassCohort
             ORDER BY ClassCohort
         ]) {
@@ -394,6 +395,7 @@ public with sharing class KenCourseOfferingSplitController {
         assertReadable(Program_Plan_Course_Junction__c.SObjectType, 'Read access is required for Program Plan Course Junction.');
         Id activePlannedRtId = getCourseOfferingRecordTypeId('Active_Planned');
         if (activePlannedRtId == null) {return new List<CourseOfferingViewDTO>();}
+        Id defaultRtId = getCourseOfferingRecordTypeId('Default');
         
         Map<String, Schema.SObjectField> fields = CourseOffering.SObjectType.getDescribe().fields.getMap();
         String capacityField = firstField(fields, new List<String>{
@@ -411,6 +413,7 @@ public with sharing class KenCourseOfferingSplitController {
         List<String> selectParts = new List<String>{
             'Id',
             'Name',
+            'RecordType.DeveloperName',
             'LearningCourse.CourseNumber',
             'LearningCourse.Name'
         };
@@ -435,9 +438,13 @@ public with sharing class KenCourseOfferingSplitController {
             } else {
                 String jSoql = 'SELECT Course_Offering__c FROM Program_Plan_Course_Junction__c' +
                     ' WHERE Course_Offering__r.AcademicSessionId = :academicSessionId' +
-                    ' AND Course_Offering__r.RecordTypeId = :activePlannedRtId' +
+                    ' AND (Course_Offering__r.RecordTypeId = :activePlannedRtId' +
+                    (defaultRtId != null && capacityField != null
+                        ? ' OR (Course_Offering__r.RecordTypeId = :defaultRtId AND Course_Offering__r.' + capacityField + ' != null)'
+                        : '') +
+                    ')' +
                     ' AND ' + enrollmentTypeField + ' = :enrollmentType' +
-                    ' ';
+                    ' WITH USER_MODE';
                 filteredOfferingIds = new Set<Id>();
                 for (Program_Plan_Course_Junction__c j : Database.query(jSoql)) {
                     Id offeringId = j.Course_Offering__c;
@@ -453,9 +460,13 @@ public with sharing class KenCourseOfferingSplitController {
         String soql = 'SELECT ' + String.join(selectParts, ',') +
             ' FROM CourseOffering' +
             ' WHERE AcademicSessionId = :academicSessionId' +
-            ' AND RecordTypeId = :activePlannedRtId' +
+            ' AND (RecordTypeId = :activePlannedRtId' +
+            (defaultRtId != null && capacityField != null
+                ? ' OR (RecordTypeId = :defaultRtId AND ' + capacityField + ' != null)'
+                : '') +
+            ')' +
             (filteredOfferingIds != null ? ' AND Id IN :filteredOfferingIds' : '') +
-            ' ' +
+            ' WITH USER_MODE' +
             ' ORDER BY LearningCourse.CourseNumber, LearningCourse.Name';
         
         List<CourseOfferingViewDTO> out = new List<CourseOfferingViewDTO>();
@@ -476,6 +487,8 @@ public with sharing class KenCourseOfferingSplitController {
             }
             if (offeringTypeField != null && co.get(offeringTypeField) != null) {
                 dto.offeringType = String.valueOf(co.get(offeringTypeField));
+            } else if (co.RecordType != null && co.RecordType.DeveloperName == 'Default') {
+                dto.offeringType = 'Standard';
             }
             out.add(dto);
         }
@@ -502,7 +515,7 @@ public with sharing class KenCourseOfferingSplitController {
                    ParticipationStatus
             FROM CourseOfferingParticipant
             WHERE CourseOfferingId = :courseOfferingId
-            
+            WITH USER_MODE
             ORDER BY ParticipantContact.Name
         ]) {
             CourseOfferingParticipantViewDTO dto = new CourseOfferingParticipantViewDTO();
@@ -574,7 +587,7 @@ public with sharing class KenCourseOfferingSplitController {
             (creditField != null ? ', ' + creditField : '') +
             ' FROM CourseOffering' +
             ' WHERE Id = :placeholderOfferingId' +
-            '  FOR UPDATE';
+            ' WITH USER_MODE FOR UPDATE';
         List<SObject> placeholderRows = Database.query(placeholderSoql);
         if (placeholderRows.isEmpty()) {
             throw new AuraHandledException('Placeholder offering not found.');
@@ -599,7 +612,7 @@ public with sharing class KenCourseOfferingSplitController {
             SELECT Id, Name
             FROM AcademicSession
             WHERE Id = :placeholder.AcademicSessionId
-            
+            WITH USER_MODE
             LIMIT 1
         ];
         
@@ -607,7 +620,7 @@ public with sharing class KenCourseOfferingSplitController {
             SELECT Id, Name, CourseNumber
             FROM LearningCourse
             WHERE Id = :placeholder.LearningCourseId
-            
+            WITH USER_MODE
             LIMIT 1
         ];
         
@@ -653,7 +666,7 @@ public with sharing class KenCourseOfferingSplitController {
             String oldJunctionSoql = 'SELECT Id, Learning_Program_Plan__c, ' + enrollmentTypeField +
                 ' FROM Program_Plan_Course_Junction__c' +
                 ' WHERE Course_Offering__c = :placeholderId' +
-                ' ';
+                ' WITH USER_MODE';
             oldJunctions = Database.query(oldJunctionSoql);
             for (Program_Plan_Course_Junction__c j : oldJunctions) {
                 if (j.Learning_Program_Plan__c == null || enrollmentTypeByPlan.containsKey(j.Learning_Program_Plan__c)) {
@@ -669,7 +682,7 @@ public with sharing class KenCourseOfferingSplitController {
                 SELECT Id
                 FROM Program_Plan_Course_Junction__c
                 WHERE Course_Offering__c = :placeholderId
-                
+                WITH USER_MODE
             ];
         }
         
@@ -969,7 +982,9 @@ public with sharing class KenCourseOfferingSplitController {
      */
     private static Id getCourseOfferingRecordTypeId(String developerName) {
         if (String.isBlank(developerName)) {return null;}
-        if (courseOfferingActivePlannedRtId != null) {return courseOfferingActivePlannedRtId;}
+        if (courseOfferingRecordTypeIdsByDeveloperName.containsKey(developerName)) {
+            return courseOfferingRecordTypeIdsByDeveloperName.get(developerName);
+        }
         if (!RecordType.SObjectType.getDescribe().isAccessible()) {
             throw new AuraHandledException('Read access is required for RecordType.');
         }
@@ -978,13 +993,18 @@ public with sharing class KenCourseOfferingSplitController {
             FROM RecordType
             WHERE SObjectType = 'CourseOffering'
             AND DeveloperName = :developerName
-            
+            WITH USER_MODE
             LIMIT 1
         ];
         if (!rts.isEmpty()) {
-            courseOfferingActivePlannedRtId = rts[0].Id;
+            courseOfferingRecordTypeIdsByDeveloperName.put(developerName, rts[0].Id);
+            if (developerName == 'Active_Planned') {
+                courseOfferingActivePlannedRtId = rts[0].Id;
+            }
+        } else {
+            courseOfferingRecordTypeIdsByDeveloperName.put(developerName, null);
         }
-        return courseOfferingActivePlannedRtId;
+        return courseOfferingRecordTypeIdsByDeveloperName.get(developerName);
     }
     
     /**

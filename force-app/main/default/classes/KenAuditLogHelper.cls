@@ -98,7 +98,7 @@ public with sharing class KenAuditLogHelper {
         public KenAuditLogCreator setRecordTypeException() {
             auditLogRecord.RecordTypeId = KenAuditLogHelper.getSObjectRecordTypeId(
                 String.valueOf(Audit_Log__c.SObjectType),
-            KenConstantController.RECORDTYPE_NAME_EXCEPTION
+            KenStudentPortalConstants.RECORDTYPE_NAME_EXCEPTION
                 );
             return this;
         }
@@ -109,7 +109,7 @@ public with sharing class KenAuditLogHelper {
         public KenAuditLogCreator setRecordTypeIntegration() {
             auditLogRecord.RecordTypeId = KenAuditLogHelper.getSObjectRecordTypeId(
                 String.valueOf(Audit_Log__c.SObjectType),
-            KenConstantController.RECORDTYPE_NAME_INTEGRATION
+            KenStudentPortalConstants.RECORDTYPE_NAME_INTEGRATION
                 );
             setSyncStatus(true);
             return this;
@@ -217,7 +217,7 @@ public with sharing class KenAuditLogHelper {
             .setTimeStamp(System.now())
             .setSource(source)
             .setRecordTypeException()
-            .setType(KenConstantController.RECORDTYPE_NAME_EXCEPTION);
+            .setType(KenStudentPortalConstants.RECORDTYPE_NAME_EXCEPTION);
     }
     
     /**

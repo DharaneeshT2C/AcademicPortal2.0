@@ -89,6 +89,72 @@
     gap: 0.75rem;
 }
 
+.week-controls {
+    margin-top: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.grid-week-controls {
+    margin-top: 0;
+    margin-left: auto;
+    justify-content: flex-end;
+}
+
+.week-button,
+.this-week-button,
+.week-date-field {
+    border: 1px solid var(--ci-border);
+    background: #fff;
+    border-radius: 12px;
+}
+
+.week-button {
+    width: 2.35rem;
+    height: 2.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.this-week-button {
+    min-height: 2.35rem;
+    padding: 0 0.85rem;
+    color: var(--ci-accent);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.week-date-field {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.35rem;
+    padding: 0 0.85rem;
+    color: var(--ci-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.week-date-field input {
+    border: 0;
+    background: transparent;
+    color: var(--ci-text);
+    font: inherit;
+    font-weight: 700;
+    min-width: 8.5rem;
+}
+
+.week-range {
+    color: var(--ci-muted);
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
 .eyebrow,
 .section-eyebrow {
     color: var(--ci-accent);
@@ -397,6 +463,16 @@
     color: #2f69c9;
 }
 
+.scheduled-chip {
+    background: #e6f7ee;
+    color: #218252;
+}
+
+.backlog-chip {
+    background: #fff4df;
+    color: #ad6a00;
+}
+
 .planned-list {
     margin-top: 0.75rem;
     flex-direction: row;
@@ -657,7 +733,7 @@
 
 .draft-row {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) auto;
     gap: 0.75rem;
     padding: 0.9rem;
     border: 1px solid #e5ecf5;
@@ -727,6 +803,14 @@
     .builder-filters {
         grid-template-columns: 1fr;
         max-width: 100%;
+    }
+
+    .week-controls {
+        align-items: stretch;
+    }
+
+    .week-date-field {
+        flex: 1 1 12rem;
     }
 
     .backlog-scroll {

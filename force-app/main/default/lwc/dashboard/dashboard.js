@@ -1,16 +1,8 @@
 import { LightningElement, api, track, wire } from 'lwc';
-import { NavigationMixin } from 'lightning/navigation';
-import { pageNameForRoute } from 'c/navHelper';
-import { studentProfile } from 'c/mockData';
-import {
-    kpiData, feedData, forYouData, nextStepsData, needsAttentionData,
-    clearanceData, scheduleData, spotlightData, quickActionsData,
-    campusGuideData, checklistData, pinnedCardData
-} from 'c/homeData';
 import getDashboard  from '@salesforce/apex/KenHomeDashboardController.getDashboard';
 import recordMoodApex from '@salesforce/apex/KenHomeDashboardController.recordMood';
 
-export default class Dashboard extends NavigationMixin(LightningElement) {
+export default class Dashboard extends LightningElement {
     @track _stage = 'middle';
     @track _careerPath = 'placements';
     @track _brand = 'ken';
@@ -22,7 +14,7 @@ export default class Dashboard extends NavigationMixin(LightningElement) {
     @track toastVariant = 'success';
     @track placementPhase = 2;   // dev-only Career preview, session-only in Salesforce
 
-    student = studentProfile;
+    student = {};
 
     @api
     get stage() { return this._stage; }
@@ -117,7 +109,7 @@ export default class Dashboard extends NavigationMixin(LightningElement) {
             && this._apex.student.displayName !== 'Student') {
             return this._apex.student.displayName.split(' ')[0];
         }
-        return this.student.FirstName || '';
+        return '';
     }
 
     get greetingSub() {
@@ -129,33 +121,22 @@ export default class Dashboard extends NavigationMixin(LightningElement) {
 
     // ── KPI cards ───────────────────────────────────────────────────────────
     get kpiCards() {
-        if (this._apex && this._apex.kpiCards && this._apex.kpiCards.length) return this._apex.kpiCards;
-        if (this._stage === 'starting') return kpiData.starting;
-        if (this._stage === 'middle')   return kpiData.middle;
-        const fixed  = kpiData.ending.fixed;
-        const career = kpiData.ending.careerByPath[this._careerPath];
-        return [fixed[0], fixed[1], career, fixed[2]];
+        return (this._apex && this._apex.kpiCards) || [];
     }
 
     // ── Pinned card ─────────────────────────────────────────────────────────
     get showPinnedCard() {
-        if (this._apex && this._apex.pinnedCard) return this._apex.pinnedCard.show;
-        return this._stage !== 'starting';
+        return !!(this._apex && this._apex.pinnedCard && this._apex.pinnedCard.show);
     }
 
     get pinnedCard() {
         if (this._apex && this._apex.pinnedCard && this._apex.pinnedCard.show) return this._apex.pinnedCard;
-        return pinnedCardData[this._stage] || pinnedCardData.middle;
+        return {};
     }
 
     // ── Feed ────────────────────────────────────────────────────────────────
     get feedItems() {
-        if (this._apex && this._apex.feedItems && this._apex.feedItems.length) return this._apex.feedItems;
-        if (this._stage === 'starting') return feedData.starting;
-        if (this._stage === 'middle')   return feedData.middle;
-        const common = feedData.ending.common;
-        const path   = feedData.ending.byPath[this._careerPath];
-        return [common[0], ...path, ...common.slice(1)];
+        return (this._apex && this._apex.feedItems) || [];
     }
 
     // ── For-you panel ───────────────────────────────────────────────────────
@@ -166,26 +147,20 @@ export default class Dashboard extends NavigationMixin(LightningElement) {
     }
 
     get forYouItems() {
-        if (this._apex && this._apex.forYouItems && this._apex.forYouItems.length) return this._apex.forYouItems;
-        if (this._stage === 'starting') return forYouData.starting;
-        if (this._stage === 'middle')   return forYouData.middle;
-        return forYouData.ending[this._careerPath];
+        return (this._apex && this._apex.forYouItems) || [];
     }
 
     get showNeedsAttention() { return this._stage !== 'ending'; }
 
     get needsAttentionItems() {
-        if (this._apex && this._apex.needsAttention && this._apex.needsAttention.length) return this._apex.needsAttention;
-        if (this._stage === 'starting') return needsAttentionData.starting;
-        return needsAttentionData.middle;
+        return (this._apex && this._apex.needsAttention) || [];
     }
 
     get clearanceItems() {
-        if (this._apex && this._apex.clearanceItems && this._apex.clearanceItems.length) return this._apex.clearanceItems;
-        return clearanceData;
+        return (this._apex && this._apex.clearanceItems) || [];
     }
 
-    get nextStepsItems() { return nextStepsData[this._careerPath]; }
+    get nextStepsItems() { return (this._apex && this._apex.nextStepsItems) || []; }
 
     // ── Today ───────────────────────────────────────────────────────────────
     get todayLabel() {
@@ -196,14 +171,12 @@ export default class Dashboard extends NavigationMixin(LightningElement) {
     }
 
     get todayItems() {
-        if (this._apex && this._apex.todayItems && this._apex.todayItems.length) return this._apex.todayItems;
-        return scheduleData[this._stage];
+        return (this._apex && this._apex.todayItems) || [];
     }
 
     // ── Spotlight ───────────────────────────────────────────────────────────
     get spotlight() {
-        if (this._apex && this._apex.spotlight) return this._apex.spotlight;
-        return spotlightData[this._stage];
+        return (this._apex && this._apex.spotlight) || {};
     }
 
     get isSpotlightTextHero() {
@@ -218,25 +191,21 @@ export default class Dashboard extends NavigationMixin(LightningElement) {
 
     // ── Quick actions / Campus guide ────────────────────────────────────────
     get quickActionsItems() {
-        if (this._apex && this._apex.quickActions && this._apex.quickActions.length) return this._apex.quickActions;
-        if (this._stage === 'starting') return quickActionsData.starting;
-        if (this._stage === 'middle')   return quickActionsData.middle;
-        return quickActionsData.ending.byPath[this._careerPath];
+        return (this._apex && this._apex.quickActions) || [];
     }
 
     get campusGuideItems() {
-        if (this._apex && this._apex.campusGuideItems && this._apex.campusGuideItems.length) return this._apex.campusGuideItems;
-        return campusGuideData;
+        return (this._apex && this._apex.campusGuideItems) || [];
     }
 
     // ── Checklist (starting stage) ──────────────────────────────────────────
-    get checklistItems() { return checklistData; }
+    get checklistItems() { return (this._apex && this._apex.checklistItems) || []; }
 
     get checklistDoneCount() {
-        return checklistData.filter(i => i.isDone).length;
+        return this.checklistItems.filter(i => i.isDone).length;
     }
 
-    get checklistTotal() { return checklistData.length; }
+    get checklistTotal() { return this.checklistItems.length || 1; }
 
     get checklistProgressStyle() {
         const pct = Math.round((this.checklistDoneCount / this.checklistTotal) * 100);
@@ -270,13 +239,25 @@ export default class Dashboard extends NavigationMixin(LightningElement) {
         return '';
     }
 
-    // ── Events / actions ────────────────────────────────────────────────────
-    navigateTo(route) {
-        this[NavigationMixin.Navigate]({
-            type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute(route) }
-        });
+    // ── Has-X getters for empty-state gating ────────────────────────────────
+    get hasFeedItems()      { return (this.feedItems || []).length > 0; }
+    get hasForYouItems()    { return (this.forYouItems || []).length > 0; }
+    get hasNeedsAttention() { return (this.needsAttentionItems || []).length > 0; }
+    get hasQuickActions()   { return (this.quickActionsItems || []).length > 0; }
+    get hasCampusGuide()    { return (this.campusGuideItems || []).length > 0; }
+    get hasClearance()      { return (this.clearanceItems || []).length > 0; }
+    get hasSpotlight() {
+        const s = this._apex && this._apex.spotlight;
+        if (!s) return false;
+        return !!(s.heroText || s.heroValue || s.subText || s.subLabel);
     }
+    get hasPinned() {
+        const p = this._apex && this._apex.pinnedCard;
+        return !!(p && p.show);
+    }
+
+    // ── Events / actions ────────────────────────────────────────────────────
+    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
 
     _showToast(msg, variant) {
         this.toastMessage = msg;

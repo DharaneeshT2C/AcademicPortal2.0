@@ -1,10 +1,8 @@
 import { LightningElement, api, track, wire } from 'lwc';
-import { NavigationMixin } from 'lightning/navigation';
-import { pageNameForRoute } from 'c/navHelper';
-import { sidebarNavItems, studentProfile } from 'c/mockData';
+import { sidebarNavItems } from 'c/mockData';
 import getStudentHeader from '@salesforce/apex/KenHomeDashboardController.getStudentHeader';
 
-export default class Sidebar extends NavigationMixin(LightningElement) {
+export default class Sidebar extends LightningElement {
     _currentRoute = 'home';
 
     @api
@@ -19,21 +17,20 @@ export default class Sidebar extends NavigationMixin(LightningElement) {
     @track navItems = [];
     @track expandedSections = {};
     @track _header;
-    // Fallback seed student profile; swapped when @wire resolves.
-    student = studentProfile;
+    student = { FirstName: '', LastName: '' };
+
+    get programLabel() {
+        if (this._header && this._header.program) return this._header.program;
+        return '';
+    }
 
     @wire(getStudentHeader)
     wiredHeader({ data }) {
         if (data) {
             this._header = data;
-            // Apex returns "Student"/"" placeholder when the running user has no
-            // linked Contact (e.g. admin previewing in Experience Builder). Keep
-            // the seeded student profile in that case so the sidebar renders a
-            // readable name and last initial.
             const isPlaceholder = !data.firstName || data.firstName === 'Student';
             if (!isPlaceholder) {
                 this.student = {
-                    ...this.student,
                     FirstName: data.firstName,
                     LastName:  data.lastName || ''
                 };
@@ -42,7 +39,30 @@ export default class Sidebar extends NavigationMixin(LightningElement) {
     }
 
     connectedCallback() {
+        this._currentRoute = this._routeFromPath();
         this.rebuildNav();
+    }
+
+    _routeFromPath() {
+        try {
+            const parts = window.location.pathname.split('/').filter(Boolean);
+            const last = parts[parts.length - 1];
+            if (!last || last === 'newportal' || last === 's') return 'home';
+            return last;
+        } catch (e) {
+            return this._currentRoute;
+        }
+    }
+
+    _navigateTo(route) {
+        try {
+            const parts = window.location.pathname.split('/').filter(Boolean);
+            const base = parts[0] || 'newportal';
+            const target = route === 'home' ? `/${base}/` : `/${base}/${route}`;
+            window.location.href = target;
+        } catch (e) {
+            this.dispatchEvent(new CustomEvent('navigate', { detail: { route } }));
+        }
     }
 
     rebuildNav() {
@@ -96,26 +116,23 @@ export default class Sidebar extends NavigationMixin(LightningElement) {
             };
             this.rebuildNav();
         } else {
-            this[NavigationMixin.Navigate]({
-                type: 'comm__namedPage',
-                attributes: { name: pageNameForRoute(route) }
-            });
+            this._navigateTo(route);
         }
     }
 
     handleChildClick(event) {
         const route = event.currentTarget.dataset.route;
-        this[NavigationMixin.Navigate]({
-            type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute(route) }
-        });
+        this._navigateTo(route);
     }
 
     handleLogout() {
-        this[NavigationMixin.Navigate]({
-            type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute('login') }
-        });
+        try {
+            // Standard Salesforce community logout endpoint.
+            window.location.href = '/secur/logout.jsp';
+        } catch (e) {
+            // Fallback for non-SF runtimes — navigate to in-app login.
+            this.dispatchEvent(new CustomEvent('navigate', { detail: { route: 'login' } }));
+        }
     }
 
     handleClose() {
@@ -123,9 +140,6 @@ export default class Sidebar extends NavigationMixin(LightningElement) {
     }
 
     handleOpenSettings() {
-        this[NavigationMixin.Navigate]({
-            type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute('settings') }
-        });
+        this._navigateTo('settings');
     }
 }

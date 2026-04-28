@@ -1,15 +1,13 @@
 import { LightningElement, wire, track } from 'lwc';
-import { NavigationMixin } from 'lightning/navigation';
-import { pageNameForRoute } from 'c/navHelper';
 import { refreshApex } from '@salesforce/apex';
-import { feeData } from 'c/mockData';
 import getPlans from '@salesforce/apex/KenFeePlanController.getPlans';
+import getFeeSummary from '@salesforce/apex/KenFeePaymentController.getFeeSummary';
 import switchToPlan from '@salesforce/apex/KenFeePlanController.switchToPlan';
 
-export default class FeePlan extends NavigationMixin(LightningElement) {
+export default class FeePlan extends LightningElement {
     @track _apex;
+    @track _summary;
     @track _wireResp;
-    _seed = feeData;
 
     @wire(getPlans)
     wiredPlans(response) {
@@ -17,39 +15,67 @@ export default class FeePlan extends NavigationMixin(LightningElement) {
         const { data, error } = response;
         if (data) this._apex = data;
         else if (error) {
-            // eslint-disable-next-line no-console
-            console.warn('[feePlan] Apex failed, using seed:', error);
+            const _msg = (error && error.body && error.body.message) || '';
+            if (_msg && !_msg.includes('not have access') && !_msg.includes('No rows')) {
+                // eslint-disable-next-line no-console
+                console.warn('[feePlan] Apex failed, using seed:', error);
+            }
+        }
+    }
+
+    @wire(getFeeSummary)
+    wiredSummary({ data, error }) {
+        if (data) this._summary = data;
+        else if (error) {
+            const _msg = (error && error.body && error.body.message) || '';
+            if (_msg && !_msg.includes('not have access') && !_msg.includes('No rows')) {
+                // eslint-disable-next-line no-console
+                console.warn('[feePlan] getFeeSummary failed, using seed:', error);
+            }
         }
     }
 
     get data() {
-        return this._seed;
+        return this._apex || {};
     }
 
+    _fmt(n) { return (n == null) ? '' : Number(n).toLocaleString('en-IN'); }
+
     get planItems() {
-        // If Apex has returned plan options, surface them alongside the seed shape expected
-        // by the template. Falls back to the legacy feePlan list otherwise.
-        if (this._apex && this._apex.length) {
-            return this._apex.map(p => ({
-                ...p,
-                hasChildren: false,
+        // Prefer real installments from KenFeePaymentController.getFeeSummary
+        // (FeeLineDTO has the right shape: feeHead/amount/dueDate/status).
+        const real = this._summary && this._summary.installments;
+        if (real && real.length) {
+            return real.map(r => ({
+                item:         r.feeHead || 'Installment',
+                dueDate:      r.dueDate || '',
+                currency:     'INR',
+                totalAmount:  this._fmt(r.amount),
+                concession:   '0',
+                tax:          '0',
+                tds:          '0',
+                totalPayable: this._fmt(r.amount),
+                status:       r.status,
+                hasChildren:  false,
                 formattedChildren: []
             }));
         }
-        return this._seed.feePlan.map(f => ({
-            ...f,
-            hasChildren: f.children && f.children.length > 0,
-            formattedChildren: f.children || []
-        }));
+        return [];
     }
 
     get formattedSemesters() {
-        return this._seed.semesters.map((s, i) => ({
-            ...s,
-            hasFees: i === 0,
-            formattedAmount: '\u20B9' + (s.totalFeeAmount ? s.totalFeeAmount.toLocaleString('en-IN') : '0'),
-            expandIcon: i === 0 ? 'expand_less' : 'expand_more'
-        }));
+        // Use real installments to compute the semester total when available.
+        const real = this._summary && this._summary.installments;
+        if (real && real.length) {
+            const total = real.reduce((sum, r) => sum + (r.amount || 0), 0);
+            return [{
+                name: 'Current Semester',
+                hasFees: true,
+                formattedAmount: '\u20B9' + this._fmt(total),
+                expandIcon: 'expand_less'
+            }];
+        }
+        return [];
     }
 
     @track _toastVisible = false;
@@ -111,10 +137,14 @@ export default class FeePlan extends NavigationMixin(LightningElement) {
     }
 
     navigateTo(route) {
-        this[NavigationMixin.Navigate]({
-            type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute(route) }
-        });
+        try {
+            const parts = window.location.pathname.split('/').filter(Boolean);
+            const base = parts[0] || 'newportal';
+            const target = route === 'home' ? `/${base}/` : `/${base}/${route}`;
+            window.location.href = target;
+        } catch (e) {
+            this.dispatchEvent(new CustomEvent('navigate', { detail: { route } }));
+        }
     }
     handleBack() { this.navigateTo('fee-payment'); }
     goFeePayment() { this.navigateTo('fee-payment'); }

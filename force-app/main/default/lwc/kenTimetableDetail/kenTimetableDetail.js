@@ -6,6 +6,61 @@ import toggleTimetableLock from '@salesforce/apex/KenTimetableManagementControll
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
+function cloneDate(value) {
+    return new Date(value.getFullYear(), value.getMonth(), value.getDate());
+}
+
+function parseDateOnlyValue(value) {
+    if (!value) {
+        return null;
+    }
+    if (value instanceof Date) {
+        return cloneDate(value);
+    }
+    const parts = String(value).split('-').map((part) => Number(part));
+    if (parts.length !== 3 || parts.some((part) => Number.isNaN(part))) {
+        return null;
+    }
+    return new Date(parts[0], parts[1] - 1, parts[2]);
+}
+
+function toIsoDate(value) {
+    return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}`;
+}
+
+function startOfWeek(value) {
+    const dateValue = cloneDate(value);
+    const day = dateValue.getDay();
+    const mondayOffset = day === 0 ? -6 : 1 - day;
+    dateValue.setDate(dateValue.getDate() + mondayOffset);
+    return dateValue;
+}
+
+function endOfWeek(value) {
+    const dateValue = startOfWeek(value);
+    dateValue.setDate(dateValue.getDate() + 6);
+    return dateValue;
+}
+
+function rangesOverlap(rangeStart, rangeEnd, windowStart, windowEnd) {
+    if (!rangeStart && !rangeEnd) {
+        return true;
+    }
+    const effectiveStart = rangeStart || rangeEnd;
+    const effectiveEnd = rangeEnd || rangeStart;
+    return effectiveStart <= windowEnd && effectiveEnd >= windowStart;
+}
+
+function formatDateRange(startDate, endDate) {
+    const sameMonth = startDate.getMonth() === endDate.getMonth() && startDate.getFullYear() === endDate.getFullYear();
+    const sameYear = startDate.getFullYear() === endDate.getFullYear();
+    const startOptions = sameMonth
+        ? { month: 'short', day: 'numeric' }
+        : { month: 'short', day: 'numeric', year: sameYear ? undefined : 'numeric' };
+    const endOptions = { month: sameMonth ? undefined : 'short', day: 'numeric', year: 'numeric' };
+    return `${new Intl.DateTimeFormat('en-US', startOptions).format(startDate)} - ${new Intl.DateTimeFormat('en-US', endOptions).format(endDate)}`;
+}
+
 function resolveTone(typeValue) {
     const normalized = String(typeValue || '').trim().toLowerCase();
     if (normalized.includes('lab') || normalized.includes('practical')) {
@@ -107,6 +162,7 @@ export default class KenTimetableDetail extends LightningElement {
     selectedProgramPlanId = 'ALL';
     selectedEnrollmentType = 'ALL';
     activePreviewMode = 'weekly';
+    selectedPreviewDate = startOfWeek(new Date());
     detailData;
     loadError;
     isActing = false;
@@ -154,6 +210,8 @@ export default class KenTimetableDetail extends LightningElement {
             this.detailData = data;
             this.scheduleEntries = (data.scheduleEntries || []).map((entry, index) => ({
                 ...entry,
+                startDateValue: parseDateOnlyValue(entry.startDate),
+                endDateValue: parseDateOnlyValue(entry.endDate),
                 key: `${entry.courseOfferingId}-${entry.dayName}-${entry.startTime}-${index}`,
                 timeLabel: `${entry.dayName} ${formatTimeLabel(entry.startTime)}-${formatTimeLabel(entry.endTime)}`,
                 courseLabel: entry.courseCode && data.courseName
@@ -162,6 +220,7 @@ export default class KenTimetableDetail extends LightningElement {
                 status: 'Scheduled',
                 statusClass: 'snapshot-badge scheduled'
             }));
+            this.selectedPreviewDate = this.resolveInitialPreviewDate();
             this.times = data.timeSlots || [];
             this.loadError = undefined;
         } catch (error) {
@@ -199,6 +258,7 @@ export default class KenTimetableDetail extends LightningElement {
 
     get previewRows() {
         const hiddenCellKeys = new Set();
+        const entries = this.visibleScheduleEntries;
 
         return this.times.map((time, timeIndex) => ({
             time: formatTimeLabel(time),
@@ -213,7 +273,7 @@ export default class KenTimetableDetail extends LightningElement {
                     };
                 }
 
-                const previewSession = this.scheduleEntries.find(
+                const previewSession = entries.find(
                     (entry) => entry.dayName === day && entry.startTime === time
                 );
                 if (!previewSession) {
@@ -274,15 +334,61 @@ export default class KenTimetableDetail extends LightningElement {
         return this.activePreviewMode === 'monthly';
     }
 
+    get selectedWeekStartDate() {
+        return startOfWeek(this.selectedPreviewDate);
+    }
+
+    get selectedWeekEndDate() {
+        return endOfWeek(this.selectedPreviewDate);
+    }
+
+    get previewPeriodLabel() {
+        if (this.showMonthlyPreview) {
+            return new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(this.selectedPreviewDate);
+        }
+        return formatDateRange(this.selectedWeekStartDate, this.selectedWeekEndDate);
+    }
+
+    get previewPeriodControlLabel() {
+        return this.showMonthlyPreview ? 'Month' : 'Week';
+    }
+
+    get previewPeriodInputValue() {
+        return toIsoDate(this.selectedPreviewDate);
+    }
+
+    get previewCaption() {
+        return this.showMonthlyPreview
+            ? `Review sessions scheduled during ${this.previewPeriodLabel}.`
+            : `Review sessions scheduled for ${this.previewPeriodLabel}.`;
+    }
+
+    get visibleScheduleEntries() {
+        const windowStart = this.showMonthlyPreview
+            ? new Date(this.selectedPreviewDate.getFullYear(), this.selectedPreviewDate.getMonth(), 1)
+            : this.selectedWeekStartDate;
+        const windowEnd = this.showMonthlyPreview
+            ? new Date(this.selectedPreviewDate.getFullYear(), this.selectedPreviewDate.getMonth() + 1, 0)
+            : this.selectedWeekEndDate;
+        return this.scheduleEntries.filter((entry) =>
+            rangesOverlap(entry.startDateValue, entry.endDateValue, windowStart, windowEnd)
+        );
+    }
+
     get monthlyPreviewDays() {
-        const today = new Date();
-        return Array.from({ length: 30 }, (_, index) => {
-            const currentDate = new Date(today);
-            currentDate.setDate(today.getDate() + index);
+        const monthStart = new Date(this.selectedPreviewDate.getFullYear(), this.selectedPreviewDate.getMonth(), 1);
+        const monthLength = new Date(this.selectedPreviewDate.getFullYear(), this.selectedPreviewDate.getMonth() + 1, 0).getDate();
+        const entries = this.visibleScheduleEntries;
+        return Array.from({ length: monthLength }, (_, index) => {
+            const currentDate = new Date(monthStart);
+            currentDate.setDate(index + 1);
             const weekdayLabel = currentDate.toLocaleDateString('en-US', { weekday: 'long' });
             const dayLabel = currentDate.toLocaleDateString('en-US', { weekday: 'short' });
-            const sessions = this.scheduleEntries
-                .filter((entry) => entry.dayName === weekdayLabel)
+            const sessions = entries
+                .filter((entry) =>
+                    entry.dayName === weekdayLabel &&
+                    rangesOverlap(entry.startDateValue, entry.endDateValue, currentDate, currentDate)
+                )
                 .map((entry) => `${entry.courseCode || (this.detailData && this.detailData.courseCode)} ${formatTimeLabel(entry.startTime)}`);
             return {
                 key: `month-day-${currentDate.toISOString()}`,
@@ -406,6 +512,39 @@ export default class KenTimetableDetail extends LightningElement {
         this.activePreviewMode = event.currentTarget.dataset.mode;
     }
 
+    handlePreviousPreviewPeriod() {
+        this.shiftPreviewPeriod(-1);
+    }
+
+    handleNextPreviewPeriod() {
+        this.shiftPreviewPeriod(1);
+    }
+
+    handlePreviewDateChange(event) {
+        const selectedDate = parseDateOnlyValue(event.target.value);
+        if (selectedDate) {
+            this.selectedPreviewDate = selectedDate;
+        }
+    }
+
+    shiftPreviewPeriod(direction) {
+        const nextDate = cloneDate(this.selectedPreviewDate);
+        if (this.showMonthlyPreview) {
+            nextDate.setMonth(nextDate.getMonth() + direction, 1);
+        } else {
+            nextDate.setDate(nextDate.getDate() + (direction * 7));
+        }
+        this.selectedPreviewDate = nextDate;
+    }
+
+    resolveInitialPreviewDate() {
+        const firstDatedEntry = this.scheduleEntries.find((entry) => entry.startDateValue || entry.endDateValue);
+        if (firstDatedEntry) {
+            return firstDatedEntry.startDateValue || firstDatedEntry.endDateValue;
+        }
+        return startOfWeek(new Date());
+    }
+
     get filteredProgramPlans() {
         return this.programPlanRows.filter((item) => {
             const matchesPlan = this.selectedProgramPlanId === 'ALL' || item.id === this.selectedProgramPlanId;
@@ -417,7 +556,7 @@ export default class KenTimetableDetail extends LightningElement {
 
     get sessionSnapshot() {
         const fallbackCourseName = (this.detailData && this.detailData.courseName) || this.timetableName;
-        return this.scheduleEntries.map((entry, index) => ({
+        return this.visibleScheduleEntries.map((entry, index) => ({
             id: entry.key || `${entry.courseOfferingId}-${entry.dayName}-${entry.startTime}-${index}`,
             course: entry.courseCode && entry.courseName
                 ? `${entry.courseCode} - ${entry.courseName}`

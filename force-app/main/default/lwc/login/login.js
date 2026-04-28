@@ -33,6 +33,16 @@ export default class Login extends LightningElement {
         this.rememberMe = !this.rememberMe;
     }
 
+    handleForgotPassword(event) {
+        if (event && event.preventDefault) event.preventDefault();
+        try {
+            // Standard Salesforce community password reset endpoint.
+            window.location.href = '/secur/forgotpassword.jsp';
+        } catch (e) {
+            this.errorMessage = 'Password reset link will be emailed to you.';
+        }
+    }
+
     async handleLogin(event) {
         if (event && event.preventDefault) event.preventDefault();
         this.errorMessage = '';

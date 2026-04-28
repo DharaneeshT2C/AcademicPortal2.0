@@ -10,7 +10,7 @@
  *                 Reason__c, Destination__c, Status__c, Approver__c).
  * ************************************************************************************************
  */
-public with sharing class KenGatePassController {
+public without sharing class KenGatePassController {
 
     public class GatePassDTO {
         @AuraEnabled public Id     id;
@@ -35,14 +35,14 @@ public with sharing class KenGatePassController {
     public static List<GatePassDTO> getGatePasses() {
         try {
             Id contactId = KenRunningStudentHelper.optionalContactId();
-            if (contactId == null) return seedPasses();
+            if (contactId == null) return new List<GatePassDTO>();
             List<GatePassDTO> out = new List<GatePassDTO>();
             for (Gate_Pass__c r : [
                 SELECT Id, Reason__c, Destination__c, Out_Date_Time__c, Return_Date_Time__c,
                        Status__c, Approver_Name__c, QR_Code__c
                 FROM Gate_Pass__c
                 WHERE Student__c = :contactId
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 ORDER BY Out_Date_Time__c DESC
                 LIMIT 50
             ]) {
@@ -57,7 +57,6 @@ public with sharing class KenGatePassController {
                 p.qrCode         = r.QR_Code__c;
                 out.add(p);
             }
-            if (out.isEmpty()) return seedPasses();
             return out;
         } catch (Exception e) {
             KenAuraExceptionHelper.throwAuraHandled('KenGatePassController.getGatePasses',
@@ -98,7 +97,7 @@ public with sharing class KenGatePassController {
                       AND Out_Date_Time__c = :outDt
                       AND Reason__c = :req.reason
                       AND Status__c IN ('Pending', 'Approved')
-                    WITH USER_MODE LIMIT 1
+                    WITH SECURITY_ENFORCED LIMIT 1
                 ];
                 if (!dupes.isEmpty()) return dupes[0].Id;
             }
@@ -120,20 +119,4 @@ public with sharing class KenGatePassController {
         }
     }
 
-    private static List<GatePassDTO> seedPasses() {
-        List<GatePassDTO> out = new List<GatePassDTO>();
-        out.add(pass('GP001', 'Home visit',       'Bangalore',    '20-Apr 6:00 PM', '22-Apr 8:00 PM', 'Approved', 'Mr. Menon',  ''));
-        out.add(pass('GP002', 'Medical',          'Apollo Clinic','15-Apr 4:00 PM', '15-Apr 7:00 PM', 'Completed','Mr. Menon',  ''));
-        out.add(pass('GP003', 'Conference',       'IIT Delhi',    '10-May 9:00 AM', '12-May 6:00 PM', 'Pending',  '',           ''));
-        return out;
-    }
-
-    private static GatePassDTO pass(String id, String reason, String dest, String outDt, String retDt,
-                                     String status, String approver, String qr) {
-        GatePassDTO p = new GatePassDTO();
-        p.reason = reason; p.destination = dest;
-        p.outDateTime = outDt; p.returnDateTime = retDt;
-        p.status = status; p.approverName = approver; p.qrCode = qr;
-        return p;
-    }
 }

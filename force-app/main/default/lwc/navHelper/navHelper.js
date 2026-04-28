@@ -9,7 +9,7 @@ const ROUTE_TO_PAGE = {
     'exam-enrollment':    'exam_enrollment__c',
     'results':            'results__c',
     'semester-detail':    'semester_detail__c',
-    'marks-breakdown':    'marks_breakdown__c',
+    'marks-breakdown':    'MarksBreakdown__c',
     'research':           'research__c',
     'thesis':             'thesis__c',
     'course-enrollment':  'course_enrollment__c',

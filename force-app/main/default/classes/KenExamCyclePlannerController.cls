@@ -412,6 +412,42 @@ Ken_Academic_Term__r.AcademicYear.Name
 
     // ─── Create Enrollment Criteria (Start Enrollment) ────────────────────────
 
+    private static final String NO_FEE_TOKEN = 'No Fee Any Students';
+    // CourseOffering.Exam_Type__c is the source of truth for Regular vs. Backlog routing.
+    private static final String EXAM_TYPE_REGULAR = 'Regular';
+    private static final Set<String> EXAM_TYPES_BACKLOG = new Set<String>{ 'Backlog', 'Retest' };
+
+    // Internal builder that holds everything needed both to insert the
+    // criterion record and to decide which exams should map to it.
+    private class CriterionPlan {
+        Id programPlanId;
+        Boolean sameFeeMode;
+        // Single-fee mode (sameFeeMode = true)
+        String singleFeeCriteria;
+        Id singleFeeTypeId;
+        String singleFeeTypeName;
+        Decimal singleExamFee;
+        // Split-fee mode (sameFeeMode = false)
+        String regularFeeCriteria;
+        Id regularFeeTypeId;
+        String regularFeeTypeName;
+        Decimal regularExamFee;
+        String backlogFeeCriteria;
+        Id backlogFeeTypeId;
+        String backlogFeeTypeName;
+        Decimal backlogExamFee;
+        // Mapping scope:
+        // - matchCourseType: filter exams by CourseOffering.Course_Type__c (case-insensitive). null → don't filter.
+        // - matchExamType:   'REGULAR' / 'BACKLOG' / null (any).
+        // - ownsAllRegular / ownsAllBacklog: anchor flags for No-Fee sections.
+        //   At most one criterion per programPlan can carry each flag.
+        String matchCourseType;
+        String matchExamType;
+        Boolean ownsAllRegular = false;
+        Boolean ownsAllBacklog = false;
+        Id insertedId;
+    }
+
     @AuraEnabled
     public static List<Id> createEnrollmentCriteria(EnrollmentCriteriaRequest request) {
         if (request == null) {
@@ -454,65 +490,87 @@ Ken_Academic_Term__r.AcademicYear.Name
             : null;
 
         Boolean sameFeeCriteria = request.sameFeeCriteria == true;
-        String noFeeToken = 'No Fee Any Students';
 
-        String singleFeeCriteria = sameFeeCriteria ? request.feeCriteria : null;
-        Id singleFeeType = null;
-        Decimal singleExamFee = null;
-        if (sameFeeCriteria && String.isNotBlank(singleFeeCriteria) && singleFeeCriteria != noFeeToken) {
-            singleFeeType = request.feeTypeId;
-            singleExamFee = request.examFee;
+        // Validate sections + collect fee type ids so we can resolve their names.
+        List<FeeItemRequest> singleItems   = sameFeeCriteria
+            ? sanitizeFeeItems(request.feeItems, request.feeCriteria, 'Fee Type')
+            : new List<FeeItemRequest>();
+        List<FeeItemRequest> regularItems  = !sameFeeCriteria
+            ? sanitizeFeeItems(request.regularFeeItems, request.regularFeeCriteria, 'Regular Fee Type')
+            : new List<FeeItemRequest>();
+        List<FeeItemRequest> backlogItems  = !sameFeeCriteria
+            ? sanitizeFeeItems(request.backlogFeeItems, request.backlogFeeCriteria, 'Backlog Fee Type')
+            : new List<FeeItemRequest>();
+
+        Set<Id> feeTypeIds = new Set<Id>();
+        for (FeeItemRequest it : singleItems)  if (it.feeTypeId != null) feeTypeIds.add(it.feeTypeId);
+        for (FeeItemRequest it : regularItems) if (it.feeTypeId != null) feeTypeIds.add(it.feeTypeId);
+        for (FeeItemRequest it : backlogItems) if (it.feeTypeId != null) feeTypeIds.add(it.feeTypeId);
+
+        Map<Id, String> feeTypeIdToName = new Map<Id, String>();
+        if (!feeTypeIds.isEmpty()) {
+            for (Ken_Fee_Type__c ft : [
+                SELECT Id, Fee_Type_Name__c
+                FROM Ken_Fee_Type__c
+                WHERE Id IN :feeTypeIds
+            ]) {
+                feeTypeIdToName.put(ft.Id, ft.Fee_Type_Name__c);
+            }
         }
 
-        String regularFeeCriteria = !sameFeeCriteria ? request.regularFeeCriteria : null;
-        Id regularFeeType = null;
-        Decimal regularExamFee = null;
-        if (!sameFeeCriteria && String.isNotBlank(regularFeeCriteria) && regularFeeCriteria != noFeeToken) {
-            regularFeeType = request.regularFeeTypeId;
-            regularExamFee = request.regularExamFee;
-        }
-
-        String backlogFeeCriteria = !sameFeeCriteria ? request.backlogFeeCriteria : null;
-        Id backlogFeeType = null;
-        Decimal backlogExamFee = null;
-        if (!sameFeeCriteria && String.isNotBlank(backlogFeeCriteria) && backlogFeeCriteria != noFeeToken) {
-            backlogFeeType = request.backlogFeeTypeId;
-            backlogExamFee = request.backlogExamFee;
-        }
-
+        // Build per-program criterion plans and the records to insert.
+        Map<Id, List<CriterionPlan>> programPlanIdToPlans = new Map<Id, List<CriterionPlan>>();
         List<Ken_Enrollment_Cretirea__c> toInsert = new List<Ken_Enrollment_Cretirea__c>();
+        List<CriterionPlan> orderedPlans = new List<CriterionPlan>();
+
         for (Id programPlanId : request.programPlanIds) {
-            Ken_Enrollment_Cretirea__c rec = new Ken_Enrollment_Cretirea__c();
-            rec.Learning_Program_Plan__c = programPlanId;
-            rec.Ken_Enrollment_Start_Date_Time__c = startDt;
-            rec.Ken_Enrollment_End_Date_Time__c = endDt;
-            rec.Ken_Late_Fine_Applying_Date_Time__c = lateFineDt;
-            rec.Ken_Same_Fee_Regular_and_Backlog__c = sameFeeCriteria;
-            rec.Ken_Fee_Criteria__c = singleFeeCriteria;
-            rec.Ken_Fee_Type__c = singleFeeType;
-            rec.Exam_Fee__c = singleExamFee;
-            rec.Ken_Regular_Fee_Criteria__c = regularFeeCriteria;
-            rec.Ken_Regular_Fee_Type__c = regularFeeType;
-            rec.Regular_Exam_Fee__c = regularExamFee;
-            rec.Ken_Backlog_Fee_Criteria__c = backlogFeeCriteria;
-            rec.Ken_Backlog_Fee_Type__c = backlogFeeType;
-            rec.Backlog_Exam_Fee__c = backlogExamFee;
-            rec.Ken_Enrollment_for_Backlog_Courses__c = request.allowBacklog ? request.backlogMode : null;
-            rec.Ken_Enrollment_for_Regular_Courses__c = request.allowRegular ? request.regularMode : null;
-            rec.Ken_Student_Declaration__c = request.declaration;
-            toInsert.add(rec);
+            List<CriterionPlan> plans = buildCriterionPlans(
+                programPlanId,
+                sameFeeCriteria,
+                request,
+                singleItems, regularItems, backlogItems,
+                feeTypeIdToName
+            );
+            programPlanIdToPlans.put(programPlanId, plans);
+            for (CriterionPlan p : plans) {
+                Ken_Enrollment_Cretirea__c rec = new Ken_Enrollment_Cretirea__c();
+                rec.Learning_Program_Plan__c = programPlanId;
+                rec.Ken_Enrollment_Start_Date_Time__c = startDt;
+                rec.Ken_Enrollment_End_Date_Time__c = endDt;
+                rec.Ken_Late_Fine_Applying_Date_Time__c = lateFineDt;
+                rec.Ken_Same_Fee_Regular_and_Backlog__c = sameFeeCriteria;
+                rec.Ken_Fee_Criteria__c = p.singleFeeCriteria;
+                rec.Ken_Fee_Type__c = p.singleFeeTypeId;
+                rec.Exam_Fee__c = p.singleExamFee;
+                rec.Ken_Regular_Fee_Criteria__c = p.regularFeeCriteria;
+                rec.Ken_Regular_Fee_Type__c = p.regularFeeTypeId;
+                rec.Regular_Exam_Fee__c = p.regularExamFee;
+                rec.Ken_Backlog_Fee_Criteria__c = p.backlogFeeCriteria;
+                rec.Ken_Backlog_Fee_Type__c = p.backlogFeeTypeId;
+                rec.Backlog_Exam_Fee__c = p.backlogExamFee;
+                rec.Ken_Enrollment_for_Backlog_Courses__c = request.allowBacklog ? request.backlogMode : null;
+                rec.Ken_Enrollment_for_Regular_Courses__c = request.allowRegular ? request.regularMode : null;
+                rec.Ken_Student_Declaration__c = request.declaration;
+                toInsert.add(rec);
+                orderedPlans.add(p);
+            }
         }
+        if (toInsert.isEmpty()) return new List<Id>();
         insert toInsert;
-
-        Map<Id, Id> programPlanIdToCriteriaId = new Map<Id, Id>();
-        for (Integer i = 0; i < request.programPlanIds.size(); i++) {
-            programPlanIdToCriteriaId.put(request.programPlanIds[i], toInsert[i].Id);
+        for (Integer i = 0; i < toInsert.size(); i++) {
+            orderedPlans[i].insertedId = toInsert[i].Id;
         }
 
+        // Build the program → offering map and remember each offering's
+        // Course_Type and Exam_Type — these are the only fields used to route
+        // an exam to a criterion plan.
         Map<Id, Set<Id>> programPlanIdToOfferingIds = new Map<Id, Set<Id>>();
+        Map<Id, String> offeringIdToCourseType = new Map<Id, String>();
+        Map<Id, String> offeringIdToExamType = new Map<Id, String>();
         Set<Id> allOfferingIds = new Set<Id>();
         for (Program_Plan_Course_Junction__c jx : [
-            SELECT Id, Course_Offering__c, Learning_Program_Plan__c
+            SELECT Id, Course_Offering__c, Learning_Program_Plan__c,
+                   Course_Offering__r.Course_Type__c, Course_Offering__r.Exam_Type__c
             FROM Program_Plan_Course_Junction__c
             WHERE Learning_Program_Plan__c IN :request.programPlanIds
             AND Course_Offering__r.AcademicSession.AcademicTermId = :termId
@@ -523,8 +581,11 @@ Ken_Academic_Term__r.AcademicYear.Name
             }
             programPlanIdToOfferingIds.get(jx.Learning_Program_Plan__c).add(jx.Course_Offering__c);
             allOfferingIds.add(jx.Course_Offering__c);
+            offeringIdToCourseType.put(jx.Course_Offering__c, (String) jx.Course_Offering__r.Course_Type__c);
+            offeringIdToExamType.put(jx.Course_Offering__c, (String) jx.Course_Offering__r.Exam_Type__c);
         }
-        if (allOfferingIds.isEmpty()) return new List<Id>(programPlanIdToCriteriaId.values());
+        Set<Id> insertedIds = collectInsertedIds(orderedPlans);
+        if (allOfferingIds.isEmpty()) return new List<Id>(insertedIds);
 
         Map<Id, Set<Id>> offeringIdToParentEvalIds = new Map<Id, Set<Id>>();
         Set<Id> allParentEvalIds = new Set<Id>();
@@ -540,7 +601,7 @@ Ken_Academic_Term__r.AcademicYear.Name
             offeringIdToParentEvalIds.get(jx.Course_Offering__c).add(jx.Ken_Evaluation_Component__c);
             allParentEvalIds.add(jx.Ken_Evaluation_Component__c);
         }
-        if (allParentEvalIds.isEmpty()) return new List<Id>(programPlanIdToCriteriaId.values());
+        if (allParentEvalIds.isEmpty()) return new List<Id>(insertedIds);
 
         Map<Id, Set<Id>> parentEvalIdToChildEvalIds = new Map<Id, Set<Id>>();
         Set<Id> allChildEvalIds = new Set<Id>();
@@ -557,7 +618,7 @@ Ken_Academic_Term__r.AcademicYear.Name
             parentEvalIdToChildEvalIds.get(child.Ken_Parent_Evaluation_Component__c).add(child.Id);
             allChildEvalIds.add(child.Id);
         }
-        if (allChildEvalIds.isEmpty()) return new List<Id>(programPlanIdToCriteriaId.values());
+        if (allChildEvalIds.isEmpty()) return new List<Id>(insertedIds);
 
         Map<Id, Set<Id>> childEvalIdToExamIds = new Map<Id, Set<Id>>();
         Set<Id> allExamIds = new Set<Id>();
@@ -574,14 +635,21 @@ Ken_Academic_Term__r.AcademicYear.Name
             childEvalIdToExamIds.get(exam.Ken_Evaluation_Component__c).add(exam.Id);
             allExamIds.add(exam.Id);
         }
-        if (allExamIds.isEmpty()) return new List<Id>(programPlanIdToCriteriaId.values());
+        if (allExamIds.isEmpty()) return new List<Id>(insertedIds);
 
+        // Route each exam by the (Course_Type, Exam_Type) of the offering it
+        // came from and pick the most specific matching criterion.
         Map<Id, Id> examIdToCriteriaId = new Map<Id, Id>();
         for (Id programPlanId : request.programPlanIds) {
-            Id criteriaId = programPlanIdToCriteriaId.get(programPlanId);
+            List<CriterionPlan> plans = programPlanIdToPlans.get(programPlanId);
+            if (plans == null || plans.isEmpty()) continue;
             Set<Id> offeringIds = programPlanIdToOfferingIds.get(programPlanId);
-            if (criteriaId == null || offeringIds == null) continue;
+            if (offeringIds == null) continue;
             for (Id offeringId : offeringIds) {
+                String courseType = offeringIdToCourseType.get(offeringId);
+                String examType = normalizeExamType(offeringIdToExamType.get(offeringId));
+                CriterionPlan match = pickCriterionForExam(plans, courseType, examType);
+                if (match == null) continue;
                 Set<Id> parentIds = offeringIdToParentEvalIds.get(offeringId);
                 if (parentIds == null) continue;
                 for (Id parentId : parentIds) {
@@ -591,38 +659,269 @@ Ken_Academic_Term__r.AcademicYear.Name
                         Set<Id> examIds = childEvalIdToExamIds.get(childId);
                         if (examIds == null) continue;
                         for (Id examId : examIds) {
-                            examIdToCriteriaId.put(examId, criteriaId);
+                            examIdToCriteriaId.put(examId, match.insertedId);
                         }
                     }
                 }
             }
         }
 
-        List<Examination> examUpdates = new List<Examination>();
-        for (Id examId : examIdToCriteriaId.keySet()) {
-            examUpdates.add(new Examination(
-                Id = examId,
-                Ken_Enrollment_Criteria__c = examIdToCriteriaId.get(examId)
-            ));
-        }
-        if (!examUpdates.isEmpty()) update examUpdates;
+        if (!examIdToCriteriaId.isEmpty()) {
+            List<Examination> examUpdates = new List<Examination>();
+            for (Id examId : examIdToCriteriaId.keySet()) {
+                examUpdates.add(new Examination(
+                    Id = examId,
+                    Ken_Enrollment_Criteria__c = examIdToCriteriaId.get(examId)
+                ));
+            }
+            update examUpdates;
 
-        List<PersonExamination> peUpdates = new List<PersonExamination>();
-        for (PersonExamination pe : [
-            SELECT Id, ExaminationId
-            FROM PersonExamination
-            WHERE ExaminationId IN :examIdToCriteriaId.keySet()
-        ]) {
-            Id criteriaId = examIdToCriteriaId.get(pe.ExaminationId);
-            if (criteriaId == null) continue;
-            peUpdates.add(new PersonExamination(
-                Id = pe.Id,
-                Ken_Enrollment_Criteria__c = criteriaId
-            ));
+            List<PersonExamination> peUpdates = new List<PersonExamination>();
+            for (PersonExamination pe : [
+                SELECT Id, ExaminationId
+                FROM PersonExamination
+                WHERE ExaminationId IN :examIdToCriteriaId.keySet()
+            ]) {
+                Id criteriaId = examIdToCriteriaId.get(pe.ExaminationId);
+                if (criteriaId == null) continue;
+                peUpdates.add(new PersonExamination(
+                    Id = pe.Id,
+                    Ken_Enrollment_Criteria__c = criteriaId
+                ));
+            }
+            if (!peUpdates.isEmpty()) update peUpdates;
         }
-        if (!peUpdates.isEmpty()) update peUpdates;
 
-        return new List<Id>(programPlanIdToCriteriaId.values());
+        return new List<Id>(insertedIds);
+    }
+
+    // Strip blanks, validate that fee items are present when fee criteria
+    // requires them, and reject duplicate fee types in the same section.
+    private static List<FeeItemRequest> sanitizeFeeItems(
+        List<FeeItemRequest> raw, String feeCriteria, String label
+    ) {
+        List<FeeItemRequest> cleaned = new List<FeeItemRequest>();
+        if (raw == null || String.isBlank(feeCriteria) || feeCriteria == NO_FEE_TOKEN) {
+            return cleaned;
+        }
+        Set<Id> seen = new Set<Id>();
+        for (FeeItemRequest it : raw) {
+            if (it == null || it.feeTypeId == null) continue;
+            if (seen.contains(it.feeTypeId)) {
+                throw new AuraHandledException(label + ' must be unique within the section.');
+            }
+            if (it.examFee == null) {
+                throw new AuraHandledException('Exam Fee is required for every ' + label + '.');
+            }
+            seen.add(it.feeTypeId);
+            cleaned.add(it);
+        }
+        if (cleaned.isEmpty()) {
+            throw new AuraHandledException('Add at least one ' + label + ' for the selected fee criteria.');
+        }
+        return cleaned;
+    }
+
+    // Translate the request into one criterion plan per record we'll insert,
+    // wiring each plan to the (course-type, exam-type) scope it should claim.
+    private static List<CriterionPlan> buildCriterionPlans(
+        Id programPlanId,
+        Boolean sameFeeCriteria,
+        EnrollmentCriteriaRequest request,
+        List<FeeItemRequest> singleItems,
+        List<FeeItemRequest> regularItems,
+        List<FeeItemRequest> backlogItems,
+        Map<Id, String> feeTypeIdToName
+    ) {
+        List<CriterionPlan> plans = new List<CriterionPlan>();
+
+        if (sameFeeCriteria) {
+            String fc = request.feeCriteria;
+            if (String.isBlank(fc)) {
+                throw new AuraHandledException('Fee Criteria is required.');
+            }
+            if (fc == NO_FEE_TOKEN) {
+                CriterionPlan p = new CriterionPlan();
+                p.programPlanId = programPlanId;
+                p.sameFeeMode = true;
+                p.singleFeeCriteria = fc;
+                p.matchCourseType = null;
+                p.matchExamType = null;
+                p.ownsAllRegular = true;
+                p.ownsAllBacklog = true;
+                plans.add(p);
+            } else {
+                for (FeeItemRequest it : singleItems) {
+                    String typeName = feeTypeIdToName.get(it.feeTypeId);
+                    CriterionPlan p = new CriterionPlan();
+                    p.programPlanId = programPlanId;
+                    p.sameFeeMode = true;
+                    p.singleFeeCriteria = fc;
+                    p.singleFeeTypeId = it.feeTypeId;
+                    p.singleFeeTypeName = typeName;
+                    p.singleExamFee = it.examFee;
+                    p.matchCourseType = typeName;
+                    p.matchExamType = null;
+                    plans.add(p);
+                }
+            }
+            return plans;
+        }
+
+        // Split-fee mode.
+        String regCrit = request.regularFeeCriteria;
+        String backCrit = request.backlogFeeCriteria;
+        if (String.isBlank(regCrit)) {
+            throw new AuraHandledException('Regular Fee Criteria is required.');
+        }
+        if (String.isBlank(backCrit)) {
+            throw new AuraHandledException('Backlog Fee Criteria is required.');
+        }
+
+        Boolean regNoFee = regCrit == NO_FEE_TOKEN;
+        Boolean backNoFee = backCrit == NO_FEE_TOKEN;
+
+        if (regNoFee && backNoFee) {
+            // One record carries both no-fee sections.
+            CriterionPlan p = new CriterionPlan();
+            p.programPlanId = programPlanId;
+            p.sameFeeMode = false;
+            p.regularFeeCriteria = regCrit;
+            p.backlogFeeCriteria = backCrit;
+            p.ownsAllRegular = true;
+            p.ownsAllBacklog = true;
+            plans.add(p);
+            return plans;
+        }
+
+        if (!regNoFee && backNoFee) {
+            // N regular records; the first also owns all backlog exams.
+            for (Integer i = 0; i < regularItems.size(); i++) {
+                FeeItemRequest it = regularItems[i];
+                String typeName = feeTypeIdToName.get(it.feeTypeId);
+                CriterionPlan p = new CriterionPlan();
+                p.programPlanId = programPlanId;
+                p.sameFeeMode = false;
+                p.regularFeeCriteria = regCrit;
+                p.regularFeeTypeId = it.feeTypeId;
+                p.regularFeeTypeName = typeName;
+                p.regularExamFee = it.examFee;
+                p.backlogFeeCriteria = backCrit; // shared no-fee text on every record
+                p.matchCourseType = typeName;
+                p.matchExamType = 'REGULAR';
+                if (i == 0) p.ownsAllBacklog = true;
+                plans.add(p);
+            }
+            return plans;
+        }
+
+        if (regNoFee && !backNoFee) {
+            // N backlog records; the first also owns all regular exams.
+            for (Integer i = 0; i < backlogItems.size(); i++) {
+                FeeItemRequest it = backlogItems[i];
+                String typeName = feeTypeIdToName.get(it.feeTypeId);
+                CriterionPlan p = new CriterionPlan();
+                p.programPlanId = programPlanId;
+                p.sameFeeMode = false;
+                p.regularFeeCriteria = regCrit; // shared no-fee text on every record
+                p.backlogFeeCriteria = backCrit;
+                p.backlogFeeTypeId = it.feeTypeId;
+                p.backlogFeeTypeName = typeName;
+                p.backlogExamFee = it.examFee;
+                p.matchCourseType = typeName;
+                p.matchExamType = 'BACKLOG';
+                if (i == 0) p.ownsAllRegular = true;
+                plans.add(p);
+            }
+            return plans;
+        }
+
+        // Both sides have fee items: N + M records, each with one section populated.
+        for (FeeItemRequest it : regularItems) {
+            String typeName = feeTypeIdToName.get(it.feeTypeId);
+            CriterionPlan p = new CriterionPlan();
+            p.programPlanId = programPlanId;
+            p.sameFeeMode = false;
+            p.regularFeeCriteria = regCrit;
+            p.regularFeeTypeId = it.feeTypeId;
+            p.regularFeeTypeName = typeName;
+            p.regularExamFee = it.examFee;
+            p.matchCourseType = typeName;
+            p.matchExamType = 'REGULAR';
+            plans.add(p);
+        }
+        for (FeeItemRequest it : backlogItems) {
+            String typeName = feeTypeIdToName.get(it.feeTypeId);
+            CriterionPlan p = new CriterionPlan();
+            p.programPlanId = programPlanId;
+            p.sameFeeMode = false;
+            p.backlogFeeCriteria = backCrit;
+            p.backlogFeeTypeId = it.feeTypeId;
+            p.backlogFeeTypeName = typeName;
+            p.backlogExamFee = it.examFee;
+            p.matchCourseType = typeName;
+            p.matchExamType = 'BACKLOG';
+            plans.add(p);
+        }
+        return plans;
+    }
+
+    // Most-specific-wins: prefer (course-type + exam-type) → course-type only
+    // → all-regular / all-backlog anchor → all-anchor.
+    private static CriterionPlan pickCriterionForExam(
+        List<CriterionPlan> plans, String courseType, String examType
+    ) {
+        CriterionPlan exactMatch = null;
+        CriterionPlan courseTypeOnly = null;
+        CriterionPlan typeAnchor = null;
+        CriterionPlan globalAnchor = null;
+        Boolean isRegular = examType == 'REGULAR';
+        Boolean isBacklog = examType == 'BACKLOG';
+        String normCourseType = normalizeCourseType(courseType);
+
+        for (CriterionPlan p : plans) {
+            String planCourseType = normalizeCourseType(p.matchCourseType);
+            if (p.matchCourseType != null && planCourseType == normCourseType) {
+                if (p.matchExamType != null) {
+                    if (p.matchExamType == examType && exactMatch == null) {
+                        exactMatch = p;
+                    }
+                } else if (courseTypeOnly == null) {
+                    courseTypeOnly = p;
+                }
+            }
+            // Anchors are identified by their ownership flags only — in Cases 3/4
+            // the anchor is the first fee record (which also carries a course type).
+            if (typeAnchor == null) {
+                if (isRegular && p.ownsAllRegular) typeAnchor = p;
+                else if (isBacklog && p.ownsAllBacklog) typeAnchor = p;
+            }
+            if (globalAnchor == null && p.ownsAllRegular && p.ownsAllBacklog) {
+                globalAnchor = p;
+            }
+        }
+
+        if (exactMatch != null) return exactMatch;
+        if (courseTypeOnly != null) return courseTypeOnly;
+        if (typeAnchor != null) return typeAnchor;
+        return globalAnchor;
+    }
+
+    private static String normalizeCourseType(String value) {
+        return value == null ? null : value.trim().toUpperCase();
+    }
+
+    private static String normalizeExamType(String value) {
+        if (String.isBlank(value)) return 'REGULAR';
+        if (EXAM_TYPES_BACKLOG.contains(value)) return 'BACKLOG';
+        if (value == EXAM_TYPE_REGULAR) return 'REGULAR';
+        return value.toUpperCase();
+    }
+
+    private static Set<Id> collectInsertedIds(List<CriterionPlan> plans) {
+        Set<Id> ids = new Set<Id>();
+        for (CriterionPlan p : plans) if (p.insertedId != null) ids.add(p.insertedId);
+        return ids;
     }
 
     // ─── Enrollment Criteria (read-only view) ─────────────────────────────────
@@ -631,6 +930,7 @@ Ken_Academic_Term__r.AcademicYear.Name
     public static EnrollmentCriteriaDetailWrapper getEnrollmentCriteriaDetail(Id planId, Id programPlanId) {
         if (planId == null || programPlanId == null) return null;
 
+        // Pull only criteria actually wired up to this plan's exams.
         Set<Id> criteriaIds = new Set<Id>();
         for (Examination exam : [
             SELECT Ken_Enrollment_Criteria__c
@@ -664,39 +964,70 @@ Ken_Academic_Term__r.AcademicYear.Name
                    Backlog_Exam_Fee__c,
                    Ken_Enrollment_for_Backlog_Courses__c,
                    Ken_Enrollment_for_Regular_Courses__c,
-                   Ken_Student_Declaration__c
+                   Ken_Student_Declaration__c,
+                   CreatedDate
             FROM Ken_Enrollment_Cretirea__c
             WHERE Id IN :criteriaIds
             AND Learning_Program_Plan__c = :programPlanId
-            ORDER BY CreatedDate DESC
-            LIMIT 1
+            ORDER BY CreatedDate ASC
         ];
         if (matches.isEmpty()) return null;
 
-        Ken_Enrollment_Cretirea__c c = matches[0];
+        // The most-recently-created batch shares a CreatedDate window. Take the
+        // newest record's window (start/end/late-fine + shared header fields)
+        // and aggregate every record from that window into the fee-row lists.
+        Ken_Enrollment_Cretirea__c newest = matches[matches.size() - 1];
+
         EnrollmentCriteriaDetailWrapper w = new EnrollmentCriteriaDetailWrapper();
-        w.id = c.Id;
-        w.programPlanId = c.Learning_Program_Plan__c;
-        w.programPlanName = (c.Learning_Program_Plan__r != null) ? c.Learning_Program_Plan__r.Name : '';
-        w.startOn = formatDatetimeForView(c.Ken_Enrollment_Start_Date_Time__c);
-        w.endsOn = formatDatetimeForView(c.Ken_Enrollment_End_Date_Time__c);
-        w.lateFineOn = formatDatetimeForView(c.Ken_Late_Fine_Applying_Date_Time__c);
-        w.sameFeeCriteria = c.Ken_Same_Fee_Regular_and_Backlog__c == true;
-        w.feeCriteria = c.Ken_Fee_Criteria__c;
-        w.feeTypeId = c.Ken_Fee_Type__c;
-        w.feeTypeName = (c.Ken_Fee_Type__r != null) ? c.Ken_Fee_Type__r.Fee_Type_Name__c : null;
-        w.examFee = c.Exam_Fee__c;
-        w.regularFeeCriteria = c.Ken_Regular_Fee_Criteria__c;
-        w.regularFeeTypeId = c.Ken_Regular_Fee_Type__c;
-        w.regularFeeTypeName = (c.Ken_Regular_Fee_Type__r != null) ? c.Ken_Regular_Fee_Type__r.Fee_Type_Name__c : null;
-        w.regularExamFee = c.Regular_Exam_Fee__c;
-        w.backlogFeeCriteria = c.Ken_Backlog_Fee_Criteria__c;
-        w.backlogFeeTypeId = c.Ken_Backlog_Fee_Type__c;
-        w.backlogFeeTypeName = (c.Ken_Backlog_Fee_Type__r != null) ? c.Ken_Backlog_Fee_Type__r.Fee_Type_Name__c : null;
-        w.backlogExamFee = c.Backlog_Exam_Fee__c;
-        w.backlogMode = c.Ken_Enrollment_for_Backlog_Courses__c;
-        w.regularMode = c.Ken_Enrollment_for_Regular_Courses__c;
-        w.declaration = c.Ken_Student_Declaration__c;
+        w.programPlanId = newest.Learning_Program_Plan__c;
+        w.programPlanName = (newest.Learning_Program_Plan__r != null) ? newest.Learning_Program_Plan__r.Name : '';
+        w.startOn = formatDatetimeForView(newest.Ken_Enrollment_Start_Date_Time__c);
+        w.endsOn = formatDatetimeForView(newest.Ken_Enrollment_End_Date_Time__c);
+        w.lateFineOn = formatDatetimeForView(newest.Ken_Late_Fine_Applying_Date_Time__c);
+        w.sameFeeCriteria = newest.Ken_Same_Fee_Regular_and_Backlog__c == true;
+        w.feeCriteria = newest.Ken_Fee_Criteria__c;
+        w.regularFeeCriteria = newest.Ken_Regular_Fee_Criteria__c;
+        w.backlogFeeCriteria = newest.Ken_Backlog_Fee_Criteria__c;
+        w.backlogMode = newest.Ken_Enrollment_for_Backlog_Courses__c;
+        w.regularMode = newest.Ken_Enrollment_for_Regular_Courses__c;
+        w.declaration = newest.Ken_Student_Declaration__c;
+        w.feeItems = new List<FeeRowView>();
+        w.regularFeeItems = new List<FeeRowView>();
+        w.backlogFeeItems = new List<FeeRowView>();
+
+        // Records from the latest batch share start/end/late-fine timestamps.
+        Datetime latestStart = newest.Ken_Enrollment_Start_Date_Time__c;
+        Datetime latestEnd = newest.Ken_Enrollment_End_Date_Time__c;
+
+        for (Ken_Enrollment_Cretirea__c c : matches) {
+            if (c.Ken_Enrollment_Start_Date_Time__c != latestStart
+                || c.Ken_Enrollment_End_Date_Time__c != latestEnd) continue;
+
+            if (c.Ken_Fee_Type__c != null) {
+                FeeRowView row = new FeeRowView();
+                row.criteriaId = c.Id;
+                row.feeTypeId = c.Ken_Fee_Type__c;
+                row.feeTypeName = (c.Ken_Fee_Type__r != null) ? c.Ken_Fee_Type__r.Fee_Type_Name__c : null;
+                row.examFee = c.Exam_Fee__c;
+                w.feeItems.add(row);
+            }
+            if (c.Ken_Regular_Fee_Type__c != null) {
+                FeeRowView row = new FeeRowView();
+                row.criteriaId = c.Id;
+                row.feeTypeId = c.Ken_Regular_Fee_Type__c;
+                row.feeTypeName = (c.Ken_Regular_Fee_Type__r != null) ? c.Ken_Regular_Fee_Type__r.Fee_Type_Name__c : null;
+                row.examFee = c.Regular_Exam_Fee__c;
+                w.regularFeeItems.add(row);
+            }
+            if (c.Ken_Backlog_Fee_Type__c != null) {
+                FeeRowView row = new FeeRowView();
+                row.criteriaId = c.Id;
+                row.feeTypeId = c.Ken_Backlog_Fee_Type__c;
+                row.feeTypeName = (c.Ken_Backlog_Fee_Type__r != null) ? c.Ken_Backlog_Fee_Type__r.Fee_Type_Name__c : null;
+                row.examFee = c.Backlog_Exam_Fee__c;
+                w.backlogFeeItems.add(row);
+            }
+        }
         return w;
     }
 
@@ -707,9 +1038,363 @@ Ken_Academic_Term__r.AcademicYear.Name
 
     private static Datetime parseDatetimeLocal(String raw) {
         if (String.isBlank(raw)) return null;
-        String normalized = raw.replace('T', ' ');
-        if (normalized.length() == 16) normalized += ':00';
-        return Datetime.valueOf(normalized);
+        String s = raw;
+        // Strip a trailing UTC marker (lightning-input may emit "...Z")
+        if (s.endsWith('Z') || s.endsWith('z')) {
+            s = s.substring(0, s.length() - 1);
+        }
+        s = s.replace('T', ' ');
+        // Drop fractional seconds, e.g. "...:30.123" → "...:30"
+        Integer dotIdx = s.indexOf('.');
+        if (dotIdx > 0) s = s.substring(0, dotIdx);
+        if (s.length() == 16) s += ':00';
+        // Build the Datetime in the user's local time zone, so the wall-clock
+        // value entered in the LWC matches what is persisted in Salesforce.
+        Integer year   = Integer.valueOf(s.substring(0, 4));
+        Integer month  = Integer.valueOf(s.substring(5, 7));
+        Integer day    = Integer.valueOf(s.substring(8, 10));
+        Integer hour   = Integer.valueOf(s.substring(11, 13));
+        Integer minute = Integer.valueOf(s.substring(14, 16));
+        Integer second = s.length() >= 19 ? Integer.valueOf(s.substring(17, 19)) : 0;
+        return Datetime.newInstance(year, month, day, hour, minute, second);
+    }
+
+    // ─── Schedule Tab ────────────────────────────────────────────────────────
+
+    @AuraEnabled(cacheable=true)
+    public static List<ScheduleRowWrapper> getScheduleRows(Id planId) {
+        List<ScheduleRowWrapper> result = new List<ScheduleRowWrapper>();
+        if (planId == null) return result;
+
+        List<Ken_Exam_Plan__c> planList = [
+            SELECT Id, Ken_Assessment__c
+            FROM Ken_Exam_Plan__c
+            WHERE Id = :planId
+            LIMIT 1
+        ];
+        if (planList.isEmpty()) return result;
+        String planAssessment = planList[0].Ken_Assessment__c;
+
+        List<Examination> exams;
+        if (String.isNotBlank(planAssessment)) {
+            exams = [
+                SELECT Id, Ken_Course_Number__c, Ken_Course_Name__c, Ken_Schedule_Count__c
+                FROM Examination
+                WHERE Ken_Exam_Plan__c = :planId
+                AND Ken_Evaluation_Component__r.Ken_Assessment__c = :planAssessment
+                ORDER BY Ken_Course_Number__c ASC NULLS LAST, Ken_Course_Name__c ASC NULLS LAST
+            ];
+        } else {
+            exams = [
+                SELECT Id, Ken_Course_Number__c, Ken_Course_Name__c, Ken_Schedule_Count__c
+                FROM Examination
+                WHERE Ken_Exam_Plan__c = :planId
+                ORDER BY Ken_Course_Number__c ASC NULLS LAST, Ken_Course_Name__c ASC NULLS LAST
+            ];
+        }
+        if (exams.isEmpty()) return result;
+
+        Set<Id> examIdSet = new Set<Id>();
+        Map<String, ScheduleRowWrapper> rowsByKey = new Map<String, ScheduleRowWrapper>();
+        List<String> orderedKeys = new List<String>();
+
+        for (Examination e : exams) {
+            examIdSet.add(e.Id);
+            String key = String.isBlank(e.Ken_Course_Number__c)
+                ? ('NO_CODE_' + e.Id)
+                : e.Ken_Course_Number__c;
+            ScheduleRowWrapper row = rowsByKey.get(key);
+            if (row == null) {
+                row = new ScheduleRowWrapper();
+                row.key = key;
+                row.courseNumber = e.Ken_Course_Number__c;
+                row.courseName = e.Ken_Course_Name__c;
+                row.examIds = new List<Id>();
+                row.enrolledStudents = 0;
+                row.scheduleCount = 0;
+                row.schedules = new List<ScheduleSetWrapper>();
+                rowsByKey.put(key, row);
+                orderedKeys.add(key);
+            }
+            row.examIds.add(e.Id);
+        }
+
+        Map<Id, Integer> studentCountByExam = new Map<Id, Integer>();
+        for (AggregateResult ar : [
+            SELECT ExaminationId examId, COUNT(Id) cnt
+            FROM PersonExamination
+            WHERE ExaminationId IN :examIdSet
+            GROUP BY ExaminationId
+        ]) {
+            studentCountByExam.put((Id) ar.get('examId'), (Integer) ar.get('cnt'));
+        }
+
+        Map<Id, List<Ken_Exam_Schedule__c>> schedulesByExam = new Map<Id, List<Ken_Exam_Schedule__c>>();
+        for (Ken_Exam_Schedule__c s : [
+            SELECT Id, Examination__c,
+                   Ken_Number_of_Student_To_Be_booked__c,
+                   Ken_Start_Date_Time__c, Ken_End_Date_Time__c,
+                   Ken_Duration_in_Hr__c
+            FROM Ken_Exam_Schedule__c
+            WHERE Examination__c IN :examIdSet
+            ORDER BY Ken_Start_Date_Time__c ASC NULLS LAST
+        ]) {
+            if (!schedulesByExam.containsKey(s.Examination__c)) {
+                schedulesByExam.put(s.Examination__c, new List<Ken_Exam_Schedule__c>());
+            }
+            schedulesByExam.get(s.Examination__c).add(s);
+        }
+
+        for (String key : orderedKeys) {
+            ScheduleRowWrapper row = rowsByKey.get(key);
+
+            Integer total = 0;
+            for (Id eid : row.examIds) {
+                total += studentCountByExam.containsKey(eid) ? studentCountByExam.get(eid) : 0;
+            }
+            row.enrolledStudents = total;
+
+            // Aggregate schedule sets across the group's examinations by start/end signature.
+            // (When a group has multiple Examinations sharing the same Course Code, each set
+            // produces one Ken_Exam_Schedule__c per Examination — we collapse them for display.)
+            Map<String, ScheduleSetWrapper> setsBySig = new Map<String, ScheduleSetWrapper>();
+            List<String> sigOrder = new List<String>();
+            for (Id eid : row.examIds) {
+                List<Ken_Exam_Schedule__c> recs = schedulesByExam.get(eid);
+                if (recs == null) continue;
+                for (Ken_Exam_Schedule__c rec : recs) {
+                    String sig = String.valueOf(rec.Ken_Start_Date_Time__c) + '|' + String.valueOf(rec.Ken_End_Date_Time__c);
+                    ScheduleSetWrapper sw = setsBySig.get(sig);
+                    if (sw == null) {
+                        sw = new ScheduleSetWrapper();
+                        sw.startDateTime = rec.Ken_Start_Date_Time__c;
+                        sw.endDateTime = rec.Ken_End_Date_Time__c;
+                        sw.durationHours = rec.Ken_Duration_in_Hr__c;
+                        sw.count = 0;
+                        setsBySig.put(sig, sw);
+                        sigOrder.add(sig);
+                    }
+                    sw.count += (rec.Ken_Number_of_Student_To_Be_booked__c != null
+                        ? rec.Ken_Number_of_Student_To_Be_booked__c.intValue() : 0);
+                }
+            }
+            for (String sig : sigOrder) row.schedules.add(setsBySig.get(sig));
+            row.scheduleCount = row.schedules.size();
+            row.hasSchedule = !row.schedules.isEmpty();
+            result.add(row);
+        }
+
+        result.sort();
+        return result;
+    }
+
+    @AuraEnabled
+    public static void saveScheduleConfiguration(ScheduleSaveRequest request) {
+        if (request == null) {
+            throw new AuraHandledException('Schedule details are required.');
+        }
+        if (request.examIds == null || request.examIds.isEmpty()) {
+            throw new AuraHandledException('Examination context is missing.');
+        }
+        if (request.sets == null || request.sets.isEmpty()) {
+            throw new AuraHandledException('Add at least one schedule.');
+        }
+
+        Set<Id> examIdSet = new Set<Id>();
+        for (Id eid : request.examIds) examIdSet.add(eid);
+
+        // Parse and validate each schedule set
+        List<ScheduleSetParsed> parsedSets = new List<ScheduleSetParsed>();
+        Integer totalRequested = 0;
+        for (Integer i = 0; i < request.sets.size(); i++) {
+            ScheduleSetRequest s = request.sets[i];
+            Integer label = i + 1;
+            if (s.count == null || s.count <= 0) {
+                throw new AuraHandledException('Schedule #' + label + ': enter a positive student count.');
+            }
+            if (String.isBlank(s.startDateTime) || String.isBlank(s.endDateTime)) {
+                throw new AuraHandledException('Schedule #' + label + ': start and end date-times are required.');
+            }
+            Datetime sdt = parseDatetimeLocal(s.startDateTime);
+            Datetime edt = parseDatetimeLocal(s.endDateTime);
+            if (sdt == null || edt == null) {
+                throw new AuraHandledException('Schedule #' + label + ': invalid date-time values.');
+            }
+            if (sdt >= edt) {
+                throw new AuraHandledException('Schedule #' + label + ': end must be after start.');
+            }
+            ScheduleSetParsed p = new ScheduleSetParsed();
+            p.index = i;
+            p.count = s.count;
+            p.startDt = sdt;
+            p.endDt = edt;
+            Decimal millis = (Decimal) (edt.getTime() - sdt.getTime());
+            p.durationHours = (millis / (1000 * 60 * 60)).setScale(2);
+            parsedSets.add(p);
+            totalRequested += s.count;
+        }
+
+        // Internal overlap among submitted sets
+        for (Integer i = 0; i < parsedSets.size(); i++) {
+            for (Integer j = i + 1; j < parsedSets.size(); j++) {
+                if (rangesOverlap(parsedSets[i].startDt, parsedSets[i].endDt,
+                                  parsedSets[j].startDt, parsedSets[j].endDt)) {
+                    throw new AuraHandledException(
+                        'Schedule #' + (i + 1) + ' overlaps with Schedule #' + (j + 1) + '.'
+                    );
+                }
+            }
+        }
+
+        // Pull all PersonExaminations for the group's examinations
+        List<PersonExamination> peList = [
+            SELECT Id, ContactId, ExaminationId, Exam_Schedule__c, EffectiveFrom, EffectiveTo
+            FROM PersonExamination
+            WHERE ExaminationId IN :examIdSet
+            ORDER BY ExaminationId ASC NULLS LAST, Id ASC
+        ];
+
+        if (peList.size() != totalRequested) {
+            throw new AuraHandledException(
+                'Total students to be booked (' + totalRequested + ') must equal enrolled students (' + peList.size() + ').'
+            );
+        }
+
+        // Distribute PEs to sets in order
+        List<Integer> setIndexForPe = new List<Integer>();
+        for (ScheduleSetParsed p : parsedSets) {
+            for (Integer k = 0; k < p.count; k++) setIndexForPe.add(p.index);
+        }
+
+        // Overlap validation against contacts' OTHER PersonExaminations
+        Set<Id> contactIds = new Set<Id>();
+        Set<Id> peCurrentIds = new Set<Id>();
+        for (PersonExamination pe : peList) {
+            if (pe.ContactId != null) contactIds.add(pe.ContactId);
+            peCurrentIds.add(pe.Id);
+        }
+
+        Map<Id, List<PersonExamination>> otherPeByContact = new Map<Id, List<PersonExamination>>();
+        if (!contactIds.isEmpty()) {
+            for (PersonExamination pe : [
+                SELECT Id, ContactId, EffectiveFrom, EffectiveTo, ExaminationId,
+                       Examination.Ken_Course_Name__c,
+                       Examination.Ken_Evaluation_Component__r.Ken_Assessment__c
+                FROM PersonExamination
+                WHERE ContactId IN :contactIds
+                AND Id NOT IN :peCurrentIds
+                AND EffectiveFrom != null
+                AND EffectiveTo != null
+            ]) {
+                if (!otherPeByContact.containsKey(pe.ContactId)) {
+                    otherPeByContact.put(pe.ContactId, new List<PersonExamination>());
+                }
+                otherPeByContact.get(pe.ContactId).add(pe);
+            }
+        }
+
+        for (Integer i = 0; i < peList.size(); i++) {
+            PersonExamination pe = peList[i];
+            ScheduleSetParsed assigned = parsedSets[setIndexForPe[i]];
+            List<PersonExamination> others = otherPeByContact.get(pe.ContactId);
+            if (others == null) continue;
+            for (PersonExamination other : others) {
+                if (rangesOverlap(assigned.startDt, assigned.endDt, other.EffectiveFrom, other.EffectiveTo)) {
+                    String courseName = (other.Examination != null && other.Examination.Ken_Course_Name__c != null)
+                        ? other.Examination.Ken_Course_Name__c : '';
+                    String assessment = (other.Examination != null
+                        && other.Examination.Ken_Evaluation_Component__r != null
+                        && other.Examination.Ken_Evaluation_Component__r.Ken_Assessment__c != null)
+                        ? other.Examination.Ken_Evaluation_Component__r.Ken_Assessment__c : '';
+                    throw new AuraHandledException(
+                        'A student in this group is already booked for another exam in this window — Course: ' +
+                        (String.isBlank(courseName) ? '—' : courseName) +
+                        ', Assessment: ' + (String.isBlank(assessment) ? '—' : assessment) +
+                        '. Adjust the schedule windows or counts.'
+                    );
+                }
+            }
+        }
+
+        // Replace existing schedules for this group (clean slate)
+        List<Ken_Exam_Schedule__c> existing = [
+            SELECT Id FROM Ken_Exam_Schedule__c WHERE Examination__c IN :examIdSet
+        ];
+        if (!existing.isEmpty()) {
+            Set<Id> existingScheduleIds = new Set<Id>();
+            for (Ken_Exam_Schedule__c s : existing) existingScheduleIds.add(s.Id);
+            List<PersonExamination> peClear = [
+                SELECT Id, Exam_Schedule__c FROM PersonExamination WHERE Exam_Schedule__c IN :existingScheduleIds
+            ];
+            if (!peClear.isEmpty()) {
+                for (PersonExamination pe : peClear) {
+                    pe.Exam_Schedule__c = null;
+                }
+                update peClear;
+            }
+            delete existing;
+        }
+
+        // Insert one Ken_Exam_Schedule__c per (set × Examination) so the lookup is consistent
+        // with the PersonExaminations that reference it.
+        Map<String, Ken_Exam_Schedule__c> scheduleByKey = new Map<String, Ken_Exam_Schedule__c>();
+        List<Ken_Exam_Schedule__c> toInsert = new List<Ken_Exam_Schedule__c>();
+        // Pre-compute counts per (set, exam) from the distribution
+        Map<String, Integer> countByKey = new Map<String, Integer>();
+        for (Integer i = 0; i < peList.size(); i++) {
+            String key = String.valueOf(setIndexForPe[i]) + '|' + peList[i].ExaminationId;
+            countByKey.put(key, (countByKey.containsKey(key) ? countByKey.get(key) : 0) + 1);
+        }
+        for (Integer si = 0; si < parsedSets.size(); si++) {
+            ScheduleSetParsed p = parsedSets[si];
+            for (Id eid : examIdSet) {
+                String key = String.valueOf(si) + '|' + eid;
+                Integer cnt = countByKey.containsKey(key) ? countByKey.get(key) : 0;
+                if (cnt == 0) continue;
+                Ken_Exam_Schedule__c rec = new Ken_Exam_Schedule__c();
+                rec.Examination__c = eid;
+                rec.Ken_Number_of_Student_To_Be_booked__c = cnt;
+                rec.Ken_Start_Date_Time__c = p.startDt;
+                rec.Ken_End_Date_Time__c = p.endDt;
+                rec.Ken_Duration_in_Hr__c = p.durationHours;
+                toInsert.add(rec);
+                scheduleByKey.put(key, rec);
+            }
+        }
+        if (!toInsert.isEmpty()) insert toInsert;
+
+        // Update PersonExaminations with their assigned schedule + effective dates
+        List<PersonExamination> peUpdates = new List<PersonExamination>();
+        for (Integer i = 0; i < peList.size(); i++) {
+            PersonExamination pe = peList[i];
+            ScheduleSetParsed assigned = parsedSets[setIndexForPe[i]];
+            String key = String.valueOf(assigned.index) + '|' + pe.ExaminationId;
+            Ken_Exam_Schedule__c sched = scheduleByKey.get(key);
+            if (sched == null) continue;
+            peUpdates.add(new PersonExamination(
+                Id = pe.Id,
+                Exam_Schedule__c = sched.Id,
+                EffectiveFrom = assigned.startDt,
+                EffectiveTo = assigned.endDt
+            ));
+        }
+        if (!peUpdates.isEmpty()) update peUpdates;
+
+        // Update Ken_Schedule_Count__c on each Examination in the group
+        List<Examination> examUpdates = new List<Examination>();
+        Integer setsCount = parsedSets.size();
+        for (Id eid : examIdSet) {
+            examUpdates.add(new Examination(
+                Id = eid,
+                Ken_Schedule_Count__c = setsCount
+            ));
+        }
+        if (!examUpdates.isEmpty()) update examUpdates;
+    }
+
+    private static Boolean rangesOverlap(Datetime aStart, Datetime aEnd, Datetime bStart, Datetime bEnd) {
+        if (aStart == null || aEnd == null || bStart == null || bEnd == null) return false;
+        return aStart < bEnd && bStart < aEnd;
     }
 
     // ─── Evaluation Schema Management ─────────────────────────────────────────
@@ -2010,7 +2695,6 @@ Ken_Academic_Term__r.AcademicYear.Name
     }
 
     public class EnrollmentCriteriaDetailWrapper {
-        @AuraEnabled public Id id { get; set; }
         @AuraEnabled public Id programPlanId { get; set; }
         @AuraEnabled public String programPlanName { get; set; }
         @AuraEnabled public String startOn { get; set; }
@@ -2018,20 +2702,21 @@ Ken_Academic_Term__r.AcademicYear.Name
         @AuraEnabled public String lateFineOn { get; set; }
         @AuraEnabled public Boolean sameFeeCriteria { get; set; }
         @AuraEnabled public String feeCriteria { get; set; }
-        @AuraEnabled public Id feeTypeId { get; set; }
-        @AuraEnabled public String feeTypeName { get; set; }
-        @AuraEnabled public Decimal examFee { get; set; }
         @AuraEnabled public String regularFeeCriteria { get; set; }
-        @AuraEnabled public Id regularFeeTypeId { get; set; }
-        @AuraEnabled public String regularFeeTypeName { get; set; }
-        @AuraEnabled public Decimal regularExamFee { get; set; }
         @AuraEnabled public String backlogFeeCriteria { get; set; }
-        @AuraEnabled public Id backlogFeeTypeId { get; set; }
-        @AuraEnabled public String backlogFeeTypeName { get; set; }
-        @AuraEnabled public Decimal backlogExamFee { get; set; }
         @AuraEnabled public String backlogMode { get; set; }
         @AuraEnabled public String regularMode { get; set; }
         @AuraEnabled public String declaration { get; set; }
+        @AuraEnabled public List<FeeRowView> feeItems { get; set; }
+        @AuraEnabled public List<FeeRowView> regularFeeItems { get; set; }
+        @AuraEnabled public List<FeeRowView> backlogFeeItems { get; set; }
+    }
+
+    public class FeeRowView {
+        @AuraEnabled public Id criteriaId { get; set; }
+        @AuraEnabled public Id feeTypeId { get; set; }
+        @AuraEnabled public String feeTypeName { get; set; }
+        @AuraEnabled public Decimal examFee { get; set; }
     }
 
     public class EnrollmentCriteriaRequest {
@@ -2042,19 +2727,21 @@ Ken_Academic_Term__r.AcademicYear.Name
         @AuraEnabled public String lateFineOn { get; set; }
         @AuraEnabled public Boolean sameFeeCriteria { get; set; }
         @AuraEnabled public String feeCriteria { get; set; }
-        @AuraEnabled public Id feeTypeId { get; set; }
-        @AuraEnabled public Decimal examFee { get; set; }
+        @AuraEnabled public List<FeeItemRequest> feeItems { get; set; }
         @AuraEnabled public String regularFeeCriteria { get; set; }
-        @AuraEnabled public Id regularFeeTypeId { get; set; }
-        @AuraEnabled public Decimal regularExamFee { get; set; }
+        @AuraEnabled public List<FeeItemRequest> regularFeeItems { get; set; }
         @AuraEnabled public String backlogFeeCriteria { get; set; }
-        @AuraEnabled public Id backlogFeeTypeId { get; set; }
-        @AuraEnabled public Decimal backlogExamFee { get; set; }
+        @AuraEnabled public List<FeeItemRequest> backlogFeeItems { get; set; }
         @AuraEnabled public Boolean allowBacklog { get; set; }
         @AuraEnabled public String backlogMode { get; set; }
         @AuraEnabled public Boolean allowRegular { get; set; }
         @AuraEnabled public String regularMode { get; set; }
         @AuraEnabled public String declaration { get; set; }
+    }
+
+    public class FeeItemRequest {
+        @AuraEnabled public Id feeTypeId { get; set; }
+        @AuraEnabled public Decimal examFee { get; set; }
     }
 
     public class FeeTypeOptionWrapper {
@@ -2248,5 +2935,51 @@ Ken_Academic_Term__r.AcademicYear.Name
         @AuraEnabled public String definition { get; set; }
         @AuraEnabled public Decimal rangeStart { get; set; }
         @AuraEnabled public Decimal rangeEnd { get; set; }
+    }
+
+    // ─── Schedule Wrappers ────────────────────────────────────────────────────
+
+    public class ScheduleRowWrapper implements Comparable {
+        @AuraEnabled public String key { get; set; }
+        @AuraEnabled public String courseNumber { get; set; }
+        @AuraEnabled public String courseName { get; set; }
+        @AuraEnabled public Integer enrolledStudents { get; set; }
+        @AuraEnabled public List<Id> examIds { get; set; }
+        @AuraEnabled public Boolean hasSchedule { get; set; }
+        @AuraEnabled public Integer scheduleCount { get; set; }
+        @AuraEnabled public List<ScheduleSetWrapper> schedules { get; set; }
+
+        public Integer compareTo(Object other) {
+            ScheduleRowWrapper o = (ScheduleRowWrapper) other;
+            String a = this.courseNumber == null ? '' : this.courseNumber;
+            String b = o.courseNumber == null ? '' : o.courseNumber;
+            return a.compareTo(b);
+        }
+    }
+
+    public class ScheduleSetWrapper {
+        @AuraEnabled public Datetime startDateTime { get; set; }
+        @AuraEnabled public Datetime endDateTime { get; set; }
+        @AuraEnabled public Decimal durationHours { get; set; }
+        @AuraEnabled public Integer count { get; set; }
+    }
+
+    public class ScheduleSaveRequest {
+        @AuraEnabled public List<Id> examIds { get; set; }
+        @AuraEnabled public List<ScheduleSetRequest> sets { get; set; }
+    }
+
+    public class ScheduleSetRequest {
+        @AuraEnabled public Integer count { get; set; }
+        @AuraEnabled public String startDateTime { get; set; }
+        @AuraEnabled public String endDateTime { get; set; }
+    }
+
+    private class ScheduleSetParsed {
+        Integer index;
+        Integer count;
+        Datetime startDt;
+        Datetime endDt;
+        Decimal durationHours;
     }
 }

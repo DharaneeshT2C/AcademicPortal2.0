@@ -1,5 +1,4 @@
 import { LightningElement, wire, track } from 'lwc';
-import { scheduleData } from 'c/mockData';
 import getWeeklySchedule from '@salesforce/apex/KenScheduleController.getWeeklySchedule';
 
 const SLOT_MIN     = 30;            // each grid row = 30 minutes
@@ -32,14 +31,16 @@ export default class Schedule extends LightningElement {
     wiredSchedule({ data, error }) {
         if (data) this._apex = data;
         else if (error) {
-            // eslint-disable-next-line no-console
-            console.warn('[schedule] Apex failed, using seed:', error);
+            const _msg = (error && error.body && error.body.message) || '';
+            if (_msg && !_msg.includes('not have access') && !_msg.includes('No rows')) {
+                // eslint-disable-next-line no-console
+                console.warn('[schedule] Apex failed, using seed:', error);
+            }
         }
     }
 
     get effectiveSchedule() {
-        if (this._apex && this._apex.length) return this._apex;
-        return scheduleData;
+        return (this._apex && this._apex.length) ? this._apex : [];
     }
 
     get currentDate() {

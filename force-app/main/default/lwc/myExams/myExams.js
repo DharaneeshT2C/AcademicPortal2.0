@@ -1,12 +1,9 @@
 import { LightningElement, wire, track } from 'lwc';
-import { NavigationMixin } from 'lightning/navigation';
-import { pageNameForRoute } from 'c/navHelper';
 import { refreshApex } from '@salesforce/apex';
-import { examData } from 'c/mockData';
 import getMyExams from '@salesforce/apex/KenMyExamsController.getMyExams';
 import enrollInExam from '@salesforce/apex/KenMyExamsController.enrollInExam';
 
-export default class MyExams extends NavigationMixin(LightningElement) {
+export default class MyExams extends LightningElement {
     @track _apex;
     @track _wireResp;
     @track _toastVisible = false;
@@ -25,14 +22,16 @@ export default class MyExams extends NavigationMixin(LightningElement) {
         const { data, error } = response;
         if (data) this._apex = data;
         else if (error) {
-            // eslint-disable-next-line no-console
-            console.warn('[myExams] Apex failed, using seed:', error);
+            const _msg = (error && error.body && error.body.message) || '';
+            if (_msg && !_msg.includes('not have access') && !_msg.includes('No rows')) {
+                // eslint-disable-next-line no-console
+                console.warn('[myExams] Apex failed, using seed:', error);
+            }
         }
     }
 
     get effectiveCourses() {
-        if (this._apex && this._apex.courses && this._apex.courses.length) return this._apex.courses;
-        return examData.courses;
+        return (this._apex && this._apex.courses) || [];
     }
 
     get formattedCourses() {
@@ -44,10 +43,14 @@ export default class MyExams extends NavigationMixin(LightningElement) {
     }
 
     navigateTo(route) {
-        this[NavigationMixin.Navigate]({
-            type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute(route) }
-        });
+        try {
+            const parts = window.location.pathname.split('/').filter(Boolean);
+            const base = parts[0] || 'newportal';
+            const target = route === 'home' ? `/${base}/` : `/${base}/${route}`;
+            window.location.href = target;
+        } catch (e) {
+            this.dispatchEvent(new CustomEvent('navigate', { detail: { route } }));
+        }
     }
     handleEnroll(event) {
         const examId = event && event.currentTarget && event.currentTarget.dataset

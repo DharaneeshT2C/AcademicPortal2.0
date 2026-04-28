@@ -17,6 +17,14 @@ const TYPE_TONE = {
     Seminar: 'violet',
     Standard: 'slate'
 };
+const ACTIVITY_OPTIONS = [
+    { label: 'Select an Option', value: '' },
+    { label: 'Sports', value: 'Sports' },
+    { label: 'Achievements', value: 'Achievements' },
+    { label: 'Lesson', value: 'Lesson' },
+    { label: 'Exam', value: 'Exam' },
+    { label: 'Project', value: 'Project' }
+];
 
 function resolveTone(typeValue) {
     const normalized = (typeValue || '').trim().toLowerCase();
@@ -113,6 +121,8 @@ function cloneDraft(entry = {}) {
         startTime: entry.startTime || '08:00',
         endTime: entry.endTime || defaultEndTime(entry.startTime || '08:00'),
         room: entry.room || '',
+        facultyId: entry.facultyId || '',
+        activityType: entry.activityType || '',
         source: entry.source || 'Manual',
         rowError: ''
     };
@@ -138,6 +148,8 @@ export default class KenTimetableBuilder extends LightningElement {
     @api programPlanId;
 
     days = DAYS;
+    selectedWeekStartDate = this.formatDateInput(this.getWeekStart(new Date()));
+    selectedWeekEndDate = this.formatDateInput(this.addDays(this.getWeekStart(new Date()), 6));
     termOptions = [];
     programPlanOptions = [];
     roomOptions = [{ label: 'No room selected', value: '' }];
@@ -215,7 +227,9 @@ export default class KenTimetableBuilder extends LightningElement {
             const payload = await getTimetableBuilderData({
                 academicTermId: this.selectedAcademicTermId || this.academicTermId || null,
                 focusCourseOfferingId: this.courseOfferingId || null,
-                learningProgramPlanId: this.selectedProgramPlanId || this.programPlanId || null
+                learningProgramPlanId: this.selectedProgramPlanId || this.programPlanId || null,
+                weekStartDate: this.selectedWeekStartDate,
+                weekEndDate: this.selectedWeekEndDate
             });
 
             this.offerings = (payload.offerings || []).map((offering) => ({
@@ -224,10 +238,13 @@ export default class KenTimetableBuilder extends LightningElement {
                 tone: resolveTone(offering.type),
                 isDraggable: !offering.timetableLocked,
                 lockLabel: offering.timetableLocked ? 'Locked' : null,
+                scheduleStatusLabel: offering.hasSchedules ? 'Scheduled' : 'Unscheduled',
+                scheduleStatusClass: offering.hasSchedules ? 'template-chip scheduled-chip' : 'template-chip backlog-chip',
                 hasTemplateEntries: !!(offering.templateEntries || []).length,
                 templateRecurrencePattern: offering.templateRecurrencePattern || '',
                 templateEntries: (offering.templateEntries || []).map((entry, index) => ({
                     ...entry,
+                    facultyOptions: offering.facultyOptions || [],
                     entryKey: `${offering.id}-template-${entry.dayName}-${entry.startTime}-${index}`,
                     roomLabel: this.resolveRoomLabel(entry.room, entry.roomName),
                     tone: resolveTone(offering.type),
@@ -276,6 +293,52 @@ export default class KenTimetableBuilder extends LightningElement {
         return (body && body.message) || error.message || 'Unable to load timetable builder.';
     }
 
+    parseDateValue(value) {
+        if (value instanceof Date) {
+            return new Date(value.getFullYear(), value.getMonth(), value.getDate());
+        }
+        const dateText = String(value || '');
+        const match = dateText.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (match) {
+            return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+        }
+        return new Date(value);
+    }
+
+    formatDateInput(value) {
+        const date = this.parseDateValue(value);
+        if (Number.isNaN(date.getTime())) {
+            return '';
+        }
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    addDays(value, days) {
+        const date = this.parseDateValue(value);
+        date.setDate(date.getDate() + days);
+        return date;
+    }
+
+    getWeekStart(value) {
+        const date = this.parseDateValue(value);
+        date.setDate(date.getDate() - date.getDay());
+        return date;
+    }
+
+    formatShortDate(value) {
+        const date = this.parseDateValue(value);
+        if (Number.isNaN(date.getTime())) {
+            return '';
+        }
+        return new Intl.DateTimeFormat('en-US', {
+            month: 'short',
+            day: 'numeric'
+        }).format(date);
+    }
+
     resolveRoomLabel(roomValue, roomName) {
         if (!roomValue) {
             return roomName || '';
@@ -286,6 +349,10 @@ export default class KenTimetableBuilder extends LightningElement {
 
     get termLabel() {
         return this.academicTermName;
+    }
+
+    get weekRangeLabel() {
+        return `${this.formatShortDate(this.selectedWeekStartDate)} - ${this.formatShortDate(this.selectedWeekEndDate)}`;
     }
 
     get isFocusedBuilder() {
@@ -301,7 +368,7 @@ export default class KenTimetableBuilder extends LightningElement {
     }
 
     get backlogOfferings() {
-        return this.offerings.filter((offering) => !offering.hasSchedules);
+        return this.offerings;
     }
 
     get hasDataView() {
@@ -513,6 +580,40 @@ export default class KenTimetableBuilder extends LightningElement {
         await this.loadBuilderData();
     }
 
+    async handlePreviousWeek() {
+        this.setSelectedWeek(this.addDays(this.selectedWeekStartDate, -7));
+        this.handleCloseEditor();
+        await this.loadBuilderData();
+    }
+
+    async handleThisWeek() {
+        this.setSelectedWeek(this.getWeekStart(new Date()));
+        this.handleCloseEditor();
+        await this.loadBuilderData();
+    }
+
+    async handleNextWeek() {
+        this.setSelectedWeek(this.addDays(this.selectedWeekStartDate, 7));
+        this.handleCloseEditor();
+        await this.loadBuilderData();
+    }
+
+    async handleWeekStartChange(event) {
+        const selectedDate = event.target.value;
+        if (!selectedDate) {
+            return;
+        }
+        this.setSelectedWeek(this.getWeekStart(selectedDate));
+        this.handleCloseEditor();
+        await this.loadBuilderData();
+    }
+
+    setSelectedWeek(value) {
+        const weekStart = this.getWeekStart(value);
+        this.selectedWeekStartDate = this.formatDateInput(weekStart);
+        this.selectedWeekEndDate = this.formatDateInput(this.addDays(weekStart, 6));
+    }
+
     async handleTopSave() {
         await this.loadBuilderData();
         this.dispatchEvent(
@@ -623,10 +724,16 @@ export default class KenTimetableBuilder extends LightningElement {
                 cloneDraft({
                     dayName: seedSlot ? seedSlot.dayName : 'Sunday',
                     startTime: seedSlot ? seedSlot.startTime : (this.timeSlots[0] || '08:00'),
-                    endTime: defaultEndTime(seedSlot ? seedSlot.startTime : (this.timeSlots[0] || '08:00'))
+                    endTime: defaultEndTime(seedSlot ? seedSlot.startTime : (this.timeSlots[0] || '08:00')),
+                    facultyId: offering.facultyId || ''
                 })
             ];
         }
+
+        drafts = drafts.map((draft) => ({
+            ...draft,
+            facultyId: draft.facultyId || offering.facultyId || ''
+        }));
 
         this.isEditorOpen = true;
         this.editorOfferingId = offeringId;
@@ -776,7 +883,9 @@ export default class KenTimetableBuilder extends LightningElement {
                 dayName: draft.dayName,
                 startTime: draft.startTime,
                 endTime: draft.endTime,
-                room: draft.room
+                room: draft.room,
+                facultyId: draft.facultyId,
+                activityType: draft.activityType
             }))
         );
     }
@@ -789,8 +898,10 @@ export default class KenTimetableBuilder extends LightningElement {
                 scheduleEntriesJson: JSON.stringify(scheduleEntries),
                 templateId: this.editorTemplateId,
                 templateRecurrencePattern: this.editorTemplateRecurrencePattern,
-                templateStartDate: this.editorTemplateStartDate,
-                templateEndDate: this.editorTemplateEndDate
+                templateStartDate: this.editorTemplateStartDate || this.selectedWeekStartDate,
+                templateEndDate: this.editorTemplateEndDate || this.selectedWeekEndDate,
+                scheduleStartDate: this.selectedWeekStartDate,
+                scheduleEndDate: this.selectedWeekEndDate
             });
 
             if (!options.suppressSuccessToast) {
@@ -887,7 +998,7 @@ export default class KenTimetableBuilder extends LightningElement {
             const overlappingFacultyEntry = this.scheduledEntries.find(
                 (entry) =>
                     entry.courseOfferingId !== offering.id &&
-                    entry.facultyId === offering.facultyId &&
+                    entry.facultyId === (draft.facultyId || offering.facultyId) &&
                     entry.dayName === draft.dayName &&
                     parseTime(entry.startTime) < endMinutes &&
                     parseTime(entry.endTime) > startMinutes
@@ -929,7 +1040,21 @@ export default class KenTimetableBuilder extends LightningElement {
             dayOptions: this.dayOptions,
             startOptions: this.timeOptions,
             endOptions: this.timeOptions,
-            roomOptions: this.roomOptions
+            roomOptions: this.roomOptions,
+            activityOptions: ACTIVITY_OPTIONS,
+            facultyOptions: this.editorFacultyOptions
+        }));
+    }
+
+    get editorFacultyOptions() {
+        const offering = this.editorOffering;
+        const options = offering && offering.facultyOptions ? offering.facultyOptions : [];
+        if (!options.length && offering && offering.facultyId) {
+            return [{ label: offering.facultyName || 'Primary Faculty', value: offering.facultyId }];
+        }
+        return options.map((option) => ({
+            label: option.name,
+            value: option.id
         }));
     }
 }

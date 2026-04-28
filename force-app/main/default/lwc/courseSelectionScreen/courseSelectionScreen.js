@@ -1,5 +1,4 @@
 import { LightningElement, api, wire, track } from "lwc";
-import getCoursesForSemester from "@salesforce/apex/KenCourseEnrollmentController.getCoursesForSemester";
 
 const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1531482615713-2afd69097998";
 
@@ -17,40 +16,6 @@ export default class CourseSelectionScreen extends LightningElement {
   openTemplateId = null;
 
   /* ------------------ APEX ------------------ */
-
-  @wire(getCoursesForSemester, {
-    semesterNumber: "$selectedSemester",
-    academicSessionId: "$academicSessionId",
-  })
-  wiredCourses({ data, error }) {
-    if (data) {
-      this.courses = data.map((c, index) => ({
-        ...c,
-        courseOfferingId: c.courseOfferingId,
-        learningProgramPlanRequirementId: c.learningProgramPlanRequirementId,
-        imageUrl: c.imageUrl ? c.imageUrl : DEFAULT_IMAGE,
-        sequence: c.sequence,
-        courseCode: c.courseCode,
-
-        // GROUPING FIELDS
-        templateId: c.learningPathwayTemplateId,
-        templateName: c.learningPathwayTemplateName,
-        templateType: c.templateType,
-
-        uniqueKey: c.courseOfferingId ? c.courseOfferingId : `${c.learningCourseId}-${index}`,
-
-        isMandatory: c.courseType && c.courseType.toLowerCase() === "requirement",
-
-        isAdded: false,
-      }));
-
-      this.applyFilters();
-    } else if (error) {
-      console.error("Courses Apex Error", error);
-    }
-  }
-
-  /* ------------------ GROUPING ------------------ */
 
   get groupedCourses() {
     const map = new Map();

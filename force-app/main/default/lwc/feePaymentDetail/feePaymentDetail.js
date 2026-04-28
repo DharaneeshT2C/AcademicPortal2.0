@@ -1,11 +1,8 @@
 import { LightningElement, api, track } from 'lwc';
-import { NavigationMixin } from 'lightning/navigation';
-import { pageNameForRoute } from 'c/navHelper';
-import { feeData } from 'c/mockData';
 import getInstallmentDetail from '@salesforce/apex/KenFeePaymentController.getInstallmentDetail';
 import initiatePayment       from '@salesforce/apex/KenFeePaymentController.initiatePayment';
 
-export default class FeePaymentDetail extends NavigationMixin(LightningElement) {
+export default class FeePaymentDetail extends LightningElement {
     @api installmentId;
     @track _apex;
     @track _payRef;
@@ -13,7 +10,6 @@ export default class FeePaymentDetail extends NavigationMixin(LightningElement) 
     @track _toastVisible = false;
     @track _toastMessage = '';
     @track _toastVariant = 'success';
-    _seed = feeData;
 
     connectedCallback() {
         if (this.installmentId) {
@@ -26,19 +22,15 @@ export default class FeePaymentDetail extends NavigationMixin(LightningElement) 
         }
     }
 
-    get data() { return this._seed; }
-    get semester() { return this._seed.semesters[0]; }
+    get data() { return this._apex || {}; }
+    get semester() { return {}; }
 
     get fees() {
         if (this._apex && this._apex.item) {
             const row = { ...this._apex, hasChildren: false, formattedChildren: [] };
             return [row];
         }
-        return this.semester.fees.map(f => ({
-            ...f,
-            hasChildren: f.children && f.children.length > 0,
-            formattedChildren: f.children || []
-        }));
+        return [];
     }
 
     get payButtonLabel() { return this._paying ? 'Processing…' : 'Make Payment'; }
@@ -53,17 +45,12 @@ export default class FeePaymentDetail extends NavigationMixin(LightningElement) 
     }
     handleToastClose() { this._toastVisible = false; }
 
-    navigateTo(route) {
-        this[NavigationMixin.Navigate]({
-            type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute(route) }
-        });
-    }
+    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
     handleBack() { this.navigateTo('fee-payment'); }
 
     handleMakePayment() {
         if (this._paying) return;
-        const amount = (this._apex && this._apex.amount) ? this._apex.amount : this.semester.totalFeeAmount;
+        const amount = (this._apex && this._apex.amount) ? this._apex.amount : 0;
         const installmentId = this.installmentId || (this._apex && this._apex.installmentId);
         if (!amount || amount <= 0) {
             this.showAToast('Nothing to pay — this installment is settled.', 'info');

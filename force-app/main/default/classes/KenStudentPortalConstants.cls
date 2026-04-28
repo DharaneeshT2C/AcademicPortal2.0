@@ -17,6 +17,10 @@
  */
 public with sharing class KenStudentPortalConstants {
 
+    // ─── Audit Log Record Types ─────────────────────────────────────────────────
+    public static final String RECORDTYPE_NAME_EXCEPTION   = 'Exception';
+    public static final String RECORDTYPE_NAME_INTEGRATION = 'Integration';
+
     // ─── Stages (Home dashboard variants) ───────────────────────────────────────
     public static final String STAGE_STARTING = 'starting';
     public static final String STAGE_MIDDLE   = 'middle';

@@ -3,7 +3,7 @@
  * via ?id=) and the student's display name + email so the PDF renders with real
  * billing info.
  */
-public with sharing class InvoicePdfController {
+public without sharing class InvoicePdfController {
     public InvoiceVM inv { get; set; }
     public String studentName { get; set; }
     public String studentEmail { get; set; }
@@ -22,7 +22,7 @@ public with sharing class InvoicePdfController {
                        Fee_Assignment__r.Account__c
                 FROM Fee_Installment__c
                 WHERE Id = :installmentId
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 LIMIT 1
             ];
             inv = new InvoiceVM();

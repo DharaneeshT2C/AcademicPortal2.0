@@ -14,7 +14,7 @@
  * @createdOn   2026
  * ************************************************************************************************
  */
-public with sharing class KenAttendanceController {
+public without sharing class KenAttendanceController {
 
     public class AttendanceRowDTO {
         @AuraEnabled public String  id;
@@ -48,13 +48,18 @@ public with sharing class KenAttendanceController {
     public static AttendanceBundleDTO getAttendanceBundle() {
         try {
             AttendanceBundleDTO b = new AttendanceBundleDTO();
-            b.subjects = seedAttendance();
+            Id studentId = KenRunningStudentHelper.optionalContactId();
+            List<AttendanceRowDTO> rows = (studentId == null)
+                ? new List<AttendanceRowDTO>()
+                : queryAttendanceRollup(studentId);
+            if (rows == null) rows = new List<AttendanceRowDTO>();
+            b.subjects = rows;
             Decimal sum = 0; Integer atRisk = 0;
-            for (AttendanceRowDTO r : b.subjects) {
+            for (AttendanceRowDTO r : rows) {
                 sum += r.percentage;
                 if (r.isAtRisk) atRisk++;
             }
-            b.overallPercentage = sum / b.subjects.size();
+            b.overallPercentage = (rows.isEmpty()) ? 0 : (sum / rows.size()).setScale(1);
             b.subjectsAtRisk    = atRisk;
             b.leaveRequests     = queryLeaveRequests();
             return b;
@@ -66,6 +71,57 @@ public with sharing class KenAttendanceController {
             );
             return null;
         }
+    }
+
+    /**
+     * Aggregates Attendance__c rows into per-subject rollups for the running
+     * student. Risk threshold matches the seed: <75% = at risk.
+     */
+    private static List<AttendanceRowDTO> queryAttendanceRollup(Id studentId) {
+        // Aggregate by subject + code: total sessions, attended (Is_Present__c = true).
+        List<Attendance__c> all = [
+            SELECT Subject__c, Subject_Code__c, Is_Present__c
+            FROM Attendance__c
+            WHERE Student__c = :studentId
+            WITH SECURITY_ENFORCED
+            LIMIT 5000
+        ];
+        if (all.isEmpty()) return new List<AttendanceRowDTO>();
+
+        Map<String, Integer[]> rollup = new Map<String, Integer[]>(); // key -> [attended, total]
+        Map<String, String[]>  meta   = new Map<String, String[]>();  // key -> [subject, code]
+        for (Attendance__c a : all) {
+            String subj = String.isBlank(a.Subject__c) ? '(Unknown)' : a.Subject__c;
+            String code = String.isBlank(a.Subject_Code__c) ? '' : a.Subject_Code__c;
+            String key  = subj + '|' + code;
+            if (!rollup.containsKey(key)) {
+                rollup.put(key, new Integer[]{ 0, 0 });
+                meta.put(key, new String[]{ subj, code });
+            }
+            Integer[] counts = rollup.get(key);
+            counts[1] += 1;                                  // total
+            if (a.Is_Present__c == true) counts[0] += 1;     // attended
+        }
+
+        List<AttendanceRowDTO> out = new List<AttendanceRowDTO>();
+        Integer idx = 0;
+        for (String key : rollup.keySet()) {
+            Integer[] c = rollup.get(key);
+            String[] m = meta.get(key);
+            Integer attended = c[0];
+            Integer total    = c[1];
+            Decimal pct = (total == 0) ? 0 : ((Decimal) attended * 100 / total).setScale(1);
+            AttendanceRowDTO r = new AttendanceRowDTO();
+            r.id              = 'AR-' + (++idx);
+            r.subject         = m[0];
+            r.code            = m[1];
+            r.attendedClasses = attended;
+            r.totalClasses    = total;
+            r.percentage      = pct;
+            r.isAtRisk        = pct < 75;
+            out.add(r);
+        }
+        return out;
     }
 
     @AuraEnabled
@@ -88,7 +144,7 @@ public with sharing class KenAttendanceController {
                       AND From_Date__c = :fromDate
                       AND To_Date__c = :toDate
                       AND Status__c = 'In Review'
-                    WITH USER_MODE LIMIT 1
+                    WITH SECURITY_ENFORCED LIMIT 1
                 ];
                 if (!dupes.isEmpty()) {
                     return mapLeaveRequest([
@@ -146,18 +202,17 @@ public with sharing class KenAttendanceController {
     private static List<LeaveRequestDTO> queryLeaveRequests() {
         List<LeaveRequestDTO> out = new List<LeaveRequestDTO>();
         Id studentId = KenRunningStudentHelper.optionalContactId();
-        if (studentId == null) return seedLeaveRequests();
+        if (studentId == null) return out;
         try {
             for (Leave_Request__c r : [
                 SELECT Id, Title__c, Type__c, Status__c, From_Date__c, To_Date__c, Reason__c
                 FROM Leave_Request__c
                 WHERE Student__c = :studentId
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 ORDER BY CreatedDate DESC
                 LIMIT 25
             ]) out.add(mapLeaveRequest(r));
         } catch (Exception ignore) { /* object/perms missing — fall through */ }
-        if (out.isEmpty()) out = seedLeaveRequests();
         return out;
     }
 
@@ -171,21 +226,6 @@ public with sharing class KenAttendanceController {
         d.toDate    = r.To_Date__c;
         d.dates     = formatDates(r.From_Date__c, r.To_Date__c);
         d.reason    = r.Reason__c;
-        return d;
-    }
-
-    private static List<LeaveRequestDTO> seedLeaveRequests() {
-        List<LeaveRequestDTO> out = new List<LeaveRequestDTO>();
-        out.add(seedLeave('Going for a vacation',     'Personal leave',  'Approved',  Date.newInstance(2026, 12, 21), Date.newInstance(2026, 12, 26)));
-        out.add(seedLeave('24th sports day practice', 'Exception',       'In Review', Date.newInstance(2026, 1, 2),  Date.newInstance(2026, 1, 2)));
-        out.add(seedLeave('Annual day - final rehearsal', 'Personal leave', 'Rejected', Date.newInstance(2026, 1, 5), Date.newInstance(2026, 1, 5)));
-        return out;
-    }
-
-    private static LeaveRequestDTO seedLeave(String title, String leaveType, String status, Date frm, Date tod) {
-        LeaveRequestDTO d = new LeaveRequestDTO();
-        d.title = title; d.leaveType = leaveType; d.status = status;
-        d.fromDate = frm; d.toDate = tod; d.dates = formatDates(frm, tod);
         return d;
     }
 
@@ -226,20 +266,4 @@ public with sharing class KenAttendanceController {
         }
     }
 
-    private static List<AttendanceRowDTO> seedAttendance() {
-        List<AttendanceRowDTO> out = new List<AttendanceRowDTO>();
-        out.add(row('A001', 'Data Structures',       'CS301', 88, 44, 50, false));
-        out.add(row('A002', 'Operating Systems',     'CS302', 82, 41, 50, false));
-        out.add(row('A003', 'Mathematics III',       'MA301', 68, 34, 50, true));
-        out.add(row('A004', 'Soft Skills Workshop',  'SS101', 96, 48, 50, false));
-        out.add(row('A005', 'Engineering Physics',   'PH301', 79, 40, 50, false));
-        return out;
-    }
-
-    private static AttendanceRowDTO row(String id, String subj, String code, Decimal pct, Integer att, Integer tot, Boolean risk) {
-        AttendanceRowDTO r = new AttendanceRowDTO();
-        r.id = id; r.subject = subj; r.code = code; r.percentage = pct;
-        r.attendedClasses = att; r.totalClasses = tot; r.isAtRisk = risk;
-        return r;
-    }
 }

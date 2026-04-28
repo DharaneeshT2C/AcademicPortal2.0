@@ -1,12 +1,9 @@
 import { LightningElement, api, track, wire } from "lwc";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import { CurrentPageReference } from "lightning/navigation";
-import getAcademicTerms from "@salesforce/apex/KenCourseOfferingSplitController.getAcademicTerms";
 import getAcademicSessionsByTerm from "@salesforce/apex/KenCourseOfferingSplitController.getAcademicSessionsByTerm";
 import getPlaceholderOfferings from "@salesforce/apex/KenCourseOfferingSplitController.getPlaceholderOfferings";
 import getProgramPlansForOffering from "@salesforce/apex/KenCourseOfferingSplitController.getProgramPlansForOffering";
-import getSectionsByProgramPlan from "@salesforce/apex/KenCourseOfferingSplitController.getSectionsByProgramPlan";
-import getEnrollmentTypesForOffering from "@salesforce/apex/KenCourseOfferingSplitController.getEnrollmentTypesForOffering";
 import splitOfferingsJson from "@salesforce/apex/KenCourseOfferingSplitController.splitOfferingsJson";
 import getActivePlannedOfferings from "@salesforce/apex/KenCourseOfferingSplitController.getActivePlannedOfferings";
 import getCourseOfferingParticipants from "@salesforce/apex/KenCourseOfferingSplitController.getCourseOfferingParticipants";
@@ -15,28 +12,27 @@ import getThemeColors from "@salesforce/apex/UiThemeController.getThemeColors";
 export default class CourseOfferingSplitScreen extends LightningElement {
   _recordId;
   _academicTermId;
-  @track terms = [];
   @track sessions = [];
   @track offerings = [];
-  @track plans = [];
-  @track allPlans = [];
   @track viewSessions = [];
   @track viewOfferings = [];
 
   termId;
   sessionId;
-  offeringId;
   viewTermId;
   viewSessionId;
   viewEnrollmentType = "All";
+  createSearchTerm = "";
+  viewSearchTerm = "";
+  createSortBy = "Name";
+  createSortDirection = "asc";
+  viewSortBy = "courseOfferingName";
+  viewSortDirection = "asc";
 
-  userType = "";
-  enrollmentType = "";
   bulkCourseType = "All";
   combinedGroupName = "";
   combinedOfferingCount = 1;
   combinedCapacity = null;
-  combinedPlanIds = [];
   selectedOfferingIds = [];
   showBulkSplitModal = false;
   showParticipantsModal = false;
@@ -73,17 +69,11 @@ export default class CourseOfferingSplitScreen extends LightningElement {
     this.initializeFromRecordContext();
   }
 
-  userTypeOptions = [
+  bulkUserTypeOptions = [
     { label: "Individual", value: "Individual" },
     { label: "Section", value: "Section" },
     { label: "Combined", value: "Combined" },
   ];
-  bulkUserTypeOptions = [
-    { label: "Individual", value: "Individual" },
-    { label: "Section", value: "Section" },
-  ];
-
-  enrollmentTypeOptions = [];
 
   viewEnrollmentTypeOptions = [
     { label: "All", value: "All" },
@@ -92,7 +82,6 @@ export default class CourseOfferingSplitScreen extends LightningElement {
   ];
 
   connectedCallback() {
-    this.loadTerms();
     this.applyThemeColor();
     this.initializeFromRecordContext();
   }
@@ -117,10 +106,6 @@ export default class CourseOfferingSplitScreen extends LightningElement {
     }
   }
 
-  get termOptions() {
-    return this.terms.map((t) => ({ label: t.Name, value: t.Id }));
-  }
-
   get sessionOptions() {
     return this.sessions.map((s) => ({ label: s.Name, value: s.Id }));
   }
@@ -129,26 +114,12 @@ export default class CourseOfferingSplitScreen extends LightningElement {
     return this.viewSessions.map((s) => ({ label: s.Name, value: s.Id }));
   }
 
-  get offeringOptions() {
-    return [{ label: "Select Course Offering", value: "" }].concat(
-      this.filteredOfferingsByEnrollmentType.map((o) => ({ label: o.Name, value: o.Id })),
-    );
-  }
-
   get hasOfferings() {
     return this.offerings.length > 0;
   }
 
-  get showSessionOfferingsSection() {
-    return this.hasOfferings && !this.isPlaceholderSelected;
-  }
-
   get selectedOfferingsCount() {
     return this.selectedOfferingIds.length;
-  }
-
-  get showBulkSelectionWidget() {
-    return !this.offeringId;
   }
 
   get bulkCourseTypeOptions() {
@@ -169,36 +140,28 @@ export default class CourseOfferingSplitScreen extends LightningElement {
   }
 
   get displayedSessionOfferings() {
-    if (!this.showBulkSelectionWidget) {
-      return this.offerings;
-    }
     let rows = this.filteredOfferingsByEnrollmentType;
-    if (!this.bulkCourseType || this.bulkCourseType === "All") {
-      return rows;
+    if (this.bulkCourseType && this.bulkCourseType !== "All") {
+      const target = this.bulkCourseType.toLowerCase();
+      rows = (rows || []).filter((o) =>
+        String(o.courseType || "")
+          .toLowerCase()
+          .split(",")
+          .map((v) => v.trim())
+          .includes(target),
+      );
     }
-    const target = this.bulkCourseType.toLowerCase();
-    rows = (rows || []).filter((o) =>
-      String(o.courseType || "")
-        .toLowerCase()
-        .split(",")
-        .map((v) => v.trim())
-        .includes(target),
-    );
-    return rows;
+    rows = this.filterBySearch(rows, this.createSearchTerm, ["Name", "courseNumber", "courseName", "courseType"]);
+    return this.sortRows(rows, this.createSortBy, this.createSortDirection);
   }
 
   get filteredOfferingsByEnrollmentType() {
-    if (!this.enrollmentType || this.enrollmentType === "All") {
-      return this.offerings || [];
-    }
-    const target = String(this.enrollmentType).toLowerCase();
-    return (this.offerings || []).filter((o) =>
-      String(o.enrollmentType || "")
-        .toLowerCase()
-        .split(",")
-        .map((v) => v.trim())
-        .includes(target),
-    );
+    return this.offerings || [];
+  }
+
+  get displayedViewOfferings() {
+    const rows = this.filterBySearch(this.viewOfferings || [], this.viewSearchTerm, ["courseOfferingName", "courseNumber", "courseName", "courseType", "offeringType"]);
+    return this.sortRows(rows, this.viewSortBy, this.viewSortDirection);
   }
 
   get isAllDisplayedSelected() {
@@ -222,11 +185,12 @@ export default class CourseOfferingSplitScreen extends LightningElement {
     return this.bulkUserType === "Individual";
   }
 
+  get isBulkCombinedMode() {
+    return this.bulkUserType === "Combined";
+  }
+
   get isBulkSplitDisabled() {
     if (this.isLoading || !this.bulkUserType) {
-      return true;
-    }
-    if (this.bulkUserType === "Combined") {
       return true;
     }
     if (this.isBulkIndividualMode && (!this.bulkOfferingCount || this.bulkOfferingCount < 1)) {
@@ -235,6 +199,9 @@ export default class CourseOfferingSplitScreen extends LightningElement {
     if (this.isBulkSectionMode && (!this.bulkSections || this.bulkSections < 1)) {
       return true;
     }
+    if (this.bulkUserType === "Combined") {
+      return !this.combinedGroupName || !this.combinedOfferingCount || this.combinedOfferingCount < 1 || !this.hasSelectedCombinedPlans;
+    }
     return false;
   }
 
@@ -242,16 +209,46 @@ export default class CourseOfferingSplitScreen extends LightningElement {
     return this.bulkOfferingPlanPreview && this.bulkOfferingPlanPreview.length > 0;
   }
 
+  get combinedPreviewRows() {
+    return (this.bulkOfferingPlanPreview || []).map((row) => ({
+      ...row,
+      selectedPlanCount: (row.selectedPlanIds || []).length,
+      statusText: row.loadError || "Ready",
+      statusClass: row.loadError === "Ready" ? "status-pill status-ready" : row.loadError === "No plans found" ? "status-pill status-warning" : "status-pill status-error",
+    }));
+  }
+
+  get combinedReadyCount() {
+    return this.combinedPreviewRows.filter((row) => row.statusText === "Ready").length;
+  }
+
+  get combinedTotalPlanCount() {
+    return this.combinedPreviewRows.reduce((sum, row) => sum + (Number(row.selectedPlanCount) || 0), 0);
+  }
+
+  get selectedCombinedPlanRows() {
+    return (this.bulkOfferingPlanPreview || []).flatMap((row) =>
+      (row.plans || [])
+        .filter((plan) => (row.selectedPlanIds || []).includes(plan.planId))
+        .map((plan) => ({
+          planId: plan.planId,
+          planName: plan.planName,
+          enrollmentType: plan.enrollmentType,
+          type: this.bulkUserType,
+          sections: this.bulkUserType === "Section" ? this.bulkSections : 1,
+          selectedSections: [],
+          offeringCount: this.bulkUserType === "Individual" ? this.bulkOfferingCount : this.bulkUserType === "Combined" ? this.combinedOfferingCount : null,
+          capacity: this.bulkUserType === "Combined" ? this.combinedCapacity : this.bulkCapacity,
+        })),
+    );
+  }
+
+  get hasSelectedCombinedPlans() {
+    return this.selectedCombinedPlanRows.length > 0;
+  }
+
   get showNoOfferingsMessage() {
     return !!this.sessionId && !this.hasOfferings;
-  }
-
-  get isSessionDisabled() {
-    return !this.termId;
-  }
-
-  get isTermLocked() {
-    return !!this.contextTermId;
   }
 
   get contextTermId() {
@@ -268,54 +265,41 @@ export default class CourseOfferingSplitScreen extends LightningElement {
     return !!this.viewTermId && this.viewOfferings.length === 0;
   }
 
-  get isOfferingDisabled() {
-    return !this.sessionId;
+  get showCreateNoResultsMessage() {
+    return !!this.sessionId && this.hasOfferings && this.displayedSessionOfferings.length === 0;
   }
 
-  get isCombinedMode() {
-    return this.userType === "Combined";
+  get showViewNoResultsMessage() {
+    return !!this.viewTermId && this.viewOfferings.length > 0 && this.displayedViewOfferings.length === 0;
   }
 
-  get showSectionsColumn() {
-    return this.userType === "Section";
+  get createSortSummary() {
+    return `Sorted by ${this.getSortLabel(this.createSortBy, "create")} (${this.createSortDirection})`;
   }
 
-  get showCapacityColumn() {
-    return this.userType !== "Combined";
+  get viewSortSummary() {
+    return `Sorted by ${this.getSortLabel(this.viewSortBy, "view")} (${this.viewSortDirection})`;
   }
 
-  get showOfferingCountColumn() {
-    return this.userType === "Individual";
+  get createSortIndicators() {
+    return {
+      Name: this.getSortIndicator(this.createSortBy, this.createSortDirection, "Name"),
+      courseNumber: this.getSortIndicator(this.createSortBy, this.createSortDirection, "courseNumber"),
+      courseName: this.getSortIndicator(this.createSortBy, this.createSortDirection, "courseName"),
+      courseType: this.getSortIndicator(this.createSortBy, this.createSortDirection, "courseType"),
+    };
   }
 
-  get disablePlanInputs() {
-    return this.userType === "Combined";
-  }
-
-  get combinedSelectedCount() {
-    return this.combinedPlanIds.length;
-  }
-
-  get isCreateDisabled() {
-    if (!this.offeringId || this.plans.length === 0 || this.isLoading) {
-      return true;
-    }
-    if (this.userType === "Section") {
-      return this.plans.some((p) => !Array.isArray(p.selectedSections) || p.selectedSections.length === 0 || !p.capacity || p.capacity < 1);
-    }
-    return false;
-  }
-
-  get combinedPlanOptions() {
-    return this.plans.map((p) => ({ label: p.planName, value: p.planId }));
-  }
-
-  async loadTerms() {
-    try {
-      this.terms = await getAcademicTerms();
-    } catch (e) {
-      this.showError("Failed to load Academic Terms", e);
-    }
+  get viewSortIndicators() {
+    return {
+      courseOfferingName: this.getSortIndicator(this.viewSortBy, this.viewSortDirection, "courseOfferingName"),
+      courseNumber: this.getSortIndicator(this.viewSortBy, this.viewSortDirection, "courseNumber"),
+      courseName: this.getSortIndicator(this.viewSortBy, this.viewSortDirection, "courseName"),
+      enrollmentCapacity: this.getSortIndicator(this.viewSortBy, this.viewSortDirection, "enrollmentCapacity"),
+      enrolleeCount: this.getSortIndicator(this.viewSortBy, this.viewSortDirection, "enrolleeCount"),
+      courseType: this.getSortIndicator(this.viewSortBy, this.viewSortDirection, "courseType"),
+      offeringType: this.getSortIndicator(this.viewSortBy, this.viewSortDirection, "offeringType"),
+    };
   }
 
   async initializeFromRecordContext() {
@@ -334,13 +318,10 @@ export default class CourseOfferingSplitScreen extends LightningElement {
 
   async loadSessionsForCreate() {
     this.sessionId = null;
-    this.offeringId = null;
     this.sessions = [];
     this.offerings = [];
-    this.plans = [];
-    this.allPlans = [];
-    this.enrollmentTypeOptions = [];
-    this.enrollmentType = "";
+    this.selectedOfferingIds = [];
+    this.bulkCourseType = "All";
 
     if (!this.termId) {
       return;
@@ -368,25 +349,10 @@ export default class CourseOfferingSplitScreen extends LightningElement {
     }
   }
 
-  async handleTermChange(event) {
-    if (this.isTermLocked) {
-      return;
-    }
-    this.termId = event.detail.value;
-    await this.loadSessionsForCreate();
-  }
-
-  async handleViewTermChange(event) {
-    if (this.isTermLocked) {
-      return;
-    }
-    this.viewTermId = event.detail.value;
-    await this.loadSessionsAndOfferingsForView();
-  }
-
   async handleViewSessionChange(event) {
     this.viewSessionId = event.detail.value;
     this.viewOfferings = [];
+    this.viewSearchTerm = "";
     if (this.viewSessionId) {
       try {
         const raw = await getActivePlannedOfferings({
@@ -491,15 +457,10 @@ export default class CourseOfferingSplitScreen extends LightningElement {
 
   async handleSessionChange(event) {
     this.sessionId = event.detail.value;
-    this.offeringId = null;
-    this.isPlaceholderSelected = false;
     this.offerings = [];
     this.selectedOfferingIds = [];
-    this.plans = [];
-    this.allPlans = [];
-    this.enrollmentTypeOptions = [];
-    this.enrollmentType = "All";
     this.bulkCourseType = "All";
+    this.createSearchTerm = "";
     if (this.sessionId) {
       try {
         const raw = await getPlaceholderOfferings({ academicSessionId: this.sessionId });
@@ -510,33 +471,12 @@ export default class CourseOfferingSplitScreen extends LightningElement {
           courseName: o.courseName || o.CourseName,
           courseType: o.courseType || o.CourseType,
           enrollmentType: o.enrollmentType || o.EnrollmentType,
-          recordUrl: (o.Id || o.id) ? `/${o.Id || o.id}` : "",
+          recordUrl: o.Id || o.id ? `/${o.Id || o.id}` : "",
           isSelected: false,
         }));
-        this.setEnrollmentTypeOptionsFromOfferings();
       } catch (e) {
         this.showError("Failed to load Course Offerings", e);
       }
-    }
-  }
-
-  setEnrollmentTypeOptionsFromOfferings() {
-    const values = new Set();
-    (this.offerings || []).forEach((o) => {
-      const raw = o && o.enrollmentType ? String(o.enrollmentType) : "";
-      raw
-        .split(",")
-        .map((v) => v.trim())
-        .filter((v) => !!v)
-        .forEach((v) => values.add(v));
-    });
-    const options = [{ label: "All", value: "All" }];
-    Array.from(values)
-      .sort()
-      .forEach((v) => options.push({ label: v, value: v }));
-    this.enrollmentTypeOptions = options;
-    if (!this.enrollmentType) {
-      this.enrollmentType = "All";
     }
   }
 
@@ -544,13 +484,30 @@ export default class CourseOfferingSplitScreen extends LightningElement {
     this.bulkCourseType = event.detail.value;
   }
 
-  async handleOfferingChange(event) {
-    this.offeringId = event.detail.value || null;
-    this.isPlaceholderSelected = !!this.offeringId;
-    this.selectedOfferingIds = [];
-    this.offerings = this.offerings.map((o) => ({ ...o, isSelected: false }));
-    await this.loadPlansForOffering(this.offeringId);
-    await this.loadEnrollmentTypesForOffering(this.offeringId);
+  handleCreateSearchChange(event) {
+    this.createSearchTerm = event.detail?.value ?? event.target?.value ?? "";
+  }
+
+  handleViewSearchChange(event) {
+    this.viewSearchTerm = event.detail?.value ?? event.target?.value ?? "";
+  }
+
+  handleCreateSort(event) {
+    const field = event.currentTarget?.dataset?.field;
+    if (!field) {
+      return;
+    }
+    this.createSortDirection = this.createSortBy === field && this.createSortDirection === "asc" ? "desc" : "asc";
+    this.createSortBy = field;
+  }
+
+  handleViewSort(event) {
+    const field = event.currentTarget?.dataset?.field;
+    if (!field) {
+      return;
+    }
+    this.viewSortDirection = this.viewSortBy === field && this.viewSortDirection === "asc" ? "desc" : "asc";
+    this.viewSortBy = field;
   }
 
   async handleSelectOfferingFromList(event) {
@@ -558,12 +515,17 @@ export default class CourseOfferingSplitScreen extends LightningElement {
     if (!selectedId) {
       return;
     }
-    this.offeringId = selectedId;
-    this.isPlaceholderSelected = true;
-    this.selectedOfferingIds = [];
-    this.offerings = this.offerings.map((o) => ({ ...o, isSelected: false }));
-    await this.loadPlansForOffering(this.offeringId);
-    await this.loadEnrollmentTypesForOffering(this.offeringId);
+    const selectedSet = new Set(this.selectedOfferingIds || []);
+    if (selectedSet.has(selectedId)) {
+      selectedSet.delete(selectedId);
+    } else {
+      selectedSet.add(selectedId);
+    }
+    this.selectedOfferingIds = Array.from(selectedSet);
+    this.offerings = this.offerings.map((o) => ({
+      ...o,
+      isSelected: selectedSet.has(o.Id),
+    }));
   }
 
   handleOfferingSelectionChange(event) {
@@ -629,6 +591,12 @@ export default class CourseOfferingSplitScreen extends LightningElement {
               offeringName: nameById.get(selectedOfferingId) || selectedOfferingId,
               plans: normalizedPlans,
               planCount: normalizedPlans.length,
+              selectedPlanIds: normalizedPlans.map((plan) => plan.planId),
+              planOptions: normalizedPlans.map((plan) => ({
+                label: plan.planName,
+                value: plan.planId,
+              })),
+              loadError: normalizedPlans.length ? "Ready" : "No plans found",
             };
           } catch (e) {
             return {
@@ -636,6 +604,8 @@ export default class CourseOfferingSplitScreen extends LightningElement {
               offeringName: nameById.get(selectedOfferingId) || selectedOfferingId,
               plans: [],
               planCount: 0,
+              selectedPlanIds: [],
+              planOptions: [],
               loadError: "Failed to load plans",
             };
           }
@@ -674,10 +644,6 @@ export default class CourseOfferingSplitScreen extends LightningElement {
       this.showToast("Error", "Please select at least one course offering.", "error");
       return;
     }
-    if (this.bulkUserType === "Combined") {
-      this.showToast("Error", "Combined type is not supported for bulk split.", "error");
-      return;
-    }
 
     this.isLoading = true;
     let successCount = 0;
@@ -685,23 +651,30 @@ export default class CourseOfferingSplitScreen extends LightningElement {
     try {
       for (const selectedOfferingId of this.selectedOfferingIds) {
         try {
-          const data = await getProgramPlansForOffering({ courseOfferingId: selectedOfferingId });
-          const planRows = (data || []).map((p) => ({
-            planId: p.id,
-            planName: p.name,
-            enrollmentType: p.enrollmentType,
-            type: this.bulkUserType,
-            sections: this.bulkUserType === "Section" ? this.bulkSections : 1,
-            selectedSections: [],
-            offeringCount: this.bulkUserType === "Individual" ? this.bulkOfferingCount : null,
-            capacity: this.bulkCapacity,
-          }));
+          const previewRow = (this.bulkOfferingPlanPreview || []).find((row) => row.offeringId === selectedOfferingId);
+          const planRows = this.isBulkCombinedMode
+            ? this.selectedCombinedPlanRows
+            : (previewRow?.plans || []).map((p) => ({
+                planId: p.planId,
+                planName: p.planName,
+                enrollmentType: p.enrollmentType,
+                type: this.bulkUserType,
+                sections: this.bulkUserType === "Section" ? this.bulkSections : 1,
+                selectedSections: [],
+                offeringCount: this.bulkUserType === "Individual" ? this.bulkOfferingCount : this.bulkUserType === "Combined" ? this.combinedOfferingCount : null,
+                capacity: this.bulkUserType === "Combined" ? this.combinedCapacity : this.bulkCapacity,
+              }));
+
+          if (!planRows.length) {
+            failedOfferingIds.push(selectedOfferingId);
+            continue;
+          }
 
           const payload = {
             placeholderOfferingId: selectedOfferingId,
-            combinedGroupName: "",
-            combinedOfferingCount: null,
-            combinedCapacity: null,
+            combinedGroupName: this.bulkUserType === "Combined" ? this.combinedGroupName : "",
+            combinedOfferingCount: this.bulkUserType === "Combined" ? this.combinedOfferingCount : null,
+            combinedCapacity: this.bulkUserType === "Combined" ? this.combinedCapacity : null,
             enrollmentType: "All",
             plans: planRows,
           };
@@ -727,126 +700,6 @@ export default class CourseOfferingSplitScreen extends LightningElement {
     }
   }
 
-  async loadEnrollmentTypesForOffering(offeringId) {
-    this.enrollmentTypeOptions = [];
-    this.enrollmentType = "";
-    if (!offeringId) {
-      this.setEnrollmentTypeOptionsFromOfferings();
-      return;
-    }
-    try {
-      const types = await getEnrollmentTypesForOffering({ courseOfferingId: offeringId });
-      const list = (types || []).map((t) => String(t)).filter((t) => t);
-      const optionList = list.map((t) => ({ label: t, value: t }));
-      this.enrollmentTypeOptions = [{ label: "All", value: "All" }].concat(optionList);
-      this.enrollmentType = "All";
-      this.applyEnrollmentTypeFilter();
-    } catch (e) {
-      this.enrollmentTypeOptions = [];
-    }
-  }
-
-  async loadPlansForOffering(offeringId) {
-    this.plans = [];
-    this.allPlans = [];
-    this.combinedPlanIds = [];
-    if (!offeringId) return;
-    try {
-      const data = await getProgramPlansForOffering({ courseOfferingId: offeringId });
-      const planRows = await Promise.all(
-        (data || []).map(async (p) => {
-          let sections = [];
-          try {
-            sections = await getSectionsByProgramPlan({ learningProgramPlanId: p.id });
-          } catch (e) {
-            sections = [];
-          }
-          return {
-            planId: p.id,
-            planName: p.name,
-            enrollmentType: p.enrollmentType,
-            offeringCount: 1,
-            sections: 1,
-            selectedSections: [],
-            sectionOptions: (sections || []).map((value) => ({
-              label: value,
-              value,
-            })),
-            capacity: null,
-          };
-        }),
-      );
-      this.allPlans = planRows;
-      this.applyEnrollmentTypeFilter();
-    } catch (e) {
-      this.showError("Failed to load Program Plans", e);
-    }
-  }
-
-  handleUserTypeChange(event) {
-    this.userType = event.detail.value;
-    if (this.userType !== "Combined") {
-      this.combinedPlanIds = [];
-    }
-  }
-
-  handleEnrollmentTypeChange(event) {
-    this.enrollmentType = event.detail.value;
-    this.applyEnrollmentTypeFilter();
-  }
-
-  applyEnrollmentTypeFilter() {
-    if (!this.allPlans || this.allPlans.length === 0) {
-      this.plans = [];
-      return;
-    }
-    if (!this.enrollmentType || this.enrollmentType === "All") {
-      this.plans = this.allPlans.map((p) => ({ ...p }));
-      return;
-    }
-    const target = String(this.enrollmentType).toLowerCase();
-    this.plans = this.allPlans.filter((p) => String(p.enrollmentType || "").toLowerCase() === target).map((p) => ({ ...p }));
-    if (!this.combinedPlanIds || this.combinedPlanIds.length === 0) {
-      return;
-    }
-    const visiblePlanIds = new Set(this.plans.map((p) => p.planId));
-    this.combinedPlanIds = this.combinedPlanIds.filter((id) => visiblePlanIds.has(id));
-  }
-
-  handlePlanSectionsChange(event) {
-    const index = Number(event.currentTarget.dataset.index);
-    const value = Array.isArray(event.detail.value) ? event.detail.value : [];
-    this.updatePlanAtIndex(index, {
-      selectedSections: value,
-      sections: value.length || 1,
-    });
-  }
-
-  handlePlanCapacityChange(event) {
-    const index = Number(event.currentTarget.dataset.index);
-    const value = Number(event.detail.value);
-    this.updatePlanAtIndex(index, { capacity: value });
-  }
-
-  handlePlanOfferingCountChange(event) {
-    const index = Number(event.currentTarget.dataset.index);
-    const value = Number(event.detail.value);
-    this.updatePlanAtIndex(index, { offeringCount: value });
-  }
-
-  updatePlanAtIndex(index, changes) {
-    if (Number.isNaN(index) || index < 0 || index >= this.plans.length) {
-      return;
-    }
-    const currentPlan = this.plans[index];
-    const planId = currentPlan?.planId;
-    if (!planId) {
-      return;
-    }
-    this.allPlans = (this.allPlans || []).map((plan) => (plan.planId === planId ? { ...plan, ...changes } : plan));
-    this.plans = this.plans.map((plan, planIndex) => (planIndex === index ? { ...plan, ...changes } : plan));
-  }
-
   handleCombinedGroupNameChange(event) {
     this.combinedGroupName = event.detail.value;
   }
@@ -860,44 +713,19 @@ export default class CourseOfferingSplitScreen extends LightningElement {
   }
 
   handleCombinedPlanSelectionChange(event) {
-    this.combinedPlanIds = event.detail.value;
-  }
-
-  async handleCreateOfferings() {
-    this.isLoading = true;
-    try {
-      const offeringValue = this.offeringId ||
-        this.template.querySelector('lightning-combobox[label="Default Course Offering"]')?.value;
-      this.offeringId = offeringValue;
-      if (!this.offeringId) {
-        this.showToast("Error", "Please select a default course offering.", "error");
-        return;
-      }
-      const payload = {
-        placeholderOfferingId: this.offeringId,
-        combinedGroupName: this.combinedGroupName,
-        combinedOfferingCount: this.combinedOfferingCount,
-        combinedCapacity: this.combinedCapacity,
-        enrollmentType: this.enrollmentType,
-        plans: this.plans.map((p) => ({
-          planId: p.planId,
-          planName: p.planName,
-          enrollmentType: p.enrollmentType,
-          type: this.userType === "Combined" ? (this.combinedPlanIds.includes(p.planId) ? "Combined" : "Individual") : this.userType,
-          sections: this.userType === "Section" ? (Array.isArray(p.selectedSections) && p.selectedSections.length ? p.selectedSections.length : p.sections) : 1,
-          selectedSections: this.userType === "Section" ? p.selectedSections : [],
-          offeringCount: this.userType === "Individual" ? p.offeringCount : null,
-          capacity: p.capacity,
-        })),
-      };
-      await splitOfferingsJson({ reqJson: JSON.stringify(payload) });
-      this.showToast("Success", "Offerings created successfully.", "success");
-      this.handleSessionChange({ detail: { value: this.sessionId } });
-    } catch (e) {
-      this.showError("Failed to create offerings", e);
-    } finally {
-      this.isLoading = false;
+    const offeringId = event.currentTarget?.dataset?.offeringId;
+    const selectedPlanIds = event.detail.value || [];
+    if (!offeringId) {
+      return;
     }
+    this.bulkOfferingPlanPreview = (this.bulkOfferingPlanPreview || []).map((row) =>
+      row.offeringId === offeringId
+        ? {
+            ...row,
+            selectedPlanIds: [...selectedPlanIds],
+          }
+        : row,
+    );
   }
 
   showToast(title, message, variant) {
@@ -912,5 +740,80 @@ export default class CourseOfferingSplitScreen extends LightningElement {
       message = error.message;
     }
     this.showToast(title, message, "error");
+  }
+
+  filterBySearch(rows, rawSearch, fields) {
+    const search = String(rawSearch || "")
+      .trim()
+      .toLowerCase();
+    if (!search) {
+      return [...(rows || [])];
+    }
+    return (rows || []).filter((row) =>
+      fields.some((field) =>
+        String(row?.[field] || "")
+          .toLowerCase()
+          .includes(search),
+      ),
+    );
+  }
+
+  sortRows(rows, field, direction) {
+    const sorted = [...(rows || [])];
+    const multiplier = direction === "desc" ? -1 : 1;
+    sorted.sort((a, b) => {
+      const left = this.normalizeSortValue(a?.[field]);
+      const right = this.normalizeSortValue(b?.[field]);
+      if (left < right) {
+        return -1 * multiplier;
+      }
+      if (left > right) {
+        return 1 * multiplier;
+      }
+      return 0;
+    });
+    return sorted;
+  }
+
+  normalizeSortValue(value) {
+    if (value === null || value === undefined || value === "") {
+      return "";
+    }
+    if (typeof value === "number") {
+      return value;
+    }
+    const numeric = Number(value);
+    if (!Number.isNaN(numeric) && String(value).trim() !== "") {
+      return numeric;
+    }
+    return String(value).toLowerCase();
+  }
+
+  getSortLabel(field, tableName) {
+    const labelsByTable = {
+      create: {
+        Name: "Course Offering Name",
+        courseNumber: "Course Number",
+        courseName: "Course Name",
+        courseType: "Course Type",
+      },
+      view: {
+        courseOfferingName: "Course Offering Name",
+        courseNumber: "Course Number",
+        courseName: "Course Name",
+        enrollmentCapacity: "Enrollment Capacity",
+        enrolleeCount: "Enrollee Count",
+        courseType: "Course Type",
+        offeringType: "Offering Type",
+      },
+    };
+    return labelsByTable?.[tableName]?.[field] || field;
+  }
+
+  getSortIndicator(activeField, activeDirection, field) {
+    if (activeField !== field) {
+      return "";
+    }
+    return activeDirection === "desc" ? "↓" : "↑";
   }
 }

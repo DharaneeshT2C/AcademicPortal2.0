@@ -27,6 +27,25 @@ public with sharing class KenAuraExceptionHelper {
         System.debug(LoggingLevel.ERROR,
             '[' + context + '] ' + cause.getTypeName() + ': ' + cause.getMessage() +
             '\n' + cause.getStackTraceString());
+        // Best-effort audit log write; never let logging hide the real error.
+        try {
+            String process = context;
+            if (String.isNotBlank(context) && context.contains('.')) {
+                String head = context.substringBefore('.');
+                // Strip 'Ken' prefix and 'Controller' suffix to derive a friendly process label.
+                if (head.startsWith('Ken')) { head = head.substring(3); }
+                if (head.endsWith('Controller')) { head = head.removeEnd('Controller'); }
+                if (head.endsWith('Service')) { head = head.removeEnd('Service'); }
+                if (String.isNotBlank(head)) { process = head; }
+            }
+            KenAuditLogHelper.auditLogRecord(process, context)
+                .setErrorMessage(cause != null ? cause.getMessage() : friendlyMessage)
+                .setStackTrace(cause != null ? cause.getStackTraceString() : null)
+                .create();
+        } catch (Exception ignored) {
+            System.debug(LoggingLevel.WARN,
+                '[KenAuraExceptionHelper] audit log write failed: ' + ignored.getMessage());
+        }
         AuraHandledException e = new AuraHandledException(friendlyMessage);
         e.setMessage(friendlyMessage);
         throw e;

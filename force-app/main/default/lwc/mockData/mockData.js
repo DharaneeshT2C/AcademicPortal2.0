@@ -499,18 +499,17 @@ export const sidebarNavItems = [
     { id: 'attendance', label: 'Attendance', route: 'attendance' },
     { id: 'my-exams', label: 'Exams', route: 'my-exams' },
     { id: 'results', label: 'Results', route: 'results' },
-    { id: 'research', label: 'Research', route: 'research' }
   ]},
   // Career (Placements + Mentors) hidden from nav per stakeholder decision.
   // Apex/objects remain deployed and the LWC code is in place if/when re-enabled.
   { id: 'campus-life', label: 'Campus Life', icon: 'apartment', children: [
-    { id: 'campus-life-overview', label: 'Overview', route: 'campus-life' },
+    { id: 'campus-life-overview', label: 'Overview', route: 'overview' },
     { id: 'events', label: 'Events', route: 'events' },
     { id: 'clubs', label: 'Clubs', route: 'clubs' }
   ]},
   { id: 'fee-payment', label: 'Fee Payment', icon: 'payment', route: 'fee-payment' },
-  { id: 'feedback', label: 'Feedback & Surveys', icon: 'feedback', route: 'feedback' },
-  { id: 'support', label: 'Support', icon: 'support_agent', route: 'service-support' }
+  // { id: 'feedback', label: 'Feedback & Surveys', icon: 'feedback', route: 'feedback' },
+  // { id: 'support', label: 'Support', icon: 'support_agent', route: 'service-support' }
 ];
 
 export const refundsData = [

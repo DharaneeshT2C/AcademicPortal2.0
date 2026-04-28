@@ -1,12 +1,10 @@
 import { LightningElement, wire, track } from 'lwc';
-import { NavigationMixin } from 'lightning/navigation';
-import { pageNameForRoute } from 'c/navHelper';
 import { refreshApex } from '@salesforce/apex';
 import { serviceSupportData } from 'c/mockData';
 import getTickets from '@salesforce/apex/KenServiceSupportController.getTickets';
 import raiseTicket from '@salesforce/apex/KenServiceSupportController.raiseTicket';
 
-export default class ServiceSupport extends NavigationMixin(LightningElement) {
+export default class ServiceSupport extends LightningElement {
     @track activeRequestTab = 'service';
     @track openFaqKeys = {};
     @track openQuestionKeys = {};
@@ -22,8 +20,11 @@ export default class ServiceSupport extends NavigationMixin(LightningElement) {
         const { data, error } = response;
         if (data) this._apexTickets = data;
         else if (error) {
-            // eslint-disable-next-line no-console
-            console.warn('[serviceSupport] Apex failed, using seed:', error);
+            const _msg = (error && error.body && error.body.message) || '';
+            if (_msg && !_msg.includes('not have access') && !_msg.includes('No rows')) {
+                // eslint-disable-next-line no-console
+                console.warn('[serviceSupport] Apex failed, using seed:', error);
+            }
         }
     }
 
@@ -60,7 +61,7 @@ export default class ServiceSupport extends NavigationMixin(LightningElement) {
     get formattedRequests() {
         const source = (this._apexTickets && this._apexTickets.length)
             ? this._apexTickets
-            : serviceSupportData.serviceRequests;
+            : [];
         return source.map(sr => {
             let cls = 'status-badge';
             if (sr.status === 'Closed') { cls = cls + ' closed'; }
@@ -70,12 +71,7 @@ export default class ServiceSupport extends NavigationMixin(LightningElement) {
         });
     }
 
-    navigateTo(route) {
-        this[NavigationMixin.Navigate]({
-            type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute(route) }
-        });
-    }
+    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
     handleFaqs() { this.navigateTo('faqs'); }
     handleServiceRequest() { this.navigateTo('service-request'); }
     handleHelpChat() { this.navigateTo('chat'); }

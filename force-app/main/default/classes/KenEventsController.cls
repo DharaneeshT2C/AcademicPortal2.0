@@ -10,7 +10,7 @@
  *                 the standard `Event` SObject with campus extensions.
  * ************************************************************************************************
  */
-public with sharing class KenEventsController {
+public without sharing class KenEventsController {
 
     public class EventDTO {
         @AuraEnabled public String  id;
@@ -40,23 +40,16 @@ public with sharing class KenEventsController {
             b.featured   = new List<EventDTO>();
             b.upcoming   = new List<EventDTO>();
             b.registered = new List<EventDTO>();
+            // Campus_Event__c is a global catalog object (no per-student sharing).
+            // Use SYSTEM_MODE so community users can read all upcoming events.
             List<Campus_Event__c> rows = [
                 SELECT Id, Name, Title__c, Description__c, Event_Date__c, Event_Time__c,
                        Location__c, Mode__c, Type__c, Is_Featured__c, Image_Url__c
                 FROM Campus_Event__c
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 ORDER BY Event_Date__c
                 LIMIT 100
             ];
-            if (rows.isEmpty()) {
-                // Same hardcoded fallback as before
-                b.featured = new List<EventDTO>{
-                    ev('EV001', 'Tech Conf: Frontiers of AI',      'Conference', 'Hybrid',  '12 Oct 2026', '10 AM IST', 'Main Auditorium', '', false, ''),
-                    ev('EV002', 'Workshop: Working with Designers','Workshop',   'Offline', '12 Oct 2026', '4 PM IST',  'Design Studio',   '', false, ''),
-                    ev('EV003', 'Career Development Workshop',     'Career',     'Hybrid',  '12 Oct 2026', '4 PM IST',  'Career Centre',   '', false, '')
-                };
-                return b;
-            }
             // Track which events the running student has registered for
             Set<Id> regIds = new Set<Id>();
             Id contactId = KenRunningStudentHelper.optionalContactId();
@@ -64,7 +57,7 @@ public with sharing class KenEventsController {
                 for (Event_Registration__c er : [
                     SELECT Event__c FROM Event_Registration__c
                     WHERE Student__c = :contactId AND Status__c = 'Registered'
-                    WITH USER_MODE
+                    WITH SECURITY_ENFORCED
                 ]) regIds.add(er.Event__c);
             }
             for (Campus_Event__c r : rows) {
@@ -104,7 +97,7 @@ public with sharing class KenEventsController {
             List<Event_Registration__c> existing = [
                 SELECT Id, Status__c FROM Event_Registration__c
                 WHERE Event__c = :eventId AND Student__c = :studentId AND Status__c != 'Cancelled'
-                WITH USER_MODE LIMIT 1
+                WITH SECURITY_ENFORCED LIMIT 1
             ];
             if (!existing.isEmpty()) return;
             KenCrudFlsHelper.assertCreateable(Event_Registration__c.SObjectType);
@@ -171,12 +164,4 @@ public with sharing class KenEventsController {
         }
     }
 
-    private static EventDTO ev(String id, String title, String type, String mode, String dateStr, String timeStr,
-                                String loc, String img, Boolean reg, String descText) {
-        EventDTO e = new EventDTO();
-        e.id = id; e.title = title; e.type = type; e.mode = mode;
-        e.eventDate = dateStr; e.eventTime = timeStr; e.location = loc;
-        e.imageUrl = img; e.isRegistered = reg; e.description = descText;
-        return e;
-    }
 }

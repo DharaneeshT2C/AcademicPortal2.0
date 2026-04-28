@@ -8,7 +8,7 @@
  *  save and deserializes on load.
  * ************************************************************************************************
  */
-public with sharing class KenResumeController {
+public without sharing class KenResumeController {
 
     public class ResumeDTO {
         @AuraEnabled public Id      id;
@@ -28,7 +28,7 @@ public with sharing class KenResumeController {
                 SELECT Id, Name, Body__c, Last_Used_Date__c, Is_Default__c
                 FROM Resume__c
                 WHERE Student__c = :studentId
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 ORDER BY Last_Used_Date__c DESC NULLS LAST, CreatedDate DESC
                 LIMIT 50
             ]) out.add(toDto(r));
@@ -103,7 +103,7 @@ public with sharing class KenResumeController {
             List<Resume__c> defaults = [
                 SELECT Id FROM Resume__c
                 WHERE Student__c = :studentId AND Is_Default__c = true
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
             ];
             List<Resume__c> updates = new List<Resume__c>();
             for (Resume__c d : defaults) {

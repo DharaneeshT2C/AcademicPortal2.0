@@ -7,7 +7,7 @@
  *  Used by the placementsLanding "Set up preferences" modal and the careerCompass LWC.
  * ************************************************************************************************
  */
-public with sharing class KenCareerCompassController {
+public without sharing class KenCareerCompassController {
 
     public class PreferencesDTO {
         @AuraEnabled public Id      id;
@@ -29,7 +29,7 @@ public with sharing class KenCareerCompassController {
                        Salary_Floor__c, Work_Mode__c, Opted_In__c
                 FROM Career_Preference__c
                 WHERE Student__c = :studentId
-                WITH USER_MODE LIMIT 1
+                WITH SECURITY_ENFORCED LIMIT 1
             ];
             if (rows.isEmpty()) return defaultDto();
             return toDto(rows[0]);
@@ -57,7 +57,7 @@ public with sharing class KenCareerCompassController {
             List<Career_Preference__c> existing = [
                 SELECT Id FROM Career_Preference__c
                 WHERE Student__c = :studentId
-                WITH USER_MODE LIMIT 1
+                WITH SECURITY_ENFORCED LIMIT 1
             ];
             if (existing.isEmpty()) {
                 KenCrudFlsHelper.assertCreateable(Career_Preference__c.SObjectType);

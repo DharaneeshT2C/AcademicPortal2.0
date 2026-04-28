@@ -10,7 +10,7 @@
  *                 Max_Marks__c, Obtained_Marks__c, Weight__c).
  * ************************************************************************************************
  */
-public with sharing class KenMarksBreakdownController {
+public without sharing class KenMarksBreakdownController {
 
     public class ComponentRowDTO {
         @AuraEnabled public String  id;
@@ -35,17 +35,17 @@ public with sharing class KenMarksBreakdownController {
         try {
             KenAuraExceptionHelper.rejectIf(subjectId == null, 'Subject id is required.');
             Id contactId = KenRunningStudentHelper.optionalContactId();
-            if (contactId == null) return seedBreakdown(subjectId);
+            if (contactId == null) return null;
             // Subject__c is itself text, so subjectId here is treated as subject name
             String subjectName = String.valueOf(subjectId);
             List<Assessment_Component__c> comps = [
                 SELECT Id, Subject__c, Type__c, Label__c, Max_Marks__c, Obtained_Marks__c, Weight_Pct__c
                 FROM Assessment_Component__c
                 WHERE Student__c = :contactId AND Subject__c = :subjectName
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 ORDER BY Type__c
             ];
-            if (comps.isEmpty()) return seedBreakdown(subjectId);
+            if (comps.isEmpty()) return null;
             return buildSubjectDTO(subjectName, comps);
         } catch (Exception e) {
             KenAuraExceptionHelper.throwAuraHandled('KenMarksBreakdownController.getBreakdown',
@@ -58,14 +58,14 @@ public with sharing class KenMarksBreakdownController {
     public static List<SubjectBreakdownDTO> getAllBreakdowns() {
         try {
             Id contactId = KenRunningStudentHelper.optionalContactId();
-            if (contactId == null) return new List<SubjectBreakdownDTO>{ seedBreakdown(null) };
+            if (contactId == null) return new List<SubjectBreakdownDTO>();
             // Group all the student's assessment components by subject
             Map<String, List<Assessment_Component__c>> bySubject = new Map<String, List<Assessment_Component__c>>();
             for (Assessment_Component__c c : [
                 SELECT Id, Subject__c, Type__c, Label__c, Max_Marks__c, Obtained_Marks__c, Weight_Pct__c
                 FROM Assessment_Component__c
                 WHERE Student__c = :contactId
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 ORDER BY Subject__c, Type__c
             ]) {
                 if (!bySubject.containsKey(c.Subject__c)) bySubject.put(c.Subject__c, new List<Assessment_Component__c>());
@@ -75,7 +75,6 @@ public with sharing class KenMarksBreakdownController {
             for (String subj : bySubject.keySet()) {
                 out.add(buildSubjectDTO(subj, bySubject.get(subj)));
             }
-            if (out.isEmpty()) out.add(seedBreakdown(null));
             return out;
         } catch (Exception e) {
             KenAuraExceptionHelper.throwAuraHandled('KenMarksBreakdownController.getAllBreakdowns',
@@ -107,26 +106,4 @@ public with sharing class KenMarksBreakdownController {
         return b;
     }
 
-    private static SubjectBreakdownDTO seedBreakdown(Id subjectId) {
-        SubjectBreakdownDTO b = new SubjectBreakdownDTO();
-        b.subjectId     = subjectId;
-        b.subject       = 'Data Structures';
-        b.code          = 'CS301';
-        b.totalObtained = 82;
-        b.totalMax      = 100;
-        b.components    = new List<ComponentRowDTO>{
-            row('MB01', 'internal',   'Internal 1',    20, 17, 20),
-            row('MB02', 'assignment', 'Assignments',   10,  9, 10),
-            row('MB03', 'midterm',    'Midterm',       20, 15, 20),
-            row('MB04', 'external',   'Final exam',    50, 41, 50)
-        };
-        return b;
-    }
-
-    private static ComponentRowDTO row(String id, String type, String label, Decimal max, Decimal got, Decimal weight) {
-        ComponentRowDTO r = new ComponentRowDTO();
-        r.id = id; r.type = type; r.label = label;
-        r.maxMarks = max; r.obtainedMarks = got; r.weightPct = weight;
-        return r;
-    }
 }

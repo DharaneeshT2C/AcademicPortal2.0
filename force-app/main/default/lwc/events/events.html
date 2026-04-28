@@ -33,7 +33,7 @@
 
                 <div class="events-grid">
                     <template for:each={featuredEvents} for:item="ev">
-                        <div key={ev.id} class="event-card">
+                        <div key={ev.id} class="event-card" data-id={ev.id} onclick={handleEventClick}>
                             <div class="card-img-wrap">
                                 <img src={ev.image} alt={ev.title} class="card-img" />
                                 <span class="type-badge">{ev.type}</span>
@@ -58,7 +58,7 @@
                 </div>
                 <div class="events-grid">
                     <template for:each={upcomingEvents} for:item="ev">
-                        <div key={ev.id} class="event-card">
+                        <div key={ev.id} class="event-card" data-id={ev.id} onclick={handleEventClick}>
                             <div class="card-img-wrap">
                                 <img src={ev.image} alt={ev.title} class="card-img" />
                                 <span class="type-badge">{ev.type}</span>
@@ -108,6 +108,48 @@
                 </div>
             </div>
         </div>
+
+        <template lwc:if={showDetailModal}>
+            <div class="modal-backdrop" onclick={handleCloseDetail}>
+                <div class="modal" onclick={stopProp}>
+                    <div class="modal-header">
+                        <h3>{detailEvent.title}</h3>
+                        <button class="icon-btn" onclick={handleCloseDetail}>&#x2715;</button>
+                    </div>
+                    <div class="modal-body">
+                        <img src={detailEvent.image} alt={detailEvent.title} class="detail-img" />
+                        <div class="detail-meta">
+                            <span class="chip"><c-icon name="event" size="14"></c-icon> {detailEvent.date}</span>
+                            <template lwc:if={detailEvent.time}>
+                                <span class="chip"><c-icon name="schedule" size="14"></c-icon> {detailEvent.time}</span>
+                            </template>
+                            <span class="chip"><c-icon name="location_on" size="14"></c-icon> {detailEvent.mode}</span>
+                            <template lwc:if={detailEvent.type}>
+                                <span class="chip">{detailEvent.type}</span>
+                            </template>
+                        </div>
+                        <template lwc:if={detailEvent.location}>
+                            <p class="detail-loc"><strong>Location:</strong> {detailEvent.location}</p>
+                        </template>
+                        <template lwc:if={detailEvent.description}>
+                            <p class="detail-desc">{detailEvent.description}</p>
+                        </template>
+                        <template lwc:if={detailEvent.isRegistered}>
+                            <p class="detail-status registered">✓ You're registered for this event</p>
+                        </template>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-outline" onclick={handleCloseDetail}>Close</button>
+                        <template lwc:if={detailEvent.isRegistered}>
+                            <button class="btn-outline" data-id={detailEvent.id} onclick={handleCancelFromDetail}>Cancel Registration</button>
+                        </template>
+                        <template lwc:else>
+                            <button class="btn-primary" data-id={detailEvent.id} onclick={handleRegisterFromDetail}>Register</button>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </template>
 
         <template lwc:if={showHostModal}>
             <div class="modal-backdrop" onclick={handleCloseHost}>

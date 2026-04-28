@@ -58,6 +58,17 @@ public with sharing class KenTimetableManagementController {
         'Venue__c',
         'Classroom__c'
     };
+    private static final List<String> SCHEDULE_FACULTY_FIELD_CANDIDATES = new List<String>{
+        'Faculty_Contact__c',
+        'FacultyContact__c',
+        'Instructor__c',
+        'InstructorId'
+    };
+    private static final List<String> SCHEDULE_ACTIVITY_FIELD_CANDIDATES = new List<String>{
+        'Activity_Type__c',
+        'Activities__c',
+        'Activity__c'
+    };
     private static final List<DayDescriptor> WEEK_DAYS = new List<DayDescriptor>{
         new DayDescriptor('Monday', 'IsMonday', 'IsMonday__c', 1),
         new DayDescriptor('Tuesday', 'IsTuesday', 'IsTuesday__c', 2),
@@ -92,6 +103,11 @@ public with sharing class KenTimetableManagementController {
         @AuraEnabled public Id id;
         @AuraEnabled public String name;
     }
+
+    public class FacultyOptionDTO {
+        @AuraEnabled public Id id;
+        @AuraEnabled public String name;
+    }
     
     public class BuilderDataDTO {
         @AuraEnabled public Id academicTermId;
@@ -113,6 +129,7 @@ public with sharing class KenTimetableManagementController {
         @AuraEnabled public String courseCode;
         @AuraEnabled public Id facultyId;
         @AuraEnabled public String facultyName;
+        @AuraEnabled public List<FacultyOptionDTO> facultyOptions;
         @AuraEnabled public String type;
         @AuraEnabled public List<String> planEnrollmentTokens;
         @AuraEnabled public Boolean timetableLocked;
@@ -152,6 +169,7 @@ public with sharing class KenTimetableManagementController {
         @AuraEnabled public String courseCode;
         @AuraEnabled public Id facultyId;
         @AuraEnabled public String facultyName;
+        @AuraEnabled public List<FacultyOptionDTO> facultyOptions;
         @AuraEnabled public String type;
         @AuraEnabled public List<String> planEnrollmentTokens;
         @AuraEnabled public Boolean timetableLocked;
@@ -159,9 +177,12 @@ public with sharing class KenTimetableManagementController {
         @AuraEnabled public Integer dayNumber;
         @AuraEnabled public String startTime;
         @AuraEnabled public String endTime;
+        @AuraEnabled public String startDate;
+        @AuraEnabled public String endDate;
         @AuraEnabled public Integer durationMinutes;
         @AuraEnabled public String room;
         @AuraEnabled public String roomName;
+        @AuraEnabled public String activityType;
         @AuraEnabled public String source;
         @AuraEnabled public String templateName;
     }
@@ -435,6 +456,7 @@ public with sharing class KenTimetableManagementController {
                 offeringDto.courseCode = offering.LearningCourse == null ? null : offering.LearningCourse.CourseNumber;
                 offeringDto.facultyId = offering.PrimaryFacultyId;
                 offeringDto.facultyName = offering.PrimaryFaculty == null ? null : offering.PrimaryFaculty.Name;
+                offeringDto.facultyOptions = buildDefaultFacultyOptions(offeringDto);
             }
         }
         
@@ -589,6 +611,7 @@ public with sharing class KenTimetableManagementController {
         offeringDto.courseCode = offering.LearningCourse == null ? null : offering.LearningCourse.CourseNumber;
         offeringDto.facultyId = offering.PrimaryFacultyId;
         offeringDto.facultyName = offering.PrimaryFaculty == null ? null : offering.PrimaryFaculty.Name;
+        offeringDto.facultyOptions = buildDefaultFacultyOptions(offeringDto);
         offeringDto.type = String.isBlank(offeringTypeField) ? 'Standard' : String.valueOf(offering.get(offeringTypeField));
         if (String.isBlank(offeringDto.type)) {
             offeringDto.type = 'Standard';
@@ -598,6 +621,9 @@ public with sharing class KenTimetableManagementController {
         List<String> scheduleFields = new List<String>{
             'Id',
             'CourseOfferingId',
+            'StartDate',
+            'EndDate',
+            'Type',
             'StartTime',
             'EndTime',
             'IsMonday',
@@ -611,13 +637,21 @@ public with sharing class KenTimetableManagementController {
         if (String.isNotBlank(templateSupport.scheduleRoomField)) {
             scheduleFields.add(templateSupport.scheduleRoomField);
         }
+        if (String.isNotBlank(templateSupport.scheduleFacultyField)) {
+            scheduleFields.add(templateSupport.scheduleFacultyField);
+        }
+        if (String.isNotBlank(templateSupport.scheduleActivityField)) {
+            scheduleFields.add(templateSupport.scheduleActivityField);
+        }
         
-        List<BuilderScheduleEntryDTO> scheduleEntries = new List<BuilderScheduleEntryDTO>();
         String scheduleQuery =
             'SELECT ' + String.join(scheduleFields, ', ') +
             ' FROM CourseOfferingSchedule WHERE CourseOfferingId = :courseOfferingId WITH USER_MODE';
-        for (SObject row : Database.query(scheduleQuery)) {
-            scheduleEntries.addAll(expandScheduleRow(row, templateSupport.scheduleRoomField, 'Saved', null, offeringDto));
+        List<SObject> scheduleRows = Database.query(scheduleQuery);
+        Map<Id, String> scheduleFacultyNames = getScheduleFacultyNames(scheduleRows, templateSupport.scheduleFacultyField);
+        List<BuilderScheduleEntryDTO> scheduleEntries = new List<BuilderScheduleEntryDTO>();
+        for (SObject row : scheduleRows) {
+            scheduleEntries.addAll(expandScheduleRow(row, templateSupport, 'Saved', null, offeringDto, scheduleFacultyNames));
         }
         
         TimetableDetailDataDTO detail = new TimetableDetailDataDTO();
@@ -718,6 +752,7 @@ public with sharing class KenTimetableManagementController {
             offeringDto.courseCode = offering.LearningCourse == null ? null : offering.LearningCourse.CourseNumber;
             offeringDto.facultyId = offering.PrimaryFacultyId;
             offeringDto.facultyName = offering.PrimaryFaculty == null ? null : offering.PrimaryFaculty.Name;
+            offeringDto.facultyOptions = buildDefaultFacultyOptions(offeringDto);
             offeringDto.type = String.isBlank(offeringTypeField) ? 'Standard' : String.valueOf(offering.get(offeringTypeField));
             if (String.isBlank(offeringDto.type)) {
                 offeringDto.type = 'Standard';
@@ -729,6 +764,9 @@ public with sharing class KenTimetableManagementController {
         List<String> scheduleFields = new List<String>{
             'Id',
             'CourseOfferingId',
+            'StartDate',
+            'EndDate',
+            'Type',
             'StartTime',
             'EndTime',
             'IsMonday',
@@ -742,19 +780,27 @@ public with sharing class KenTimetableManagementController {
         if (String.isNotBlank(templateSupport.scheduleRoomField)) {
             scheduleFields.add(templateSupport.scheduleRoomField);
         }
+        if (String.isNotBlank(templateSupport.scheduleFacultyField)) {
+            scheduleFields.add(templateSupport.scheduleFacultyField);
+        }
+        if (String.isNotBlank(templateSupport.scheduleActivityField)) {
+            scheduleFields.add(templateSupport.scheduleActivityField);
+        }
         
         Set<Id> scheduledOfferingIds = new Set<Id>();
         Set<Id> scheduledScopeOfferingIds = offeringsById.keySet();
         String scheduleQuery =
             'SELECT ' + String.join(scheduleFields, ', ') +
             ' FROM CourseOfferingSchedule WHERE CourseOfferingId IN :scheduledScopeOfferingIds WITH USER_MODE';
-        for (SObject row : Database.query(scheduleQuery)) {
+        List<SObject> scheduleRows = Database.query(scheduleQuery);
+        Map<Id, String> scheduleFacultyNames = getScheduleFacultyNames(scheduleRows, templateSupport.scheduleFacultyField);
+        for (SObject row : scheduleRows) {
             Id offeringId = (Id)row.get('CourseOfferingId');
             BuilderOfferingDTO offeringDto = offeringsById.get(offeringId);
             if (offeringDto == null) {
                 continue;
             }
-            List<BuilderScheduleEntryDTO> expanded = expandScheduleRow(row, templateSupport.scheduleRoomField, 'Saved', null, offeringDto);
+            List<BuilderScheduleEntryDTO> expanded = expandScheduleRow(row, templateSupport, 'Saved', null, offeringDto, scheduleFacultyNames);
             if (expanded.isEmpty()) {
                 continue;
             }
@@ -835,8 +881,16 @@ public with sharing class KenTimetableManagementController {
     }
     
     @AuraEnabled
-    public static BuilderDataDTO getTimetableBuilderData(Id academicTermId, Id focusCourseOfferingId, Id learningProgramPlanId) {
+    public static BuilderDataDTO getTimetableBuilderData(
+        Id academicTermId,
+        Id focusCourseOfferingId,
+        Id learningProgramPlanId,
+        String weekStartDate,
+        String weekEndDate
+    ) {
         assertReadable(CourseOffering.SObjectType, 'Read access is required for Course Offering.');
+        Date selectedWeekStart = parseDateValue(weekStartDate);
+        Date selectedWeekEnd = parseDateValue(weekEndDate);
         
         Id resolvedTermId = resolveAcademicTermId(academicTermId, focusCourseOfferingId);
         if (resolvedTermId == null) {
@@ -936,6 +990,7 @@ public with sharing class KenTimetableManagementController {
             offeringDto.courseCode = offering.LearningCourse == null ? null : offering.LearningCourse.CourseNumber;
             offeringDto.facultyId = offering.PrimaryFacultyId;
             offeringDto.facultyName = offering.PrimaryFaculty == null ? null : offering.PrimaryFaculty.Name;
+            offeringDto.facultyOptions = buildDefaultFacultyOptions(offeringDto);
             offeringDto.type = String.isBlank(offeringTypeField) ? 'Standard' : String.valueOf(offering.get(offeringTypeField));
             if (String.isBlank(offeringDto.type)) {
                 offeringDto.type = 'Standard';
@@ -964,6 +1019,7 @@ public with sharing class KenTimetableManagementController {
                 ? planEnrollmentTokensByOfferingId.get(offeringId)
                 : new List<String>();
         }
+        applyFacultyOptions(offeringsById);
         
         Set<Id> templateIds = new Set<Id>();
         templateIds.addAll(templateIdByOfferingId.values());
@@ -986,6 +1042,9 @@ public with sharing class KenTimetableManagementController {
         List<String> scheduleFields = new List<String>{
             'Id',
             'CourseOfferingId',
+            'StartDate',
+            'EndDate',
+            'Type',
             'StartTime',
             'EndTime',
             'IsMonday',
@@ -999,19 +1058,30 @@ public with sharing class KenTimetableManagementController {
         if (String.isNotBlank(templateSupport.scheduleRoomField)) {
             scheduleFields.add(templateSupport.scheduleRoomField);
         }
+        if (String.isNotBlank(templateSupport.scheduleFacultyField)) {
+            scheduleFields.add(templateSupport.scheduleFacultyField);
+        }
+        if (String.isNotBlank(templateSupport.scheduleActivityField)) {
+            scheduleFields.add(templateSupport.scheduleActivityField);
+        }
         
         if (!offeringsById.isEmpty()) {
             Set<Id> offeringIds = offeringsById.keySet();
             String scheduleQuery =
                 'SELECT ' + String.join(scheduleFields, ', ') +
                 ' FROM CourseOfferingSchedule WHERE CourseOfferingId IN :offeringIds WITH USER_MODE';
-            for (SObject row : Database.query(scheduleQuery)) {
+            List<SObject> scheduleRows = Database.query(scheduleQuery);
+            Map<Id, String> scheduleFacultyNames = getScheduleFacultyNames(scheduleRows, templateSupport.scheduleFacultyField);
+            for (SObject row : scheduleRows) {
+                if (!scheduleAppliesToWeek(row, selectedWeekStart, selectedWeekEnd)) {
+                    continue;
+                }
                 Id offeringId = (Id)row.get('CourseOfferingId');
                 BuilderOfferingDTO offeringDto = offeringsById.get(offeringId);
                 if (offeringDto == null) {
                     continue;
                 }
-                List<BuilderScheduleEntryDTO> expanded = expandScheduleRow(row, templateSupport.scheduleRoomField, 'Saved', null, offeringDto);
+                List<BuilderScheduleEntryDTO> expanded = expandScheduleRow(row, templateSupport, 'Saved', null, offeringDto, scheduleFacultyNames);
                 if (expanded.isEmpty()) {
                     continue;
                 }
@@ -1026,9 +1096,13 @@ public with sharing class KenTimetableManagementController {
         dto.validation = buildValidationSummary(dto.offerings, dto.scheduledEntries, dto.programPlanOptions);
         return dto;
     }
+
+    public static BuilderDataDTO getTimetableBuilderData(Id academicTermId, Id focusCourseOfferingId, Id learningProgramPlanId) {
+        return getTimetableBuilderData(academicTermId, focusCourseOfferingId, learningProgramPlanId, null, null);
+    }
     
     public static BuilderDataDTO getTimetableBuilderData(Id academicTermId, Id focusCourseOfferingId) {
-        return getTimetableBuilderData(academicTermId, focusCourseOfferingId, null);
+        return getTimetableBuilderData(academicTermId, focusCourseOfferingId, null, null, null);
     }
     
     @AuraEnabled(cacheable=true)
@@ -1077,10 +1151,20 @@ public with sharing class KenTimetableManagementController {
     Id templateId,
     String templateRecurrencePattern,
     String templateStartDate,
-    String templateEndDate
+    String templateEndDate,
+    String scheduleStartDate,
+    String scheduleEndDate
     ) {
         if (courseOfferingId == null) {
             throw new AuraHandledException('Course offering is required.');
+        }
+        Date selectedScheduleStartDate = parseDateValue(scheduleStartDate);
+        Date selectedScheduleEndDate = parseDateValue(scheduleEndDate);
+        if ((selectedScheduleStartDate == null) != (selectedScheduleEndDate == null)) {
+            throw new AuraHandledException('Both schedule start date and end date are required for a week-specific timetable.');
+        }
+        if (selectedScheduleStartDate != null && selectedScheduleEndDate < selectedScheduleStartDate) {
+            throw new AuraHandledException('Schedule end date must be on or after the schedule start date.');
         }
         
         List<Object> requestedEntries = String.isBlank(scheduleEntriesJson)
@@ -1089,7 +1173,7 @@ public with sharing class KenTimetableManagementController {
         
         Map<String, Schema.SObjectField> offeringFieldMap = CourseOffering.SObjectType.getDescribe().fields.getMap();
         String timetableLockedField = getReadableFieldName(offeringFieldMap, new List<String>{ 'Timetable_Locked__c' });
-        List<String> offeringFields = new List<String>{ 'Id', 'Name', 'AcademicSession.AcademicTermId' };
+        List<String> offeringFields = new List<String>{ 'Id', 'Name', 'PrimaryFacultyId', 'AcademicSession.AcademicTermId' };
         if (String.isNotBlank(timetableLockedField)) {
             offeringFields.add(timetableLockedField);
         }
@@ -1105,6 +1189,9 @@ public with sharing class KenTimetableManagementController {
         List<CourseOfferingSchedule> existingSchedules = [
             SELECT Id,
                    CourseOfferingId,
+                   StartDate,
+                   EndDate,
+                   Type,
                    StartTime,
                    EndTime,
                    IsMonday,
@@ -1114,14 +1201,22 @@ public with sharing class KenTimetableManagementController {
                    IsFriday,
                    IsSaturday,
                    IsSunday
+                   ,Faculty_Contact__c
                    ,Description
                    FROM CourseOfferingSchedule
                    WHERE CourseOfferingId = :offering.Id
         ];
-        
-        Map<Id, CourseOfferingSchedule> existingById = new Map<Id, CourseOfferingSchedule>(existingSchedules);
-        Map<String, Id> existingScheduleIdByDay = new Map<String, Id>();
+        List<CourseOfferingSchedule> editableSchedules = new List<CourseOfferingSchedule>();
         for (CourseOfferingSchedule existingSchedule : existingSchedules) {
+            if (scheduleAppliesToWeek(existingSchedule, selectedScheduleStartDate, selectedScheduleEndDate)) {
+                editableSchedules.add(existingSchedule);
+            }
+        }
+        
+        Map<Id, CourseOfferingSchedule> existingById = new Map<Id, CourseOfferingSchedule>(editableSchedules);
+        Set<Id> allowedFacultyIds = getAllowedFacultyIds(offering.Id, (Id)offering.get('PrimaryFacultyId'));
+        Map<String, Id> existingScheduleIdByDay = new Map<String, Id>();
+        for (CourseOfferingSchedule existingSchedule : editableSchedules) {
             for (String activeDayName : getActiveDayNames(existingSchedule)) {
                 existingScheduleIdByDay.put(activeDayName, existingSchedule.Id);
             }
@@ -1144,6 +1239,14 @@ public with sharing class KenTimetableManagementController {
             String startTimeValue = entry.containsKey('startTime') ? safeString(entry.get('startTime')) : null;
             String endTimeValue = entry.containsKey('endTime') ? safeString(entry.get('endTime')) : null;
             String roomValue = entry.containsKey('room') ? safeString(entry.get('room')) : null;
+            String activityTypeValue = entry.containsKey('activityType') ? safeString(entry.get('activityType')) : null;
+            Id facultyIdValue = toId(entry.containsKey('facultyId') ? safeString(entry.get('facultyId')) : null);
+            if (facultyIdValue == null) {
+                facultyIdValue = (Id)offering.get('PrimaryFacultyId');
+            }
+            if (facultyIdValue != null && !allowedFacultyIds.contains(facultyIdValue)) {
+                throw new AuraHandledException('Selected faculty is not mapped to this course offering.');
+            }
             
             String trimmedDay = String.isBlank(dayName) ? null : dayName.trim();
             if (String.isBlank(trimmedDay) || String.isBlank(startTimeValue) || String.isBlank(endTimeValue)) {
@@ -1165,9 +1268,12 @@ public with sharing class KenTimetableManagementController {
                 throw new AuraHandledException('End time must be later than start time.');
             }
             
-            String signature = buildScheduleSignature(startTime, endTime, roomValue);
+            String signature = buildScheduleSignature(startTime, endTime, roomValue, facultyIdValue, activityTypeValue);
             if (!requestBySignature.containsKey(signature)) {
-                requestBySignature.put(signature, new ConsolidatedScheduleRequest(startTime, endTime, roomValue));
+                requestBySignature.put(
+                    signature,
+                    new ConsolidatedScheduleRequest(startTime, endTime, roomValue, facultyIdValue, activityTypeValue)
+                );
             }
             ConsolidatedScheduleRequest requestGroup = requestBySignature.get(signature);
             requestGroup.dayNames.add(trimmedDay);
@@ -1200,21 +1306,39 @@ public with sharing class KenTimetableManagementController {
                 retainedScheduleIds.add(targetSchedule.Id);
                 targetSchedule.StartTime = requestGroup.startTime;
                 targetSchedule.EndTime = requestGroup.endTime;
+                if (selectedScheduleStartDate != null) {
+                    targetSchedule.StartDate = selectedScheduleStartDate;
+                    targetSchedule.EndDate = selectedScheduleEndDate;
+                    targetSchedule.RecurrencePattern = buildWeeklyRecurrencePattern(selectedScheduleEndDate);
+                }
+                applyScheduleActivity(targetSchedule, templateSupport, requestGroup.activityType);
                 targetSchedule.Description = buildScheduleDescription(requestGroup.dayNames, requestGroup.startTime, requestGroup.endTime);
                 applyDays(targetSchedule, requestGroup.dayNames);
                 if (String.isNotBlank(templateSupport.scheduleRoomField)) {
                     targetSchedule.put(templateSupport.scheduleRoomField, requestGroup.room);
+                }
+                if (String.isNotBlank(templateSupport.scheduleFacultyField)) {
+                    targetSchedule.put(templateSupport.scheduleFacultyField, requestGroup.facultyId);
                 }
                 schedulesToUpdate.add(targetSchedule);
             } else {
                 CourseOfferingSchedule schedule = new CourseOfferingSchedule();
                 schedule.CourseOfferingId = offering.Id;
                 schedule.Description = buildScheduleDescription(requestGroup.dayNames, requestGroup.startTime, requestGroup.endTime);
+                if (selectedScheduleStartDate != null) {
+                    schedule.StartDate = selectedScheduleStartDate;
+                    schedule.EndDate = selectedScheduleEndDate;
+                    schedule.RecurrencePattern = buildWeeklyRecurrencePattern(selectedScheduleEndDate);
+                }
+                applyScheduleActivity(schedule, templateSupport, requestGroup.activityType);
                 schedule.StartTime = requestGroup.startTime;
                 schedule.EndTime = requestGroup.endTime;
                 applyDays(schedule, requestGroup.dayNames);
                 if (String.isNotBlank(templateSupport.scheduleRoomField)) {
                     schedule.put(templateSupport.scheduleRoomField, requestGroup.room);
+                }
+                if (String.isNotBlank(templateSupport.scheduleFacultyField)) {
+                    schedule.put(templateSupport.scheduleFacultyField, requestGroup.facultyId);
                 }
                 schedulesToInsert.add(schedule);
             }
@@ -1224,12 +1348,12 @@ public with sharing class KenTimetableManagementController {
             throw new AuraHandledException('No valid schedule rows were received from the screen.');
         }
         
-        validateGridOverlap(offering, requestBySignature.values());
+        validateGridOverlap(offering, requestBySignature.values(), selectedScheduleStartDate, selectedScheduleEndDate);
         
         Savepoint savepoint = Database.setSavepoint();
         try {
             List<CourseOfferingSchedule> schedulesToDelete = new List<CourseOfferingSchedule>();
-            for (CourseOfferingSchedule existingSchedule : existingSchedules) {
+            for (CourseOfferingSchedule existingSchedule : editableSchedules) {
                 if (!retainedScheduleIds.contains(existingSchedule.Id)) {
                     schedulesToDelete.add(existingSchedule);
                 }
@@ -1273,8 +1397,12 @@ public with sharing class KenTimetableManagementController {
             if (templateId != null && String.isNotBlank(templateSupport.templateObjectApiName)) {
                 SObject templateUpdate = Schema.getGlobalDescribe().get(templateSupport.templateObjectApiName).newSObject(templateId);
                 Boolean shouldUpdateTemplate = false;
+                Date parsedTemplateEndDate = parseDateValue(templateEndDate);
                 if (String.isNotBlank(templateSupport.templateRecurrenceField)) {
-                    templateUpdate.put(templateSupport.templateRecurrenceField, templateRecurrencePattern);
+                    templateUpdate.put(
+                        templateSupport.templateRecurrenceField,
+                        normalizeTemplateRecurrencePattern(templateRecurrencePattern, parsedTemplateEndDate)
+                    );
                     shouldUpdateTemplate = true;
                 }
                 if (String.isNotBlank(templateSupport.templateStartDateField) && String.isNotBlank(templateStartDate)) {
@@ -1282,7 +1410,7 @@ public with sharing class KenTimetableManagementController {
                     shouldUpdateTemplate = true;
                 }
                 if (String.isNotBlank(templateSupport.templateEndDateField) && String.isNotBlank(templateEndDate)) {
-                    templateUpdate.put(templateSupport.templateEndDateField, Date.valueOf(templateEndDate));
+                    templateUpdate.put(templateSupport.templateEndDateField, parsedTemplateEndDate);
                     shouldUpdateTemplate = true;
                 }
                 if (shouldUpdateTemplate) {
@@ -1318,7 +1446,7 @@ public with sharing class KenTimetableManagementController {
         Id courseOfferingId,
     String scheduleEntriesJson
     ) {
-        return saveCourseOfferingSchedules(courseOfferingId, scheduleEntriesJson, null, null, null, null);
+        return saveCourseOfferingSchedules(courseOfferingId, scheduleEntriesJson, null, null, null, null, null, null);
     }
     
     private static BuilderDataDTO emptyBuilderState() {
@@ -1470,7 +1598,9 @@ public with sharing class KenTimetableManagementController {
     
     private static void validateGridOverlap(
         CourseOffering offering,
-    List<ConsolidatedScheduleRequest> requestedGroups
+    List<ConsolidatedScheduleRequest> requestedGroups,
+    Date selectedScheduleStartDate,
+    Date selectedScheduleEndDate
     ) {
         if (offering == null ||
             offering.AcademicSession == null ||
@@ -1483,6 +1613,11 @@ public with sharing class KenTimetableManagementController {
         List<CourseOfferingSchedule> existingSchedules = [
             SELECT CourseOfferingId,
                    CourseOffering.Name,
+                   CourseOffering.PrimaryFacultyId,
+                   Faculty_Contact__c,
+                   StartDate,
+                   EndDate,
+                   Type,
                    StartTime,
                    EndTime,
                    IsMonday,
@@ -1512,16 +1647,20 @@ public with sharing class KenTimetableManagementController {
         List<String> currentOfferingTokens = planEnrollmentTokensByOfferingId.get(offering.Id);
         
         for (CourseOfferingSchedule existingSchedule : existingSchedules) {
-            if (!shouldBlockOverlap(
-                currentOfferingTokens,
-            planEnrollmentTokensByOfferingId.get(existingSchedule.CourseOfferingId)
-            )) {
+            if (!scheduleAppliesToWeek(existingSchedule, selectedScheduleStartDate, selectedScheduleEndDate)) {
                 continue;
             }
+            Boolean hasProgramPlanOverlap = shouldBlockOverlap(
+                currentOfferingTokens,
+            planEnrollmentTokensByOfferingId.get(existingSchedule.CourseOfferingId)
+            );
             Set<String> existingDays = new Set<String>(getActiveDayNames(existingSchedule));
             if (existingDays.isEmpty()) {
                 continue;
             }
+            Id existingFacultyId = existingSchedule.Faculty_Contact__c == null
+                ? existingSchedule.CourseOffering.PrimaryFacultyId
+                : existingSchedule.Faculty_Contact__c;
             
             for (ConsolidatedScheduleRequest requestGroup : requestedGroups) {
                 if (requestGroup == null || requestGroup.startTime == null || requestGroup.endTime == null) {
@@ -1539,6 +1678,17 @@ public with sharing class KenTimetableManagementController {
                 
                 for (String requestedDay : requestGroup.dayNames) {
                     if (existingDays.contains(requestedDay)) {
+                        if (requestGroup.facultyId != null && requestGroup.facultyId == existingFacultyId) {
+                            throw new AuraHandledException(
+                                'Selected faculty is already assigned to ' + existingSchedule.CourseOffering.Name +
+                                ' on ' + requestedDay +
+                                ' between ' + formatTime24(existingSchedule.StartTime) +
+                                ' and ' + formatTime24(existingSchedule.EndTime) + '.'
+                                );
+                        }
+                        if (!hasProgramPlanOverlap) {
+                            continue;
+                        }
                         throw new AuraHandledException(
                             'Schedule overlaps with ' + existingSchedule.CourseOffering.Name +
                             ' on ' + requestedDay +
@@ -1605,6 +1755,9 @@ public with sharing class KenTimetableManagementController {
             item.courseCode = offering.courseCode;
             item.facultyId = offering.facultyId;
             item.facultyName = offering.facultyName;
+            item.facultyOptions = offering.facultyOptions == null
+                ? new List<FacultyOptionDTO>()
+                : new List<FacultyOptionDTO>(offering.facultyOptions);
             item.type = offering.type;
             item.planEnrollmentTokens = offering.planEnrollmentTokens == null
                 ? new List<String>()
@@ -1617,19 +1770,135 @@ public with sharing class KenTimetableManagementController {
             item.durationMinutes = source.durationMinutes;
             item.room = source.room;
             item.roomName = source.roomName;
+            item.activityType = source.activityType;
             item.source = 'Template';
             item.templateName = offering.templateName;
             cloned.add(item);
         }
         return cloned;
     }
+
+    private static List<FacultyOptionDTO> buildDefaultFacultyOptions(BuilderOfferingDTO offering) {
+        List<FacultyOptionDTO> options = new List<FacultyOptionDTO>();
+        if (offering == null || offering.facultyId == null) {
+            return options;
+        }
+        FacultyOptionDTO option = new FacultyOptionDTO();
+        option.id = offering.facultyId;
+        option.name = String.isBlank(offering.facultyName) ? 'Primary Faculty' : offering.facultyName;
+        options.add(option);
+        return options;
+    }
+
+    private static void applyFacultyOptions(Map<Id, BuilderOfferingDTO> offeringsById) {
+        if (offeringsById == null || offeringsById.isEmpty()) {
+            return;
+        }
+
+        Map<Id, Map<Id, FacultyOptionDTO>> optionsByOfferingId = new Map<Id, Map<Id, FacultyOptionDTO>>();
+        for (BuilderOfferingDTO offering : offeringsById.values()) {
+            Map<Id, FacultyOptionDTO> optionMap = new Map<Id, FacultyOptionDTO>();
+            for (FacultyOptionDTO option : buildDefaultFacultyOptions(offering)) {
+                optionMap.put(option.id, option);
+            }
+            optionsByOfferingId.put(offering.id, optionMap);
+        }
+
+        if (!CourseOfferingParticipant.SObjectType.getDescribe().isAccessible()) {
+            for (Id offeringId : offeringsById.keySet()) {
+                offeringsById.get(offeringId).facultyOptions = optionsByOfferingId.get(offeringId).values();
+            }
+            return;
+        }
+
+        Set<Id> offeringIds = offeringsById.keySet();
+        for (CourseOfferingParticipant participant : [
+            SELECT CourseOfferingId,
+                   ParticipantAffiliation,
+                   ParticipantContactId,
+                   ParticipantContact.Name
+            FROM CourseOfferingParticipant
+            WHERE CourseOfferingId IN :offeringIds
+            AND ParticipantContactId != null
+            WITH USER_MODE
+        ]) {
+            if (!isFacultyParticipant(participant.ParticipantAffiliation) ||
+                !optionsByOfferingId.containsKey(participant.CourseOfferingId)) {
+                continue;
+            }
+
+            FacultyOptionDTO option = new FacultyOptionDTO();
+            option.id = participant.ParticipantContactId;
+            option.name = participant.ParticipantContact == null
+                ? 'Mapped Faculty'
+                : participant.ParticipantContact.Name;
+            optionsByOfferingId.get(participant.CourseOfferingId).put(option.id, option);
+        }
+
+        for (Id offeringId : offeringsById.keySet()) {
+            offeringsById.get(offeringId).facultyOptions = optionsByOfferingId.get(offeringId).values();
+        }
+    }
+
+    private static Boolean isFacultyParticipant(String affiliation) {
+        String normalized = String.isBlank(affiliation) ? '' : affiliation.trim().toLowerCase();
+        return normalized.contains('faculty') ||
+            normalized.contains('instructor') ||
+            normalized.contains('teacher') ||
+            normalized.contains('professor');
+    }
+
+    private static Set<Id> getAllowedFacultyIds(Id offeringId, Id primaryFacultyId) {
+        Map<Id, BuilderOfferingDTO> offeringsById = new Map<Id, BuilderOfferingDTO>();
+        BuilderOfferingDTO offering = new BuilderOfferingDTO();
+        offering.id = offeringId;
+        offering.facultyId = primaryFacultyId;
+        offeringsById.put(offeringId, offering);
+        applyFacultyOptions(offeringsById);
+
+        Set<Id> allowedIds = new Set<Id>();
+        List<FacultyOptionDTO> options = offeringsById.get(offeringId).facultyOptions;
+        for (FacultyOptionDTO option : options == null ? new List<FacultyOptionDTO>() : options) {
+            if (option.id != null) {
+                allowedIds.add(option.id);
+            }
+        }
+        return allowedIds;
+    }
+
+    private static Map<Id, String> getScheduleFacultyNames(List<SObject> scheduleRows, String scheduleFacultyField) {
+        Set<Id> facultyIds = new Set<Id>();
+        if (scheduleRows != null && String.isNotBlank(scheduleFacultyField)) {
+            for (SObject row : scheduleRows) {
+                Id facultyId = (Id)row.get(scheduleFacultyField);
+                if (facultyId != null) {
+                    facultyIds.add(facultyId);
+                }
+            }
+        }
+
+        Map<Id, String> namesById = new Map<Id, String>();
+        if (facultyIds.isEmpty()) {
+            return namesById;
+        }
+        for (Contact faculty : [
+            SELECT Id, Name
+            FROM Contact
+            WHERE Id IN :facultyIds
+            WITH USER_MODE
+        ]) {
+            namesById.put(faculty.Id, faculty.Name);
+        }
+        return namesById;
+    }
     
     private static List<BuilderScheduleEntryDTO> expandScheduleRow(
         SObject row,
-    String roomField,
+    TemplateSupport templateSupport,
     String source,
     String templateName,
-    BuilderOfferingDTO offering
+    BuilderOfferingDTO offering,
+    Map<Id, String> scheduleFacultyNames
     ) {
         Time startTime = (Time)row.get('StartTime');
         Time endTime = (Time)row.get('EndTime');
@@ -1637,7 +1906,14 @@ public with sharing class KenTimetableManagementController {
             return new List<BuilderScheduleEntryDTO>();
         }
         
-        String room = String.isBlank(roomField) ? null : safeString(row.get(roomField));
+        String room = String.isBlank(templateSupport.scheduleRoomField) ? null : safeString(row.get(templateSupport.scheduleRoomField));
+        Id scheduleFacultyId = String.isBlank(templateSupport.scheduleFacultyField)
+            ? null
+            : (Id)row.get(templateSupport.scheduleFacultyField);
+        Id effectiveFacultyId = scheduleFacultyId == null ? offering.facultyId : scheduleFacultyId;
+        String effectiveFacultyName = scheduleFacultyId == null
+            ? offering.facultyName
+            : (scheduleFacultyNames == null ? null : scheduleFacultyNames.get(scheduleFacultyId));
         List<DayDescriptor> activeDays = getActiveDays(row, false);
         if (activeDays.isEmpty()) {
             return new List<BuilderScheduleEntryDTO>();
@@ -1652,8 +1928,11 @@ public with sharing class KenTimetableManagementController {
             item.sessionName = offering.sessionName;
             item.courseName = offering.courseName;
             item.courseCode = offering.courseCode;
-            item.facultyId = offering.facultyId;
-            item.facultyName = offering.facultyName;
+            item.facultyId = effectiveFacultyId;
+            item.facultyName = String.isBlank(effectiveFacultyName) ? offering.facultyName : effectiveFacultyName;
+            item.facultyOptions = offering.facultyOptions == null
+                ? new List<FacultyOptionDTO>()
+                : new List<FacultyOptionDTO>(offering.facultyOptions);
             item.type = offering.type;
             item.planEnrollmentTokens = offering.planEnrollmentTokens == null
                 ? new List<String>()
@@ -1663,9 +1942,14 @@ public with sharing class KenTimetableManagementController {
             item.dayNumber = descriptor.dayNumber;
             item.startTime = formatTime24(startTime);
             item.endTime = formatTime24(endTime);
+            item.startDate = formatTemplateDate(row.get('StartDate'));
+            item.endDate = formatTemplateDate(row.get('EndDate'));
             item.durationMinutes = calculateDuration(startTime, endTime);
             item.room = room;
             item.roomName = room;
+            item.activityType = String.isBlank(templateSupport.scheduleActivityField)
+                ? null
+                : safeString(row.get(templateSupport.scheduleActivityField));
             item.source = source;
             item.templateName = templateName;
             items.add(item);
@@ -1743,9 +2027,10 @@ public with sharing class KenTimetableManagementController {
         return dayNames;
     }
     
-    private static String buildScheduleSignature(Time startTime, Time endTime, String room) {
+    private static String buildScheduleSignature(Time startTime, Time endTime, String room, Id facultyId, String activityType) {
         String normalizedRoom = String.isBlank(room) ? '' : room.trim().toLowerCase();
-        return String.valueOf(startTime) + '|' + String.valueOf(endTime) + '|' + normalizedRoom;
+        String normalizedActivity = String.isBlank(activityType) ? '' : activityType.trim().toLowerCase();
+        return String.valueOf(startTime) + '|' + String.valueOf(endTime) + '|' + normalizedRoom + '|' + String.valueOf(facultyId) + '|' + normalizedActivity;
     }
     
     private static String buildScheduleDescription(Set<String> dayNames, Time startTime, Time endTime) {
@@ -1757,6 +2042,65 @@ public with sharing class KenTimetableManagementController {
         }
         String dayLabel = orderedDays.isEmpty() ? 'Schedule' : String.join(orderedDays, ', ');
         return dayLabel + ' ' + formatTime24(startTime) + ' - ' + formatTime24(endTime);
+    }
+
+    private static Boolean scheduleAppliesToWeek(SObject row, Date weekStartDate, Date weekEndDate) {
+        if (row == null || weekStartDate == null || weekEndDate == null) {
+            return true;
+        }
+
+        Date scheduleStartDate = getDateField(row, 'StartDate');
+        Date scheduleEndDate = getDateField(row, 'EndDate');
+        if (scheduleStartDate == null && scheduleEndDate == null) {
+            return weekStartDate == getWeekStart(Date.today());
+        }
+        if (scheduleStartDate == null) {
+            scheduleStartDate = scheduleEndDate;
+        }
+        if (scheduleEndDate == null) {
+            scheduleEndDate = scheduleStartDate;
+        }
+        return scheduleStartDate <= weekEndDate && scheduleEndDate >= weekStartDate;
+    }
+
+    private static Date getDateField(SObject row, String fieldName) {
+        if (row == null || String.isBlank(fieldName) || !row.getSObjectType().getDescribe().fields.getMap().containsKey(fieldName)) {
+            return null;
+        }
+        Object value = row.get(fieldName);
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Date) {
+            return (Date)value;
+        }
+        if (value instanceof Datetime) {
+            return ((Datetime)value).date();
+        }
+        return String.isBlank(String.valueOf(value)) ? null : Date.valueOf(String.valueOf(value));
+    }
+
+    private static Date getWeekStart(Date value) {
+        if (value == null) {
+            return null;
+        }
+        Date knownSunday = Date.newInstance(1900, 1, 7);
+        Integer offset = Math.mod(knownSunday.daysBetween(value), 7);
+        return value.addDays(-offset);
+    }
+
+    private static String buildWeeklyRecurrencePattern(Date endDate) {
+        String pattern = 'RRULE:FREQ=WEEKLY;INTERVAL=1';
+        if (endDate != null) {
+            pattern += ';UNTIL=' + formatRRuleDate(endDate);
+        }
+        return pattern;
+    }
+
+    private static String formatRRuleDate(Date value) {
+        return value == null
+            ? null
+            : String.valueOf(value).replace('-', '') + 'T235959Z';
     }
     
     private static String normalizeDmlError(Exception error) {
@@ -2247,6 +2591,20 @@ public with sharing class KenTimetableManagementController {
         }
         target.put(fieldName, value);
     }
+
+    private static void applyScheduleActivity(
+        CourseOfferingSchedule schedule,
+    TemplateSupport templateSupport,
+    String activityType
+    ) {
+        if (String.isBlank(templateSupport.scheduleActivityField)) {
+            if (String.isBlank(activityType)) {
+                return;
+            }
+            throw new AuraHandledException('Activities field is not configured on Course Offering Schedule.');
+        }
+        schedule.put(templateSupport.scheduleActivityField, String.isBlank(activityType) ? null : activityType);
+    }
     
     private static TemplateSupport discoverTemplateSupport() {
         Map<String, Schema.SObjectType> describeMap = Schema.getGlobalDescribe();
@@ -2259,9 +2617,19 @@ public with sharing class KenTimetableManagementController {
                 );
         }
         if (describeMap.containsKey('CourseOfferingSchedule')) {
+            Map<String, Schema.SObjectField> scheduleFields =
+                describeMap.get('CourseOfferingSchedule').getDescribe().fields.getMap();
             support.scheduleRoomField = getExistingFieldName(
-                describeMap.get('CourseOfferingSchedule').getDescribe().fields.getMap(),
+                scheduleFields,
             ROOM_FIELD_CANDIDATES
+                );
+            support.scheduleFacultyField = getUpdateableFieldName(
+                scheduleFields,
+            SCHEDULE_FACULTY_FIELD_CANDIDATES
+                );
+            support.scheduleActivityField = getUpdateableFieldName(
+                scheduleFields,
+            SCHEDULE_ACTIVITY_FIELD_CANDIDATES
                 );
         }
         
@@ -2387,13 +2755,17 @@ public with sharing class KenTimetableManagementController {
         private Time startTime;
         private Time endTime;
         private String room;
+        private Id facultyId;
+        private String activityType;
         private Set<String> dayNames;
         private Set<Id> scheduleIds;
         
-        private ConsolidatedScheduleRequest(Time startTime, Time endTime, String room) {
+        private ConsolidatedScheduleRequest(Time startTime, Time endTime, String room, Id facultyId, String activityType) {
             this.startTime = startTime;
             this.endTime = endTime;
             this.room = room;
+            this.facultyId = facultyId;
+            this.activityType = activityType;
             this.dayNames = new Set<String>();
             this.scheduleIds = new Set<Id>();
         }
@@ -2411,6 +2783,8 @@ public with sharing class KenTimetableManagementController {
         private String templateEntryEndField;
         private String templateEntryRoomField;
         private String scheduleRoomField;
+        private String scheduleFacultyField;
+        private String scheduleActivityField;
         
         private Boolean hasOfferingTemplateLookup() {
             return String.isNotBlank(offeringTemplateLookupField) && String.isNotBlank(templateObjectApiName);

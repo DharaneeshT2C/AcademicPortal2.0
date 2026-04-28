@@ -12,7 +12,7 @@
  * @createdOn   2026
  * ************************************************************************************************
  */
-public with sharing class KenPlacementsController {
+public without sharing class KenPlacementsController {
 
     public class JobDTO {
         @AuraEnabled public Id      id;
@@ -53,7 +53,7 @@ public with sharing class KenPlacementsController {
                 for (Job_Application__c a : [
                     SELECT Id, Job__c, Status__c FROM Job_Application__c
                     WHERE Student__c = :studentId
-                    WITH USER_MODE
+                    WITH SECURITY_ENFORCED
                     LIMIT 500
                 ]) {
                     myStatus.put(a.Job__c, a.Status__c);
@@ -65,7 +65,7 @@ public with sharing class KenPlacementsController {
                        Salary_Min__c, Salary_Max__c, Currency__c, Tags__c
                 FROM Job_Posting__c
                 WHERE Is_Active__c = true
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 ORDER BY CreatedDate DESC
                 LIMIT 200
             ]) {
@@ -105,7 +105,7 @@ public with sharing class KenPlacementsController {
                        Job__r.Company__c, Job__r.Title__c, Job__r.Category__c
                 FROM Job_Application__c
                 WHERE Student__c = :studentId AND Status__c != 'Saved'
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 ORDER BY Applied_Date__c DESC
                 LIMIT 200
             ]) out.add(toDto(a));
@@ -128,14 +128,14 @@ public with sharing class KenPlacementsController {
                 SELECT Id FROM Job_Application__c
                 WHERE Job__c = :jobId AND Student__c = :studentId
                   AND Status__c NOT IN ('Saved', 'Withdrawn', 'Rejected')
-                WITH USER_MODE LIMIT 1
+                WITH SECURITY_ENFORCED LIMIT 1
             ];
             if (!existing.isEmpty()) return existing[0].Id;
             // If a Saved record exists, promote it to Applied.
             List<Job_Application__c> saved = [
                 SELECT Id FROM Job_Application__c
                 WHERE Job__c = :jobId AND Student__c = :studentId AND Status__c = 'Saved'
-                WITH USER_MODE LIMIT 1
+                WITH SECURITY_ENFORCED LIMIT 1
             ];
             if (!saved.isEmpty()) {
                 Job_Application__c upd = new Job_Application__c(
@@ -201,7 +201,7 @@ public with sharing class KenPlacementsController {
             List<Job_Application__c> existing = [
                 SELECT Id, Status__c FROM Job_Application__c
                 WHERE Job__c = :jobId AND Student__c = :studentId
-                WITH USER_MODE LIMIT 1
+                WITH SECURITY_ENFORCED LIMIT 1
             ];
             if (!existing.isEmpty()) {
                 Job_Application__c row = existing[0];
@@ -261,7 +261,7 @@ public with sharing class KenPlacementsController {
                        Student__r.FirstName, Student__r.LastName
                 FROM Job_Application__c
                 WHERE Id = :applicationId
-                WITH USER_MODE LIMIT 1
+                WITH SECURITY_ENFORCED LIMIT 1
             ];
             if (rows.isEmpty()) return null;
             Job_Application__c a = rows[0];

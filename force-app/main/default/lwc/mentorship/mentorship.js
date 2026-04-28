@@ -1,6 +1,5 @@
 import { LightningElement, track, wire } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
-import { mentors, mentorTasks, mentorSessions } from 'c/mockData';
 import getTasks from '@salesforce/apex/KenMentorshipController.getTasks';
 import addTaskApex from '@salesforce/apex/KenMentorshipController.addTask';
 
@@ -16,10 +15,11 @@ const MENTOR_PHOTOS = [
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const SESSION_DAYS = new Set([7, 12, 14, 21, 26, 27]);
 
+// TODO: wire mentors/sessions to KenMentorshipController in v1.1 — only tasks are wired today.
 export default class Mentorship extends LightningElement {
-    mentors = mentors;
-    tasks = mentorTasks;
-    sessions = mentorSessions;
+    mentors = [];
+    tasks = [];
+    sessions = [];
 
     @track currentYear = new Date().getFullYear();
     @track currentMonth = new Date().getMonth();
@@ -66,23 +66,23 @@ export default class Mentorship extends LightningElement {
     }
 
     get formattedMentors() {
-        return this.mentors.map((m, i) => ({
+        return (this.mentors || []).map((m, i) => ({
             ...m,
-            typeClass: 'mentor-type ' + m.type.toLowerCase(),
+            typeClass: 'mentor-type ' + (m.type || '').toLowerCase(),
             photo: MENTOR_PHOTOS[i % MENTOR_PHOTOS.length]
         }));
     }
 
     get formattedTasks() {
-        return this.tasks.map(t => ({
+        return (this.tasks || []).map(t => ({
             ...t,
-            statusClass: 'status-badge ' + t.status.toLowerCase().replace(' ', '-'),
-            priorityClass: 'priority ' + t.priority.toLowerCase()
+            statusClass: 'status-badge ' + (t.status || '').toLowerCase().replace(' ', '-'),
+            priorityClass: 'priority ' + (t.priority || '').toLowerCase()
         }));
     }
 
     get formattedSessions() {
-        return this.sessions.map(session => {
+        return (this.sessions || []).map(session => {
             const actions = session.actions || [];
             return {
                 ...session,
@@ -186,9 +186,7 @@ export default class Mentorship extends LightningElement {
     }
 
     get visibleTasks() {
-        // Persisted tasks (from Apex) shown first, then any seed tasks.
-        if (this._persistedTasks && this._persistedTasks.length) return this._persistedTasks;
-        return mentorTasks || [];
+        return this._persistedTasks || [];
     }
 
     handleConfirmTask() {

@@ -1,29 +1,27 @@
 import { LightningElement, wire, track } from 'lwc';
-import { NavigationMixin } from 'lightning/navigation';
-import { pageNameForRoute } from 'c/navHelper';
-import { examData } from 'c/mockData';
 import getMyExams from '@salesforce/apex/KenMyExamsController.getMyExams';
 import confirmExamEnrollment from '@salesforce/apex/KenMyExamsController.confirmExamEnrollment';
 
-export default class ExamEnrollment extends NavigationMixin(LightningElement) {
+export default class ExamEnrollment extends LightningElement {
     @track _apex;
     @track _submitting = false;
     @track _confirmation;
     @track _errorMessage;
-    _seed = examData;
 
     @wire(getMyExams)
     wiredMyExams({ data, error }) {
         if (data) this._apex = data;
         else if (error) {
-            // eslint-disable-next-line no-console
-            console.warn('[examEnrollment] Apex failed, using seed:', error);
+            const _msg = (error && error.body && error.body.message) || '';
+            if (_msg && !_msg.includes('not have access') && !_msg.includes('No rows')) {
+                // eslint-disable-next-line no-console
+                console.warn('[examEnrollment] Apex failed, using seed:', error);
+            }
         }
     }
 
     get data() {
-        if (this._apex) return Object.assign({}, this._seed, this._apex);
-        return this._seed;
+        return this._apex || {};
     }
 
     get selectedCourses() {
@@ -61,12 +59,7 @@ export default class ExamEnrollment extends NavigationMixin(LightningElement) {
         return !!this._errorMessage;
     }
 
-    navigateTo(route) {
-        this[NavigationMixin.Navigate]({
-            type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute(route) }
-        });
-    }
+    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
     handleBack() { this.navigateTo('my-exams'); }
 
     handlePayAndConfirm() {

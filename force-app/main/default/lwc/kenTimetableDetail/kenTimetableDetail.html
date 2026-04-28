@@ -147,10 +147,31 @@
                                     {mode.label}
                                 </button>
                             </template>
+                            <div class="preview-period-controls">
+                                <button
+                                    class="period-nav-button"
+                                    type="button"
+                                    onclick={handlePreviousPreviewPeriod}
+                                    title="Previous period">
+                                    <lightning-icon icon-name="utility:chevronleft" size="x-small" alternative-text="Previous"></lightning-icon>
+                                </button>
+                                <label class="period-date-field">
+                                    <span>{previewPeriodControlLabel}</span>
+                                    <input type="date" value={previewPeriodInputValue} onchange={handlePreviewDateChange} />
+                                </label>
+                                <strong class="period-label">{previewPeriodLabel}</strong>
+                                <button
+                                    class="period-nav-button"
+                                    type="button"
+                                    onclick={handleNextPreviewPeriod}
+                                    title="Next period">
+                                    <lightning-icon icon-name="utility:chevronright" size="x-small" alternative-text="Next"></lightning-icon>
+                                </button>
+                            </div>
                         </div>
 
                         <template if:true={showWeeklyPreview}>
-                            <div class="panel-caption">Review this course offering in the same weekly grid style as timetable creation.</div>
+                            <div class="panel-caption">{previewCaption}</div>
                             <div class="preview-wrap builder-preview-wrap">
                                 <table class="preview-table builder-preview-table">
                                     <thead>
@@ -200,6 +221,7 @@
                         </template>
 
                         <template if:true={showMonthlyPreview}>
+                            <div class="panel-caption">{previewCaption}</div>
                             <div class="month-grid">
                                 <template for:each={monthlyPreviewDays} for:item="day">
                                     <article key={day.key} class={day.className}>

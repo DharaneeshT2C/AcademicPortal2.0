@@ -611,6 +611,51 @@
     text-transform: uppercase;
 }
 
+.fee-row {
+    border: 1px solid var(--brand-border, #dce5ef);
+    border-radius: 4px;
+    background: #ffffff;
+    padding: 0.6rem 0.75rem;
+}
+
+.fee-row + .fee-row {
+    margin-top: 0.5rem;
+}
+
+.fee-row-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.4rem;
+}
+
+.fee-row-title {
+    font-weight: 600;
+    color: var(--brand-text, #182330);
+    font-size: 0.82rem;
+}
+
+.fee-row-add {
+    margin-top: 0.55rem;
+    width: 100%;
+    text-align: center;
+}
+
+.criteria-fee-row {
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.7rem;
+    border: 1px dashed var(--brand-border, #dce5ef);
+    border-radius: 4px;
+    background: #fafcff;
+}
+
+.criteria-fee-row-title {
+    margin: 0 0 0.3rem;
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: var(--brand-text, #182330);
+}
+
 /* ── Create Plan modal (compact variant) ───────────────────────────── */
 .modal--sm {
     width: min(880px, calc(100vw - 3rem));
@@ -964,4 +1009,120 @@
     .criteria-row:last-child {
         border-bottom: none;
     }
+}
+
+/* ─── Schedule Tab ─────────────────────────────────────────────────────── */
+
+.schedule-actions {
+    justify-content: flex-end;
+    background: #ffffff;
+}
+
+.schedule-action-icon {
+    margin-right: 0.4rem;
+}
+
+.grid-check {
+    width: 2.5rem;
+    text-align: center;
+}
+
+.grid-check input[type="checkbox"] {
+    width: 1.05rem;
+    height: 1.05rem;
+    cursor: pointer;
+    accent-color: var(--workspace-blue, #3f5efb);
+}
+
+.schedule-selected-card {
+    background: #f8fbff;
+    border: 1px solid var(--brand-border, #dce5ef);
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.schedule-selected-label {
+    margin: 0 0 0.25rem;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--brand-text-secondary, #556476);
+}
+
+.schedule-selected-value {
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
+    color: #080707;
+}
+
+.schedule-selected-meta {
+    margin: 0;
+    color: var(--workspace-muted, #5f6368);
+    font-size: 0.88rem;
+}
+
+.schedule-set {
+    border: 1px solid var(--brand-border, #dce5ef);
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.85rem;
+    background: #ffffff;
+}
+
+.schedule-set-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.6rem;
+}
+
+.schedule-set-title {
+    font-weight: 700;
+    color: #080707;
+}
+
+.schedule-set-remove {
+    color: #b91c1c;
+    border-color: #fecaca;
+}
+
+.schedule-set-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.schedule-set-count {
+    max-width: 320px;
+}
+
+.schedule-set-datetime-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    align-items: end;
+}
+
+@media (max-width: 720px) {
+    .schedule-set-datetime-row {
+        grid-template-columns: 1fr;
+    }
+    .schedule-set-count {
+        max-width: 100%;
+    }
+}
+
+.schedule-add-btn {
+    margin-top: 0.25rem;
+}
+
+.schedule-merge-cell {
+    background: #fafbff;
+    vertical-align: middle;
+    border-right: 1px solid #ececec;
+}
+
+.schedule-row td {
+    vertical-align: middle;
 }

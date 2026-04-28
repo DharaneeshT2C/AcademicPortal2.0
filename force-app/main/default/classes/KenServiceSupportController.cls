@@ -10,7 +10,7 @@
  *                 `Service_Request__c` if organisation prefers dedicated object.
  * ************************************************************************************************
  */
-public with sharing class KenServiceSupportController {
+public without sharing class KenServiceSupportController {
 
     public class TicketDTO {
         @AuraEnabled public Id     id;
@@ -36,13 +36,13 @@ public with sharing class KenServiceSupportController {
     public static List<TicketDTO> getTickets() {
         try {
             Id contactId = KenRunningStudentHelper.optionalContactId();
-            if (contactId == null) return seedTickets();
+            if (contactId == null) return new List<TicketDTO>();
             List<TicketDTO> out = new List<TicketDTO>();
             for (Case c : [
                 SELECT Id, CaseNumber, Subject, Description, Type, Status, CreatedDate, ClosedDate
                 FROM Case
                 WHERE ContactId = :contactId
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 ORDER BY CreatedDate DESC
                 LIMIT 50
             ]) {
@@ -60,7 +60,6 @@ public with sharing class KenServiceSupportController {
                 t.attachmentName = null;
                 out.add(t);
             }
-            if (out.isEmpty()) return seedTickets();
             return out;
         } catch (Exception e) {
             KenAuraExceptionHelper.throwAuraHandled('KenServiceSupportController.getTickets',
@@ -117,18 +116,4 @@ public with sharing class KenServiceSupportController {
         }
     }
 
-    private static List<TicketDTO> seedTickets() {
-        List<TicketDTO> out = new List<TicketDTO>();
-        out.add(ticket(null, '#20240101', 'Career Services', 'Resume/CV Review',            'Career',  'Closed',    '20-Dec-2023', '23-Dec-2023', 'Resume.pdf'));
-        out.add(ticket(null, '#20240101', 'Career Services', 'Internship assistance',        'Career',  'In Review', '05-Jan-2024', null,          null));
-        out.add(ticket(null, '#20240110', 'IT',              'Wi-Fi not working in Block B', 'IT',      'New',       '14-Apr-2026', null,          null));
-        return out;
-    }
-
-    private static TicketDTO ticket(Id id, String req, String title, String sub, String cat, String status, String raised, String closed, String attach) {
-        TicketDTO t = new TicketDTO();
-        t.id = id; t.requestId = req; t.title = title; t.subtitle = sub; t.category = cat;
-        t.status = status; t.raisedOn = raised; t.closedOn = closed; t.attachmentName = attach;
-        return t;
-    }
 }

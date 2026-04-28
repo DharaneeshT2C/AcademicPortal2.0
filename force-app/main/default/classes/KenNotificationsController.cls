@@ -10,7 +10,7 @@
  *                 or use the platform's CustomNotification / Notifications API.
  * ************************************************************************************************
  */
-public with sharing class KenNotificationsController {
+public without sharing class KenNotificationsController {
 
     public class NotificationDTO {
         @AuraEnabled public Id      id;
@@ -27,13 +27,13 @@ public with sharing class KenNotificationsController {
     public static List<NotificationDTO> getNotifications() {
         try {
             Id contactId = KenRunningStudentHelper.optionalContactId();
-            if (contactId == null) return seed();
+            if (contactId == null) return new List<NotificationDTO>();
             List<NotificationDTO> out = new List<NotificationDTO>();
             for (Student_Notification__c r : [
                 SELECT Id, Title__c, Body__c, Category__c, Is_Read__c, Source_Route__c, CreatedDate
                 FROM Student_Notification__c
                 WHERE Student__c = :contactId
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 ORDER BY CreatedDate DESC
                 LIMIT 50
             ]) {
@@ -48,7 +48,6 @@ public with sharing class KenNotificationsController {
                 d.iconUrl   = '';
                 out.add(d);
             }
-            if (out.isEmpty()) return seed();
             return out;
         } catch (Exception e) {
             KenAuraExceptionHelper.throwAuraHandled('KenNotificationsController.getNotifications',
@@ -61,16 +60,12 @@ public with sharing class KenNotificationsController {
     public static Integer getUnreadCount() {
         try {
             Id contactId = KenRunningStudentHelper.optionalContactId();
-            if (contactId == null) {
-                Integer n = 0;
-                for (NotificationDTO x : seed()) { if (!x.isRead) n++; }
-                return n;
-            }
+            if (contactId == null) return 0;
             return [
                 SELECT COUNT()
                 FROM Student_Notification__c
                 WHERE Student__c = :contactId AND Is_Read__c = false
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
             ];
         } catch (Exception e) {
             KenAuraExceptionHelper.throwAuraHandled('KenNotificationsController.getUnreadCount',
@@ -150,7 +145,7 @@ public with sharing class KenNotificationsController {
                 SELECT Id
                 FROM Student_Notification__c
                 WHERE Student__c = :studentId AND Is_Read__c = false
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 LIMIT 1000
             ];
             if (unread.isEmpty()) return;
@@ -166,20 +161,4 @@ public with sharing class KenNotificationsController {
         }
     }
 
-    private static List<NotificationDTO> seed() {
-        List<NotificationDTO> out = new List<NotificationDTO>();
-        out.add(n(null, 'Assignment graded', 'Your Data Structures assignment has been graded.', 'Academic', '10 min ago', false, '', 'results'));
-        out.add(n(null, 'Fee reminder',       'Tuition Q3 due by Apr 30.',                      'Fee',       '2 hours ago', false, '', 'fee-payment'));
-        out.add(n(null, 'Event registration', 'Registration open for Guest Lecture Apr 19.',   'Event',     'Yesterday',  true,  '', 'events'));
-        out.add(n(null, 'New message',        'You have a new message from Dr. Iyer.',          'Message',   '2 days ago', true,  '', 'chat'));
-        out.add(n(null, 'System update',      'Portal will be under maintenance Apr 30, 2 AM.', 'System',    '3 days ago', true,  '', null));
-        return out;
-    }
-
-    private static NotificationDTO n(Id id, String title, String body, String cat, String t, Boolean read, String icon, String route) {
-        NotificationDTO x = new NotificationDTO();
-        x.id = id; x.title = title; x.body = body; x.category = cat;
-        x.timeAgo = t; x.isRead = read; x.iconUrl = icon; x.route = route;
-        return x;
-    }
 }

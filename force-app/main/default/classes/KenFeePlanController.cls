@@ -10,7 +10,7 @@
  *                 grouped by Plan_Code__c.
  * ************************************************************************************************
  */
-public with sharing class KenFeePlanController {
+public without sharing class KenFeePlanController {
 
     public class PlanOptionDTO {
         @AuraEnabled public String  id;
@@ -28,17 +28,11 @@ public with sharing class KenFeePlanController {
             List<Fee_Plan__c> plans = [
                 SELECT Id, Plan_Name__c, Instalment_Count__c, Instalment_Amount__c, Total_Amount__c
                 FROM Fee_Plan__c
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 ORDER BY Instalment_Count__c
                 LIMIT 50
             ];
-            if (plans.isEmpty()) {
-                List<PlanOptionDTO> out = new List<PlanOptionDTO>();
-                out.add(plan('FP001', 'Single payment',     1,  165000, 165000, false, 'Apr 30'));
-                out.add(plan('FP002', 'Quarterly (2 left)', 4,   41250, 165000, true,  'Apr 30'));
-                out.add(plan('FP003', 'Monthly (6 left)',   12,  13750, 165000, false, 'Apr 30'));
-                return out;
-            }
+            if (plans.isEmpty()) return new List<PlanOptionDTO>();
             // Determine the student's active enrollment if any
             Id contactId = KenRunningStudentHelper.optionalContactId();
             Set<Id> activePlanIds = new Set<Id>();
@@ -46,7 +40,7 @@ public with sharing class KenFeePlanController {
                 for (Fee_Plan_Enrollment__c en : [
                     SELECT Plan__c FROM Fee_Plan_Enrollment__c
                     WHERE Student__c = :contactId AND Is_Active__c = true
-                    WITH USER_MODE
+                    WITH SECURITY_ENFORCED
                 ]) activePlanIds.add(en.Plan__c);
             }
             List<PlanOptionDTO> out = new List<PlanOptionDTO>();
@@ -80,7 +74,7 @@ public with sharing class KenFeePlanController {
             List<Fee_Plan_Enrollment__c> existing = [
                 SELECT Id FROM Fee_Plan_Enrollment__c
                 WHERE Student__c = :contactId AND Is_Active__c = true
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
             ];
             for (Fee_Plan_Enrollment__c e : existing) e.Is_Active__c = false;
             if (!existing.isEmpty()) update existing;
@@ -97,11 +91,4 @@ public with sharing class KenFeePlanController {
         }
     }
 
-    private static PlanOptionDTO plan(String id, String name, Integer count, Decimal each, Decimal total, Boolean active, String due) {
-        PlanOptionDTO p = new PlanOptionDTO();
-        p.id = id; p.planName = name; p.instalmentCount = count;
-        p.instalmentAmount = each; p.totalAmount = total;
-        p.isActive = active; p.nextDueDate = due;
-        return p;
-    }
 }

@@ -7,7 +7,7 @@
  *  hostel/mess/transport shortcuts, and campus-level announcements.
  * ************************************************************************************************
  */
-public with sharing class KenCampusLifeController {
+public without sharing class KenCampusLifeController {
 
     public class ShortcutDTO {
         @AuraEnabled public String id;

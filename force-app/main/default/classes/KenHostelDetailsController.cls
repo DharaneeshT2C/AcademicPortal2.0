@@ -9,7 +9,7 @@
  *                 Roommate__c, Check_In_Date__c).
  * ************************************************************************************************
  */
-public with sharing class KenHostelDetailsController {
+public without sharing class KenHostelDetailsController {
 
     public class FacilityDTO {
         @AuraEnabled public String id;
@@ -35,15 +35,7 @@ public with sharing class KenHostelDetailsController {
     public static HostelDTO getHostelDetails() {
         try {
             HostelDTO h = new HostelDTO();
-            // Always include the static facilities list (not in DB yet)
-            h.facilities = new List<FacilityDTO>{
-                facility('F1', 'wifi',           'Wi-Fi',       true),
-                facility('F2', 'ac_unit',        'AC',          true),
-                facility('F3', 'local_laundry',  'Laundry',     true),
-                facility('F4', 'restaurant',     'Mess access', true),
-                facility('F5', 'fitness_center', 'Gym',         true),
-                facility('F6', 'local_parking',  'Parking',     false)
-            };
+            h.facilities = new List<FacilityDTO>();
             Id contactId = KenRunningStudentHelper.optionalContactId();
             if (contactId != null) {
                 List<Hostel_Allocation__c> rows = [
@@ -52,7 +44,7 @@ public with sharing class KenHostelDetailsController {
                            Check_In_Date__c, Check_Out_Date__c
                     FROM Hostel_Allocation__c
                     WHERE Student__c = :contactId
-                    WITH USER_MODE
+                    WITH SECURITY_ENFORCED
                     LIMIT 1
                 ];
                 if (!rows.isEmpty()) {
@@ -69,28 +61,13 @@ public with sharing class KenHostelDetailsController {
                     return h;
                 }
             }
-            // No allocation found — fall back to seed
-            h.roomNumber   = 'B-215';
-            h.block        = 'Block B';
-            h.floor        = '2nd floor';
-            h.type         = 'Shared';
-            h.roommateName = 'Rohan S';
-            h.wardenName   = 'Mr. Menon';
-            h.wardenPhone  = '+91 98765 43210';
-            h.checkInDate  = '01-Aug-2024';
-            h.checkOutDate = '31-May-2026';
+            // No allocation found — return null core fields, facilities still populated
             return h;
         } catch (Exception e) {
             KenAuraExceptionHelper.throwAuraHandled('KenHostelDetailsController.getHostelDetails',
                 'Unable to load hostel details.', e);
             return null;
         }
-    }
-
-    private static FacilityDTO facility(String id, String icon, String label, Boolean avail) {
-        FacilityDTO f = new FacilityDTO();
-        f.id = id; f.icon = icon; f.label = label; f.available = avail;
-        return f;
     }
 
     @AuraEnabled
@@ -108,7 +85,7 @@ public with sharing class KenHostelDetailsController {
                 List<Hostel_Allocation__c> open = [
                     SELECT Id FROM Hostel_Allocation__c
                     WHERE Student__c = :studentId AND Status__c = 'Pending Request'
-                    WITH USER_MODE LIMIT 1
+                    WITH SECURITY_ENFORCED LIMIT 1
                 ];
                 if (!open.isEmpty()) return open[0].Id;
             }

@@ -1,8 +1,5 @@
 import { LightningElement, wire, track } from 'lwc';
-import { NavigationMixin } from 'lightning/navigation';
-import { pageNameForRoute } from 'c/navHelper';
 import { refreshApex } from '@salesforce/apex';
-import { clubsData } from 'c/mockData';
 import SP_IMAGES from '@salesforce/resourceUrl/StudentPortalImages';
 import getClubs from '@salesforce/apex/KenClubsController.getClubs';
 import expressInterest from '@salesforce/apex/KenClubsController.expressInterest';
@@ -28,7 +25,7 @@ const MOCK_MEMBERS = [
     { id: 3, initial: 'K', cls: 'av-violet' }
 ];
 
-export default class Clubs extends NavigationMixin(LightningElement) {
+export default class Clubs extends LightningElement {
     friendAvatarsA = [IMG('images/avatars/avatar2.jpg'), IMG('images/avatars/avatar5.jpg'), IMG('images/avatars/avatar6.jpg')];
     friendAvatarsB = [IMG('images/avatars/avatar3.jpg'), IMG('images/avatars/avatar4.jpg'), IMG('images/avatars/avatar7.jpg')];
 
@@ -65,8 +62,11 @@ export default class Clubs extends NavigationMixin(LightningElement) {
         const { data, error } = response;
         if (data) this._apex = data;
         else if (error) {
-            // eslint-disable-next-line no-console
-            console.warn('[clubs] Apex failed, using seed:', error);
+            const _msg = (error && error.body && error.body.message) || '';
+            if (_msg && !_msg.includes('not have access') && !_msg.includes('No rows')) {
+                // eslint-disable-next-line no-console
+                console.warn('[clubs] Apex failed, using seed:', error);
+            }
         }
     }
 
@@ -78,12 +78,7 @@ export default class Clubs extends NavigationMixin(LightningElement) {
 
     handleToastClose() { this.showToast = false; }
 
-    navigateTo(route) {
-        this[NavigationMixin.Navigate]({
-            type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute(route) }
-        });
-    }
+    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
     handleBack() { this.navigateTo('campus-life'); }
 
     _clubImg(c) {
@@ -105,22 +100,45 @@ export default class Clubs extends NavigationMixin(LightningElement) {
     }
 
     get allClubs() {
-        const source = (this._apex && this._apex.length) ? this._apex : clubsData;
-        return source.map(c => Object.assign({}, c, {
-            description: c.description || CLUB_DESCRIPTIONS[c.id] || 'Join this club to connect with fellow students.',
-            image: this._clubImg(c)
-        }));
+        const source = (this._apex && this._apex.length) ? this._apex : [];
+        return source.map(c => {
+            // Apex DTOs don't carry a `suggested` flag — derive it from
+            // isJoined so non-joined real clubs appear in the carousel.
+            const suggested = (c.suggested === true) || !c.isJoined;
+            return Object.assign({}, c, {
+                description: c.description || CLUB_DESCRIPTIONS[c.id] || 'Join this club to connect with fellow students.',
+                image: this._clubImg(c),
+                suggested
+            });
+        });
     }
 
-    get discoverClubs() {
-        let clubs = this.allClubs.filter(c => !c.suggested && !c.isPrivate);
-        const search = this.searchText.toLowerCase().trim();
-        if (search) {
-            clubs = clubs.filter(c => c.name.toLowerCase().includes(search));
+    /**
+     * Right-rail "Clubs Joined" panel. Sourced from Apex `isJoined=true`
+     * so refreshing the page doesn't wipe state. Falls back to the local
+     * @track array (used during the optimistic-add flow).
+     */
+    get effectiveJoinedClubs() {
+        const fromApex = !!(this._apex && this._apex.length);
+        if (fromApex) {
+            return this._apex
+                .filter(c => c.isJoined)
+                .map(c => Object.assign({}, c, { image: this._clubImg(c) }));
         }
-        if (this.filterCategory) {
+        return this.joinedClubs;
+    }
+    get hasJoinedClubsApex() { return this.effectiveJoinedClubs.length > 0; }
+
+    get discoverClubs() {
+        let clubs = this.allClubs.filter(c => !c.isPrivate);
+        const search = (this.searchText || '').toLowerCase().trim();
+        if (search) {
+            clubs = clubs.filter(c => (c.name || '').toLowerCase().includes(search));
+        }
+        // Filter by `category` field (not by name). Empty string / "All" = no filter.
+        if (this.filterCategory && this.filterCategory !== 'All') {
             const cat = this.filterCategory.toLowerCase();
-            clubs = clubs.filter(c => c.name.toLowerCase().includes(cat));
+            clubs = clubs.filter(c => (c.category || '').toLowerCase() === cat);
         }
         return clubs;
     }
@@ -299,6 +317,9 @@ export default class Clubs extends NavigationMixin(LightningElement) {
                 this.newClubName = '';
                 this.newClubDescription = '';
                 this.newClubPrivacy = 'Public';
+                // Reset any active filter so the just-created club is visible.
+                this.filterCategory = '';
+                this.searchText = '';
                 this._toast(`"${newClub.name}" submitted for admin review.`, 'success');
                 if (this._wireClubsResp) refreshApex(this._wireClubsResp);
             })

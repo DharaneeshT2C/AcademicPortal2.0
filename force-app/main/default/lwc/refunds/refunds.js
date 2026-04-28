@@ -1,12 +1,9 @@
 import { LightningElement, wire, track } from 'lwc';
-import { NavigationMixin } from 'lightning/navigation';
-import { pageNameForRoute } from 'c/navHelper';
 import { refreshApex } from '@salesforce/apex';
-import { refundsData } from 'c/mockData';
 import getRefunds from '@salesforce/apex/KenRefundsController.getRefunds';
 import createRefundRequest from '@salesforce/apex/KenRefundsController.createRefundRequest';
 
-export default class Refunds extends NavigationMixin(LightningElement) {
+export default class Refunds extends LightningElement {
     @track _apex;
     @track _wireResp;
     @track _toastVisible = false;
@@ -24,26 +21,44 @@ export default class Refunds extends NavigationMixin(LightningElement) {
         const { data, error } = response;
         if (data) this._apex = data;
         else if (error) {
-            // eslint-disable-next-line no-console
-            console.warn('[refunds] Apex failed, using seed:', error);
+            const _msg = (error && error.body && error.body.message) || '';
+            if (_msg && !_msg.includes('not have access') && !_msg.includes('No rows')) {
+                // eslint-disable-next-line no-console
+                console.warn('[refunds] Apex failed, using seed:', error);
+            }
         }
     }
 
     get effectiveRefunds() {
-        if (this._apex && this._apex.length) return this._apex;
-        return refundsData;
+        return (this._apex && this._apex.length) ? this._apex : [];
     }
 
     get hasRefunds() {
         return this.effectiveRefunds && this.effectiveRefunds.length > 0;
     }
+    /**
+     * Apex DTO: { id, requestDate, amount, reason, status, processedDate, originalPaymentRef }
+     * Mock:    { id, requestDate, feeItem, currency, amount, status, processedOn }
+     * Normalise both shapes for the template.
+     */
     get formattedRefunds() {
+        const fmt = (n) => (n == null) ? '' : Number(n).toLocaleString('en-IN');
         return this.effectiveRefunds.map(r => {
             let cls = 'status';
-            if (r.status === 'Processed') { cls = cls + ' success'; }
-            else if (r.status === 'Pending') { cls = cls + ' pending'; }
-            else if (r.status === 'Rejected') { cls = cls + ' rejected'; }
-            return { ...r, statusClass: cls };
+            if (r.status === 'Processed' || r.status === 'Approved') cls += ' success';
+            else if (r.status === 'Pending') cls += ' pending';
+            else if (r.status === 'Rejected') cls += ' rejected';
+            const id = r.id ? (String(r.id).startsWith('a') ? 'REF-' + String(r.id).slice(-6).toUpperCase() : r.id) : '';
+            return {
+                id,
+                requestDate: r.requestDate || '',
+                feeItem: r.feeItem || r.reason || 'Tuition fee',
+                currency: r.currency || 'INR',
+                amount: typeof r.amount === 'number' ? fmt(r.amount) : (r.amount || ''),
+                status: r.status,
+                statusClass: cls,
+                processedOn: r.processedOn || r.processedDate || (r.status === 'Pending' ? '--' : '')
+            };
         });
     }
 
@@ -73,10 +88,14 @@ export default class Refunds extends NavigationMixin(LightningElement) {
     }
 
     navigateTo(route) {
-        this[NavigationMixin.Navigate]({
-            type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute(route) }
-        });
+        try {
+            const parts = window.location.pathname.split('/').filter(Boolean);
+            const base = parts[0] || 'newportal';
+            const target = route === 'home' ? `/${base}/` : `/${base}/${route}`;
+            window.location.href = target;
+        } catch (e) {
+            this.dispatchEvent(new CustomEvent('navigate', { detail: { route } }));
+        }
     }
     goFeePayment() { this.navigateTo('fee-payment'); }
     goFeePlan() { this.navigateTo('fee-plan'); }

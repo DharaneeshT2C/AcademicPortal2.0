@@ -9,7 +9,7 @@
  *  TODO[SOBJECT]: Wire to `Research_Paper__c` and `Research_Project__c`.
  * ************************************************************************************************
  */
-public with sharing class KenResearchController {
+public without sharing class KenResearchController {
 
     public class PaperDTO {
         @AuraEnabled public String id;
@@ -42,16 +42,12 @@ public with sharing class KenResearchController {
             b.papers   = new List<PaperDTO>();
             b.projects = new List<ProjectDTO>();
             Id contactId = KenRunningStudentHelper.optionalContactId();
-            if (contactId == null) {
-                b.papers   = seedPapers();
-                b.projects = seedProjects();
-                return b;
-            }
+            if (contactId == null) return b;
             for (Research_Paper__c p : [
                 SELECT Id, Title__c, Authors__c, Venue__c, Year__c, Status__c, Download_Url__c
                 FROM Research_Paper__c
                 WHERE Student__c = :contactId
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 ORDER BY Year__c DESC
                 LIMIT 50
             ]) {
@@ -69,7 +65,7 @@ public with sharing class KenResearchController {
                 SELECT Id, Title__c, Lead_Faculty__c, Track__c, Progress_Pct__c, Status__c
                 FROM Research_Project__c
                 WHERE Student__c = :contactId
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 LIMIT 50
             ]) {
                 ProjectDTO d = new ProjectDTO();
@@ -81,10 +77,6 @@ public with sharing class KenResearchController {
                 d.status      = p.Status__c;
                 b.projects.add(d);
             }
-            if (b.papers.isEmpty() && b.projects.isEmpty()) {
-                b.papers   = seedPapers();
-                b.projects = seedProjects();
-            }
             return b;
         } catch (Exception e) {
             KenAuraExceptionHelper.throwAuraHandled('KenResearchController.getResearchBundle',
@@ -93,31 +85,4 @@ public with sharing class KenResearchController {
         }
     }
 
-    private static List<PaperDTO> seedPapers() {
-        List<PaperDTO> out = new List<PaperDTO>();
-        out.add(paper('RP001', 'Graph Algorithms for Sparse Networks', 'Arjun R, Dr. Iyer', 'ICML', '2025', 'Published', ''));
-        out.add(paper('RP002', 'Reinforcement Learning in Education',  'Arjun R, Dr. Sharma','NeurIPS', '2025', 'Under review', ''));
-        return out;
-    }
-
-    private static List<ProjectDTO> seedProjects() {
-        List<ProjectDTO> out = new List<ProjectDTO>();
-        out.add(project('PJ001', 'Smart Campus Energy Monitor', 'Dr. Iyer',   'IoT',   62, 'In progress'));
-        out.add(project('PJ002', 'ML for Student Wellness',     'Dr. Sharma', 'ML',    34, 'Kickoff'));
-        return out;
-    }
-
-    private static PaperDTO paper(String id, String title, String authors, String venue, String year, String status, String url) {
-        PaperDTO p = new PaperDTO();
-        p.id = id; p.title = title; p.authors = authors; p.venue = venue;
-        p.year = year; p.status = status; p.downloadUrl = url;
-        return p;
-    }
-
-    private static ProjectDTO project(String id, String title, String lead, String track, Decimal pct, String status) {
-        ProjectDTO p = new ProjectDTO();
-        p.id = id; p.title = title; p.lead = lead; p.track = track;
-        p.progressPct = pct; p.status = status;
-        return p;
-    }
 }

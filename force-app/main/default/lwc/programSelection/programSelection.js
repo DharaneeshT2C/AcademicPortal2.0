@@ -1,11 +1,9 @@
 import { LightningElement, track } from 'lwc';
-import { NavigationMixin } from 'lightning/navigation';
-import { pageNameForRoute } from 'c/navHelper';
-import { programOptions } from 'c/mockData';
 import selectProgram from '@salesforce/apex/KenLearnController.selectProgram';
 
-export default class ProgramSelection extends NavigationMixin(LightningElement) {
-    @track programs = programOptions.map(p => ({ ...p, cardClass: p.selected ? 'prog-card selected' : 'prog-card', dotClass: p.selected ? 'radio-dot checked' : 'radio-dot' }));
+// TODO: wire to a getProgramOptions Apex method in v1.1 — list is empty until then.
+export default class ProgramSelection extends LightningElement {
+    @track programs = [];
     @track _saving = false;
     @track _error;
 
@@ -31,10 +29,7 @@ export default class ProgramSelection extends NavigationMixin(LightningElement) 
         selectProgram({ programName: picked.title || picked.name || picked.id })
             .then(() => {
                 this._saving = false;
-                this[NavigationMixin.Navigate]({
-                    type: 'comm__namedPage',
-                    attributes: { name: pageNameForRoute('semester-detail') }
-                });
+                this.dispatchEvent(new CustomEvent('navigate', { detail: { route: 'semester-detail' } }));
             })
             .catch(err => {
                 this._saving = false;
@@ -48,10 +43,7 @@ export default class ProgramSelection extends NavigationMixin(LightningElement) 
     get isSubmitDisabled() { return this._saving; }
 
     handleDiscard() {
-        this[NavigationMixin.Navigate]({
-            type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute('semester-detail') }
-        });
+        this.dispatchEvent(new CustomEvent('navigate', { detail: { route: 'semester-detail' } }));
     }
 
     handleDownloadBrochure(event) {
@@ -77,9 +69,6 @@ export default class ProgramSelection extends NavigationMixin(LightningElement) 
 
     handleViewCourses(event) {
         event.stopPropagation();
-        this[NavigationMixin.Navigate]({
-            type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute('learn') }
-        });
+        this.dispatchEvent(new CustomEvent('navigate', { detail: { route: 'learn' } }));
     }
 }

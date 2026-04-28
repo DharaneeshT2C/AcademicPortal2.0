@@ -234,14 +234,14 @@
             <div class="right-col">
                 <div class="card sidebar-card">
                     <h3 class="section-title">Clubs Joined</h3>
-                    <template lwc:if={hasJoinedClubs}>
+                    <template lwc:if={hasJoinedClubsApex}>
                         <div class="joined-list">
-                            <template for:each={joinedClubs} for:item="club">
+                            <template for:each={effectiveJoinedClubs} for:item="club">
                                 <div key={club.id} class="joined-item">
                                     <img src={club.image} alt={club.name} class="joined-thumb" />
                                     <div class="joined-info">
                                         <p class="joined-name">{club.name}</p>
-                                        <p class="joined-members">{club.members} members</p>
+                                        <p class="joined-members">{club.memberCount} members</p>
                                     </div>
                                 </div>
                             </template>

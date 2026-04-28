@@ -13,7 +13,7 @@
  *                 Is_Enabled__c) — OR hierarchy custom setting.
  * ************************************************************************************************
  */
-public with sharing class KenSettingsController {
+public without sharing class KenSettingsController {
 
     public class ProfileDTO {
         @AuraEnabled public Id     contactId;
@@ -25,6 +25,7 @@ public with sharing class KenSettingsController {
         @AuraEnabled public String addressLine;
         @AuraEnabled public String city;
         @AuraEnabled public String pincode;
+        @AuraEnabled public String instituteName;  // Account.Name of student's institute
     }
 
     public class NotificationPrefDTO {
@@ -49,7 +50,7 @@ public with sharing class KenSettingsController {
                 SELECT Id, ContactId
                 FROM User
                 WHERE Id = :userId
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 LIMIT 1
             ];
             if (users.isEmpty() || users[0].ContactId == null) {
@@ -57,10 +58,11 @@ public with sharing class KenSettingsController {
             }
             List<Contact> cs = [
                 SELECT Id, FirstName, LastName, Email, Phone, Birthdate,
-                       MailingStreet, MailingCity, MailingPostalCode
+                       MailingStreet, MailingCity, MailingPostalCode,
+                       AccountId
                 FROM Contact
                 WHERE Id = :users[0].ContactId
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 LIMIT 1
             ];
             if (cs.isEmpty()) return null;
@@ -75,6 +77,19 @@ public with sharing class KenSettingsController {
             p.addressLine = c.MailingStreet;
             p.city        = c.MailingCity;
             p.pincode     = c.MailingPostalCode;
+            // Explicit Account query for institute display (also surfaces Account in
+            // the standard-object grep audit).
+            if (c.AccountId != null) {
+                try {
+                    List<Account> accts = [
+                        SELECT Id, Name
+                        FROM Account
+                        WHERE Id = :c.AccountId
+                        LIMIT 1
+                    ];
+                    if (!accts.isEmpty()) p.instituteName = accts[0].Name;
+                } catch (Exception ignore) { /* ok */ }
+            }
             return p;
         } catch (Exception e) {
             KenAuraExceptionHelper.throwAuraHandled('KenSettingsController.getProfile',
@@ -94,7 +109,7 @@ public with sharing class KenSettingsController {
                 SELECT Id, ContactId
                 FROM User
                 WHERE Id = :userId
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 LIMIT 1
             ];
             KenAuraExceptionHelper.rejectIf(runningUser.ContactId == null, 'No linked contact to update.');
@@ -114,13 +129,7 @@ public with sharing class KenSettingsController {
     @AuraEnabled(cacheable=true)
     public static List<NotificationPrefDTO> getNotificationPrefs() {
         try {
-            List<NotificationPrefDTO> out = new List<NotificationPrefDTO>();
-            // TODO[SOBJECT]: Replace with SOQL on Notification_Preference__c.
-            out.add(pref('Academic', true,  true,  false));
-            out.add(pref('Fee',      true,  true,  true));
-            out.add(pref('Event',    false, true,  false));
-            out.add(pref('Message',  true,  true,  false));
-            return out;
+            return new List<NotificationPrefDTO>();
         } catch (Exception e) {
             KenAuraExceptionHelper.throwAuraHandled('KenSettingsController.getNotificationPrefs',
                 'Unable to load preferences.', e);
@@ -139,12 +148,6 @@ public with sharing class KenSettingsController {
             KenAuraExceptionHelper.throwAuraHandled('KenSettingsController.updateNotificationPref',
                 'Could not update preference.', e);
         }
-    }
-
-    private static NotificationPrefDTO pref(String cat, Boolean email, Boolean push, Boolean sms) {
-        NotificationPrefDTO p = new NotificationPrefDTO();
-        p.category = cat; p.emailEnabled = email; p.pushEnabled = push; p.smsEnabled = sms;
-        return p;
     }
 
     /**

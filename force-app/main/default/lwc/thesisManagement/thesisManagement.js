@@ -1,14 +1,11 @@
 import { LightningElement, wire, track } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
-import { thesisData } from 'c/mockData';
 import getThesis from '@salesforce/apex/KenThesisManagementController.getThesis';
 import uploadDraft from '@salesforce/apex/KenThesisManagementController.uploadDraft';
 import addThesisTask from '@salesforce/apex/KenThesisManagementController.addThesisTask';
 
 export default class ThesisManagement extends LightningElement {
     @track _apex;
-    // Seed fallback.
-    _seed = thesisData;
 
     @track _wireResp;
     @wire(getThesis)
@@ -17,25 +14,24 @@ export default class ThesisManagement extends LightningElement {
         const { data, error } = response;
         if (data) this._apex = data;
         else if (error) {
-            // eslint-disable-next-line no-console
-            console.warn('[thesisManagement] Apex failed, using seed:', error);
+            const _msg = (error && error.body && error.body.message) || '';
+            if (_msg && !_msg.includes('not have access') && !_msg.includes('No rows')) {
+                // eslint-disable-next-line no-console
+                console.warn('[thesisManagement] Apex failed, using seed:', error);
+            }
         }
     }
 
     get data() {
-        // Merge Apex DTO onto the seed shape so template bindings that rely on legacy
-        // fields (phases, requirements, preparationTips) keep resolving even if the Apex
-        // payload shape is different.
-        if (this._apex) return Object.assign({}, this._seed, this._apex);
-        return this._seed;
+        return this._apex || {};
     }
 
     get phases() {
         return (this.data.phases || []).map((p, i) => ({
             ...p,
             key: `ph-${i}`,
-            phaseClass: `phase-item ${p.status.toLowerCase().replace(' ', '-')}`,
-            statusClass: `phase-status ${p.status.toLowerCase().replace(' ', '-')}`
+            phaseClass: `phase-item ${(p.status || '').toLowerCase().replace(' ', '-')}`,
+            statusClass: `phase-status ${(p.status || '').toLowerCase().replace(' ', '-')}`
         }));
     }
 

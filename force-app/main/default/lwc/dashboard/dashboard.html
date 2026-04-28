@@ -154,6 +154,7 @@
 
                 <!-- Activity Feed -->
                 <div class="activity-feed">
+                    <template lwc:if={hasFeedItems}>
                     <template for:each={feedItems} for:item="row">
                         <div key={row.id} class="feed-item-wrap">
                             <template lwc:if={row.isSocial}>
@@ -183,6 +184,14 @@
                             </template>
                         </div>
                     </template>
+                    </template>
+                    <template lwc:else>
+                        <div class="empty-state">
+                            <c-icon name="info" size="32"></c-icon>
+                            <p class="empty-msg">No campus updates right now</p>
+                            <p class="empty-sub">Check back later — new items will appear here as they come in.</p>
+                        </div>
+                    </template>
                 </div>
             </div>
 
@@ -194,16 +203,25 @@
                     <h3 class="section-heading">{forYouTitle}</h3>
                 </div>
                 <div class="module-card">
-                    <template for:each={forYouItems} for:item="item">
-                        <div key={item.id} class="for-you-row" data-route={item.route} data-toast={item.toastMsg} onclick={handleForYouRow} style="cursor:pointer">
-                            <div class={item.tileClass}><c-icon name={item.icon} size="18"></c-icon></div>
-                            <div class="for-you-text">
-                                <p class="for-you-title">{item.title}</p>
-                                <p class="for-you-ctx">{item.context}</p>
+                    <template lwc:if={hasForYouItems}>
+                        <template for:each={forYouItems} for:item="item">
+                            <div key={item.id} class="for-you-row" data-route={item.route} data-toast={item.toastMsg} onclick={handleForYouRow} style="cursor:pointer">
+                                <div class={item.tileClass}><c-icon name={item.icon} size="18"></c-icon></div>
+                                <div class="for-you-text">
+                                    <p class="for-you-title">{item.title}</p>
+                                    <p class="for-you-ctx">{item.context}</p>
+                                </div>
+                                <svg class="for-you-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                    <path d="M6 4 L10 8 L6 12" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
                             </div>
-                            <svg class="for-you-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <path d="M6 4 L10 8 L6 12" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
+                        </template>
+                    </template>
+                    <template lwc:else>
+                        <div class="empty-state">
+                            <c-icon name="info" size="32"></c-icon>
+                            <p class="empty-msg">Nothing for you right now</p>
+                            <p class="empty-sub">Personalised picks will appear here.</p>
                         </div>
                     </template>
                 </div>
@@ -249,13 +267,22 @@
                         <h3 class="section-heading">Needs attention</h3>
                     </div>
                     <div class="module-card">
-                        <template for:each={needsAttentionItems} for:item="item">
-                            <div key={item.id} class={item.rowClass}>
-                                <span class={item.dotClass}></span>
-                                <div class="needs-text">
-                                    <p class="needs-title">{item.title}</p>
-                                    <p class="needs-ctx">{item.context}</p>
+                        <template lwc:if={hasNeedsAttention}>
+                            <template for:each={needsAttentionItems} for:item="item">
+                                <div key={item.id} class={item.rowClass}>
+                                    <span class={item.dotClass}></span>
+                                    <div class="needs-text">
+                                        <p class="needs-title">{item.title}</p>
+                                        <p class="needs-ctx">{item.context}</p>
+                                    </div>
                                 </div>
+                            </template>
+                        </template>
+                        <template lwc:else>
+                            <div class="empty-state">
+                                <c-icon name="info" size="32"></c-icon>
+                                <p class="empty-msg">You're all caught up</p>
+                                <p class="empty-sub">No items need your attention right now.</p>
                             </div>
                         </template>
                     </div>
@@ -318,33 +345,43 @@
                 </div>
 
                 <!-- Spotlight -->
-                <div class="spotlight-card">
-                    <div class="spotlight-deco" aria-hidden="true"></div>
-                    <p class="spotlight-eyebrow">SPOTLIGHT</p>
-                    <template lwc:if={isSpotlightTextHero}>
-                        <div class="spotlight-text-hero">{spotlight.heroText}</div>
-                    </template>
-                    <template lwc:if={isSpotlightCountHero}>
-                        <div class="spotlight-count">{spotlight.heroText}</div>
-                    </template>
-                    <p class="spotlight-label">{spotlight.subText}</p>
-                    <p class="spotlight-range">{spotlight.date}</p>
-                    <button class="spotlight-cta" onclick={handleSpotlightCta}>{spotlight.cta}</button>
-                </div>
+                <template lwc:if={hasSpotlight}>
+                    <div class="spotlight-card">
+                        <div class="spotlight-deco" aria-hidden="true"></div>
+                        <p class="spotlight-eyebrow">SPOTLIGHT</p>
+                        <template lwc:if={isSpotlightTextHero}>
+                            <div class="spotlight-text-hero">{spotlight.heroText}</div>
+                        </template>
+                        <template lwc:if={isSpotlightCountHero}>
+                            <div class="spotlight-count">{spotlight.heroText}</div>
+                        </template>
+                        <p class="spotlight-label">{spotlight.subText}</p>
+                        <p class="spotlight-range">{spotlight.date}</p>
+                        <button class="spotlight-cta" onclick={handleSpotlightCta}>{spotlight.cta}</button>
+                    </div>
+                </template>
 
                 <!-- Quick Actions -->
                 <div class="rail-card">
                     <div class="rail-head">
                         <span class="section-heading">Quick Actions</span>
                     </div>
-                    <div class="qa-grid">
-                        <template for:each={quickActionsItems} for:item="qa">
-                            <button key={qa.id} class="qa-card" data-route={qa.route} data-toast={qa.toastMsg} onclick={handleQuickAction}>
-                                <div class={qa.tileClass}><c-icon name={qa.icon} size="18"></c-icon></div>
-                                <span class="qa-label">{qa.label}</span>
-                            </button>
-                        </template>
-                    </div>
+                    <template lwc:if={hasQuickActions}>
+                        <div class="qa-grid">
+                            <template for:each={quickActionsItems} for:item="qa">
+                                <button key={qa.id} class="qa-card" data-route={qa.route} data-toast={qa.toastMsg} onclick={handleQuickAction}>
+                                    <div class={qa.tileClass}><c-icon name={qa.icon} size="18"></c-icon></div>
+                                    <span class="qa-label">{qa.label}</span>
+                                </button>
+                            </template>
+                        </div>
+                    </template>
+                    <template lwc:else>
+                        <div class="empty-state">
+                            <c-icon name="info" size="28"></c-icon>
+                            <p class="empty-msg">No quick actions yet</p>
+                        </div>
+                    </template>
                 </div>
 
                 <!-- Mood Check -->

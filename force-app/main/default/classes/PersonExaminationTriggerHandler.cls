@@ -15,6 +15,43 @@ public with sharing class PersonExaminationTriggerHandler {
         applyAutoEnrollment(newRecords, oldMap);
     }
 
+    public static void handleAfterChange(
+        List<PersonExamination> newRecords,
+        Map<Id, PersonExamination> oldMap
+    ) {
+        Set<Id> examinationIds = collectAffectedExaminationIds(newRecords, oldMap);
+        PersonExaminationStatusRollup.rollup(examinationIds);
+    }
+
+    public static void handleAfterDelete(List<PersonExamination> oldRecords) {
+        PersonExaminationStatusRollup.rollup(collectExaminationIds(oldRecords));
+    }
+
+    private static Set<Id> collectAffectedExaminationIds(
+        List<PersonExamination> newRecords,
+        Map<Id, PersonExamination> oldMap
+    ) {
+        Set<Id> examinationIds = collectExaminationIds(newRecords);
+        if (oldMap != null) {
+            examinationIds.addAll(collectExaminationIds(oldMap.values()));
+        }
+        return examinationIds;
+    }
+
+    private static Set<Id> collectExaminationIds(Iterable<PersonExamination> records) {
+        Set<Id> examinationIds = new Set<Id>();
+        if (records == null) {
+            return examinationIds;
+        }
+
+        for (PersonExamination personExam : records) {
+            if (personExam.ExaminationId != null) {
+                examinationIds.add(personExam.ExaminationId);
+            }
+        }
+        return examinationIds;
+    }
+
     private static void applyAutoEnrollment(
         List<PersonExamination> newRecords,
         Map<Id, PersonExamination> oldMap
@@ -192,4 +229,5 @@ public with sharing class PersonExaminationTriggerHandler {
         }
         return value.toLowerCase().replaceAll('[^a-z0-9]+', '');
     }
+
 }

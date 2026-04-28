@@ -273,6 +273,8 @@
 
 .tab-row {
     display: flex;
+    align-items: center;
+    flex-wrap: wrap;
     gap: 0.35rem;
     border-bottom: 1px solid #e5e7eb;
     margin-bottom: 0.9rem;
@@ -296,6 +298,64 @@
 .tab.active {
     color: #0b74d1;
     border-bottom: 3px solid #0b74d1;
+}
+
+.preview-period-controls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-left: auto;
+    padding-bottom: 0.45rem;
+}
+
+.period-nav-button {
+    width: 2.35rem;
+    height: 2.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #d8dadd;
+    border-radius: 0.55rem;
+    background: #ffffff;
+    color: #1f2937;
+    cursor: pointer;
+}
+
+.period-date-field {
+    min-height: 2.35rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid #d8dadd;
+    border-radius: 0.55rem;
+    background: #ffffff;
+    padding: 0 0.7rem;
+}
+
+.period-date-field span {
+    color: #5f7087;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.period-date-field input {
+    width: 8.8rem;
+    border: none;
+    color: #1f2937;
+    font-size: 0.82rem;
+    font-weight: 700;
+    background: transparent;
+}
+
+.period-date-field input:focus {
+    outline: none;
+}
+
+.period-label {
+    color: #5f7087;
+    font-size: 0.86rem;
+    white-space: nowrap;
 }
 
 .preview-wrap,
@@ -709,6 +769,15 @@
 
     .detail-filter-row {
         grid-template-columns: 1fr;
+    }
+
+    .preview-period-controls {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .period-label {
+        width: 100%;
     }
 
     .month-grid {

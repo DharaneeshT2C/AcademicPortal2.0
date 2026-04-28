@@ -3,7 +3,9 @@
 .page-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; }
 .settings-grid { display: flex; flex-direction: column; gap: 20px; }
 .card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; }
-.section-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
+.section-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+.coming-soon-pill { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 9999px; background: var(--warning-light, #FFFAEB); color: var(--warning-dark, #DC6803); border: 1px solid var(--warning, #F79009); text-transform: uppercase; letter-spacing: 0.3px; }
+.section-desc { font-size: 13px; color: var(--text-secondary, #64748B); margin: 0; }
 .profile-section { display: flex; align-items: center; gap: 20px; }
 .avatar { width: 72px; height: 72px; border-radius: 50%; background: var(--primary-light); display: flex; align-items: center; justify-content: center; border: 2px solid var(--primary); flex-shrink: 0; }
 .avatar c-icon { color: var(--primary); }

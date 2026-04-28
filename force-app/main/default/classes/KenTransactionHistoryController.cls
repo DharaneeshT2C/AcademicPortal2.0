@@ -8,7 +8,7 @@
  *  TODO[SOBJECT]: Wire to `Payment__c` with related Fee_Installment__c reference.
  * ************************************************************************************************
  */
-public with sharing class KenTransactionHistoryController {
+public without sharing class KenTransactionHistoryController {
 
     public class TransactionDTO {
         @AuraEnabled public Id      id;
@@ -33,7 +33,7 @@ public with sharing class KenTransactionHistoryController {
                            Installment__r.Installment_Number__c
                     FROM Payment__c
                     WHERE Student__c = :contactId
-                    WITH USER_MODE
+                    WITH SECURITY_ENFORCED
                     ORDER BY Transaction_Date__c DESC
                     LIMIT 50
                 ]) {
@@ -64,7 +64,7 @@ public with sharing class KenTransactionHistoryController {
                                Fee_Assignment__r.Fee_Assignment_Name__c
                         FROM Fee_Installment__c
                         WHERE Fee_Assignment__r.Account__c = :acctId AND Total_Paid_Amount__c > 0
-                        WITH USER_MODE
+                        WITH SECURITY_ENFORCED
                         ORDER BY LastModifiedDate DESC
                         LIMIT 50
                     ]) {
@@ -83,7 +83,6 @@ public with sharing class KenTransactionHistoryController {
                     }
                 }
             }
-            if (out.isEmpty()) return seedTransactions();
             return out;
         } catch (Exception e) {
             KenAuraExceptionHelper.throwAuraHandled('KenTransactionHistoryController.getTransactions',
@@ -108,19 +107,4 @@ public with sharing class KenTransactionHistoryController {
         } catch (Exception e) { return null; }
     }
 
-    private static List<TransactionDTO> seedTransactions() {
-        List<TransactionDTO> out = new List<TransactionDTO>();
-        out.add(txn(null, '28-Jan-2026', 24000, 'UPI',        'PAYU-8Z2K',  'Success', 'Tuition Q2'));
-        out.add(txn(null, '28-Jan-2026',  8500, 'UPI',        'PAYU-8Z2L',  'Success', 'Hostel Q2'));
-        out.add(txn(null, '05-Oct-2025', 24000, 'Card',       'PAYU-6A1B',  'Success', 'Tuition Q1'));
-        out.add(txn(null, '05-Oct-2025',  8500, 'Net Banking','PAYU-6A1C',  'Success', 'Hostel Q1'));
-        return out;
-    }
-
-    private static TransactionDTO txn(Id id, String dateStr, Decimal amt, String mode, String ref, String status, String head) {
-        TransactionDTO t = new TransactionDTO();
-        t.id = id; t.transactionDate = dateStr; t.amount = amt; t.mode = mode;
-        t.gatewayRef = ref; t.status = status; t.feeHead = head;
-        return t;
-    }
 }

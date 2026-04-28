@@ -1,33 +1,34 @@
 import { LightningElement, wire, track } from 'lwc';
-import { courses } from 'c/mockData';
 import getLearnBundle from '@salesforce/apex/KenLearnController.getLearnBundle';
 import getCourseDetail from '@salesforce/apex/KenLearnController.getCourseDetail';
+import SideNavigation from 'c/sideNavigation';
 
 const THEMES = ['green', 'purple', 'purple', 'orange', 'green', 'blue', 'orange', 'green'];
 const PROGRAMS = ['BA., Psychology', 'Digital Marketing & E-Commerce', 'Financial Markets & Investment Management'];
 const SEMESTERS = ['Semester 1', 'Semester 2', 'Semester 3'];
 
-export default class Learn extends LightningElement {
+export default class Learn extends SideNavigation {
     @track selectedProgram = PROGRAMS[0];
     @track selectedSemester = SEMESTERS[0];
     @track _apex;
     @track _selectedCourse;
     @track _detailLoading = false;
     @track _detailError;
-    courses = courses;
 
     @wire(getLearnBundle)
     wiredLearn({ data, error }) {
         if (data) this._apex = data;
         else if (error) {
-            // eslint-disable-next-line no-console
-            console.warn('[learn] Apex failed, using seed:', error);
+            const _msg = (error && error.body && error.body.message) || '';
+            if (_msg && !_msg.includes('not have access') && !_msg.includes('No rows')) {
+                // eslint-disable-next-line no-console
+                console.warn('[learn] Apex failed, using seed:', error);
+            }
         }
     }
 
     get effectiveCourses() {
-        if (this._apex && this._apex.courses && this._apex.courses.length) return this._apex.courses;
-        return this.courses;
+        return (this._apex && this._apex.courses) || [];
     }
 
     get formattedPrograms() {

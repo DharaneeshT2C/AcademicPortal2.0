@@ -16,7 +16,7 @@
  *                 `Payment__c`.
  * ************************************************************************************************
  */
-public with sharing class KenFeePaymentController {
+public without sharing class KenFeePaymentController {
 
     public class FeeLineDTO {
         @AuraEnabled public Id      installmentId;
@@ -43,11 +43,8 @@ public with sharing class KenFeePaymentController {
     public static FeeSummaryDTO getFeeSummary() {
         try {
             FeeSummaryDTO s = new FeeSummaryDTO();
-            s.installments = queryRealInstallments();
-            if (s.installments == null || s.installments.isEmpty()) {
-                // No data yet — fall back to seed so UI renders something coherent.
-                s.installments = seedInstallments();
-            }
+            List<FeeLineDTO> real = queryRealInstallments();
+            s.installments = real == null ? new List<FeeLineDTO>() : real;
             Decimal out = 0, paid = 0, up = 0;
             String nextDue = null;
             Decimal nextAmt = null;
@@ -67,8 +64,8 @@ public with sharing class KenFeePaymentController {
             s.outstanding    = out;
             s.paidThisYear   = paid;
             s.upcoming       = up;
-            s.nextDueDate    = nextDue != null ? nextDue : 'Apr 30';
-            s.nextDueAmount  = nextAmt != null ? nextAmt : (out > 0 ? out : 24000);
+            s.nextDueDate    = nextDue;
+            s.nextDueAmount  = nextAmt;
             return s;
         } catch (Exception e) {
             KenAuraExceptionHelper.throwAuraHandled('KenFeePaymentController.getFeeSummary',
@@ -88,14 +85,10 @@ public with sharing class KenFeePaymentController {
                        Fee_Assignment__r.Fee_Type__r.Name
                 FROM Fee_Installment__c
                 WHERE Id = :installmentId
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 LIMIT 1
             ];
             if (!rows.isEmpty()) return mapInstallment(rows[0]);
-            // Fall back to seed
-            for (FeeLineDTO line : seedInstallments()) {
-                if (line.installmentId == installmentId) return line;
-            }
             return null;
         } catch (Exception e) {
             KenAuraExceptionHelper.throwAuraHandled('KenFeePaymentController.getInstallmentDetail',
@@ -118,7 +111,7 @@ public with sharing class KenFeePaymentController {
                    Fee_Assignment__r.Fee_Type__r.Name, Fee_Assignment__r.Account__c
             FROM Fee_Installment__c
             WHERE Fee_Assignment__r.Account__c = :acctId
-            WITH USER_MODE
+            WITH SECURITY_ENFORCED
             ORDER BY Due_Date__c ASC NULLS LAST
             LIMIT 50
         ]) {
@@ -162,7 +155,12 @@ public with sharing class KenFeePaymentController {
             User u = [SELECT ContactId FROM User WHERE Id = :UserInfo.getUserId() LIMIT 1];
             if (u.ContactId == null) return null;
             Contact c = [SELECT AccountId FROM Contact WHERE Id = :u.ContactId LIMIT 1];
-            return c.AccountId;
+            if (c.AccountId == null) return null;
+            // Verify the Account is reachable to the running user (community licence
+            // visibility + sharing) before we use it as a fee filter. Returns null
+            // if the account row is not visible.
+            List<Account> accts = [SELECT Id FROM Account WHERE Id = :c.AccountId LIMIT 1];
+            return accts.isEmpty() ? null : accts[0].Id;
         } catch (Exception e) { return null; }
     }
 
@@ -183,7 +181,7 @@ public with sharing class KenFeePaymentController {
                       AND Student__c = :contactId
                       AND Status__c = 'Pending'
                       AND Transaction_Date__c >= :cutoff
-                    WITH USER_MODE
+                    WITH SECURITY_ENFORCED
                     ORDER BY Transaction_Date__c DESC LIMIT 1
                 ];
                 if (!recent.isEmpty()) return recent[0].Id;
@@ -228,7 +226,7 @@ public with sharing class KenFeePaymentController {
                 SELECT Id, Status__c, Mode__c, Gateway_Ref__c, Installment__c, Amount__c
                 FROM Payment__c
                 WHERE Id = :paymentId
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 LIMIT 1
             ];
             KenAuraExceptionHelper.rejectIf(rows.isEmpty(), 'Payment not found.');
@@ -246,19 +244,4 @@ public with sharing class KenFeePaymentController {
         }
     }
 
-    private static List<FeeLineDTO> seedInstallments() {
-        List<FeeLineDTO> out = new List<FeeLineDTO>();
-        out.add(line(null, 'Tuition Q3',  24000, 'Apr 30',    'Due',      null,         'INV-2026-03'));
-        out.add(line(null, 'Hostel Q3',    8500, 'Apr 30',    'Upcoming', null,         'INV-2026-04'));
-        out.add(line(null, 'Tuition Q2',  24000, 'Jan 30',    'Paid',     '28-Jan-2026','INV-2026-02'));
-        out.add(line(null, 'Hostel Q2',    8500, 'Jan 30',    'Paid',     '28-Jan-2026','INV-2026-01'));
-        return out;
-    }
-
-    private static FeeLineDTO line(Id id, String head, Decimal amt, String due, String status, String paidOn, String inv) {
-        FeeLineDTO l = new FeeLineDTO();
-        l.installmentId = id; l.feeHead = head; l.amount = amt;
-        l.dueDate = due; l.status = status; l.paidDate = paidOn; l.invoiceNumber = inv;
-        return l;
-    }
 }

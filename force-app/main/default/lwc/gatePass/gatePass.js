@@ -1,41 +1,33 @@
 import { LightningElement, wire, track } from 'lwc';
-import { NavigationMixin } from 'lightning/navigation';
-import { pageNameForRoute } from 'c/navHelper';
-import { gatePassList } from 'c/mockData';
 import getGatePasses from '@salesforce/apex/KenGatePassController.getGatePasses';
 
-export default class GatePass extends NavigationMixin(LightningElement) {
+export default class GatePass extends LightningElement {
     @track _apex;
-    // Seed fallback.
-    passes = gatePassList;
 
     @wire(getGatePasses)
     wiredPasses({ data, error }) {
         if (data) this._apex = data;
         else if (error) {
-            // eslint-disable-next-line no-console
-            console.warn('[gatePass] Apex failed, using seed:', error);
+            const _msg = (error && error.body && error.body.message) || '';
+            if (_msg && !_msg.includes('not have access') && !_msg.includes('No rows')) {
+                // eslint-disable-next-line no-console
+                console.warn('[gatePass] Apex failed, using seed:', error);
+            }
         }
     }
 
     get effectivePasses() {
-        if (this._apex && this._apex.length) return this._apex;
-        return this.passes;
+        return (this._apex && this._apex.length) ? this._apex : [];
     }
 
     get formattedPasses() {
         return this.effectivePasses.map(p => ({
             ...p,
-            statusClass: `status-badge ${p.status.toLowerCase().replace(' ', '-')}`
+            statusClass: `status-badge ${(p.status || '').toLowerCase().replace(' ', '-')}`
         }));
     }
 
-    navigateTo(route) {
-        this[NavigationMixin.Navigate]({
-            type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute(route) }
-        });
-    }
+    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
     handleCreate() { this.navigateTo('create-gate-pass'); }
     handleBack() { this.navigateTo('campus-life'); }
 }

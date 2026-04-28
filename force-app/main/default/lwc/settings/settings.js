@@ -1,17 +1,13 @@
 import { LightningElement, track, wire } from 'lwc';
-import { NavigationMixin } from 'lightning/navigation';
-import { pageNameForRoute } from 'c/navHelper';
 import { refreshApex } from '@salesforce/apex';
-import { studentProfile } from 'c/mockData';
 import getProfile             from '@salesforce/apex/KenSettingsController.getProfile';
 import getNotificationPrefs   from '@salesforce/apex/KenSettingsController.getNotificationPrefs';
 import updateProfile          from '@salesforce/apex/KenSettingsController.updateProfile';
 import updateNotificationPref from '@salesforce/apex/KenSettingsController.updateNotificationPref';
 import resetMyPassword from '@salesforce/apex/KenSettingsController.resetMyPassword';
 
-export default class Settings extends NavigationMixin(LightningElement) {
-    // Fallback seed shown until the @wire calls resolve.
-    student = studentProfile;
+export default class Settings extends LightningElement {
+    student = {};
     @track _apexProfile;
     @track _apexPrefs;
     @track showToast = false;
@@ -29,10 +25,10 @@ export default class Settings extends NavigationMixin(LightningElement) {
             this._apexProfile = data;
             this.student = {
                 ...this.student,
-                FirstName: data.firstName || this.student.FirstName,
-                LastName:  data.lastName  || this.student.LastName,
-                Email:     data.email     || this.student.Email,
-                Phone:     data.phone     || this.student.Phone
+                FirstName: data.firstName || '',
+                LastName:  data.lastName  || '',
+                Email:     data.email     || '',
+                Phone:     data.phone     || ''
             };
         }
     }
@@ -67,10 +63,7 @@ export default class Settings extends NavigationMixin(LightningElement) {
     handleContactAdmin() {
         // Routes to the existing service-support page; no Apex call needed,
         // and avoids the previous misleading "message sent" toast.
-        this[NavigationMixin.Navigate]({
-            type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute('service-support') }
-        });
+        this.dispatchEvent(new CustomEvent('navigate', { detail: { route: 'service-support' } }));
     }
 
     handleSaveProfile(event) {

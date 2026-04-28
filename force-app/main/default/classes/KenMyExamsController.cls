@@ -10,7 +10,7 @@
  *                 Seat_Number__c, Hall__c, Enrollment_Status__c).
  * ************************************************************************************************
  */
-public with sharing class KenMyExamsController {
+public without sharing class KenMyExamsController {
 
     public class ExamDTO {
         @AuraEnabled public String  id;
@@ -37,17 +37,13 @@ public with sharing class KenMyExamsController {
             b.upcoming  = new List<ExamDTO>();
             b.completed = new List<ExamDTO>();
             Id contactId = KenRunningStudentHelper.optionalContactId();
-            if (contactId == null) {
-                b.upcoming  = seedUpcoming();
-                b.completed = seedCompleted();
-                return b;
-            }
+            if (contactId == null) return b;
             // Pull all exams; cross-reference enrollment to populate seat/eligibility
             List<Exam__c> exams = [
                 SELECT Id, Subject__c, Subject_Code__c, Exam_Date__c, Start_Time__c,
                        Duration_Label__c, Hall__c, Status__c
                 FROM Exam__c
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 ORDER BY Exam_Date__c
                 LIMIT 100
             ];
@@ -56,7 +52,7 @@ public with sharing class KenMyExamsController {
                 SELECT Id, Exam__c, Seat_Number__c, Is_Eligible__c, Enrollment_Status__c
                 FROM Exam_Enrollment__c
                 WHERE Student__c = :contactId
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
             ]) enrollByExam.put(en.Exam__c, en);
             for (Exam__c r : exams) {
                 ExamDTO e = new ExamDTO();
@@ -74,10 +70,6 @@ public with sharing class KenMyExamsController {
                 e.isEligible    = en != null && en.Is_Eligible__c == true;
                 if (r.Exam_Date__c != null && r.Exam_Date__c >= Date.today()) b.upcoming.add(e);
                 else                                                          b.completed.add(e);
-            }
-            if (b.upcoming.isEmpty() && b.completed.isEmpty()) {
-                b.upcoming  = seedUpcoming();
-                b.completed = seedCompleted();
             }
             return b;
         } catch (Exception e) {
@@ -97,7 +89,7 @@ public with sharing class KenMyExamsController {
             List<Exam_Enrollment__c> existing = [
                 SELECT Id FROM Exam_Enrollment__c
                 WHERE Exam__c = :examId AND Student__c = :studentId
-                WITH USER_MODE LIMIT 1
+                WITH SECURITY_ENFORCED LIMIT 1
             ];
             if (!existing.isEmpty()) return;
             KenCrudFlsHelper.assertCreateable(Exam_Enrollment__c.SObjectType);
@@ -140,7 +132,7 @@ public with sharing class KenMyExamsController {
                 SELECT Id, Subject_Code__c, Subject__c
                 FROM Exam__c
                 WHERE Subject_Code__c IN :courseCodes
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 LIMIT 200
             ]) examByCode.put(x.Subject_Code__c, x);
             if (canCreateExam) {
@@ -167,7 +159,7 @@ public with sharing class KenMyExamsController {
                 for (Exam_Enrollment__c en : [
                     SELECT Exam__c FROM Exam_Enrollment__c
                     WHERE Student__c = :studentId AND Exam__c IN :examByCode.values()
-                    WITH USER_MODE
+                    WITH SECURITY_ENFORCED
                 ]) alreadyEnrolledExamIds.add(en.Exam__c);
             }
             List<Exam_Enrollment__c> newEnrollments = new List<Exam_Enrollment__c>();
@@ -239,27 +231,4 @@ public with sharing class KenMyExamsController {
         return code.left(1).toUpperCase() + '-' + (n < 10 ? '0' + n : String.valueOf(n));
     }
 
-    private static List<ExamDTO> seedUpcoming() {
-        List<ExamDTO> out = new List<ExamDTO>();
-        out.add(exam('EX001', 'Data Structures',  'CS301', 'Apr 28', '9:00 AM', '3 hrs', 'Hall A', 'A-24',  'Scheduled', true));
-        out.add(exam('EX002', 'Operating Systems','CS302', 'Apr 30', '2:00 PM', '3 hrs', 'Hall B', 'B-17',  'Scheduled', true));
-        out.add(exam('EX003', 'Mathematics III',  'MA301', 'May 2',  '9:00 AM', '3 hrs', 'Hall A', 'A-19',  'Scheduled', false));
-        out.add(exam('EX004', 'Soft Skills',      'SS101', 'May 5',  '2:00 PM', '2 hrs', 'Hall C', 'C-08',  'Scheduled', true));
-        return out;
-    }
-
-    private static List<ExamDTO> seedCompleted() {
-        List<ExamDTO> out = new List<ExamDTO>();
-        out.add(exam('EX100', 'Discrete Math', 'MA201', 'Dec 12', '9:00 AM', '3 hrs', 'Hall A', 'A-24', 'Completed', true));
-        out.add(exam('EX101', 'DBMS',          'CS210', 'Dec 14', '2:00 PM', '3 hrs', 'Hall B', 'B-11', 'Completed', true));
-        return out;
-    }
-
-    private static ExamDTO exam(String id, String subj, String code, String dateStr, String timeStr, String dur,
-                                 String hall, String seat, String status, Boolean elig) {
-        ExamDTO e = new ExamDTO();
-        e.id = id; e.subject = subj; e.code = code; e.examDate = dateStr; e.startTime = timeStr;
-        e.durationLabel = dur; e.hall = hall; e.seatNumber = seat; e.status = status; e.isEligible = elig;
-        return e;
-    }
 }

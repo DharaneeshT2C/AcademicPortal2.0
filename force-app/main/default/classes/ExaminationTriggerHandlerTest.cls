@@ -148,6 +148,146 @@ private class ExaminationTriggerHandlerTest {
         );
     }
 
+    @IsTest
+    static void testPersonExaminationEnrollmentRollsUpToExamination() {
+        ExamDataBundle testData = createExamDataBundle(2);
+
+        Test.startTest();
+        Examination examinationRecord = buildExaminationRecord(testData.subComponent.Id);
+        insert examinationRecord;
+        Test.stopTest();
+
+        List<PersonExamination> personExams = [
+            SELECT Id, Ken_Enrollment_Status__c
+            FROM PersonExamination
+            WHERE ExaminationId = :examinationRecord.Id
+            ORDER BY Id
+        ];
+        System.assertEquals(2, personExams.size(), 'Expected two person examinations.');
+
+        Examination rolledUp = [
+            SELECT Ken_Enrollment__c
+            FROM Examination
+            WHERE Id = :examinationRecord.Id
+        ];
+        System.assertEquals('Not Started', rolledUp.Ken_Enrollment__c);
+
+        personExams[0].Ken_Enrollment_Status__c = 'Enrolled';
+        update personExams[0];
+
+        rolledUp = [
+            SELECT Ken_Enrollment__c
+            FROM Examination
+            WHERE Id = :examinationRecord.Id
+        ];
+        System.assertEquals('In Progress', rolledUp.Ken_Enrollment__c);
+
+        personExams[1].Ken_Enrollment_Status__c = 'Enrolled';
+        update personExams[1];
+
+        rolledUp = [
+            SELECT Ken_Enrollment__c
+            FROM Examination
+            WHERE Id = :examinationRecord.Id
+        ];
+        System.assertEquals('Completed', rolledUp.Ken_Enrollment__c);
+    }
+
+    @IsTest
+    static void testPersonExaminationScheduleRollsUpToExamination() {
+        ExamDataBundle testData = createExamDataBundle(2);
+
+        Test.startTest();
+        Examination examinationRecord = buildExaminationRecord(testData.subComponent.Id);
+        insert examinationRecord;
+        Test.stopTest();
+
+        List<PersonExamination> personExams = [
+            SELECT Id, EffectiveFrom, EffectiveTo
+            FROM PersonExamination
+            WHERE ExaminationId = :examinationRecord.Id
+            ORDER BY Id
+        ];
+        System.assertEquals(2, personExams.size(), 'Expected two person examinations.');
+
+        Examination rolledUp = [
+            SELECT Ken_Schedule__c
+            FROM Examination
+            WHERE Id = :examinationRecord.Id
+        ];
+        System.assertEquals('Not Started', rolledUp.Ken_Schedule__c);
+
+        Datetime startTime = Datetime.now().addDays(1);
+        personExams[0].EffectiveFrom = startTime;
+        personExams[0].EffectiveTo = startTime.addHours(2);
+        update personExams[0];
+
+        rolledUp = [
+            SELECT Ken_Schedule__c
+            FROM Examination
+            WHERE Id = :examinationRecord.Id
+        ];
+        System.assertEquals('In Progress', rolledUp.Ken_Schedule__c);
+
+        personExams[1].EffectiveFrom = startTime.addDays(1);
+        personExams[1].EffectiveTo = startTime.addDays(1).addHours(2);
+        update personExams[1];
+
+        rolledUp = [
+            SELECT Ken_Schedule__c
+            FROM Examination
+            WHERE Id = :examinationRecord.Id
+        ];
+        System.assertEquals('Completed', rolledUp.Ken_Schedule__c);
+    }
+
+    @IsTest
+    static void testAutoEnrollmentCriteriaMarksPersonExaminationEnrolled() {
+        ExamDataBundle testData = createExamDataBundle(1);
+
+        Test.startTest();
+        Examination examinationRecord = buildExaminationRecord(testData.subComponent.Id);
+        insert examinationRecord;
+        Test.stopTest();
+
+        Ken_Enrollment_Cretirea__c criteria = new Ken_Enrollment_Cretirea__c(
+            Ken_Same_Fee_Regular_and_Backlog__c = true,
+            Ken_Fee_Criteria__c = 'No Fee Any Students',
+            Ken_Enrollment_for_Regular_Courses__c = 'Auto Register',
+            Ken_Enrollment_for_Backlog_Courses__c = 'Auto Register'
+        );
+        populateRequiredFields(
+            criteria,
+            Ken_Enrollment_Cretirea__c.SObjectType.getDescribe().fields.getMap()
+        );
+        insert criteria;
+
+        PersonExamination personExam = [
+            SELECT Id, Ken_Enrollment_Criteria__c, Ken_Enrollment_Status__c, Ken_Exam_Type__c
+            FROM PersonExamination
+            WHERE ExaminationId = :examinationRecord.Id
+            LIMIT 1
+        ];
+
+        personExam.Ken_Exam_Type__c = 'Regular';
+        personExam.Ken_Enrollment_Criteria__c = criteria.Id;
+        update personExam;
+
+        personExam = [
+            SELECT Ken_Enrollment_Status__c
+            FROM PersonExamination
+            WHERE Id = :personExam.Id
+        ];
+        System.assertEquals('Enrolled', personExam.Ken_Enrollment_Status__c);
+
+        Examination rolledUp = [
+            SELECT Ken_Enrollment__c
+            FROM Examination
+            WHERE Id = :examinationRecord.Id
+        ];
+        System.assertEquals('Completed', rolledUp.Ken_Enrollment__c);
+    }
+
     private static String getAlternateAssessmentValue(String currentValue) {
         Schema.DescribeFieldResult describeResult =
             Ken_Evaluation_Component__c.Ken_Assessment__c.getDescribe();

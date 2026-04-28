@@ -1,11 +1,8 @@
 import { LightningElement, wire, track } from 'lwc';
-import { NavigationMixin } from 'lightning/navigation';
-import { pageNameForRoute } from 'c/navHelper';
-import { messMenuData } from 'c/mockData';
 import getWeeklyMenu from '@salesforce/apex/KenMessMenuController.getWeeklyMenu';
 import submitMessFeedback from '@salesforce/apex/KenMessMenuController.submitMessFeedback';
 
-export default class MessMenu extends NavigationMixin(LightningElement) {
+export default class MessMenu extends LightningElement {
     @track _apex;
     @track _viewMode = 'day';
     @track _showAllBreakfast = false;
@@ -15,7 +12,6 @@ export default class MessMenu extends NavigationMixin(LightningElement) {
     @track _toastVisible = false;
     @track _toastMessage = '';
     @track _toastVariant = 'success';
-    _seed = messMenuData;
 
     showAToast(msg, v = 'success') { this._toastMessage = msg; this._toastVariant = v; this._toastVisible = true; }
     handleToastClose() { this._toastVisible = false; }
@@ -39,7 +35,7 @@ export default class MessMenu extends NavigationMixin(LightningElement) {
         }));
     }
     get weekDays() {
-        const week = (this._seed && this._seed.week) || [];
+        const week = (this._apex && this._apex.week) || [];
         if (week.length) return week;
         // Fallback: synthesize a week shape from current day data
         return ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d, i) => ({
@@ -55,12 +51,7 @@ export default class MessMenu extends NavigationMixin(LightningElement) {
     handleViewDay() { this._viewMode = 'day'; }
     handleViewWeek() { this._viewMode = 'week'; }
     handleToggleViewMore() { this._showAllBreakfast = !this._showAllBreakfast; }
-    handleGetHelp() {
-        this[NavigationMixin.Navigate]({
-            type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute('service-support') }
-        });
-    }
+    handleGetHelp() { this.dispatchEvent(new CustomEvent('navigate', { detail: { route: 'service-support' } })); }
     handleOpenFeedback(event) {
         this._feedbackMeal = event.currentTarget.dataset.meal || '';
         this._feedbackRating = 5;
@@ -95,14 +86,16 @@ export default class MessMenu extends NavigationMixin(LightningElement) {
                 this._apex = data;
             }
         } else if (error) {
-            // eslint-disable-next-line no-console
-            console.warn('[messMenu] Apex failed, using seed:', error);
+            const _msg = (error && error.body && error.body.message) || '';
+            if (_msg && !_msg.includes('not have access') && !_msg.includes('No rows')) {
+                // eslint-disable-next-line no-console
+                console.warn('[messMenu] Apex failed, using seed:', error);
+            }
         }
     }
 
     get data() {
-        if (this._apex) return Object.assign({}, this._seed, this._apex);
-        return this._seed;
+        return this._apex || {};
     }
 
     _toItems(arr) {
@@ -142,11 +135,6 @@ export default class MessMenu extends NavigationMixin(LightningElement) {
             });
     }
 
-    navigateTo(route) {
-        this[NavigationMixin.Navigate]({
-            type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute(route) }
-        });
-    }
+    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
     handleBack() { this.navigateTo('campus-life'); }
 }

@@ -1,17 +1,12 @@
 import { LightningElement } from 'lwc';
-import { NavigationMixin } from 'lightning/navigation';
-import { pageNameForRoute } from 'c/navHelper';
 
-export default class Header extends NavigationMixin(LightningElement) {
+export default class Header extends LightningElement {
     handleToggleSidebar() {
         this.dispatchEvent(new CustomEvent('togglesidebar'));
     }
 
     navigateTo(route) {
-        this[NavigationMixin.Navigate]({
-            type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute(route) }
-        });
+        this.dispatchEvent(new CustomEvent('navigate', { detail: { route } }));
     }
 
     handleSchedule() { this.navigateTo('schedule'); }

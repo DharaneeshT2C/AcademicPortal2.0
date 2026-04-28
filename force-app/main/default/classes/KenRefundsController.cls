@@ -9,7 +9,7 @@
  *                 Reason__c, Status__c, Original_Payment__c).
  * ************************************************************************************************
  */
-public with sharing class KenRefundsController {
+public without sharing class KenRefundsController {
 
     public class RefundDTO {
         @AuraEnabled public Id      id;
@@ -31,13 +31,13 @@ public with sharing class KenRefundsController {
     public static List<RefundDTO> getRefunds() {
         try {
             Id contactId = KenRunningStudentHelper.optionalContactId();
-            if (contactId == null) return seedRefunds();
+            if (contactId == null) return new List<RefundDTO>();
             List<RefundDTO> out = new List<RefundDTO>();
             for (Refund_Request__c r : [
                 SELECT Id, Amount__c, Reason__c, Status__c, Request_Date__c, Processed_Date__c, Original_Payment__c
                 FROM Refund_Request__c
                 WHERE Student__c = :contactId
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 ORDER BY Request_Date__c DESC
                 LIMIT 50
             ]) {
@@ -51,7 +51,6 @@ public with sharing class KenRefundsController {
                 d.originalPaymentRef = r.Original_Payment__c == null ? '' : String.valueOf(r.Original_Payment__c);
                 out.add(d);
             }
-            if (out.isEmpty()) return seedRefunds();
             return out;
         } catch (Exception e) {
             KenAuraExceptionHelper.throwAuraHandled('KenRefundsController.getRefunds',
@@ -78,7 +77,7 @@ public with sharing class KenRefundsController {
                       AND Original_Payment__c = :req.paymentId
                       AND Amount__c = :req.amount
                       AND CreatedDate >= :cutoff
-                    WITH USER_MODE LIMIT 1
+                    WITH SECURITY_ENFORCED LIMIT 1
                 ];
                 if (!dupes.isEmpty()) return dupes[0].Id;
             }
@@ -100,17 +99,4 @@ public with sharing class KenRefundsController {
         }
     }
 
-    private static List<RefundDTO> seedRefunds() {
-        List<RefundDTO> out = new List<RefundDTO>();
-        out.add(refund(null, '15-Mar-2026', 8500, 'Course dropped — hostel fee refund', 'Processed', '22-Mar-2026', 'PAYU-8Z2L'));
-        out.add(refund(null, '10-Apr-2026', 1200, 'Duplicate mess fee',                  'Pending',   null,          'PAYU-9A3M'));
-        return out;
-    }
-
-    private static RefundDTO refund(Id id, String reqDate, Decimal amt, String reason, String status, String procDate, String origRef) {
-        RefundDTO r = new RefundDTO();
-        r.id = id; r.requestDate = reqDate; r.amount = amt; r.reason = reason;
-        r.status = status; r.processedDate = procDate; r.originalPaymentRef = origRef;
-        return r;
-    }
 }

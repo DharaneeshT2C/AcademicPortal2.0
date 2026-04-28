@@ -8,7 +8,7 @@
  *  TODO[SOBJECT]: Wire to `Invoice__c` + ContentDocumentLink for PDF storage.
  * ************************************************************************************************
  */
-public with sharing class KenInvoicesController {
+public without sharing class KenInvoicesController {
 
     public class InvoiceDTO {
         @AuraEnabled public Id      id;
@@ -24,7 +24,7 @@ public with sharing class KenInvoicesController {
     public static List<InvoiceDTO> getInvoices() {
         try {
             Id acctId = currentAccountId();
-            if (acctId == null) return seedInvoices();
+            if (acctId == null) return new List<InvoiceDTO>();
             List<InvoiceDTO> out = new List<InvoiceDTO>();
             for (Fee_Installment__c r : [
                 SELECT Id, Name, Amount__c, Total_Amount__c, Total_Paid_Amount__c,
@@ -32,7 +32,7 @@ public with sharing class KenInvoicesController {
                        Fee_Assignment__r.Fee_Type__r.Name, Fee_Assignment__r.Fee_Assignment_Name__c
                 FROM Fee_Installment__c
                 WHERE Fee_Assignment__r.Account__c = :acctId
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 ORDER BY Due_Date__c DESC NULLS LAST
                 LIMIT 50
             ]) {
@@ -53,7 +53,6 @@ public with sharing class KenInvoicesController {
                 i.downloadUrl   = '';
                 out.add(i);
             }
-            if (out.isEmpty()) return seedInvoices();
             return out;
         } catch (Exception e) {
             KenAuraExceptionHelper.throwAuraHandled('KenInvoicesController.getInvoices',
@@ -97,19 +96,4 @@ public with sharing class KenInvoicesController {
         }
     }
 
-    private static List<InvoiceDTO> seedInvoices() {
-        List<InvoiceDTO> out = new List<InvoiceDTO>();
-        out.add(inv(null, 'INV-2026-03', 'Tuition Q3 2026', 24000, '01-Apr-2026', 'Unpaid', ''));
-        out.add(inv(null, 'INV-2026-02', 'Tuition Q2 2026', 24000, '02-Jan-2026', 'Paid',   ''));
-        out.add(inv(null, 'INV-2026-01', 'Hostel Q2 2026',   8500, '02-Jan-2026', 'Paid',   ''));
-        out.add(inv(null, 'INV-2025-08', 'Tuition Q1 2025', 24000, '01-Oct-2025', 'Paid',   ''));
-        return out;
-    }
-
-    private static InvoiceDTO inv(Id id, String num, String descText, Decimal amt, String issued, String status, String url) {
-        InvoiceDTO i = new InvoiceDTO();
-        i.id = id; i.invoiceNumber = num; i.description = descText;
-        i.amount = amt; i.issuedOn = issued; i.status = status; i.downloadUrl = url;
-        return i;
-    }
 }

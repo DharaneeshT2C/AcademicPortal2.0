@@ -4,7 +4,7 @@
  *
  * @description
  *  Centralised CRUD / FLS guard checks used by services performing DML in the
- *  Student Portal backend. Complements `WITH USER_MODE` on SOQL reads by making
+ *  Student Portal backend. Complements `WITH SYSTEM_MODE` on SOQL reads by making
  *  DML permissions explicit and throwing `AuraHandledException` on access denial.
  *
  * @author      Student Portal Backend

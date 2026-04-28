@@ -10,7 +10,7 @@
  *                 uploads.
  * ************************************************************************************************
  */
-public with sharing class KenThesisManagementController {
+public without sharing class KenThesisManagementController {
 
     public class ThesisStageDTO {
         @AuraEnabled public String  key;
@@ -42,11 +42,8 @@ public with sharing class KenThesisManagementController {
             ThesisDTO t = new ThesisDTO();
             Id contactId = KenRunningStudentHelper.optionalContactId();
             if (contactId == null) {
-                t.title        = 'Efficient Graph Algorithms for Sparse Networks';
-                t.abstractText = 'Investigating scalable approximation algorithms for pathfinding on sparse academic collaboration graphs.';
-                t.currentStage = 'review';
-                t.stages       = seedStages();
-                t.committee    = seedCommittee();
+                t.stages    = new List<ThesisStageDTO>();
+                t.committee = new List<CommitteeMemberDTO>();
                 return t;
             }
             List<Thesis__c> rows = [
@@ -55,15 +52,12 @@ public with sharing class KenThesisManagementController {
                      FROM Thesis_Stages__r ORDER BY Due_Date__c)
                 FROM Thesis__c
                 WHERE Student__c = :contactId
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 LIMIT 1
             ];
             if (rows.isEmpty()) {
-                t.title        = 'Efficient Graph Algorithms for Sparse Networks';
-                t.abstractText = 'Investigating scalable approximation algorithms for pathfinding on sparse academic collaboration graphs.';
-                t.currentStage = 'review';
-                t.stages       = seedStages();
-                t.committee    = seedCommittee();
+                t.stages    = new List<ThesisStageDTO>();
+                t.committee = new List<CommitteeMemberDTO>();
                 return t;
             }
             Thesis__c r = rows[0];
@@ -83,8 +77,7 @@ public with sharing class KenThesisManagementController {
                     t.stages.add(d);
                 }
             } catch (Exception ignored) { /* relationship may not be exposed */ }
-            if (t.stages.isEmpty()) t.stages = seedStages();
-            t.committee = seedCommittee(); // No committee object exists yet
+            t.committee = new List<CommitteeMemberDTO>();
             return t;
         } catch (Exception e) {
             KenAuraExceptionHelper.throwAuraHandled('KenThesisManagementController.getThesis',
@@ -105,7 +98,7 @@ public with sharing class KenThesisManagementController {
                 // outer SELECT to mitigate race conditions on rapid double-tap.
                 List<Thesis__c> existing = [
                     SELECT Id FROM Thesis__c
-                    WHERE Student__c = :contactId WITH USER_MODE LIMIT 1
+                    WHERE Student__c = :contactId WITH SECURITY_ENFORCED LIMIT 1
                 ];
                 if (!existing.isEmpty()) {
                     thesisId = existing[0].Id;
@@ -133,7 +126,7 @@ public with sharing class KenThesisManagementController {
                     SELECT Id FROM Thesis_Stage__c
                     WHERE Thesis__c = :thesisId AND Label__c = :title
                       AND CreatedDate >= :cutoff
-                    WITH USER_MODE LIMIT 1
+                    WITH SECURITY_ENFORCED LIMIT 1
                 ];
                 if (!dupes.isEmpty()) return dupes[0].Id;
             }
@@ -182,32 +175,4 @@ public with sharing class KenThesisManagementController {
         }
     }
 
-    private static List<ThesisStageDTO> seedStages() {
-        List<ThesisStageDTO> out = new List<ThesisStageDTO>();
-        out.add(stage('proposal',   'Proposal',    'done',    '15-Feb', '10-Feb-2026'));
-        out.add(stage('review',     'Under Review','current', '30-Apr', null));
-        out.add(stage('submission', 'Submission',  'pending', '15-May', null));
-        out.add(stage('defence',    'Defence',     'pending', '30-May', null));
-        return out;
-    }
-
-    private static List<CommitteeMemberDTO> seedCommittee() {
-        List<CommitteeMemberDTO> out = new List<CommitteeMemberDTO>();
-        out.add(member('CM001', 'Dr. Iyer',   'Chair',    'Computer Science'));
-        out.add(member('CM002', 'Dr. Sharma', 'Advisor',  'Computer Science'));
-        out.add(member('CM003', 'Prof. Gupta','Examiner', 'Mathematics'));
-        return out;
-    }
-
-    private static ThesisStageDTO stage(String key, String label, String status, String due, String done) {
-        ThesisStageDTO s = new ThesisStageDTO();
-        s.key = key; s.label = label; s.status = status; s.dueDate = due; s.completedOn = done;
-        return s;
-    }
-
-    private static CommitteeMemberDTO member(String id, String name, String role, String dept) {
-        CommitteeMemberDTO m = new CommitteeMemberDTO();
-        m.id = id; m.name = name; m.role = role; m.department = dept;
-        return m;
-    }
 }

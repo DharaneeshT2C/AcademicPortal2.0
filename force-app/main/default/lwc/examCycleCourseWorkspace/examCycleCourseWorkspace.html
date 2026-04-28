@@ -186,18 +186,61 @@
                     </template>
 
                     <template lwc:elseif={isPlanScheduleTab}>
-                        <table class="grid">
-                            <thead>
-                                <tr><th>Course Code</th><th>Course</th><th>Enrolled Students</th><th>Date</th><th>Time</th><th>Duration</th><th>Hall</th></tr>
-                            </thead>
-                            <tbody>
-                                <template for:each={scheduleRows} for:item="row">
-                                    <tr key={row.id}>
-                                        <td>{row.code}</td><td>{row.course}</td><td>{row.students}</td><td>{row.date}</td><td>{row.time}</td><td>{row.duration}</td><td>{row.hall}</td>
+                        <template lwc:if={hasScheduleSelection}>
+                            <div class="panel-actions schedule-actions">
+                                <button class="btn-primary" onclick={handleOpenConfigureSchedule} disabled={isConfigureDisabled}>
+                                    <span class="schedule-action-icon">📅</span>
+                                    {configureScheduleLabel}
+                                </button>
+                            </div>
+                        </template>
+                        <template lwc:if={scheduleError}>
+                            <div class="placeholder">{scheduleError}</div>
+                        </template>
+                        <template lwc:elseif={hasScheduleRows}>
+                            <table class="grid">
+                                <thead>
+                                    <tr>
+                                        <th class="grid-check"></th>
+                                        <th>Course Code</th>
+                                        <th>Course</th>
+                                        <th>Enrolled Students</th>
+                                        <th>Booked Students</th>
+                                        <th>Date</th>
+                                        <th>Start Time</th>
+                                        <th>End Time</th>
+                                        <th>Duration</th>
                                     </tr>
-                                </template>
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    <template for:each={flatScheduleRows} for:item="row">
+                                        <tr key={row.rowKey} class="schedule-row">
+                                            <template lwc:if={row.isFirst}>
+                                                <td class="grid-check schedule-merge-cell" rowspan={row.rowspan}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={row.isSelected}
+                                                        data-key={row.sectionKey}
+                                                        onchange={handleScheduleSelect}
+                                                    />
+                                                </td>
+                                                <td class="schedule-merge-cell" rowspan={row.rowspan}>{row.code}</td>
+                                                <td class="schedule-merge-cell" rowspan={row.rowspan}>{row.course}</td>
+                                                <td class="schedule-merge-cell" rowspan={row.rowspan}>{row.students}</td>
+                                            </template>
+                                            <td>{row.booked}</td>
+                                            <td>{row.date}</td>
+                                            <td>{row.startTime}</td>
+                                            <td>{row.endTime}</td>
+                                            <td>{row.duration}</td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </template>
+                        <template lwc:else>
+                            <div class="placeholder">No examinations available for scheduling yet.</div>
+                        </template>
                     </template>
 
                     <template lwc:elseif={isPlanSeatingTab}>
@@ -342,25 +385,51 @@
                             options={feeCriteriaOptions}
                         ></lightning-combobox>
                         <template lwc:if={showSingleFeeDetails}>
-                            <div class="intake-two-col field-gap">
-                                <lightning-combobox
-                                    label="Fee Type"
-                                    value={enrollmentDraft.feeTypeId}
-                                    data-field="feeTypeId"
-                                    onchange={handleEnrollmentFieldChange}
-                                    options={feeTypeOptions}
-                                    placeholder="Select Fee Type"
-                                ></lightning-combobox>
-                                <lightning-input
-                                    type="number"
-                                    label="Exam Fee"
-                                    value={enrollmentDraft.examFee}
-                                    data-field="examFee"
-                                    onchange={handleEnrollmentFieldChange}
-                                    step="0.01"
-                                    min="0"
-                                ></lightning-input>
-                            </div>
+                            <template for:each={singleFeeRows} for:item="row">
+                                <div key={row.rowKey} class="fee-row field-gap">
+                                    <div class="fee-row-head">
+                                        <span class="fee-row-title">{row.label}</span>
+                                        <template lwc:if={row.canRemove}>
+                                            <button
+                                                class="btn-mini fee-row-remove"
+                                                data-list="feeItems"
+                                                data-row={row.rowKey}
+                                                onclick={handleRemoveFeeRow}
+                                                type="button"
+                                            >Remove</button>
+                                        </template>
+                                    </div>
+                                    <div class="intake-two-col">
+                                        <lightning-combobox
+                                            label="Fee Type"
+                                            value={row.feeTypeId}
+                                            options={row.options}
+                                            placeholder="Select Fee Type"
+                                            data-list="feeItems"
+                                            data-row={row.rowKey}
+                                            data-rowfield="feeTypeId"
+                                            onchange={handleFeeRowFieldChange}
+                                        ></lightning-combobox>
+                                        <lightning-input
+                                            type="number"
+                                            label="Exam Fee"
+                                            value={row.examFee}
+                                            step="0.01"
+                                            min="0"
+                                            data-list="feeItems"
+                                            data-row={row.rowKey}
+                                            data-rowfield="examFee"
+                                            onchange={handleFeeRowFieldChange}
+                                        ></lightning-input>
+                                    </div>
+                                </div>
+                            </template>
+                            <button
+                                class="btn-ghost fee-row-add"
+                                data-list="feeItems"
+                                onclick={handleAddFeeRow}
+                                type="button"
+                            >+ Add Fee Type</button>
                         </template>
                     </template>
 
@@ -375,25 +444,51 @@
                                 options={feeCriteriaOptions}
                             ></lightning-combobox>
                             <template lwc:if={showRegularFeeDetails}>
-                                <div class="intake-two-col field-gap">
-                                    <lightning-combobox
-                                        label="Regular Fee Type"
-                                        value={enrollmentDraft.regularFeeTypeId}
-                                        data-field="regularFeeTypeId"
-                                        onchange={handleEnrollmentFieldChange}
-                                        options={feeTypeOptions}
-                                        placeholder="Select Fee Type"
-                                    ></lightning-combobox>
-                                    <lightning-input
-                                        type="number"
-                                        label="Regular Exam Fee"
-                                        value={enrollmentDraft.regularExamFee}
-                                        data-field="regularExamFee"
-                                        onchange={handleEnrollmentFieldChange}
-                                        step="0.01"
-                                        min="0"
-                                    ></lightning-input>
-                                </div>
+                                <template for:each={regularFeeRows} for:item="row">
+                                    <div key={row.rowKey} class="fee-row field-gap">
+                                        <div class="fee-row-head">
+                                            <span class="fee-row-title">{row.label}</span>
+                                            <template lwc:if={row.canRemove}>
+                                                <button
+                                                    class="btn-mini fee-row-remove"
+                                                    data-list="regularFeeItems"
+                                                    data-row={row.rowKey}
+                                                    onclick={handleRemoveFeeRow}
+                                                    type="button"
+                                                >Remove</button>
+                                            </template>
+                                        </div>
+                                        <div class="intake-two-col">
+                                            <lightning-combobox
+                                                label="Regular Fee Type"
+                                                value={row.feeTypeId}
+                                                options={row.options}
+                                                placeholder="Select Fee Type"
+                                                data-list="regularFeeItems"
+                                                data-row={row.rowKey}
+                                                data-rowfield="feeTypeId"
+                                                onchange={handleFeeRowFieldChange}
+                                            ></lightning-combobox>
+                                            <lightning-input
+                                                type="number"
+                                                label="Regular Exam Fee"
+                                                value={row.examFee}
+                                                step="0.01"
+                                                min="0"
+                                                data-list="regularFeeItems"
+                                                data-row={row.rowKey}
+                                                data-rowfield="examFee"
+                                                onchange={handleFeeRowFieldChange}
+                                            ></lightning-input>
+                                        </div>
+                                    </div>
+                                </template>
+                                <button
+                                    class="btn-ghost fee-row-add"
+                                    data-list="regularFeeItems"
+                                    onclick={handleAddFeeRow}
+                                    type="button"
+                                >+ Add Regular Fee Type</button>
                             </template>
                         </div>
 
@@ -407,25 +502,51 @@
                                 options={feeCriteriaOptions}
                             ></lightning-combobox>
                             <template lwc:if={showBacklogFeeDetails}>
-                                <div class="intake-two-col field-gap">
-                                    <lightning-combobox
-                                        label="Backlog Fee Type"
-                                        value={enrollmentDraft.backlogFeeTypeId}
-                                        data-field="backlogFeeTypeId"
-                                        onchange={handleEnrollmentFieldChange}
-                                        options={feeTypeOptions}
-                                        placeholder="Select Fee Type"
-                                    ></lightning-combobox>
-                                    <lightning-input
-                                        type="number"
-                                        label="Backlog Exam Fee"
-                                        value={enrollmentDraft.backlogExamFee}
-                                        data-field="backlogExamFee"
-                                        onchange={handleEnrollmentFieldChange}
-                                        step="0.01"
-                                        min="0"
-                                    ></lightning-input>
-                                </div>
+                                <template for:each={backlogFeeRows} for:item="row">
+                                    <div key={row.rowKey} class="fee-row field-gap">
+                                        <div class="fee-row-head">
+                                            <span class="fee-row-title">{row.label}</span>
+                                            <template lwc:if={row.canRemove}>
+                                                <button
+                                                    class="btn-mini fee-row-remove"
+                                                    data-list="backlogFeeItems"
+                                                    data-row={row.rowKey}
+                                                    onclick={handleRemoveFeeRow}
+                                                    type="button"
+                                                >Remove</button>
+                                            </template>
+                                        </div>
+                                        <div class="intake-two-col">
+                                            <lightning-combobox
+                                                label="Backlog Fee Type"
+                                                value={row.feeTypeId}
+                                                options={row.options}
+                                                placeholder="Select Fee Type"
+                                                data-list="backlogFeeItems"
+                                                data-row={row.rowKey}
+                                                data-rowfield="feeTypeId"
+                                                onchange={handleFeeRowFieldChange}
+                                            ></lightning-combobox>
+                                            <lightning-input
+                                                type="number"
+                                                label="Backlog Exam Fee"
+                                                value={row.examFee}
+                                                step="0.01"
+                                                min="0"
+                                                data-list="backlogFeeItems"
+                                                data-row={row.rowKey}
+                                                data-rowfield="examFee"
+                                                onchange={handleFeeRowFieldChange}
+                                            ></lightning-input>
+                                        </div>
+                                    </div>
+                                </template>
+                                <button
+                                    class="btn-ghost fee-row-add"
+                                    data-list="backlogFeeItems"
+                                    onclick={handleAddFeeRow}
+                                    type="button"
+                                >+ Add Backlog Fee Type</button>
                             </template>
                         </div>
                     </template>
@@ -569,18 +690,26 @@
                                     <span class="criteria-label">Fee Criteria</span>
                                     <span class="criteria-value">{criteriaView.feeCriteria}</span>
                                 </div>
-                                <template lwc:if={criteriaViewShowSingleFeeDetails}>
-                                    <div class="criteria-row">
-                                        <span class="criteria-label">Fee Type</span>
-                                        <span class="criteria-value">{criteriaView.feeTypeName}</span>
-                                    </div>
-                                    <div class="criteria-row">
-                                        <span class="criteria-label">Exam Fee</span>
-                                        <span class="criteria-value">{criteriaView.examFee}</span>
-                                    </div>
-                                </template>
                             </template>
                         </div>
+
+                        <template lwc:if={criteriaViewShowSingleFeeDetails}>
+                            <template for:each={criteriaViewSingleFeeRows} for:item="row">
+                                <div key={row.criteriaId} class="criteria-fee-row">
+                                    <p class="criteria-fee-row-title">{row.label}</p>
+                                    <div class="criteria-grid">
+                                        <div class="criteria-row">
+                                            <span class="criteria-label">Fee Type</span>
+                                            <span class="criteria-value">{row.feeTypeName}</span>
+                                        </div>
+                                        <div class="criteria-row">
+                                            <span class="criteria-label">Exam Fee</span>
+                                            <span class="criteria-value">{row.examFee}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
 
                         <template lwc:if={criteriaViewShowSplitFees}>
                             <div class="criteria-subsection">
@@ -590,17 +719,24 @@
                                         <span class="criteria-label">Regular Fee Criteria</span>
                                         <span class="criteria-value">{criteriaView.regularFeeCriteria}</span>
                                     </div>
-                                    <template lwc:if={criteriaViewShowRegularFeeDetails}>
-                                        <div class="criteria-row">
-                                            <span class="criteria-label">Regular Fee Type</span>
-                                            <span class="criteria-value">{criteriaView.regularFeeTypeName}</span>
-                                        </div>
-                                        <div class="criteria-row">
-                                            <span class="criteria-label">Regular Exam Fee</span>
-                                            <span class="criteria-value">{criteriaView.regularExamFee}</span>
+                                </div>
+                                <template lwc:if={criteriaViewShowRegularFeeDetails}>
+                                    <template for:each={criteriaViewRegularFeeRows} for:item="row">
+                                        <div key={row.criteriaId} class="criteria-fee-row">
+                                            <p class="criteria-fee-row-title">{row.label}</p>
+                                            <div class="criteria-grid">
+                                                <div class="criteria-row">
+                                                    <span class="criteria-label">Regular Fee Type</span>
+                                                    <span class="criteria-value">{row.feeTypeName}</span>
+                                                </div>
+                                                <div class="criteria-row">
+                                                    <span class="criteria-label">Regular Exam Fee</span>
+                                                    <span class="criteria-value">{row.examFee}</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </template>
-                                </div>
+                                </template>
                             </div>
 
                             <div class="criteria-subsection">
@@ -610,17 +746,24 @@
                                         <span class="criteria-label">Backlog Fee Criteria</span>
                                         <span class="criteria-value">{criteriaView.backlogFeeCriteria}</span>
                                     </div>
-                                    <template lwc:if={criteriaViewShowBacklogFeeDetails}>
-                                        <div class="criteria-row">
-                                            <span class="criteria-label">Backlog Fee Type</span>
-                                            <span class="criteria-value">{criteriaView.backlogFeeTypeName}</span>
-                                        </div>
-                                        <div class="criteria-row">
-                                            <span class="criteria-label">Backlog Exam Fee</span>
-                                            <span class="criteria-value">{criteriaView.backlogExamFee}</span>
+                                </div>
+                                <template lwc:if={criteriaViewShowBacklogFeeDetails}>
+                                    <template for:each={criteriaViewBacklogFeeRows} for:item="row">
+                                        <div key={row.criteriaId} class="criteria-fee-row">
+                                            <p class="criteria-fee-row-title">{row.label}</p>
+                                            <div class="criteria-grid">
+                                                <div class="criteria-row">
+                                                    <span class="criteria-label">Backlog Fee Type</span>
+                                                    <span class="criteria-value">{row.feeTypeName}</span>
+                                                </div>
+                                                <div class="criteria-row">
+                                                    <span class="criteria-label">Backlog Exam Fee</span>
+                                                    <span class="criteria-value">{row.examFee}</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </template>
-                                </div>
+                                </template>
                             </div>
                         </template>
                     </section>
@@ -655,6 +798,92 @@
             </div>
             <footer class="modal-foot">
                 <button class="btn-primary" onclick={handleCloseCriteriaView}>Close</button>
+            </footer>
+        </section>
+    </template>
+
+    <template lwc:if={showScheduleModal}>
+        <div class="modal-backdrop" onclick={handleCloseScheduleModal}></div>
+        <section class="modal" role="dialog" aria-modal="true">
+            <header class="modal-head">
+                <h3>Configure Schedule</h3>
+                <button class="modal-close" onclick={handleCloseScheduleModal} aria-label="Close">×</button>
+            </header>
+            <div class="modal-body">
+                <div class="schedule-selected-card">
+                    <p class="schedule-selected-label">Selected Exam</p>
+                    <p class="schedule-selected-value">
+                        <strong>{scheduleModalRow.code}</strong> · {scheduleModalRow.course}
+                    </p>
+                    <p class="schedule-selected-meta">
+                        Enrolled Students: <strong>{scheduleEnrolledTotal}</strong>
+                        &nbsp;·&nbsp; Total Number of Schedules: <strong>{scheduleSetsCount}</strong>
+                        &nbsp;·&nbsp; Booked: <strong>{scheduleSetsTotal}</strong>
+                    </p>
+                </div>
+
+                <template for:each={scheduleSetsForRender} for:item="set">
+                    <div key={set.id} class="schedule-set">
+                        <div class="schedule-set-head">
+                            <span class="schedule-set-title">{set.label}</span>
+                            <template lwc:if={set.canRemove}>
+                                <button
+                                    class="btn-mini schedule-set-remove"
+                                    data-setid={set.id}
+                                    onclick={handleRemoveScheduleSet}
+                                    type="button"
+                                >Remove</button>
+                            </template>
+                        </div>
+                        <div class="schedule-set-fields">
+                            <div class="schedule-set-count">
+                                <lightning-input
+                                    type="number"
+                                    label="Number of Students To Be Booked *"
+                                    min="1"
+                                    step="1"
+                                    value={set.count}
+                                    data-setid={set.id}
+                                    data-field="count"
+                                    onchange={handleScheduleSetFieldChange}
+                                ></lightning-input>
+                            </div>
+                            <div class="schedule-set-datetime-row">
+                                <lightning-input
+                                    type="datetime-local"
+                                    label="Start Date &amp; Time *"
+                                    value={set.startDateTime}
+                                    data-setid={set.id}
+                                    data-field="startDateTime"
+                                    onchange={handleScheduleSetFieldChange}
+                                ></lightning-input>
+                                <lightning-input
+                                    type="datetime-local"
+                                    label="End Date &amp; Time *"
+                                    value={set.endDateTime}
+                                    data-setid={set.id}
+                                    data-field="endDateTime"
+                                    onchange={handleScheduleSetFieldChange}
+                                ></lightning-input>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <button class="btn-ghost schedule-add-btn" onclick={handleAddScheduleSet} type="button">
+                    + Add Schedule
+                </button>
+
+                <template lwc:if={scheduleSaveError}>
+                    <div class="plan-form-error">{scheduleSaveError}</div>
+                </template>
+            </div>
+            <footer class="modal-foot">
+                <button class="btn-ghost" onclick={handleCloseScheduleModal} disabled={isSavingSchedule}>Cancel</button>
+                <button class="btn-primary" onclick={handleSaveSchedule} disabled={isSavingSchedule}>
+                    <template lwc:if={isSavingSchedule}>Saving…</template>
+                    <template lwc:else>Save Schedule</template>
+                </button>
             </footer>
         </section>
     </template>

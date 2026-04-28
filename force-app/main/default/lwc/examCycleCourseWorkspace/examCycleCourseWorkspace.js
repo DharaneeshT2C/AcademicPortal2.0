@@ -11,6 +11,8 @@ import getEnrollmentCriteriaOptions from '@salesforce/apex/KenExamCyclePlannerCo
 import createEnrollmentCriteria from '@salesforce/apex/KenExamCyclePlannerController.createEnrollmentCriteria';
 import getEnrollmentCriteriaDetail from '@salesforce/apex/KenExamCyclePlannerController.getEnrollmentCriteriaDetail';
 import getExaminationFeeTypes from '@salesforce/apex/KenExamCyclePlannerController.getExaminationFeeTypes';
+import getScheduleRows from '@salesforce/apex/KenExamCyclePlannerController.getScheduleRows';
+import saveScheduleConfiguration from '@salesforce/apex/KenExamCyclePlannerController.saveScheduleConfiguration';
 
 const NO_FEE_CRITERIA = 'No Fee Any Students';
 
@@ -52,6 +54,18 @@ export default class ExamCycleCourseWorkspace extends LightningElement {
     @track enrollmentProgramsError = '';
     _wiredEnrollmentRef;
 
+    // ─── Schedule (Schedule subtab) state ────────────────────────────────────
+    @track scheduleData = [];
+    @track scheduleError = '';
+    @track selectedScheduleKeys = [];
+    @track showScheduleModal = false;
+    @track scheduleModalRow = null;
+    @track scheduleSets = [];
+    @track scheduleSaveError = '';
+    @track isSavingSchedule = false;
+    _wiredScheduleRef;
+    _scheduleSetCounter = 0;
+
     @track feeCriteriaOptionsData = [];
     @track backlogOptionsData = [];
     @track regularOptionsData = [];
@@ -64,20 +78,19 @@ export default class ExamCycleCourseWorkspace extends LightningElement {
     @track criteriaViewError = '';
     @track criteriaView = null;
 
+    _feeRowCounter = 0;
+
     @track enrollmentDraft = {
         startOn: '',
         endsOn: '',
         lateFineOn: '',
         sameFeeCriteria: false,
         feeCriteria: '',
-        feeTypeId: '',
-        examFee: null,
+        feeItems: [],
         regularFeeCriteria: '',
-        regularFeeTypeId: '',
-        regularExamFee: null,
+        regularFeeItems: [],
         backlogFeeCriteria: '',
-        backlogFeeTypeId: '',
-        backlogExamFee: null,
+        backlogFeeItems: [],
         allowBacklog: true,
         backlogMode: '',
         allowRegular: true,
@@ -165,6 +178,23 @@ export default class ExamCycleCourseWorkspace extends LightningElement {
         return (match && match.value) || this.feeCriteriaOptionsData[0].value;
     }
 
+    @wire(getScheduleRows, { planId: '$selectedPlanId' })
+    wiredSchedule(result) {
+        this._wiredScheduleRef = result;
+        if (result.data) {
+            this.scheduleData = result.data;
+            this.scheduleError = '';
+            const allowed = new Set((result.data || []).map((r) => r.key));
+            this.selectedScheduleKeys = (this.selectedScheduleKeys || []).filter((k) => allowed.has(k));
+        } else if (result.error) {
+            this.scheduleData = [];
+            this.scheduleError = (result.error.body && result.error.body.message)
+                ? result.error.body.message
+                : 'Failed to load schedule.';
+            this.selectedScheduleKeys = [];
+        }
+    }
+
     @wire(getEnrollmentProgramsByPlan, { planId: '$selectedPlanId' })
     wiredEnrollmentPrograms(result) {
         this._wiredEnrollmentRef = result;
@@ -234,13 +264,64 @@ export default class ExamCycleCourseWorkspace extends LightningElement {
 
     get hasExamRows() { return this.examRows && this.examRows.length > 0; }
 
-    get scheduleRows() {
-        return [
-            { id: 's1', code: 'CS101', course: 'Intro to Computer Science', students: 145, date: '2026-05-01', time: '09:00 AM', duration: '3 hours', hall: 'A-Block Hall 1' },
-            { id: 's2', code: 'MATH201', course: 'Calculus II', students: 98, date: '2026-05-03', time: '09:00 AM', duration: '3 hours', hall: 'B-Block Hall 2' },
-            { id: 's3', code: 'PHY101', course: 'Physics I', students: 120, date: '2026-05-05', time: '02:00 PM', duration: '3 hours', hall: 'A-Block Hall 3' }
-        ];
+    get flatScheduleRows() {
+        const selected = new Set(this.selectedScheduleKeys || []);
+        const out = [];
+        (this.scheduleData || []).forEach((row) => {
+            const recs = (row.schedules && row.schedules.length) ? row.schedules : [null];
+            const code = row.courseNumber || '—';
+            const course = row.courseName || '—';
+            const students = row.enrolledStudents || 0;
+            const isSelected = selected.has(row.key);
+            recs.forEach((s, i) => {
+                out.push({
+                    rowKey: `${row.key}__${i}`,
+                    sectionKey: row.key,
+                    isFirst: i === 0,
+                    rowspan: recs.length,
+                    code,
+                    course,
+                    students,
+                    isSelected,
+                    booked: s && s.count != null ? s.count : '—',
+                    date: s ? this._formatDate(s.startDateTime) : '—',
+                    startTime: s ? this._formatTime(s.startDateTime) : '—',
+                    endTime: s ? this._formatTime(s.endDateTime) : '—',
+                    duration: s ? this._formatDuration(s.durationHours) : '—'
+                });
+            });
+        });
+        return out;
     }
+
+    get hasScheduleRows() { return (this.scheduleData || []).length > 0; }
+    get hasScheduleSelection() { return (this.selectedScheduleKeys || []).length > 0; }
+    get scheduleSelectionCount() { return (this.selectedScheduleKeys || []).length; }
+    get configureScheduleLabel() {
+        return `Configure Schedule (${this.scheduleSelectionCount})`;
+    }
+    get isConfigureDisabled() { return !this.hasScheduleSelection; }
+    get scheduleModalTitle() {
+        if (!this.scheduleModalRow) return 'Configure Schedule';
+        return `Configure Schedule — ${this.scheduleModalRow.code} ${this.scheduleModalRow.course}`;
+    }
+    get scheduleSetsForRender() {
+        return (this.scheduleSets || []).map((s, idx) => ({
+            ...s,
+            label: `Schedule ${idx + 1}`,
+            canRemove: this.scheduleSets.length > 1
+        }));
+    }
+    get scheduleSetsTotal() {
+        return (this.scheduleSets || []).reduce(
+            (sum, s) => sum + (s.count != null && s.count !== '' ? Number(s.count) : 0),
+            0
+        );
+    }
+    get scheduleEnrolledTotal() {
+        return this.scheduleModalRow ? this.scheduleModalRow.students : 0;
+    }
+    get scheduleSetsCount() { return (this.scheduleSets || []).length; }
 
     get seatingRows() {
         return [
@@ -322,9 +403,60 @@ export default class ExamCycleCourseWorkspace extends LightningElement {
         return this._requiresFeeDetails(this.enrollmentDraft.backlogFeeCriteria);
     }
 
+    get singleFeeRows() {
+        return this._renderFeeRows(this.enrollmentDraft.feeItems, 'feeItems');
+    }
+
+    get regularFeeRows() {
+        return this._renderFeeRows(this.enrollmentDraft.regularFeeItems, 'regularFeeItems');
+    }
+
+    get backlogFeeRows() {
+        return this._renderFeeRows(this.enrollmentDraft.backlogFeeItems, 'backlogFeeItems');
+    }
+
+    _renderFeeRows(rows, listName) {
+        const items = rows || [];
+        const totalRows = items.length;
+        return items.map((row, idx) => ({
+            ...row,
+            label: `Fee #${idx + 1}`,
+            canRemove: totalRows > 1,
+            options: this._availableFeeTypeOptions(items, row.feeTypeId),
+            listName
+        }));
+    }
+
+    _availableFeeTypeOptions(rows, currentValue) {
+        const taken = new Set(
+            (rows || [])
+                .map((r) => r.feeTypeId)
+                .filter((v) => v && v !== currentValue)
+        );
+        return (this.feeTypeOptionsData || []).filter((opt) => !taken.has(opt.value));
+    }
+
     _requiresFeeDetails(value) {
         if (!value) return false;
         return value !== NO_FEE_CRITERIA;
+    }
+
+    _newFeeRow() {
+        this._feeRowCounter += 1;
+        return {
+            rowKey: `feeRow_${this._feeRowCounter}`,
+            feeTypeId: '',
+            examFee: null
+        };
+    }
+
+    _ensureRowsForCriteria(listName, criteriaValue) {
+        if (!this._requiresFeeDetails(criteriaValue)) {
+            return [];
+        }
+        const existing = this.enrollmentDraft[listName] || [];
+        if (existing.length) return existing;
+        return [this._newFeeRow()];
     }
 
     get backlogRadioOptions() {
@@ -416,11 +548,17 @@ export default class ExamCycleCourseWorkspace extends LightningElement {
     handleStartEnrollment() {
         if (this.isStartEnrollmentDisabled) return;
         const defaultFee = this._defaultFeeCriteriaValue();
+        const feeCriteria = this.enrollmentDraft.feeCriteria || defaultFee;
+        const regularFeeCriteria = this.enrollmentDraft.regularFeeCriteria || defaultFee;
+        const backlogFeeCriteria = this.enrollmentDraft.backlogFeeCriteria || defaultFee;
         this.enrollmentDraft = {
             ...this.enrollmentDraft,
-            feeCriteria: this.enrollmentDraft.feeCriteria || defaultFee,
-            regularFeeCriteria: this.enrollmentDraft.regularFeeCriteria || defaultFee,
-            backlogFeeCriteria: this.enrollmentDraft.backlogFeeCriteria || defaultFee
+            feeCriteria,
+            regularFeeCriteria,
+            backlogFeeCriteria,
+            feeItems: this._ensureRowsForCriteria('feeItems', feeCriteria),
+            regularFeeItems: this._ensureRowsForCriteria('regularFeeItems', regularFeeCriteria),
+            backlogFeeItems: this._ensureRowsForCriteria('backlogFeeItems', backlogFeeCriteria)
         };
         this.enrollmentSaveError = '';
         this.showEnrollmentModal = true;
@@ -449,27 +587,79 @@ export default class ExamCycleCourseWorkspace extends LightningElement {
         if (fieldName === 'sameFeeCriteria') {
             const defaultFee = this._defaultFeeCriteriaValue();
             if (nextValue) {
-                if (!this.enrollmentDraft.feeCriteria) patch.feeCriteria = defaultFee;
+                const feeCriteria = this.enrollmentDraft.feeCriteria || defaultFee;
+                patch.feeCriteria = feeCriteria;
+                patch.feeItems = this._ensureRowsForCriteria('feeItems', feeCriteria);
             } else {
-                if (!this.enrollmentDraft.regularFeeCriteria) patch.regularFeeCriteria = defaultFee;
-                if (!this.enrollmentDraft.backlogFeeCriteria) patch.backlogFeeCriteria = defaultFee;
+                const regularFeeCriteria = this.enrollmentDraft.regularFeeCriteria || defaultFee;
+                const backlogFeeCriteria = this.enrollmentDraft.backlogFeeCriteria || defaultFee;
+                patch.regularFeeCriteria = regularFeeCriteria;
+                patch.backlogFeeCriteria = backlogFeeCriteria;
+                patch.regularFeeItems = this._ensureRowsForCriteria('regularFeeItems', regularFeeCriteria);
+                patch.backlogFeeItems = this._ensureRowsForCriteria('backlogFeeItems', backlogFeeCriteria);
             }
         }
 
-        if (fieldName === 'feeCriteria' && !this._requiresFeeDetails(nextValue)) {
-            patch.feeTypeId = '';
-            patch.examFee = null;
+        if (fieldName === 'feeCriteria') {
+            patch.feeItems = this._requiresFeeDetails(nextValue)
+                ? this._ensureRowsForCriteria('feeItems', nextValue)
+                : [];
         }
-        if (fieldName === 'regularFeeCriteria' && !this._requiresFeeDetails(nextValue)) {
-            patch.regularFeeTypeId = '';
-            patch.regularExamFee = null;
+        if (fieldName === 'regularFeeCriteria') {
+            patch.regularFeeItems = this._requiresFeeDetails(nextValue)
+                ? this._ensureRowsForCriteria('regularFeeItems', nextValue)
+                : [];
         }
-        if (fieldName === 'backlogFeeCriteria' && !this._requiresFeeDetails(nextValue)) {
-            patch.backlogFeeTypeId = '';
-            patch.backlogExamFee = null;
+        if (fieldName === 'backlogFeeCriteria') {
+            patch.backlogFeeItems = this._requiresFeeDetails(nextValue)
+                ? this._ensureRowsForCriteria('backlogFeeItems', nextValue)
+                : [];
         }
 
         this.enrollmentDraft = { ...this.enrollmentDraft, ...patch };
+    }
+
+    handleAddFeeRow(event) {
+        const listName = event.currentTarget.dataset.list;
+        if (!listName) return;
+        const existing = this.enrollmentDraft[listName] || [];
+        this.enrollmentDraft = {
+            ...this.enrollmentDraft,
+            [listName]: [...existing, this._newFeeRow()]
+        };
+    }
+
+    handleRemoveFeeRow(event) {
+        const listName = event.currentTarget.dataset.list;
+        const rowKey = event.currentTarget.dataset.row;
+        if (!listName || !rowKey) return;
+        const existing = this.enrollmentDraft[listName] || [];
+        if (existing.length <= 1) return;
+        this.enrollmentDraft = {
+            ...this.enrollmentDraft,
+            [listName]: existing.filter((row) => row.rowKey !== rowKey)
+        };
+    }
+
+    handleFeeRowFieldChange(event) {
+        const listName = event.currentTarget.dataset.list;
+        const rowKey = event.currentTarget.dataset.row;
+        const field = event.currentTarget.dataset.rowfield;
+        const element = event.target;
+        let value;
+        if (element.type === 'number') {
+            const raw = element.value;
+            value = raw === '' || raw === null || raw === undefined ? null : Number(raw);
+        } else {
+            value = element.value;
+        }
+        const existing = this.enrollmentDraft[listName] || [];
+        this.enrollmentDraft = {
+            ...this.enrollmentDraft,
+            [listName]: existing.map((row) =>
+                row.rowKey === rowKey ? { ...row, [field]: value } : row
+            )
+        };
     }
 
     async handleViewEligibility(event) {
@@ -524,7 +714,9 @@ export default class ExamCycleCourseWorkspace extends LightningElement {
     }
 
     get criteriaViewShowSingleFeeDetails() {
-        return this.criteriaViewShowSingleFee && this._requiresFeeDetails(this.criteriaView.feeCriteria);
+        return this.criteriaViewShowSingleFee
+            && this._requiresFeeDetails(this.criteriaView.feeCriteria)
+            && (this.criteriaView.feeItems || []).length > 0;
     }
 
     get criteriaViewShowSplitFees() {
@@ -532,11 +724,34 @@ export default class ExamCycleCourseWorkspace extends LightningElement {
     }
 
     get criteriaViewShowRegularFeeDetails() {
-        return this.criteriaViewShowSplitFees && this._requiresFeeDetails(this.criteriaView.regularFeeCriteria);
+        return this.criteriaViewShowSplitFees
+            && this._requiresFeeDetails(this.criteriaView.regularFeeCriteria)
+            && (this.criteriaView.regularFeeItems || []).length > 0;
     }
 
     get criteriaViewShowBacklogFeeDetails() {
-        return this.criteriaViewShowSplitFees && this._requiresFeeDetails(this.criteriaView.backlogFeeCriteria);
+        return this.criteriaViewShowSplitFees
+            && this._requiresFeeDetails(this.criteriaView.backlogFeeCriteria)
+            && (this.criteriaView.backlogFeeItems || []).length > 0;
+    }
+
+    get criteriaViewSingleFeeRows() {
+        return this._renderViewFeeRows(this.criteriaView && this.criteriaView.feeItems);
+    }
+
+    get criteriaViewRegularFeeRows() {
+        return this._renderViewFeeRows(this.criteriaView && this.criteriaView.regularFeeItems);
+    }
+
+    get criteriaViewBacklogFeeRows() {
+        return this._renderViewFeeRows(this.criteriaView && this.criteriaView.backlogFeeItems);
+    }
+
+    _renderViewFeeRows(rows) {
+        return (rows || []).map((row, idx) => ({
+            ...row,
+            label: `Fee #${idx + 1}`
+        }));
     }
 
     async handleSaveEnrollment() {
@@ -556,31 +771,33 @@ export default class ExamCycleCourseWorkspace extends LightningElement {
 
         const d = this.enrollmentDraft;
         const sameFee = !!d.sameFeeCriteria;
+
+        let cleanFeeItems = [];
+        let cleanRegularItems = [];
+        let cleanBacklogItems = [];
+
         if (sameFee) {
             if (!d.feeCriteria) {
                 this.enrollmentSaveError = 'Fee Criteria is required.';
                 return;
             }
             if (this._requiresFeeDetails(d.feeCriteria)) {
-                if (!d.feeTypeId) { this.enrollmentSaveError = 'Fee Type is required.'; return; }
-                if (d.examFee === null || d.examFee === undefined || d.examFee === '') {
-                    this.enrollmentSaveError = 'Exam Fee is required.'; return;
-                }
+                const validation = this._validateFeeRows(d.feeItems, 'Fee Type');
+                if (validation.error) { this.enrollmentSaveError = validation.error; return; }
+                cleanFeeItems = validation.items;
             }
         } else {
             if (!d.regularFeeCriteria) { this.enrollmentSaveError = 'Regular Fee Criteria is required.'; return; }
             if (this._requiresFeeDetails(d.regularFeeCriteria)) {
-                if (!d.regularFeeTypeId) { this.enrollmentSaveError = 'Regular Fee Type is required.'; return; }
-                if (d.regularExamFee === null || d.regularExamFee === undefined || d.regularExamFee === '') {
-                    this.enrollmentSaveError = 'Regular Exam Fee is required.'; return;
-                }
+                const validation = this._validateFeeRows(d.regularFeeItems, 'Regular Fee Type');
+                if (validation.error) { this.enrollmentSaveError = validation.error; return; }
+                cleanRegularItems = validation.items;
             }
             if (!d.backlogFeeCriteria) { this.enrollmentSaveError = 'Backlog Fee Criteria is required.'; return; }
             if (this._requiresFeeDetails(d.backlogFeeCriteria)) {
-                if (!d.backlogFeeTypeId) { this.enrollmentSaveError = 'Backlog Fee Type is required.'; return; }
-                if (d.backlogExamFee === null || d.backlogExamFee === undefined || d.backlogExamFee === '') {
-                    this.enrollmentSaveError = 'Backlog Exam Fee is required.'; return;
-                }
+                const validation = this._validateFeeRows(d.backlogFeeItems, 'Backlog Fee Type');
+                if (validation.error) { this.enrollmentSaveError = validation.error; return; }
+                cleanBacklogItems = validation.items;
             }
         }
 
@@ -595,14 +812,11 @@ export default class ExamCycleCourseWorkspace extends LightningElement {
                     lateFineOn: d.lateFineOn || null,
                     sameFeeCriteria: sameFee,
                     feeCriteria: sameFee ? (d.feeCriteria || null) : null,
-                    feeTypeId: sameFee && this._requiresFeeDetails(d.feeCriteria) ? (d.feeTypeId || null) : null,
-                    examFee: sameFee && this._requiresFeeDetails(d.feeCriteria) ? this._toNumber(d.examFee) : null,
+                    feeItems: sameFee ? cleanFeeItems : [],
                     regularFeeCriteria: !sameFee ? (d.regularFeeCriteria || null) : null,
-                    regularFeeTypeId: !sameFee && this._requiresFeeDetails(d.regularFeeCriteria) ? (d.regularFeeTypeId || null) : null,
-                    regularExamFee: !sameFee && this._requiresFeeDetails(d.regularFeeCriteria) ? this._toNumber(d.regularExamFee) : null,
+                    regularFeeItems: !sameFee ? cleanRegularItems : [],
                     backlogFeeCriteria: !sameFee ? (d.backlogFeeCriteria || null) : null,
-                    backlogFeeTypeId: !sameFee && this._requiresFeeDetails(d.backlogFeeCriteria) ? (d.backlogFeeTypeId || null) : null,
-                    backlogExamFee: !sameFee && this._requiresFeeDetails(d.backlogFeeCriteria) ? this._toNumber(d.backlogExamFee) : null,
+                    backlogFeeItems: !sameFee ? cleanBacklogItems : [],
                     allowBacklog: !!d.allowBacklog,
                     backlogMode: d.backlogMode || null,
                     allowRegular: !!d.allowRegular,
@@ -627,8 +841,226 @@ export default class ExamCycleCourseWorkspace extends LightningElement {
         }
     }
 
+    _validateFeeRows(rows, label) {
+        const items = rows || [];
+        if (!items.length) {
+            return { error: `Add at least one ${label}.`, items: [] };
+        }
+        const seen = new Set();
+        const cleaned = [];
+        for (let i = 0; i < items.length; i++) {
+            const row = items[i];
+            if (!row.feeTypeId) {
+                return { error: `${label} is required for Fee #${i + 1}.`, items: [] };
+            }
+            if (seen.has(row.feeTypeId)) {
+                return { error: `${label} must be unique — duplicate at Fee #${i + 1}.`, items: [] };
+            }
+            if (row.examFee === null || row.examFee === undefined || row.examFee === '') {
+                return { error: `Exam Fee is required for Fee #${i + 1}.`, items: [] };
+            }
+            seen.add(row.feeTypeId);
+            cleaned.push({ feeTypeId: row.feeTypeId, examFee: this._toNumber(row.examFee) });
+        }
+        return { error: '', items: cleaned };
+    }
+
     handleBack() {
         this.dispatchEvent(new CustomEvent('back'));
+    }
+
+    // ─── Schedule Tab Handlers ────────────────────────────────────────────────
+
+    handleScheduleSelect(event) {
+        const key = event.currentTarget.dataset.key;
+        const checked = event.target.checked;
+        this.selectedScheduleKeys = checked ? [key] : [];
+    }
+
+    handleOpenConfigureSchedule() {
+        if (!this.hasScheduleSelection) return;
+        const firstKey = this.selectedScheduleKeys[0];
+        const row = (this.scheduleData || []).find((r) => r.key === firstKey);
+        if (!row) return;
+
+        this.scheduleModalRow = {
+            key: row.key,
+            code: row.courseNumber || '—',
+            course: row.courseName || '—',
+            students: row.enrolledStudents || 0,
+            examIds: row.examIds || []
+        };
+
+        if (row.schedules && row.schedules.length) {
+            this.scheduleSets = row.schedules.map((s) => this._buildSetDraft({
+                count: s.count != null ? s.count : '',
+                startDateTime: this._toLocalInputValue(s.startDateTime),
+                endDateTime: this._toLocalInputValue(s.endDateTime)
+            }));
+        } else {
+            this.scheduleSets = [this._buildSetDraft({})];
+        }
+        this.scheduleSaveError = '';
+        this.showScheduleModal = true;
+    }
+
+    handleCloseScheduleModal() {
+        if (this.isSavingSchedule) return;
+        this.showScheduleModal = false;
+        this.scheduleModalRow = null;
+        this.scheduleSets = [];
+        this.scheduleSaveError = '';
+    }
+
+    handleAddScheduleSet() {
+        this.scheduleSets = [...this.scheduleSets, this._buildSetDraft({})];
+    }
+
+    handleRemoveScheduleSet(event) {
+        const id = event.currentTarget.dataset.setid;
+        if (this.scheduleSets.length <= 1) return;
+        this.scheduleSets = this.scheduleSets.filter((s) => s.id !== id);
+    }
+
+    handleScheduleSetFieldChange(event) {
+        const id = event.currentTarget.dataset.setid;
+        const field = event.currentTarget.dataset.field;
+        const element = event.target;
+        let value;
+        if (element.type === 'number') {
+            const raw = element.value;
+            value = raw === '' || raw === null || raw === undefined ? '' : Number(raw);
+        } else {
+            value = element.value;
+        }
+        this.scheduleSets = this.scheduleSets.map((s) => (s.id === id ? { ...s, [field]: value } : s));
+    }
+
+    async handleSaveSchedule() {
+        this.scheduleSaveError = '';
+        if (!this.scheduleModalRow) return;
+
+        const enrolled = this.scheduleModalRow.students || 0;
+        if (!this.scheduleSets || !this.scheduleSets.length) {
+            this.scheduleSaveError = 'Add at least one schedule.';
+            return;
+        }
+
+        for (let i = 0; i < this.scheduleSets.length; i++) {
+            const s = this.scheduleSets[i];
+            const label = `Schedule ${i + 1}`;
+            if (s.count === '' || s.count == null || Number(s.count) <= 0) {
+                this.scheduleSaveError = `${label}: enter a positive student count.`;
+                return;
+            }
+            if (!s.startDateTime || !s.endDateTime) {
+                this.scheduleSaveError = `${label}: start and end date-times are required.`;
+                return;
+            }
+            if (new Date(s.startDateTime).getTime() >= new Date(s.endDateTime).getTime()) {
+                this.scheduleSaveError = `${label}: end must be after start.`;
+                return;
+            }
+        }
+
+        if (this.scheduleSetsTotal !== enrolled) {
+            this.scheduleSaveError = `Total students to be booked (${this.scheduleSetsTotal}) must equal enrolled students (${enrolled}).`;
+            return;
+        }
+
+        this.isSavingSchedule = true;
+        try {
+            await saveScheduleConfiguration({
+                request: {
+                    examIds: this.scheduleModalRow.examIds,
+                    sets: this.scheduleSets.map((s) => ({
+                        count: Number(s.count),
+                        startDateTime: this._normalizeLocalDatetime(s.startDateTime),
+                        endDateTime: this._normalizeLocalDatetime(s.endDateTime)
+                    }))
+                }
+            });
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Success',
+                message: 'Schedule saved.',
+                variant: 'success'
+            }));
+            this.showScheduleModal = false;
+            this.scheduleModalRow = null;
+            this.scheduleSets = [];
+            this.selectedScheduleKeys = [];
+            await refreshApex(this._wiredScheduleRef);
+        } catch (err) {
+            this.scheduleSaveError = (err && err.body && err.body.message)
+                ? err.body.message
+                : 'Failed to save schedule.';
+        } finally {
+            this.isSavingSchedule = false;
+        }
+    }
+
+    _buildSetDraft({ count = '', startDateTime = '', endDateTime = '' }) {
+        this._scheduleSetCounter += 1;
+        return {
+            id: `set_${this._scheduleSetCounter}`,
+            count,
+            startDateTime,
+            endDateTime
+        };
+    }
+
+    _formatDate(value) {
+        if (!value) return '—';
+        const d = new Date(value);
+        if (Number.isNaN(d.getTime())) return '—';
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    _formatTime(value) {
+        if (!value) return '—';
+        const d = new Date(value);
+        if (Number.isNaN(d.getTime())) return '—';
+        let h = d.getHours();
+        const m = String(d.getMinutes()).padStart(2, '0');
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+        return `${String(h).padStart(2, '0')}:${m} ${ampm}`;
+    }
+
+    _formatDuration(hours) {
+        if (hours == null || hours === '') return '—';
+        const value = Number(hours);
+        if (Number.isNaN(value)) return '—';
+        if (Math.abs(value - Math.round(value)) < 0.01) return `${Math.round(value)} hrs`;
+        return `${value.toFixed(2)} hrs`;
+    }
+
+    _toLocalInputValue(value) {
+        if (!value) return '';
+        const d = new Date(value);
+        if (Number.isNaN(d.getTime())) return '';
+        const pad = (n) => String(n).padStart(2, '0');
+        const yyyy = d.getFullYear();
+        const mm = pad(d.getMonth() + 1);
+        const dd = pad(d.getDate());
+        const hh = pad(d.getHours());
+        const mi = pad(d.getMinutes());
+        return `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+    }
+
+    _normalizeLocalDatetime(value) {
+        if (!value) return '';
+        // lightning-input type="datetime-local" sometimes returns an ISO UTC
+        // string ending in "Z". Re-emit it as a naive browser-local string
+        // so what the user sees in the input is exactly what reaches Apex.
+        const d = new Date(value);
+        if (Number.isNaN(d.getTime())) return value;
+        const pad = (n) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` +
+            `T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
     }
 
     // ── Create Exam Plan ───────────────────────────────────────────────────

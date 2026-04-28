@@ -56,7 +56,7 @@
                             <input type="checkbox" checked={rememberMe} onchange={handleRememberMe} />
                             <span>Remember Me</span>
                         </label>
-                        <span class="forgot-password">Forgot Password? <a href="#">Reset</a></span>
+                        <span class="forgot-password">Forgot Password? <a href="javascript:void(0)" onclick={handleForgotPassword}>Reset</a></span>
                     </div>
 
                     <template lwc:if={hasError}>

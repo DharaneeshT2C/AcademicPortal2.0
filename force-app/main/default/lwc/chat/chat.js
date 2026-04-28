@@ -1,82 +1,122 @@
-import { LightningElement, track } from 'lwc';
+import { LightningElement, wire, track } from 'lwc';
+import { refreshApex } from '@salesforce/apex';
 import { chatData } from 'c/mockData';
-import getHistory from '@salesforce/apex/KenChatController.getHistory';
-import sendMessage from '@salesforce/apex/KenChatController.sendMessage';
+import getConversations from '@salesforce/apex/KenChatController.getConversations';
+import getHistory       from '@salesforce/apex/KenChatController.getHistory';
+import sendMessage      from '@salesforce/apex/KenChatController.sendMessage';
 
 /**
  * Peer-to-peer DM screen.
- *  ─ Left rail: contacts list with unread counts and online dots.
- *  ─ Right pane: WhatsApp/Slack-style bubbles, read receipts on sent msgs,
- *    composer at the bottom.
- *  Apex `getHistory` is wired but per-conversation seed data lives in the
- *  LWC (mockData.chatData.threads) so QA sees realistic conversations even
- *  before any Chat_Message__c rows exist.
+ *  ─ Conversations come from real Chat_Conversation__c records (peer name,
+ *    type, avatar live on the conversation row itself).
+ *  ─ Messages come from Chat_Message__c rows (Role__c='user' = self,
+ *    Role__c='assistant' = peer).
+ *  ─ When Apex returns nothing (preview / unauth / fresh org), we fall back
+ *    to the rich mock threads in c/mockData so the page is never blank.
  */
 export default class Chat extends LightningElement {
-    contacts = chatData.contacts;
-    _threads = chatData.threads || {};
-    @track _apexMessages;
-    @track selectedContact = chatData.contacts[0];
+    @track _convs = null;             // Apex conversations
+    @track _wireConvs;                // wire response, for refreshApex
+    @track _apexMessages = null;      // current thread (Apex)
+    @track _selectedId = null;        // active conversation id (real or 'CT00x' fallback)
     @track newMessage = '';
     @track _chatError;
 
-    connectedCallback() {
-        this.loadHistory();
+    /* Mock contact list kept as a UI config helper so the page is never
+       blank in preview/unauth mode. Real message threads come from Apex only. */
+    _mockContacts = chatData.contacts;
+    _mockThreads  = {};
+    @track _mockThreadOverlay = {};   // optimistic sends while in mock mode
+
+    @wire(getConversations)
+    wiredConversations(response) {
+        this._wireConvs = response;
+        const { data, error } = response;
+        if (data && data.length) {
+            this._convs = data;
+            // Auto-select first conversation if none yet
+            if (!this._selectedId) {
+                this._selectedId = data[0].id;
+                this.loadHistory();
+            }
+        } else if (error) {
+            // eslint-disable-next-line no-console
+            console.warn('[chat] getConversations failed, using mock contacts:', error);
+            this._convs = null;
+            if (!this._selectedId && this._mockContacts.length) {
+                this._selectedId = this._mockContacts[0].id;
+            }
+        } else {
+            // No real conversations — use mock contacts.
+            this._convs = null;
+            if (!this._selectedId && this._mockContacts.length) {
+                this._selectedId = this._mockContacts[0].id;
+            }
+        }
     }
 
-    /**
-     * Try to load real Apex history for the selected contact. If the call
-     * fails or returns nothing meaningful, we keep `_apexMessages` null and
-     * the getter falls back to the per-contact mock thread.
-     */
-    loadHistory() {
-        const conversationId = this.selectedContact && this.selectedContact.id;
-        if (!conversationId) return;
-        getHistory({ conversationId })
-            .then(data => {
-                // Only adopt the Apex thread if it has at least one real
-                // peer message; otherwise keep the richer mock thread.
-                if (data && data.length > 1) this._apexMessages = data;
-                else this._apexMessages = null;
-            })
-            .catch(err => {
-                // eslint-disable-next-line no-console
-                console.warn('[chat] getHistory failed, using seed:', err);
-                this._apexMessages = null;
-            });
-    }
+    /** True when we have real Apex conversations to render. */
+    get _isLive() { return !!(this._convs && this._convs.length); }
 
-    /** Source of truth for the active thread. */
-    get _activeThread() {
-        if (this._apexMessages && this._apexMessages.length) return this._apexMessages;
-        const id = this.selectedContact && this.selectedContact.id;
-        return (id && this._threads[id]) || [];
+    /** Selected contact (either a real conversation row or a mock contact). */
+    get selectedContact() {
+        if (this._isLive) {
+            const c = this._convs.find(x => x.id === this._selectedId) || this._convs[0];
+            return {
+                id: c.id,
+                name: c.name,
+                type: c.type,
+                avatar: c.avatar,
+                online: false
+            };
+        }
+        return this._mockContacts.find(c => c.id === this._selectedId) || this._mockContacts[0];
     }
 
     get formattedContacts() {
-        return this.contacts.map(c => {
-            const isSel = c.id === this.selectedContact.id;
+        const list = this._isLive
+            ? this._convs.map(c => ({
+                id: c.id,
+                name: c.name,
+                type: c.type,
+                avatar: c.avatar,
+                lastMessage: c.lastMessage,
+                time: c.timeAgo,
+                unread: c.unread || 0,
+                online: false
+              }))
+            : this._mockContacts;
+
+        return list.map(c => {
+            const isSel = c.id === this._selectedId;
             return {
                 ...c,
                 isSelected: isSel,
                 contactClass: isSel ? 'contact-item selected' : 'contact-item',
-                hasUnread: !isSel && c.unread > 0,
-                unreadLabel: c.unread > 9 ? '9+' : String(c.unread || '')
+                hasUnread: !isSel && (c.unread || 0) > 0,
+                unreadLabel: (c.unread || 0) > 9 ? '9+' : String(c.unread || '')
             };
         });
+    }
+
+    /** Active thread. Apex when live, mock otherwise. */
+    get _activeThread() {
+        if (this._isLive) return this._apexMessages || [];
+        const overlay = this._mockThreadOverlay[this._selectedId];
+        if (overlay) return overlay;
+        return this._mockThreads[this._selectedId] || [];
     }
 
     /**
      * Normalise message shape from either:
      *   - Apex DTO  { id, role: 'user'|'assistant', body, createdAt }
      *   - Mock data { id, sender: 'self'|'other', text, time, status }
-     * Renders bubble class + read-receipt tick state.
      */
     get formattedMessages() {
         const msgs = this._activeThread || [];
         return msgs.map((m, idx) => {
             const isSelf = (m.sender === 'self') || (m.role === 'user');
-            const status = m.status || (isSelf ? 'sent' : null);
+            const status = m.status || (isSelf ? 'read' : null);
             return {
                 id: m.id || ('msg-' + idx),
                 text: m.text || m.body || '',
@@ -95,7 +135,7 @@ export default class Chat extends LightningElement {
     get headerStatus() {
         const c = this.selectedContact || {};
         if (c.online) return 'online';
-        return c.type || 'offline';
+        return c.type || '';
     }
     get headerStatusClass() {
         return (this.selectedContact && this.selectedContact.online)
@@ -107,13 +147,26 @@ export default class Chat extends LightningElement {
 
     handleContactSelect(event) {
         const id = event.currentTarget.dataset.id;
-        const next = this.contacts.find(c => c.id === id);
-        if (!next || next.id === this.selectedContact.id) return;
-        // Clear unread on selection (optimistic).
-        if (next.unread) next.unread = 0;
-        this.selectedContact = next;
+        if (!id || id === this._selectedId) return;
+        this._selectedId = id;
         this._apexMessages = null;
-        this.loadHistory();
+        if (this._isLive) this.loadHistory();
+    }
+
+    /** Fetch messages for the active conversation from Apex. */
+    loadHistory() {
+        if (!this._isLive) return;
+        const conversationId = this._selectedId;
+        if (!conversationId) return;
+        getHistory({ conversationId })
+            .then(data => {
+                this._apexMessages = data || [];
+            })
+            .catch(err => {
+                // eslint-disable-next-line no-console
+                console.warn('[chat] getHistory failed:', err);
+                this._apexMessages = [];
+            });
     }
 
     handleMessageChange(event) { this.newMessage = event.target.value; }
@@ -130,55 +183,52 @@ export default class Chat extends LightningElement {
         if (!body) return;
         const sentBody = body;
         this.newMessage = '';
-
-        // Optimistic insert into the active thread.
         const tempId = 'tmp-' + Date.now();
         const nowLabel = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        if (this._isLive) {
+            // Optimistic insert into the apex thread.
+            const optimistic = { id: tempId, role: 'user', body: sentBody, createdAt: nowLabel, status: 'sent' };
+            this._apexMessages = [...(this._apexMessages || []), optimistic];
+
+            sendMessage({ conversationId: this._selectedId, body: sentBody })
+                .then(saved => {
+                    // Replace temp with real saved record.
+                    this._apexMessages = (this._apexMessages || []).map(m =>
+                        m.id === tempId ? { ...saved, status: 'delivered' } : m
+                    );
+                    setTimeout(() => this._markStatus(saved.id, 'read'), 1500);
+                    if (this._wireConvs) refreshApex(this._wireConvs);
+                })
+                .catch(err => {
+                    this._apexMessages = (this._apexMessages || []).filter(m => m.id !== tempId);
+                    this.newMessage = sentBody;
+                    this._chatError = (err && err.body && err.body.message)
+                        ? err.body.message
+                        : 'Could not send your message.';
+                });
+            return;
+        }
+
+        // ── Mock-mode path: optimistic local-only echo. ──────────────────
         const optimistic = { id: tempId, sender: 'self', text: sentBody, time: nowLabel, status: 'sent' };
-        const contactId = this.selectedContact && this.selectedContact.id;
-
-        if (this._apexMessages) {
-            this._apexMessages = [...this._apexMessages, { id: tempId, role: 'user', body: sentBody, createdAt: nowLabel, status: 'sent' }];
-        } else if (contactId) {
-            const next = (this._threads[contactId] || []).slice();
-            next.push(optimistic);
-            this._threads = { ...this._threads, [contactId]: next };
-        }
-
-        sendMessage({ conversationId: contactId, body: sentBody })
-            .then(() => {
-                // Mark the temp message as delivered.
-                this._markStatus(contactId, tempId, 'delivered');
-                // After a short delay simulate the peer reading it.
-                setTimeout(() => this._markStatus(contactId, tempId, 'read'), 1500);
-            })
-            .catch(err => {
-                // Roll back on failure.
-                this._removeFromThread(contactId, tempId);
-                this.newMessage = sentBody;
-                this._chatError = (err && err.body && err.body.message)
-                    ? err.body.message
-                    : 'Could not send your message.';
-            });
+        const base = (this._mockThreadOverlay[this._selectedId] || this._mockThreads[this._selectedId] || []).slice();
+        base.push(optimistic);
+        this._mockThreadOverlay = { ...this._mockThreadOverlay, [this._selectedId]: base };
+        // Simulate progression for visual realism.
+        setTimeout(() => this._mockMarkStatus(this._selectedId, tempId, 'delivered'), 400);
+        setTimeout(() => this._mockMarkStatus(this._selectedId, tempId, 'read'),      1800);
     }
 
-    _markStatus(contactId, id, status) {
-        if (this._apexMessages) {
-            this._apexMessages = this._apexMessages.map(m =>
-                m.id === id ? { ...m, status } : m);
-            return;
-        }
-        const arr = (this._threads[contactId] || []).map(m =>
+    _markStatus(id, status) {
+        if (!this._isLive) return;
+        this._apexMessages = (this._apexMessages || []).map(m =>
             m.id === id ? { ...m, status } : m);
-        this._threads = { ...this._threads, [contactId]: arr };
     }
-    _removeFromThread(contactId, id) {
-        if (this._apexMessages) {
-            this._apexMessages = this._apexMessages.filter(m => m.id !== id);
-            return;
-        }
-        const arr = (this._threads[contactId] || []).filter(m => m.id !== id);
-        this._threads = { ...this._threads, [contactId]: arr };
+    _mockMarkStatus(contactId, id, status) {
+        const arr = (this._mockThreadOverlay[contactId] || []).map(m =>
+            m.id === id ? { ...m, status } : m);
+        this._mockThreadOverlay = { ...this._mockThreadOverlay, [contactId]: arr };
     }
 
     handleDismissChatError() { this._chatError = null; }

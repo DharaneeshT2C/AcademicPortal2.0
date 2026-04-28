@@ -1,6 +1,5 @@
 import { LightningElement, wire, track } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
-import { notifications as seedNotifications } from 'c/mockData';
 import getNotifications from '@salesforce/apex/KenNotificationsController.getNotifications';
 import markAllRead      from '@salesforce/apex/KenNotificationsController.markAllRead';
 import markRead         from '@salesforce/apex/KenNotificationsController.markRead';
@@ -20,8 +19,11 @@ export default class NotificationsPage extends LightningElement {
         const { data, error } = response;
         if (data) this._apex = data;
         else if (error) {
-            // eslint-disable-next-line no-console
-            console.warn('[notificationsPage] Apex failed, using seed:', error);
+            const _msg = (error && error.body && error.body.message) || '';
+            if (_msg && !_msg.includes('not have access') && !_msg.includes('No rows')) {
+                // eslint-disable-next-line no-console
+                console.warn('[notificationsPage] Apex failed, using seed:', error);
+            }
         }
     }
 
@@ -31,7 +33,7 @@ export default class NotificationsPage extends LightningElement {
      * Normalise both into a single shape the template can render.
      */
     get formattedNotifications() {
-        const source = (this._apex && this._apex.length) ? this._apex : seedNotifications;
+        const source = (this._apex && this._apex.length) ? this._apex : [];
         return source.map(n => {
             const overlay = this._localOverlay[n.id] || {};
             const decision = overlay.decision || n.decision;

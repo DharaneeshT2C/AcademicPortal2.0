@@ -1,15 +1,10 @@
 import { LightningElement, wire, track } from 'lwc';
-import { NavigationMixin } from 'lightning/navigation';
-import { pageNameForRoute } from 'c/navHelper';
 import { refreshApex } from '@salesforce/apex';
-import { hostelDetailData } from 'c/mockData';
 import getHostelDetails from '@salesforce/apex/KenHostelDetailsController.getHostelDetails';
 import submitAllocationRequest from '@salesforce/apex/KenHostelDetailsController.submitAllocationRequest';
 
-export default class HostelDetails extends NavigationMixin(LightningElement) {
+export default class HostelDetails extends LightningElement {
     @track _apex;
-    // Seed fallback retained for template bindings.
-    _seed = hostelDetailData;
 
     @track _wireResp;
     @wire(getHostelDetails)
@@ -18,14 +13,16 @@ export default class HostelDetails extends NavigationMixin(LightningElement) {
         const { data, error } = response;
         if (data) this._apex = data;
         else if (error) {
-            // eslint-disable-next-line no-console
-            console.warn('[hostelDetails] Apex failed, using seed:', error);
+            const _msg = (error && error.body && error.body.message) || '';
+            if (_msg && !_msg.includes('not have access') && !_msg.includes('No rows')) {
+                // eslint-disable-next-line no-console
+                console.warn('[hostelDetails] Apex failed, using seed:', error);
+            }
         }
     }
 
     get data() {
-        if (this._apex) return Object.assign({}, this._seed, this._apex);
-        return this._seed;
+        return this._apex || {};
     }
 
     get formattedLeaveRequests() {
@@ -74,11 +71,6 @@ export default class HostelDetails extends NavigationMixin(LightningElement) {
             });
     }
 
-    navigateTo(route) {
-        this[NavigationMixin.Navigate]({
-            type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute(route) }
-        });
-    }
+    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
     handleBack() { this.navigateTo('campus-life'); }
 }

@@ -1,5 +1,4 @@
 import { LightningElement, wire, track } from 'lwc';
-import { feedbackData } from 'c/mockData';
 import getActiveSurvey from '@salesforce/apex/KenFeedbackController.getActiveSurvey';
 import submitFeedback from '@salesforce/apex/KenFeedbackController.submitFeedback';
 
@@ -8,7 +7,6 @@ export default class FeedbackPage extends LightningElement {
     @track _toastVisible = false;
     @track _toastMessage = '';
     @track _toastVariant = 'success';
-    _seed = feedbackData;
 
     showAToast(msg, v = 'success') { this._toastMessage = msg; this._toastVariant = v; this._toastVisible = true; }
     handleToastClose() { this._toastVisible = false; }
@@ -20,14 +18,16 @@ export default class FeedbackPage extends LightningElement {
     wiredSurvey({ data, error }) {
         if (data) this._apex = data;
         else if (error) {
-            // eslint-disable-next-line no-console
-            console.warn('[feedbackPage] Apex failed, using seed:', error);
+            const _msg = (error && error.body && error.body.message) || '';
+            if (_msg && !_msg.includes('not have access') && !_msg.includes('No rows')) {
+                // eslint-disable-next-line no-console
+                console.warn('[feedbackPage] Apex failed, using seed:', error);
+            }
         }
     }
 
     get data() {
-        if (this._apex) return Object.assign({}, this._seed, this._apex);
-        return this._seed;
+        return this._apex || {};
     }
 
     get formCards() {

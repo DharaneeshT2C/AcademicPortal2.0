@@ -9,7 +9,7 @@
  *  TODO[SOBJECT]: Wire to `Club__c` and `Club_Membership__c`.
  * ************************************************************************************************
  */
-public with sharing class KenClubsController {
+public without sharing class KenClubsController {
 
     public class ClubDTO {
         @AuraEnabled public String  id;
@@ -26,20 +26,15 @@ public with sharing class KenClubsController {
         try {
             // Pull live Club__c rows; figure out which ones the running student
             // has joined to set isJoined.
+            // Club__c is a global catalog object (no per-student sharing).
+            // SYSTEM_MODE so community users can browse all clubs.
             List<Club__c> rows = [
                 SELECT Id, Name, Category__c, Description__c, Member_Count__c, Image_Url__c
                 FROM Club__c
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 ORDER BY Name
                 LIMIT 200
             ];
-            if (rows.isEmpty()) {
-                List<ClubDTO> all = seedClubs();
-                if (String.isBlank(category) || category == 'All') return all;
-                List<ClubDTO> f = new List<ClubDTO>();
-                for (ClubDTO c : all) if (c.category == category) f.add(c);
-                return f;
-            }
             // Joined-club ids for the running student
             Set<Id> joined = new Set<Id>();
             Id contactId = KenRunningStudentHelper.optionalContactId();
@@ -47,7 +42,7 @@ public with sharing class KenClubsController {
                 for (Club_Membership__c m : [
                     SELECT Club__c FROM Club_Membership__c
                     WHERE Student__c = :contactId AND Status__c IN ('Active','Interested')
-                    WITH USER_MODE
+                    WITH SECURITY_ENFORCED
                 ]) joined.add(m.Club__c);
             }
             List<ClubDTO> out = new List<ClubDTO>();
@@ -82,7 +77,7 @@ public with sharing class KenClubsController {
             List<Club_Membership__c> existing = [
                 SELECT Id, Status__c FROM Club_Membership__c
                 WHERE Club__c = :clubId AND Student__c = :studentId
-                WITH USER_MODE LIMIT 1
+                WITH SECURITY_ENFORCED LIMIT 1
             ];
             if (!existing.isEmpty()) return;
             KenCrudFlsHelper.assertCreateable(Club_Membership__c.SObjectType);
@@ -148,20 +143,4 @@ public with sharing class KenClubsController {
         }
     }
 
-    private static List<ClubDTO> seedClubs() {
-        List<ClubDTO> out = new List<ClubDTO>();
-        out.add(club('CL001', 'Coding Club',         'Technical',   'Hackathons, weekly build sessions, mentorship.', 248, false, ''));
-        out.add(club('CL002', 'UI/UX Society',       'Technical',   'Design critiques, workshops, portfolio reviews.', 132, true,  ''));
-        out.add(club('CL003', 'Debate Club',         'Cultural',    'MUN, parliamentary debate, public speaking.',     86,  false, ''));
-        out.add(club('CL004', 'Photography Society', 'Arts',        'Photo walks, workshops, annual exhibition.',     104, false, ''));
-        out.add(club('CL005', 'Sports Council',      'Sports',      'Inter-college tournaments, fitness drives.',     310, false, ''));
-        return out;
-    }
-
-    private static ClubDTO club(String id, String name, String cat, String descText, Integer count, Boolean joined, String img) {
-        ClubDTO c = new ClubDTO();
-        c.id = id; c.name = name; c.category = cat; c.description = descText;
-        c.memberCount = count; c.isJoined = joined; c.imageUrl = img;
-        return c;
-    }
 }

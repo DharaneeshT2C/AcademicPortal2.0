@@ -7,37 +7,55 @@
                     <h3 class="section-title">Featured Events</h3>
                     <button class="btn-outline" onclick={handleEvents}>View More</button>
                 </div>
-                <div class="events-row">
-                    <template for:each={formattedEvents} for:item="event">
-                        <div key={event.id} class="event-card">
-                            <div class="event-thumb">
-                                <img src={event.imgUrl} alt="Event" class="event-img" />
-                                <span class="event-type-badge">{event.type}</span>
-                            </div>
-                            <div class="event-content">
-                                <h4 class="event-title">{event.title}</h4>
-                                <p class="event-mode"><c-icon name="circle" size="8"></c-icon> {event.mode}</p>
-                                <div class="event-meta-row">
-                                    <span class="event-chip"><c-icon name="calendar_today" size="12"></c-icon> {event.date}</span>
-                                    <span class="event-chip"><c-icon name="schedule" size="12"></c-icon> {event.time}</span>
+                <template lwc:if={hasEvents}>
+                    <div class="events-row">
+                        <template for:each={formattedEvents} for:item="event">
+                            <div key={event.id} class="event-card">
+                                <div class="event-thumb">
+                                    <img src={event.imgUrl} alt="Event" class="event-img" />
+                                    <span class="event-type-badge">{event.type}</span>
+                                </div>
+                                <div class="event-content">
+                                    <h4 class="event-title">{event.title}</h4>
+                                    <p class="event-mode"><c-icon name="circle" size="8"></c-icon> {event.mode}</p>
+                                    <div class="event-meta-row">
+                                        <span class="event-chip"><c-icon name="calendar_today" size="12"></c-icon> {event.date}</span>
+                                        <span class="event-chip"><c-icon name="schedule" size="12"></c-icon> {event.time}</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </template>
-                </div>
+                        </template>
+                    </div>
+                </template>
+                <template lwc:else>
+                    <div class="empty-state">
+                        <c-icon name="info" size="32"></c-icon>
+                        <p class="empty-msg">No featured events right now</p>
+                        <p class="empty-sub">New events will show up here as they are scheduled.</p>
+                    </div>
+                </template>
             </div>
 
             <div class="card clubs-card">
                 <h3 class="section-title">Discover Clubs</h3>
-                <div class="club-list">
-                    <template for:each={data.clubs} for:item="club">
-                        <div key={club.id} class="club-list-item" onclick={handleClubs}>
-                            <img src={club.thumb} alt={club.name} class="club-thumb" />
-                            <span class="club-label">{club.name}</span>
-                            <c-icon name="arrow_forward_ios" size="14"></c-icon>
-                        </div>
-                    </template>
-                </div>
+                <template lwc:if={hasClubs}>
+                    <div class="club-list">
+                        <template for:each={clubsList} for:item="club">
+                            <div key={club.id} class="club-list-item" onclick={handleClubs}>
+                                <img src={club.thumb} alt={club.name} class="club-thumb" />
+                                <span class="club-label">{club.name}</span>
+                                <c-icon name="arrow_forward_ios" size="14"></c-icon>
+                            </div>
+                        </template>
+                    </div>
+                </template>
+                <template lwc:else>
+                    <div class="empty-state">
+                        <c-icon name="info" size="32"></c-icon>
+                        <p class="empty-msg">No clubs to discover yet</p>
+                        <p class="empty-sub">Check back soon for new clubs to join.</p>
+                    </div>
+                </template>
                 <button class="btn-primary full-width" onclick={handleClubs}>Explore Clubs</button>
             </div>
 
@@ -46,84 +64,111 @@
                     <h3 class="section-title">Gate Pass</h3>
                     <button class="btn-outline" onclick={handleGatePass}>View All</button>
                 </div>
-                <div class="gp-list">
-                    <div class="gp-item" onclick={handleGatePass}>
-                        <div class="gp-info"><span class="gp-count">{data.gatePass.activeCount}</span> Active Gate Passes</div>
-                        <c-icon name="arrow_forward_ios" size="16"></c-icon>
+                <template lwc:if={hasGatePassData}>
+                    <div class="gp-list">
+                        <div class="gp-item" onclick={handleGatePass}>
+                            <div class="gp-info"><span class="gp-count">{gatePassCounts.active}</span> Active Gate Passes</div>
+                            <c-icon name="arrow_forward_ios" size="16"></c-icon>
+                        </div>
+                        <div class="gp-item" onclick={handleGatePass}>
+                            <div class="gp-info"><span class="gp-count">{gatePassCounts.expired}</span> Expired Passes</div>
+                            <c-icon name="arrow_forward_ios" size="16"></c-icon>
+                        </div>
+                        <div class="gp-item" onclick={handleGatePass}>
+                            <div class="gp-info"><span class="gp-count">{gatePassCounts.upcoming}</span> Upcoming Passes</div>
+                            <c-icon name="arrow_forward_ios" size="16"></c-icon>
+                        </div>
+                        <div class="gp-item" onclick={handleGatePass}>
+                            <div class="gp-info"><span class="gp-count">{gatePassCounts.notUsed}</span> Pending Passes</div>
+                            <c-icon name="arrow_forward_ios" size="16"></c-icon>
+                        </div>
                     </div>
-                    <div class="gp-item" onclick={handleGatePass}>
-                        <div class="gp-info"><span class="gp-count">10+</span> Expired Passes</div>
-                        <c-icon name="arrow_forward_ios" size="16"></c-icon>
+                </template>
+                <template lwc:else>
+                    <div class="empty-state">
+                        <c-icon name="info" size="32"></c-icon>
+                        <p class="empty-msg">No gate passes yet</p>
+                        <p class="empty-sub">Create your first one to leave campus.</p>
                     </div>
-                    <div class="gp-item" onclick={handleGatePass}>
-                        <div class="gp-info"><span class="gp-count">{data.gatePass.upcomingCount}</span> More Upcoming Passes</div>
-                        <c-icon name="arrow_forward_ios" size="16"></c-icon>
-                    </div>
-                    <div class="gp-item" onclick={handleGatePass}>
-                        <div class="gp-info"><span class="gp-count">{data.gatePass.notUsedCount}</span> Passes Not Used</div>
-                        <c-icon name="arrow_forward_ios" size="16"></c-icon>
-                    </div>
-                </div>
+                </template>
                 <button class="btn-primary full-width" onclick={handleCreateGatePass}>Create a Gate Pass</button>
             </div>
 
             <div class="card hostel-card">
                 <h3 class="section-title">Hostel Details</h3>
-                <div class="room-row">
-                    <span class="room-number">{data.hostel.roomNo}</span>
-                    <span class="room-type-badge">{data.hostel.type}</span>
-                </div>
-                <p class="room-location"><c-icon name="location_on" size="16"></c-icon> {data.hostel.building}</p>
-                <div class="hostel-people">
-                    <div class="people-section">
-                        <h4 class="people-label">Roommates</h4>
-                        <div class="avatar-stack">
-                            <template for:each={roommateAvatars} for:item="av">
-                                <img key={av} src={av} alt="Roommate" class="avatar-circle-img" />
-                            </template>
+                <template lwc:if={hasHostel}>
+                    <div class="room-row">
+                        <span class="room-number">{hostel.roomNo}</span>
+                        <span class="room-type-badge">{hostel.type}</span>
+                    </div>
+                    <p class="room-location"><c-icon name="location_on" size="16"></c-icon> {hostel.building}</p>
+                    <div class="hostel-people">
+                        <div class="people-section">
+                            <h4 class="people-label">Roommates</h4>
+                            <div class="avatar-stack">
+                                <template for:each={roommateAvatars} for:item="av">
+                                    <img key={av} src={av} alt="Roommate" class="avatar-circle-img" />
+                                </template>
+                            </div>
+                        </div>
+                        <div class="people-section">
+                            <h4 class="people-label">Warden</h4>
+                            <p class="warden-name">{hostel.warden.name}</p>
+                            <p class="warden-email"><c-icon name="email" size="14"></c-icon> {hostel.warden.email}</p>
                         </div>
                     </div>
-                    <div class="people-section">
-                        <h4 class="people-label">Warden</h4>
-                        <p class="warden-name">{data.hostel.warden.name}</p>
-                        <p class="warden-email"><c-icon name="email" size="14"></c-icon> {data.hostel.warden.email}</p>
+                </template>
+                <template lwc:else>
+                    <div class="empty-state">
+                        <c-icon name="info" size="32"></c-icon>
+                        <p class="empty-msg">No hostel allocation yet</p>
+                        <p class="empty-sub">Once you are allocated a room, details will show up here.</p>
                     </div>
-                </div>
+                </template>
                 <button class="btn-primary full-width" onclick={handleHostel}>View Details</button>
             </div>
 
             <div class="card mess-card">
                 <h3 class="section-title">Mess Details</h3>
-                <div class="mess-grid">
-                    <div class="meal-item">
-                        <div class="meal-icon-wrap meal-breakfast"><c-icon name="free_breakfast" size="22"></c-icon></div>
-                        <div class="meal-info">
-                            <strong>Breakfast</strong>
-                            <span>{data.mess.breakfast.time}</span>
+                <template lwc:if={hasMess}>
+                    <div class="mess-grid">
+                        <div class="meal-item">
+                            <div class="meal-icon-wrap meal-breakfast"><c-icon name="free_breakfast" size="22"></c-icon></div>
+                            <div class="meal-info">
+                                <strong>Breakfast</strong>
+                                <span>{messMeals.breakfast.time}</span>
+                            </div>
+                        </div>
+                        <div class="meal-item">
+                            <div class="meal-icon-wrap meal-lunch"><c-icon name="lunch_dining" size="22"></c-icon></div>
+                            <div class="meal-info">
+                                <strong>Lunch</strong>
+                                <span>{messMeals.lunch.time}</span>
+                            </div>
+                        </div>
+                        <div class="meal-item">
+                            <div class="meal-icon-wrap meal-snacks"><c-icon name="local_cafe" size="22"></c-icon></div>
+                            <div class="meal-info">
+                                <strong>Snacks</strong>
+                                <span>{messMeals.snacks.time}</span>
+                            </div>
+                        </div>
+                        <div class="meal-item">
+                            <div class="meal-icon-wrap meal-dinner"><c-icon name="dinner_dining" size="22"></c-icon></div>
+                            <div class="meal-info">
+                                <strong>Dinner</strong>
+                                <span>{messMeals.dinner.time}</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="meal-item">
-                        <div class="meal-icon-wrap meal-lunch"><c-icon name="lunch_dining" size="22"></c-icon></div>
-                        <div class="meal-info">
-                            <strong>Lunch</strong>
-                            <span>{data.mess.lunch.time}</span>
-                        </div>
+                </template>
+                <template lwc:else>
+                    <div class="empty-state">
+                        <c-icon name="info" size="32"></c-icon>
+                        <p class="empty-msg">Mess menu not published</p>
+                        <p class="empty-sub">This week's menu will appear here once published.</p>
                     </div>
-                    <div class="meal-item">
-                        <div class="meal-icon-wrap meal-snacks"><c-icon name="local_cafe" size="22"></c-icon></div>
-                        <div class="meal-info">
-                            <strong>Snacks</strong>
-                            <span>{data.mess.snacks.time}</span>
-                        </div>
-                    </div>
-                    <div class="meal-item">
-                        <div class="meal-icon-wrap meal-dinner"><c-icon name="dinner_dining" size="22"></c-icon></div>
-                        <div class="meal-info">
-                            <strong>Dinner</strong>
-                            <span>{data.mess.dinner.time}</span>
-                        </div>
-                    </div>
-                </div>
+                </template>
                 <button class="btn-outline full-width" onclick={handleMess}>View Details</button>
             </div>
 

@@ -84,9 +84,9 @@
                     <div class="panel-header">
                         <div>
                             <div class="section-eyebrow">Backlog</div>
-                            <h2>Unscheduled Course Offerings</h2>
+                            <h2>Course Offerings</h2>
                         </div>
-                        <span class="badge">{unscheduledCount}</span>
+                        <span class="badge">{totalOfferings}</span>
                     </div>
 
                     <div class="backlog-scroll">
@@ -115,6 +115,7 @@
                                     <template if:true={offering.lockLabel}>
                                         <div class="template-chip lock-chip">{offering.lockLabel}</div>
                                     </template>
+                                    <div class={offering.scheduleStatusClass}>{offering.scheduleStatusLabel}</div>
                                     <template if:true={offering.templateName}>
                                         <div class="template-chip">Template: {offering.templateName}</div>
                                     </template>
@@ -130,7 +131,7 @@
                         </template>
 
                         <template if:false={hasBacklogOfferings}>
-                            <div class="empty-panel">All course offerings in this term already have schedules.</div>
+                            <div class="empty-panel">No course offerings found for this term.</div>
                         </template>
                     </div>
                     </div>
@@ -142,7 +143,20 @@
                             <div class="section-eyebrow">Grid</div>
                             <h2>Weekly Timetable</h2>
                         </div>
-                        <p class="panel-caption">Drag an unscheduled offering to a day/time cell or open any scheduled chip to edit all its weekday rows.</p>
+                        <div class="week-controls grid-week-controls" aria-label="Selected timetable week">
+                            <button class="week-button" type="button" onclick={handlePreviousWeek}>
+                                <lightning-icon icon-name="utility:chevronleft" size="xx-small" alternative-text="Previous week"></lightning-icon>
+                            </button>
+                            <label class="week-date-field">
+                                <span>Week</span>
+                                <input type="date" value={selectedWeekStartDate} onchange={handleWeekStartChange} />
+                            </label>
+                            <span class="week-range">{weekRangeLabel}</span>
+                            <button class="week-button" type="button" onclick={handleNextWeek}>
+                                <lightning-icon icon-name="utility:chevronright" size="xx-small" alternative-text="Next week"></lightning-icon>
+                            </button>
+                            <button class="this-week-button" type="button" onclick={handleThisWeek}>This Week</button>
+                        </div>
                     </div>
 
                     <div class="grid-scroll">
@@ -188,6 +202,9 @@
                                                                         </template>
                                                                         <template if:true={entry.facultyName}>
                                                                             <span>{entry.facultyName}</span>
+                                                                        </template>
+                                                                        <template if:true={entry.activityType}>
+                                                                            <span>{entry.activityType}</span>
                                                                         </template>
                                                                         <span>{entry.startTime} - {entry.endTime}</span>
                                                                         <template if:true={entry.roomLabel}>
@@ -345,6 +362,30 @@
                                         data-field="endTime"
                                         value={draft.endTime}
                                         options={draft.endOptions}
+                                        onchange={handleDraftChange}>
+                                    </lightning-combobox>
+                                </label>
+
+                                <label>
+                                    <span>Faculty</span>
+                                    <lightning-combobox
+                                        variant="label-hidden"
+                                        data-row-id={draft.id}
+                                        data-field="facultyId"
+                                        value={draft.facultyId}
+                                        options={draft.facultyOptions}
+                                        onchange={handleDraftChange}>
+                                    </lightning-combobox>
+                                </label>
+
+                                <label>
+                                    <span>Activities</span>
+                                    <lightning-combobox
+                                        variant="label-hidden"
+                                        data-row-id={draft.id}
+                                        data-field="activityType"
+                                        value={draft.activityType}
+                                        options={draft.activityOptions}
                                         onchange={handleDraftChange}>
                                     </lightning-combobox>
                                 </label>

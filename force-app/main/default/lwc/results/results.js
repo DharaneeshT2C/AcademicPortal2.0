@@ -1,27 +1,25 @@
 import { LightningElement, wire, track } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
-import { pageNameForRoute } from 'c/navHelper';
-import { examData, studentProfile } from 'c/mockData';
 import getResultsBundle from '@salesforce/apex/KenResultsController.getResultsBundle';
 
 export default class Results extends NavigationMixin(LightningElement) {
     @track _apex;
-    // Seed fallback retained for template bindings.
-    student = studentProfile;
-    _seed = examData.results;
+    student = {};
 
     @wire(getResultsBundle)
     wiredResults({ data, error }) {
         if (data) this._apex = data;
         else if (error) {
-            // eslint-disable-next-line no-console
-            console.warn('[results] Apex failed, using seed:', error);
+            const _msg = (error && error.body && error.body.message) || '';
+            if (_msg && !_msg.includes('not have access') && !_msg.includes('No rows')) {
+                // eslint-disable-next-line no-console
+                console.warn('[results] Apex failed, using seed:', error);
+            }
         }
     }
 
     get data() {
-        if (this._apex) return Object.assign({}, this._seed, this._apex);
-        return this._seed;
+        return this._apex || {};
     }
 
     get effectiveData() {
@@ -76,12 +74,13 @@ export default class Results extends NavigationMixin(LightningElement) {
         return labels;
     }
 
-    navigateTo(route) {
+    goToMarksBreakdown() {
         this[NavigationMixin.Navigate]({
             type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute(route) }
+            attributes: { name: 'MarksBreakdown__c' }
         });
     }
-    handleMarksBreakdown() { this.navigateTo('marks-breakdown'); }
-    handleViewGradeCards() { this.navigateTo('marks-breakdown'); }
+
+    handleMarksBreakdown() { this.goToMarksBreakdown(); }
+    handleViewGradeCards() { this.goToMarksBreakdown(); }
 }

@@ -1,8 +1,5 @@
 import { LightningElement, wire, track } from 'lwc';
-import { NavigationMixin } from 'lightning/navigation';
-import { pageNameForRoute } from 'c/navHelper';
 import { refreshApex } from '@salesforce/apex';
-import { feeData } from 'c/mockData';
 import getFeeSummary    from '@salesforce/apex/KenFeePaymentController.getFeeSummary';
 import initiatePayment  from '@salesforce/apex/KenFeePaymentController.initiatePayment';
 import confirmPayment   from '@salesforce/apex/KenFeePaymentController.confirmPayment';
@@ -14,9 +11,8 @@ const PAY_METHODS = [
     { id: 'Wallet',      label: 'Wallet',        hint: 'Paytm, Mobikwik, etc.',        icon: 'account_balance_wallet' }
 ];
 
-export default class FeePayment extends NavigationMixin(LightningElement) {
+export default class FeePayment extends LightningElement {
     @track _apex;
-    _seed = feeData;
     @track showToast = false;
     @track toastMessage = '';
     @track toastVariant = 'success';
@@ -40,14 +36,16 @@ export default class FeePayment extends NavigationMixin(LightningElement) {
         const { data, error } = response;
         if (data) this._apex = data;
         else if (error) {
-            // eslint-disable-next-line no-console
-            console.warn('[feePayment] Apex failed, using seed:', error);
+            const _msg = (error && error.body && error.body.message) || '';
+            if (_msg && !_msg.includes('not have access') && !_msg.includes('No rows')) {
+                // eslint-disable-next-line no-console
+                console.warn('[feePayment] Apex failed, using seed:', error);
+            }
         }
     }
 
     get data() {
-        if (this._apex) return Object.assign({}, this._seed, this._apex);
-        return this._seed;
+        return this._apex || {};
     }
 
     get currentFees() {
@@ -98,10 +96,14 @@ export default class FeePayment extends NavigationMixin(LightningElement) {
 
     // ── Routing helpers ──────────────────────────────────────────────────────
     navigateTo(route) {
-        this[NavigationMixin.Navigate]({
-            type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute(route) }
-        });
+        try {
+            const parts = window.location.pathname.split('/').filter(Boolean);
+            const base = parts[0] || 'newportal';
+            const target = route === 'home' ? `/${base}/` : `/${base}/${route}`;
+            window.location.href = target;
+        } catch (e) {
+            this.dispatchEvent(new CustomEvent('navigate', { detail: { route } }));
+        }
     }
     handleViewPlan()      { this.navigateTo('fee-plan'); }
     handleViewDetails()   { this.navigateTo('fee-payment-detail'); }

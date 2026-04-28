@@ -1,27 +1,43 @@
 import { LightningElement, wire, track } from 'lwc';
-import { NavigationMixin } from 'lightning/navigation';
-import { pageNameForRoute } from 'c/navHelper';
-import { feeData } from 'c/mockData';
 import getInvoices from '@salesforce/apex/KenInvoicesController.getInvoices';
 import getDownloadUrl from '@salesforce/apex/KenInvoicesController.getDownloadUrl';
 
-export default class Invoices extends NavigationMixin(LightningElement) {
+export default class Invoices extends LightningElement {
     @track _apex;
-    // Seed fallback.
-    _seed = feeData.invoices;
 
     @wire(getInvoices)
     wiredInvoices({ data, error }) {
         if (data) this._apex = data;
         else if (error) {
-            // eslint-disable-next-line no-console
-            console.warn('[invoices] Apex failed, using seed:', error);
+            const _msg = (error && error.body && error.body.message) || '';
+            if (_msg && !_msg.includes('not have access') && !_msg.includes('No rows')) {
+                // eslint-disable-next-line no-console
+                console.warn('[invoices] Apex failed, using seed:', error);
+            }
         }
     }
 
+    /**
+     * Apex DTO: { id, invoiceNumber, description, amount, issuedOn, status, downloadUrl }
+     * Mock data: { id, particulars, invoiceId, date, totalPaid, currency, remaining, proForma, invoice }
+     * Normalise to a single shape the template can render.
+     */
     get invoices() {
-        if (this._apex && this._apex.length) return this._apex;
-        return this._seed;
+        const fmt = (n) => (n == null) ? '' : Number(n).toLocaleString('en-IN');
+        if (this._apex && this._apex.length) {
+            return this._apex.map(r => ({
+                id: r.id,
+                particulars: r.description || r.particulars || 'Tuition fee',
+                invoiceId: r.invoiceNumber || r.invoiceId || (r.id ? String(r.id).slice(-8) : ''),
+                date: r.issuedOn || r.date || '',
+                totalPaid: fmt(r.amount != null ? r.amount : r.totalPaid),
+                currency: r.currency || 'INR',
+                remaining: r.status === 'Paid' ? '0' : (r.remaining || fmt(r.amount)),
+                proForma: !!(r.downloadUrl || r.proForma),
+                invoice: r.status === 'Paid'
+            }));
+        }
+        return [];
     }
 
     @track _bannerMsg;
@@ -63,10 +79,14 @@ export default class Invoices extends NavigationMixin(LightningElement) {
     }
 
     navigateTo(route) {
-        this[NavigationMixin.Navigate]({
-            type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute(route) }
-        });
+        try {
+            const parts = window.location.pathname.split('/').filter(Boolean);
+            const base = parts[0] || 'newportal';
+            const target = route === 'home' ? `/${base}/` : `/${base}/${route}`;
+            window.location.href = target;
+        } catch (e) {
+            this.dispatchEvent(new CustomEvent('navigate', { detail: { route } }));
+        }
     }
     handleBack() { this.navigateTo('fee-payment'); }
     goFeePayment() { this.navigateTo('fee-payment'); }

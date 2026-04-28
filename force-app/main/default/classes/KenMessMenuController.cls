@@ -9,7 +9,7 @@
  *                 or publish from a single scheduled custom metadata record.
  * ************************************************************************************************
  */
-public with sharing class KenMessMenuController {
+public without sharing class KenMessMenuController {
 
     public class MealDTO {
         @AuraEnabled public String mealType;  // 'Breakfast' | 'Lunch' | 'Snacks' | 'Dinner'
@@ -25,14 +25,15 @@ public with sharing class KenMessMenuController {
     @AuraEnabled(cacheable=true)
     public static List<DayMenuDTO> getWeeklyMenu() {
         try {
+            // Mess_Menu__c is a global catalog object (no per-student sharing).
             List<Mess_Menu__c> rows = [
                 SELECT Day_Of_Week__c, Meal_Type__c, Items__c, Timing__c
                 FROM Mess_Menu__c
-                WITH USER_MODE
+                WITH SECURITY_ENFORCED
                 ORDER BY Day_Of_Week__c, Meal_Type__c
                 LIMIT 200
             ];
-            if (rows.isEmpty()) return seedWeek();
+            if (rows.isEmpty()) return new List<DayMenuDTO>();
             // Group by day in fixed order
             List<String> dayOrder = new List<String>{'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'};
             List<String> mealOrder = new List<String>{'Breakfast','Lunch','Snacks','Dinner'};
@@ -54,25 +55,12 @@ public with sharing class KenMessMenuController {
                 }
                 out.add(d);
             }
-            if (out.isEmpty()) return seedWeek();
             return out;
         } catch (Exception e) {
             KenAuraExceptionHelper.throwAuraHandled('KenMessMenuController.getWeeklyMenu',
                 'Unable to load mess menu.', e);
             return null;
         }
-    }
-
-    private static List<DayMenuDTO> seedWeek() {
-        List<DayMenuDTO> out = new List<DayMenuDTO>();
-        out.add(dayMenu('Monday',    'Idli & sambar',          'Dal, rice, paneer',          'Samosa, chai',            'Roti, sabzi, dal'));
-        out.add(dayMenu('Tuesday',   'Poha, boiled eggs',      'Rajma, rice, salad',         'Bhel puri',               'Chicken curry, roti'));
-        out.add(dayMenu('Wednesday', 'Upma, fruits',           'Chole bhature',              'Sandwich, coffee',        'Veg biryani, raita'));
-        out.add(dayMenu('Thursday',  'Dosa, chutney',          'Dal makhani, jeera rice',    'Pakora, chai',            'Paneer tikka, roti'));
-        out.add(dayMenu('Friday',    'Paratha, curd',          'Sambar rice, rasam',         'Vada pav',                'Fish curry, rice'));
-        out.add(dayMenu('Saturday',  'Bread omelette',         'Thali (full)',               'Spring rolls',            'Noodles, manchurian'));
-        out.add(dayMenu('Sunday',    'Puri sabzi',             'Pulao, kadhi',               'Pav bhaji',               'Dal, roti, dessert'));
-        return out;
     }
 
     @AuraEnabled
@@ -90,7 +78,7 @@ public with sharing class KenMessMenuController {
                     WHERE Student__c = :studentId
                       AND Meal__c = :meal
                       AND CreatedDate >= :startOfDay
-                    WITH USER_MODE LIMIT 1
+                    WITH SECURITY_ENFORCED LIMIT 1
                 ];
                 if (!dupes.isEmpty()) return;
             }
@@ -105,18 +93,6 @@ public with sharing class KenMessMenuController {
             KenAuraExceptionHelper.throwAuraHandled('KenMessMenuController.submitMessFeedback',
                 'Could not submit feedback.', e);
         }
-    }
-
-    private static DayMenuDTO dayMenu(String day, String bf, String lunch, String snacks, String dinner) {
-        DayMenuDTO d = new DayMenuDTO();
-        d.dayOfWeek = day;
-        d.meals = new List<MealDTO>{
-            meal('Breakfast', bf,     '7:30–9:00 AM'),
-            meal('Lunch',     lunch,  '12:30–2:00 PM'),
-            meal('Snacks',    snacks, '4:30–5:30 PM'),
-            meal('Dinner',    dinner, '7:30–9:00 PM')
-        };
-        return d;
     }
 
     private static MealDTO meal(String type, String items, String timing) {

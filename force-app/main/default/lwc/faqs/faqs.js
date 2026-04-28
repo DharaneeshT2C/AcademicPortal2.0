@@ -1,10 +1,8 @@
 import { LightningElement, wire, track } from 'lwc';
-import { NavigationMixin } from 'lightning/navigation';
-import { pageNameForRoute } from 'c/navHelper';
 import { serviceSupportData } from 'c/mockData';
 import getFaqs from '@salesforce/apex/KenFaqsController.getFaqs';
 
-export default class Faqs extends NavigationMixin(LightningElement) {
+export default class Faqs extends LightningElement {
     @track _apex;
     @track _openCats = {}; // category name → bool
     @track _openQs = {};   // question key → bool
@@ -20,8 +18,11 @@ export default class Faqs extends NavigationMixin(LightningElement) {
                 if (firstName) this._openCats = { [firstName]: true };
             }
         } else if (error) {
-            // eslint-disable-next-line no-console
-            console.warn('[faqs] Apex failed, using seed:', error);
+            const _msg = (error && error.body && error.body.message) || '';
+            if (_msg && !_msg.includes('not have access') && !_msg.includes('No rows')) {
+                // eslint-disable-next-line no-console
+                console.warn('[faqs] Apex failed, using seed:', error);
+            }
         }
     }
 
@@ -89,11 +90,6 @@ export default class Faqs extends NavigationMixin(LightningElement) {
 
     handleSearchChange(event) { this._searchTerm = event.target.value || ''; }
 
-    navigateTo(route) {
-        this[NavigationMixin.Navigate]({
-            type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute(route) }
-        });
-    }
+    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
     handleBack() { this.navigateTo('service-support'); }
 }

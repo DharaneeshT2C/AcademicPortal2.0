@@ -1,15 +1,12 @@
 import { LightningElement, wire, track } from 'lwc';
-import { NavigationMixin } from 'lightning/navigation';
-import { pageNameForRoute } from 'c/navHelper';
 import { refreshApex } from '@salesforce/apex';
 import SP_IMAGES from '@salesforce/resourceUrl/StudentPortalImages';
-import { eventsData } from 'c/mockData';
 import getEventsBundle from '@salesforce/apex/KenEventsController.getEventsBundle';
 import registerForEvent from '@salesforce/apex/KenEventsController.registerForEvent';
 import cancelRegistration from '@salesforce/apex/KenEventsController.cancelRegistration';
 import submitHostedEvent from '@salesforce/apex/KenEventsController.submitHostedEvent';
 
-export default class Events extends NavigationMixin(LightningElement) {
+export default class Events extends LightningElement {
     @track _apex;
     @track _searchTerm = '';
     @track _filterMode = 'all';
@@ -18,6 +15,7 @@ export default class Events extends NavigationMixin(LightningElement) {
     @track _showAllRegistered = false;
     @track _showHostModal = false;
     @track _hostForm = { title: '', date: '', time: '', mode: 'Offline' };
+    @track _detailEvent = null;
     @track _toastVisible = false;
     @track _toastMessage = '';
     @track _toastVariant = 'success';
@@ -29,6 +27,8 @@ export default class Events extends NavigationMixin(LightningElement) {
     get toastVariant() { return this._toastVariant; }
     get showFilterMenu() { return this._showFilterMenu; }
     get showHostModal() { return this._showHostModal; }
+    get showDetailModal() { return !!this._detailEvent; }
+    get detailEvent() { return this._detailEvent || {}; }
     get showAllRegistered() { return this._showAllRegistered; }
     get viewAllLabel() { return this._showAllRegistered ? 'Show Less' : 'View All'; }
     get filterLabel() {
@@ -72,10 +72,17 @@ export default class Events extends NavigationMixin(LightningElement) {
         return base + '/images/events/' + file;
     }
 
+    /**
+     * Apex DTO uses { eventDate, eventTime, dateLabel, timeLabel } —
+     * mock data uses { date, time }. Normalise into the names the template
+     * binds: `ev.date` and `ev.time`.
+     */
     _decorate(ev) {
         return {
             ...ev,
             image: this._imgFor(ev),
+            date: ev.date || ev.dateLabel || ev.eventDate || '',
+            time: ev.time || ev.timeLabel || ev.eventTime || '',
             isBookmarked: this._bookmarks.has(ev.id),
             bookmarkClass: this._bookmarks.has(ev.id) ? 'bookmark-btn saved' : 'bookmark-btn',
             bookmarkIcon: this._bookmarks.has(ev.id) ? 'bookmark' : 'bookmark_border'
@@ -89,13 +96,16 @@ export default class Events extends NavigationMixin(LightningElement) {
         const { data, error } = response;
         if (data) this._apex = data;
         else if (error) {
-            // eslint-disable-next-line no-console
-            console.warn('[events] Apex failed, using seed:', error);
+            const _msg = (error && error.body && error.body.message) || '';
+            if (_msg && !_msg.includes('not have access') && !_msg.includes('No rows')) {
+                // eslint-disable-next-line no-console
+                console.warn('[events] Apex failed, using seed:', error);
+            }
         }
     }
 
     get effectiveData() {
-        return this._apex || eventsData;
+        return this._apex || {};
     }
 
     get featuredEvents() {
@@ -112,10 +122,7 @@ export default class Events extends NavigationMixin(LightningElement) {
     get upcomingCount() { return this.upcomingEvents.length; }
 
     navigateTo(route) {
-        this[NavigationMixin.Navigate]({
-            type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute(route) }
-        });
+        this.dispatchEvent(new CustomEvent('navigate', { detail: { route } }));
     }
     handleBack() { this.navigateTo('campus-life'); }
 
@@ -129,6 +136,54 @@ export default class Events extends NavigationMixin(LightningElement) {
             })
             .catch(err => {
                 const msg = (err && err.body && err.body.message) ? err.body.message : 'Could not register.';
+                this.showAToast(msg, 'error');
+            });
+    }
+
+    /** Open the event details modal when a card is clicked. */
+    handleEventClick(event) {
+        const id = event.currentTarget.dataset.id;
+        if (!id) return;
+        const all = [
+            ...(this.effectiveData.featured || []),
+            ...(this.effectiveData.upcoming || [])
+        ];
+        const ev = all.find(e => e.id === id);
+        if (ev) this._detailEvent = this._decorate(ev);
+    }
+    handleCloseDetail() { this._detailEvent = null; }
+
+    handleRegisterFromDetail(event) {
+        const id = event.currentTarget.dataset.id;
+        if (!id) return;
+        registerForEvent({ eventId: id })
+            .then(() => {
+                this.showAToast('Registered for event');
+                this._detailEvent = null;
+                if (this._wireResp) refreshApex(this._wireResp);
+            })
+            .catch(err => {
+                const msg = (err && err.body && err.body.message) ? err.body.message : 'Could not register.';
+                this.showAToast(msg, 'error');
+            });
+    }
+    handleCancelFromDetail(event) {
+        const id = event.currentTarget.dataset.id;
+        if (!id) return;
+        // We need the registration Id, not the event Id — look it up from registered list.
+        const reg = (this.effectiveData.registered || []).find(r => r.id === id);
+        if (!reg) {
+            this.showAToast('Cannot find your registration.', 'error');
+            return;
+        }
+        cancelRegistration({ registrationId: reg.registrationId || reg.id })
+            .then(() => {
+                this.showAToast('Registration cancelled');
+                this._detailEvent = null;
+                if (this._wireResp) refreshApex(this._wireResp);
+            })
+            .catch(err => {
+                const msg = (err && err.body && err.body.message) ? err.body.message : 'Could not cancel.';
                 this.showAToast(msg, 'error');
             });
     }
@@ -178,6 +233,9 @@ export default class Events extends NavigationMixin(LightningElement) {
         submitHostedEvent({ title: f.title.trim(), dateStr: f.date, timeStr: f.time, mode: f.mode })
             .then(eventId => {
                 this._showHostModal = false;
+                // Reset any active filters so the just-created event is visible.
+                this._filterMode = 'all';
+                this._searchTerm = '';
                 this.showAToast(`Submitted "${f.title.trim()}" for review (id ${eventId || ''})`);
                 if (this._wireResp) refreshApex(this._wireResp);
             })

@@ -1,29 +1,27 @@
 import { LightningElement, wire, track } from 'lwc';
-import { NavigationMixin } from 'lightning/navigation';
-import { pageNameForRoute } from 'c/navHelper';
-import { examData } from 'c/mockData';
 import getAllBreakdowns from '@salesforce/apex/KenMarksBreakdownController.getAllBreakdowns';
 import getBreakdown from '@salesforce/apex/KenMarksBreakdownController.getBreakdown';
 
-export default class MarksBreakdown extends NavigationMixin(LightningElement) {
+export default class MarksBreakdown extends LightningElement {
     @track _apex;           // list of breakdowns from @wire
     @track _selectedBreakdown; // drill-down from imperative call
-    // Seed fallback retained for template bindings.
-    _seed = examData.results.courseDetail;
 
     @wire(getAllBreakdowns)
     wiredBreakdowns({ data, error }) {
         if (data) this._apex = data;
         else if (error) {
-            // eslint-disable-next-line no-console
-            console.warn('[marksBreakdown] Apex failed, using seed:', error);
+            const _msg = (error && error.body && error.body.message) || '';
+            if (_msg && !_msg.includes('not have access') && !_msg.includes('No rows')) {
+                // eslint-disable-next-line no-console
+                console.warn('[marksBreakdown] Apex failed, using seed:', error);
+            }
         }
     }
 
     get data() {
         if (this._selectedBreakdown) return this._selectedBreakdown;
         if (this._apex && this._apex.length) return this._apex[0];
-        return this._seed;
+        return {};
     }
 
     @track _loadError;
@@ -43,11 +41,6 @@ export default class MarksBreakdown extends NavigationMixin(LightningElement) {
             });
     }
 
-    navigateTo(route) {
-        this[NavigationMixin.Navigate]({
-            type: 'comm__namedPage',
-            attributes: { name: pageNameForRoute(route) }
-        });
-    }
+    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
     handleBack() { this.navigateTo('results'); }
 }

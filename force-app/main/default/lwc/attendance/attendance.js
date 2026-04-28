@@ -1,6 +1,5 @@
 import { LightningElement, wire, track } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
-import { attendanceData } from 'c/mockData';
 import getAttendanceBundle from '@salesforce/apex/KenAttendanceController.getAttendanceBundle';
 import raiseAttendanceDispute from '@salesforce/apex/KenAttendanceController.raiseAttendanceDispute';
 import submitLeaveRequest from '@salesforce/apex/KenAttendanceController.submitLeaveRequest';
@@ -25,22 +24,22 @@ export default class Attendance extends LightningElement {
         toDate: '',
         reason: ''
     };
-    _seed = attendanceData;
-
     @wire(getAttendanceBundle)
     wiredAttendance(response) {
         this._wireResponse = response;
         const { data, error } = response;
         if (data) this._apex = data;
         else if (error) {
-            // eslint-disable-next-line no-console
-            console.warn('[attendance] Apex failed, using seed:', error);
+            const _msg = (error && error.body && error.body.message) || '';
+            if (_msg && !_msg.includes('not have access') && !_msg.includes('No rows')) {
+                // eslint-disable-next-line no-console
+                console.warn('[attendance] Apex failed:', error);
+            }
         }
     }
 
     get data() {
-        if (this._apex) return Object.assign({}, this._seed, this._apex);
-        return this._seed;
+        return this._apex || {};
     }
 
     get todayItems() {

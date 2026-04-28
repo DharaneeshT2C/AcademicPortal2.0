@@ -11,7 +11,7 @@
  *                 Category__c, Comments__c, Submitted_On__c).
  * ************************************************************************************************
  */
-public with sharing class KenFeedbackController {
+public without sharing class KenFeedbackController {
 
     public class FeedbackSurveyDTO {
         @AuraEnabled public String       id;
@@ -54,7 +54,7 @@ public with sharing class KenFeedbackController {
                 List<Feedback_Submission__c> dupes = [
                     SELECT Id FROM Feedback_Submission__c
                     WHERE Student__c = :studentId AND Survey_Id__c = :s.surveyId
-                    WITH USER_MODE LIMIT 1
+                    WITH SECURITY_ENFORCED LIMIT 1
                 ];
                 if (!dupes.isEmpty()) return;
             }
