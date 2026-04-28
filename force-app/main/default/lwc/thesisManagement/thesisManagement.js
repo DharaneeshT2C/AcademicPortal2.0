@@ -4,6 +4,65 @@ import getThesis from '@salesforce/apex/KenThesisManagementController.getThesis'
 import uploadDraft from '@salesforce/apex/KenThesisManagementController.uploadDraft';
 import addThesisTask from '@salesforce/apex/KenThesisManagementController.addThesisTask';
 
+// Mock seed used while the Apex backing is not wired up. Flip USE_MOCK to false
+// (or pass empty arrays) to verify the "No data available" empty state.
+const MOCK_DATA = {
+    phases: [
+        { id: 1, name: 'Topic Selection',        status: 'In Progress' },
+        { id: 2, name: 'Proposal Submission',    status: 'Locked' },
+        { id: 3, name: 'Research & Drafting',    status: 'Locked' },
+        { id: 4, name: 'Defense Preparation',    status: 'Locked' },
+        { id: 5, name: 'Final Submission',       status: 'Locked' }
+    ],
+    requirements: [
+        {
+            text: 'Complete 24 credits in core courses',
+            detail: '22 of 24 credits earned. Two more to go.',
+            completed: false
+        },
+        {
+            text: 'Maintain a CGPA of 7.5 or higher',
+            detail: 'Current CGPA: 8.2',
+            completed: true
+        },
+        {
+            text: 'Clear all academic backlogs',
+            detail: 'No backlogs pending.',
+            completed: true
+        },
+        {
+            text: 'Submit research interest form',
+            detail: 'Submitted on 12 March 2026.',
+            completed: true
+        },
+        {
+            text: 'Attend mandatory research methodology workshop',
+            detail: 'Workshop scheduled for 15 May 2026.',
+            completed: false
+        }
+    ],
+    preparationTips: [
+        {
+            title: 'Identify your research area early',
+            description: 'Browse faculty profiles and recent publications to find a topic aligned with your interests.'
+        },
+        {
+            title: 'Keep a literature review log',
+            description: 'A running summary of papers you read saves significant time when writing the proposal.'
+        },
+        {
+            title: 'Talk to senior students',
+            description: 'Seniors who have completed a thesis can share practical advice on managing deliverables and timelines.'
+        },
+        {
+            title: 'Plan a 9–12 month timeline',
+            description: 'Map out milestones for proposal, drafts, mid-review and defense to stay on track.'
+        }
+    ]
+};
+
+const USE_MOCK = true;
+
 export default class ThesisManagement extends LightningElement {
     @track _apex;
 
@@ -23,7 +82,23 @@ export default class ThesisManagement extends LightningElement {
     }
 
     get data() {
-        return this._apex || {};
+        const apex = this._apex;
+        const hasApexContent = apex && (
+            (Array.isArray(apex.phases) && apex.phases.length > 0) ||
+            (Array.isArray(apex.requirements) && apex.requirements.length > 0) ||
+            (Array.isArray(apex.preparationTips) && apex.preparationTips.length > 0)
+        );
+        if (hasApexContent) return apex;
+        return USE_MOCK ? MOCK_DATA : (apex || {});
+    }
+
+    get hasContent() {
+        const d = this.data;
+        return (
+            (Array.isArray(d.phases) && d.phases.length > 0) ||
+            (Array.isArray(d.requirements) && d.requirements.length > 0) ||
+            (Array.isArray(d.preparationTips) && d.preparationTips.length > 0)
+        );
     }
 
     get phases() {

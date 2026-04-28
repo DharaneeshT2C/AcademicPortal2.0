@@ -1,5 +1,5 @@
 :host { font-family: var(--font-family, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif); }
-.dashboard { width: 100%; display: flex; flex-direction: column; gap: 14px; padding-bottom: 16px; }
+.dashboard { width: 100%; display: flex; flex-direction: column; gap: 14px; padding-bottom: 16px;height: calc(100vh - 120px);overflow-y: auto; }
 
 /* ── Greeting Row ── */
 .greeting-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; margin-bottom: 0; }

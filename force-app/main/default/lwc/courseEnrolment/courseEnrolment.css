@@ -1,0 +1,170 @@
+:host {
+    display: block;
+    font-family: var(--font-family, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+    color: var(--text-primary, #1A1D26);
+    background: var(--bg-main, #F8FAFC);
+    box-sizing: border-box;
+}
+
+.page {
+    box-sizing: border-box;
+    height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+
+.page-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 24px;
+    letter-spacing: -0.02em;
+    color: var(--text-primary, #1A1D26);
+}
+
+/* ── Choose Program Banner ─────────────────────────────────────────── */
+.banner {
+    background: linear-gradient(135deg, rgb(76, 110, 245), rgb(59, 91, 219));
+    color: #fff;
+    border-radius: var(--radius-lg, 16px);
+    padding: 24px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-md, 0 2px 4px rgba(16,24,40,0.04), 0 4px 8px rgba(16,24,40,0.06));
+}
+
+.banner-content { flex: 1; min-width: 0; }
+.banner-title { margin: 0 0 6px; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; color: #fff; }
+.banner-desc  { margin: 0; font-size: 13px; opacity: 0.92; line-height: 1.5; color: #fff; }
+
+.banner-cta { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+.banner-meta { color: #FDBA74; font-size: 12px; font-weight: 500; }
+
+.btn-banner {
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.4);
+    padding: 10px 18px;
+    border-radius: var(--radius-md, 12px);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    font-family: inherit;
+    transition: background 160ms ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-banner:hover { background: rgba(255,255,255,0.18); }
+.btn-banner .arrow { display: inline-block; transform: translateY(-1px); }
+
+/* ── All Semesters header ──────────────────────────────────────────── */
+.section-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.section-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.01em;
+    color: var(--text-primary, #1A1D26);
+}
+.credit-chips { display: flex; gap: 8px; }
+.chip {
+    background: var(--bg-white, #fff);
+    border: 1px solid var(--border, #E2E8F0);
+    border-radius: var(--radius-full, 9999px);
+    padding: 6px 14px;
+    font-size: 12px;
+    color: var(--text-secondary, #64748B);
+    font-weight: 500;
+}
+
+/* ── Semester cards grid ───────────────────────────────────────────── */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.card {
+    background: var(--bg-white, #fff);
+    border: 1px solid var(--border, #E2E8F0);
+    border-radius: var(--radius-lg, 16px);
+    padding: 20px;
+    box-shadow: var(--shadow-sm, 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06));
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 160ms ease, transform 160ms ease;
+}
+.card:hover { box-shadow: var(--shadow-hover, 0 4px 12px rgba(16,24,40,0.08)); }
+
+.card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 18px;
+    gap: 12px;
+}
+
+.card-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.01em;
+    color: var(--text-primary, #1A1D26);
+}
+
+.status {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: var(--radius-full, 9999px);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.status-approved { background: var(--success-light, #ECFDF3); color: var(--success-dark, #039855); }
+.status-ongoing  { background: var(--warning-light, #FFFAEB); color: var(--warning-dark, #DC6803); }
+.status-upcoming { background: var(--neutral-light, #F2F4F7); color: var(--neutral, #667085); }
+
+.credit-line { font-size: 13px; color: var(--text-secondary, #64748B); margin: 3px 0; }
+.credit-line strong { color: var(--text-primary, #1A1D26); font-weight: 600; }
+
+.card-action {
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: var(--radius-md, 12px);
+    font-weight: 600;
+    font-size: 13px;
+    font-family: inherit;
+    border: none;
+    cursor: pointer;
+    transition: background 160ms ease;
+    width: 100%;
+}
+.action-completed,
+.action-upcoming {
+    background: var(--neutral-light, #F2F4F7);
+    color: var(--text-secondary, #64748B);
+    cursor: not-allowed;
+}
+.action-primary {
+    background: var(--primary, #4C6EF5);
+    color: #fff;
+}
+.action-primary:hover { background: var(--primary-dark, #3B5BDB); }
+
+@media (max-width: 1100px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 700px) {
+    .grid { grid-template-columns: 1fr; }
+    .banner { flex-direction: column; align-items: flex-start; }
+    .banner-cta { flex-wrap: wrap; }
+}

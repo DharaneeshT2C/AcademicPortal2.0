@@ -1,0 +1,13 @@
+<template>
+    <div class="modal-overlay" onclick={handleOverlayClick}>
+        <div class="modal-panel" role="dialog" aria-modal="true" onclick={stop}>
+            <h2 class="modal-title">{title}</h2>
+            <p class="modal-message">{message}</p>
+
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick={handleCancel}>{cancelLabel}</button>
+                <button class={confirmClass} onclick={handleConfirm}>{confirmLabel}</button>
+            </div>
+        </div>
+    </div>
+</template>

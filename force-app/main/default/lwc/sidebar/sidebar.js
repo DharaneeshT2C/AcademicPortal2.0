@@ -66,7 +66,8 @@ export default class Sidebar extends LightningElement {
     }
 
     rebuildNav() {
-        this.navItems = sidebarNavItems.map(item => {
+        const sourceNavItems = this.getSidebarNavItems();
+        this.navItems = sourceNavItems.map(item => {
             if (item.isSection) {
                 return { ...item, isSection: true, hasChildren: false, hasChildrenStr: 'false', children: [] };
             }
@@ -88,6 +89,34 @@ export default class Sidebar extends LightningElement {
                     childClass: child.route === this._currentRoute ? 'nav-child active' : 'nav-child'
                 })) : []
             };
+        });
+    }
+
+    getSidebarNavItems() {
+        return sidebarNavItems.map((item) => {
+            if (item.id !== 'academics' || !Array.isArray(item.children)) {
+                return item;
+            }
+
+            const hasCourseEnrolment = item.children.some((child) => child.route === 'course-enrolment');
+            if (hasCourseEnrolment) {
+                return item;
+            }
+
+            const attendanceIndex = item.children.findIndex((child) => child.route === 'attendance');
+            const courseEnrolmentItem = {
+                id: 'course-enrolment',
+                label: 'Course Enrolment',
+                route: 'course-enrolment'
+            };
+
+            if (attendanceIndex === -1) {
+                return { ...item, children: [...item.children, courseEnrolmentItem] };
+            }
+
+            const updatedChildren = [...item.children];
+            updatedChildren.splice(attendanceIndex + 1, 0, courseEnrolmentItem);
+            return { ...item, children: updatedChildren };
         });
     }
 

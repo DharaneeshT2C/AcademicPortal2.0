@@ -1,0 +1,80 @@
+<template>
+    <div class="page">
+        <header class="page-header">
+            <h1 class="page-title">{semester.name}</h1>
+            <nav class="breadcrumb">
+                <a href="#" onclick={handleBreadcrumbHome}>Home</a>
+                <span class="sep">&gt;</span>
+                <a href="#" onclick={handleBreadcrumbCourseEnrolment}>Course Enrolment</a>
+            </nav>
+        </header>
+
+        <div class="section-row">
+            <h2 class="section-title">{semester.name}</h2>
+            <button class="btn-secondary" onclick={handleGetHelp}>Get Help</button>
+        </div>
+
+        <div class="list-area">
+            <template lwc:if={hasPathways}>
+                <template lwc:if={hasMajor}>
+                    <article class="card">
+                        <div class="card-row">
+                            <div class="card-main">
+                                <h3 class="card-title">{majorProgram.name}</h3>
+                                <div class="credit-line">Mandatory: {majorProgram.mandatory}</div>
+                                <div class="credit-line">Electives: {majorProgram.electives}</div>
+                                <div class="status-line warning">
+                                    <span class="warn-icon" aria-hidden="true">&#9888;</span>
+                                    <span>{majorProgram.statusLabel}</span>
+                                </div>
+                            </div>
+                            <div class="card-meta">
+                                <span class="last-date">Last Date: {majorProgram.lastDate}</span>
+                            </div>
+                        </div>
+                    </article>
+                </template>
+
+                <template for:each={minorPrograms} for:item="minor">
+                    <article key={minor.id} class="card">
+                        <div class="card-row">
+                            <div class="card-main">
+                                <h3 class="card-title">{minor.name}</h3>
+                                <div class="status-line muted">
+                                    <span class="warn-icon muted-icon" aria-hidden="true">&#9888;</span>
+                                    <span>{minor.message}</span>
+                                </div>
+                            </div>
+                            <div class="card-meta">
+                                <span class="last-date">Last Date: {minor.lastDate}</span>
+                                <button class="btn-primary" data-id={minor.id} onclick={handleEnrol}>
+                                    Enrol Now <span class="arrow">&rarr;</span>
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+                </template>
+            </template>
+
+            <template lwc:else>
+                <div class="empty-state">
+                    <p class="empty-msg">No data available</p>
+                </div>
+            </template>
+        </div>
+
+        <footer class="page-footer">
+            <span class="footer-msg">{footer.message}</span>
+            <button class="btn-outline" onclick={handleSelectCourses} disabled={footer.disabled}>
+                Select Courses <span class="arrow">&rarr;</span>
+            </button>
+        </footer>
+
+        <template lwc:if={showGetHelp}>
+            <c-get-help-modal
+                onclose={handleGetHelpClose}
+                onsubmit={handleGetHelpSubmit}
+            ></c-get-help-modal>
+        </template>
+    </div>
+</template>

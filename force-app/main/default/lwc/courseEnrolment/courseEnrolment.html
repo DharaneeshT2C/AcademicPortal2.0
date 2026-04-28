@@ -1,0 +1,49 @@
+<template>
+    <div class="page">
+        <h1 class="page-title">Course Enrolment</h1>
+
+        <section class="banner">
+            <div class="banner-content">
+                <h2 class="banner-title">{banner.title}</h2>
+                <p class="banner-desc">{banner.description}</p>
+            </div>
+            <div class="banner-cta">
+                <span class="banner-meta">Last date to choose: {banner.lastDate}</span>
+                <button class="btn-banner" onclick={handleChooseProgram}>
+                    {banner.ctaLabel} <span class="arrow">&rarr;</span>
+                </button>
+            </div>
+        </section>
+
+        <div class="section-row">
+            <h2 class="section-title">All Semesters</h2>
+            <div class="credit-chips">
+                <span class="chip">Major Credits: {totals.major}</span>
+                <span class="chip">Minor Credits: {totals.minor}</span>
+            </div>
+        </div>
+
+        <div class="grid">
+            <template for:each={semesters} for:item="sem">
+                <article key={sem.id} class="card">
+                    <div class="card-head">
+                        <h3 class="card-title">{sem.name}</h3>
+                        <span class={sem.statusClass}>{sem.status}</span>
+                    </div>
+
+                    <div class="credit-line">Major Credits: <strong>{sem.major}</strong></div>
+                    <div class="credit-line">Minor Credits: <strong>{sem.minor}</strong></div>
+
+                    <button
+                        class={sem.actionClass}
+                        data-id={sem.id}
+                        disabled={sem.actionDisabled}
+                        onclick={handleSemesterAction}
+                    >
+                        {sem.actionLabel}
+                    </button>
+                </article>
+            </template>
+        </div>
+    </div>
+</template>

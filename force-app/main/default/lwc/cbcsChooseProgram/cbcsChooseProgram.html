@@ -1,0 +1,80 @@
+<template>
+    <div class="page">
+        <header class="page-header">
+            <h1 class="page-title">{context.title}</h1>
+            <nav class="breadcrumb">{context.breadcrumb}</nav>
+        </header>
+
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <h2 class="section-title">Choose a Program</h2>
+                <p class="section-sub">You can select a maximum of one program</p>
+            </div>
+            <div class="search-wrap">
+                <span class="search-icon" aria-hidden="true">&#128269;</span>
+                <input
+                    type="text"
+                    class="search-input"
+                    placeholder="Search by keywords..."
+                    value={searchTerm}
+                    oninput={handleSearch}
+                />
+            </div>
+        </div>
+
+        <div class="list-area">
+            <template lwc:if={hasPrograms}>
+                <template for:each={programs} for:item="p">
+                    <article
+                        key={p.id}
+                        class={p.cardClass}
+                        data-id={p.id}
+                        onclick={handleSelect}
+                    >
+                        <div class="program-left">
+                            <span class={p.radioClass} aria-hidden="true">
+                                <span class="radio-dot"></span>
+                            </span>
+                            <div class="program-info">
+                                <h3 class="program-name">{p.name}</h3>
+                                <p class="program-credits">{p.creditsLine}</p>
+                            </div>
+                        </div>
+                        <div class="program-actions">
+                            <button class="btn-light" data-id={p.id} onclick={handleBrochure}>
+                                Program Brochure <span class="dl" aria-hidden="true">&#11015;</span>
+                            </button>
+                            <button class="btn-light" data-id={p.id} onclick={handleViewCourses}>
+                                View Courses
+                            </button>
+                        </div>
+                    </article>
+                </template>
+            </template>
+            <template lwc:else>
+                <div class="empty-state">
+                    <p class="empty-msg">No programs available</p>
+                </div>
+            </template>
+        </div>
+
+        <footer class="page-footer">
+            <button class="btn-secondary" onclick={handleDiscard}>Discard Changes</button>
+            <button class="btn-primary" onclick={handleSubmit} disabled={isSubmitDisabled}>
+                Submit Selection
+            </button>
+        </footer>
+
+        <template lwc:if={showConfirmSubmit}>
+            <c-confirm-modal
+                title="Are you sure you want to submit?"
+                message="Once your selection has been submitted it cannot be edited."
+                cancel-label="Cancel"
+                confirm-label="Submit Request"
+                variant="primary"
+                oncancel={handleConfirmCancel}
+                onconfirm={handleConfirmSubmit}
+            ></c-confirm-modal>
+        </template>
+    </div>
+</template>

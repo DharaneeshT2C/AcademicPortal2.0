@@ -1,0 +1,77 @@
+<template>
+    <div class="modal-overlay" onclick={handleOverlayClick}>
+        <div class="modal-panel" role="dialog" aria-modal="true" onclick={stop}>
+            <header class="modal-header">
+                <h2 class="modal-title">{title}</h2>
+                <button class="modal-close" onclick={handleClose} aria-label="Close">&times;</button>
+            </header>
+
+            <div class="modal-body">
+                <div class="field">
+                    <label class="field-label">Description of the Issue (Optional)</label>
+                    <div class="textarea-wrap">
+                        <textarea
+                            class="textarea"
+                            placeholder="Enter description"
+                            oninput={handleDescriptionChange}
+                        ></textarea>
+                        <button class="btn-magic" type="button" onclick={handleAutoCreate}>
+                            <span class="magic-icon" aria-hidden="true">&#10024;</span>
+                            Auto-Create Form Now
+                        </button>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="field-label">
+                        Choose Issue Type<span class="req">*</span>
+                    </label>
+                    <select class="select" onchange={handleIssueTypeChange}>
+                        <template for:each={options} for:item="opt">
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        </template>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label class="field-label">
+                        Issue Subject<span class="req">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        class="input"
+                        placeholder="Enter issue subject"
+                        oninput={handleSubjectChange}
+                    />
+                </div>
+
+                <div class="field">
+                    <label class="field-label">Upload Supporting Document (Optional)</label>
+                    <div class="upload-area" onclick={triggerFileInput}>
+                        <p class="upload-cta">
+                            <span class="upload-link">Click to upload</span>
+                            <span class="upload-rest">or drag and drop</span>
+                        </p>
+                        <p class="upload-hint">PNG, JPG or PDF (Max 5 MB)</p>
+                        <template lwc:if={form.fileName}>
+                            <p class="upload-file">{form.fileName}</p>
+                        </template>
+                    </div>
+                    <input
+                        type="file"
+                        class="hidden-file"
+                        accept=".png,.jpg,.jpeg,.pdf"
+                        onchange={handleFileChange}
+                    />
+                </div>
+            </div>
+
+            <footer class="modal-footer">
+                <button class="btn-cancel" onclick={handleClose}>Cancel</button>
+                <button class="btn-submit" onclick={handleSubmit} disabled={isSubmitDisabled}>
+                    Submit
+                </button>
+            </footer>
+        </div>
+    </div>
+</template>

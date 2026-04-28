@@ -497,6 +497,7 @@ export const sidebarNavItems = [
   { id: 'academics', label: 'Academics', icon: 'school', children: [
     { id: 'learn', label: 'Learn', route: 'learn' },
     { id: 'attendance', label: 'Attendance', route: 'attendance' },
+    { id: 'course-enrolment', label: 'Course Enrolment', route: 'course-enrolment' },
     { id: 'my-exams', label: 'Exams', route: 'my-exams' },
     { id: 'results', label: 'Results', route: 'results' },
   ]},
