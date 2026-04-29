@@ -1,8 +1,10 @@
 import { LightningElement, api, track, wire } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
+import { pageNameForRoute } from 'c/navHelper';
 import getDashboard  from '@salesforce/apex/KenHomeDashboardController.getDashboard';
 import recordMoodApex from '@salesforce/apex/KenHomeDashboardController.recordMood';
 
-export default class Dashboard extends LightningElement {
+export default class Dashboard extends NavigationMixin(LightningElement) {
     @track _stage = 'middle';
     @track _careerPath = 'placements';
     @track _brand = 'ken';
@@ -258,6 +260,16 @@ export default class Dashboard extends LightningElement {
 
     // ── Events / actions ────────────────────────────────────────────────────
     navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
+    navigateWithMixin(route) {
+        try {
+            this[NavigationMixin.Navigate]({
+                type: 'comm__namedPage',
+                attributes: { name: pageNameForRoute(route) }
+            });
+        } catch (e) {
+            this.navigateTo(route);
+        }
+    }
 
     _showToast(msg, variant) {
         this.toastMessage = msg;
@@ -306,12 +318,12 @@ export default class Dashboard extends LightningElement {
     }
 
     handleViewAll()      { this.navigateTo('events'); }
-    handleViewCalendar() { this.navigateTo('schedule'); }
+    handleViewCalendar() { this.navigateWithMixin('schedule'); }
     handleKaiChat()      { this.navigateTo('chat'); }
     handleViewFeedItem() { this.navigateTo('events'); }
 
     handleSpotlightCta() {
-        if (this.spotlightRoute) { this.navigateTo(this.spotlightRoute); }
+        if (this.spotlightRoute) { this.navigateWithMixin(this.spotlightRoute); }
         else { this._showToast('RSVP confirmed for Convocation 2026!', 'success'); }
     }
 

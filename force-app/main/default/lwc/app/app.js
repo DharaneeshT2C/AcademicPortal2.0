@@ -112,7 +112,7 @@ function applyBrandTheme(brand) {
 
 const KNOWN_ROUTES = new Set([
     'home','learn','attendance','my-exams','exam-enrollment','results','semester-detail',
-    'marks-breakdown','research','thesis','course-enrollment','program-selection',
+    'marks-breakdown','research','thesis','thesis-management','course-enrollment','program-selection',
     'campus-life','clubs','events','hostel-details','mess-menu','gate-pass',
     'create-gate-pass','schedule','fee-payment','fee-payment-detail','fee-plan',
     'invoices','transactions','transaction-history','refunds','service-support',
@@ -231,7 +231,7 @@ export default class App extends LightningElement {
     get isProgramSelection() { return this.currentRoute === 'program-selection'; }
     get isLearn() { return this.currentRoute === 'learn'; }
     get isAttendance() { return this.currentRoute === 'attendance'; }
-    get isThesis() { return this.currentRoute === 'thesis'; }
+    get isThesis() { return this.currentRoute === 'thesis' || this.currentRoute === 'thesis-management'; }
     get isMentors() { return this.currentRoute === 'mentors'; }
     get isFeePayment() { return this.currentRoute === 'fee-payment'; }
     get isFeePaymentDetail() { return this.currentRoute === 'fee-payment-detail'; }

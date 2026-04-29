@@ -498,6 +498,7 @@ export const sidebarNavItems = [
     { id: 'learn', label: 'Learn', route: 'learn' },
     { id: 'attendance', label: 'Attendance', route: 'attendance' },
     { id: 'course-enrolment', label: 'Course Enrolment', route: 'course-enrolment' },
+    { id: 'thesis-management', label: 'Thesis Management', route: 'thesis-management' },
     { id: 'my-exams', label: 'Exams', route: 'my-exams' },
     { id: 'results', label: 'Results', route: 'results' },
   ]},
