@@ -47,9 +47,11 @@
                             </div>
                             <div class="card-meta">
                                 <span class="last-date">Last Date: {minor.lastDate}</span>
-                                <button class="btn-primary" data-id={minor.id} onclick={handleEnrol}>
-                                    Enrol Now <span class="arrow">&rarr;</span>
-                                </button>
+                                <template lwc:if={minor.showEnrolButton}>
+                                    <button class="btn-primary" data-id={minor.id} onclick={handleEnrol}>
+                                        Enrol Now <span class="arrow">&rarr;</span>
+                                    </button>
+                                </template>
                             </div>
                         </div>
                     </article>

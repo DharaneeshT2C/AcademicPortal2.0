@@ -1,0 +1,100 @@
+<template>
+    <div class="page">
+        <header class="page-header">
+            <h1 class="page-title">{semester.name}</h1>
+            <nav class="breadcrumb">
+                <a href="#" onclick={handleBreadcrumbHome}>Home</a>
+                <span class="sep">&gt;</span>
+                <a href="#" onclick={handleBreadcrumbCourseEnrolment}>Course Enrolment</a>
+            </nav>
+        </header>
+
+        <div class="content">
+            <!-- Status Banner -->
+            <section class={banner.bannerClass}>
+                <div class="banner-left">
+                    <span class={banner.iconClass} aria-hidden="true">{banner.iconText}</span>
+                    <div>
+                        <h2 class="banner-title">{banner.title}</h2>
+                        <p class="banner-desc">{banner.description}</p>
+                    </div>
+                </div>
+                <div class="banner-right">
+                    <span class={banner.pillClass}>{banner.pillLabel}</span>
+                    <template lwc:if={banner.showEditButton}>
+                        <button class="btn-outline" onclick={handleEditEnrollment}>
+                            {banner.editButtonLabel} <span class="arrow">&rarr;</span>
+                        </button>
+                    </template>
+                    <template lwc:if={banner.showViewScheduleButton}>
+                        <button class="btn-primary" onclick={handleViewSchedule}>
+                            View Schedule
+                        </button>
+                    </template>
+                </div>
+            </section>
+
+            <!-- Per-pathway sections -->
+            <template lwc:if={hasContent}>
+                <template for:each={pathwaySections} for:item="section">
+                    <section key={section.id} class="pathway-card">
+                        <header class="pathway-head">
+                            <h3 class="pathway-title">{section.title}</h3>
+                            <span class="pathway-meta">{section.metaText}</span>
+                        </header>
+
+                        <template lwc:if={section.hasRows}>
+                            <div class="table-wrap">
+                                <table class="status-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Course Name</th>
+                                            <th>Course Code</th>
+                                            <th>Credits</th>
+                                            <th>Type</th>
+                                            <th>Faculty</th>
+                                            <th>Enrolment Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template for:each={section.rows} for:item="row">
+                                            <tr key={row.id}>
+                                                <td>{row.courseName}</td>
+                                                <td>{row.courseCode}</td>
+                                                <td>{row.credits}</td>
+                                                <td>{row.type}</td>
+                                                <td>{row.faculty}</td>
+                                                <td><span class={row.statusClass}>{row.status}</span></td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </template>
+                    </section>
+                </template>
+            </template>
+
+            <template lwc:else>
+                <div class="empty-state">
+                    <p class="empty-msg">No enrolment data available</p>
+                </div>
+            </template>
+        </div>
+
+        <!-- View Schedule modal (placeholder) -->
+        <template lwc:if={isScheduleModalOpen}>
+            <div class="modal-overlay" onclick={handleCloseScheduleModal}>
+                <div class="modal-panel" role="dialog" aria-modal="true">
+                    <header class="modal-header">
+                        <h2 class="modal-title">Enrolment Schedule</h2>
+                        <button class="modal-close" onclick={handleCloseScheduleModal} aria-label="Close">&times;</button>
+                    </header>
+                    <div class="modal-body">
+                        <p class="modal-empty">Your published timetable will appear here once enrolment is approved.</p>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

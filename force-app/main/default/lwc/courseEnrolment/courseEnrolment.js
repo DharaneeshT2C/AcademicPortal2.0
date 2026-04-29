@@ -4,6 +4,8 @@ import getAcademicSessionsForUser from '@salesforce/apex/KenPortalCourseEnrollme
 
 const SEMESTER_DETAIL_PAGE = 'Semester_Details__c';
 const SEMESTER_DETAIL_ROUTE = 'course-enrolment/semester-details';
+const ENROLLMENT_STATUS_PAGE = 'Course_After_Enrolment__c';
+const ENROLLMENT_STATUS_ROUTE = 'course-enrolment/course-after-enrolment';
 const DEFAULT_TOTALS = { major: '12/78', minor: '03/56' };
 const MOCK_SEMESTERS = [
     {
@@ -128,7 +130,9 @@ export default class CourseEnrolment extends NavigationMixin(LightningElement) {
             actionLabel: isOngoing ? (canViewDetails ? 'View Details' : 'Get Started') : isCompleted ? 'Completed' : 'Upcoming',
             actionState: isOngoing ? 'primary' : isCompleted ? 'completed' : 'upcoming',
             actionClass: isOngoing ? 'card-action action-primary' : isCompleted ? 'card-action action-completed' : 'card-action action-upcoming',
-            actionDisabled: !isOngoing
+            actionDisabled: !isOngoing,
+            academicSessionId: row.academicSessionId || '',
+            canViewDetails: canViewDetails
         };
     }
 
@@ -216,19 +220,35 @@ export default class CourseEnrolment extends NavigationMixin(LightningElement) {
         const sem = this.semesters.find(s => s.id === id);
         if (!sem || sem.actionState !== 'primary') return;
 
+        // "View Details" branches to the Enrollment Status page;
+        // "Get Started" goes to the Semester Details (pathway selection) page.
+        const targetPage = sem.canViewDetails ? ENROLLMENT_STATUS_PAGE : SEMESTER_DETAIL_PAGE;
+        const targetRoute = sem.canViewDetails ? ENROLLMENT_STATUS_ROUTE : SEMESTER_DETAIL_ROUTE;
+
         this.dispatchEvent(new CustomEvent('navigate', {
-            detail: { route: SEMESTER_DETAIL_ROUTE, semesterId: id }
+            detail: {
+                route: targetRoute,
+                semesterId: id,
+                academicSessionId: sem.academicSessionId
+            }
         }));
 
         try {
             this[NavigationMixin.Navigate]({
                 type: 'comm__namedPage',
-                attributes: { name: SEMESTER_DETAIL_PAGE },
-                state: { c__semesterId: String(id) }
+                attributes: { name: targetPage },
+                state: {
+                    c__semesterId: String(id),
+                    c__academicSessionId: sem.academicSessionId || ''
+                }
             });
         } catch (e) {
             const base = window.location.pathname.split('/').filter(Boolean)[0] || 'newportal';
-            window.location.href = `/${base}/${SEMESTER_DETAIL_ROUTE}?c__semesterId=${encodeURIComponent(String(id))}`;
+            const params = [
+                `c__semesterId=${encodeURIComponent(String(id))}`,
+                `c__academicSessionId=${encodeURIComponent(sem.academicSessionId || '')}`
+            ];
+            window.location.href = `/${base}/${targetRoute}?${params.join('&')}`;
         }
     }
 }

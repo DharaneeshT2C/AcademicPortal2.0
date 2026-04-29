@@ -100,7 +100,7 @@ export default class CbcsCourseSelection extends LightningElement {
 
   connectedCallback() {
     const params = new URLSearchParams(window.location.search || "");
-    const semesterParam = params.get("semester") || params.get("c__semester");
+    const semesterParam = params.get("semester") || params.get("c__semester") || params.get("c__semesterId");
     const sessionParam = params.get("academicSessionId") || params.get("c__academicSessionId");
     const templateParam = params.get("templateId") || params.get("c__templateId");
     const templateNameParam = params.get("templateName") || params.get("c__templateName");
@@ -661,23 +661,59 @@ export default class CbcsCourseSelection extends LightningElement {
   }
 
   handleCancelFlow() {
+    // First try Experience Cloud comm__namedPage navigation back to our Semester Details page.
+    try {
+      this[NavigationMixin.Navigate]({
+        type: "comm__namedPage",
+        attributes: { name: "Semester_Details__c" },
+        state: {
+          c__semesterId: this.selectedSemester ? String(this.selectedSemester) : "",
+          c__academicSessionId: this.academicSessionId || ""
+        }
+      });
+      return;
+    } catch (e) {
+      // Fall through to URL-based fallback below.
+    }
     const currentPath = window.location.pathname || "";
-    const currentPagePrefix = currentPath.replace(/\/(cbcscourseselection|courseparticulardetails)(?:\/.*)?$/i, "");
+    const currentPagePrefix = currentPath.replace(
+      /\/(path-configuration|cbcscourseselection|courseparticulardetails)(?:\/.*)?$/i,
+      ""
+    );
     const sitePrefix = currentPagePrefix && currentPagePrefix !== "/" ? currentPagePrefix : "/s";
     const queryParts = [];
     if (this.selectedSemester) {
-      queryParts.push(`semester=${encodeURIComponent(String(this.selectedSemester))}`);
+      queryParts.push(`c__semesterId=${encodeURIComponent(String(this.selectedSemester))}`);
     }
     if (this.academicSessionId) {
-      queryParts.push(`academicSessionId=${encodeURIComponent(this.academicSessionId)}`);
+      queryParts.push(`c__academicSessionId=${encodeURIComponent(this.academicSessionId)}`);
     }
     const query = queryParts.length ? `?${queryParts.join("&")}` : "";
-    window.location.assign(`${sitePrefix}/courseenrollmentdetails${query}`);
+    window.location.assign(`${sitePrefix}/course-enrolment/semester-details${query}`);
   }
 
   navigateToCourseEnrollment() {
-    const targetUrl = `${window.location.origin}/StudentPortalAcademics/`;
-    window.location.assign(targetUrl);
+    // After successful submit, land at the Enrollment Status page in our flow.
+    try {
+      this[NavigationMixin.Navigate]({
+        type: "comm__namedPage",
+        attributes: { name: "Course_After_Enrolment__c" },
+        state: {
+          c__semesterId: this.selectedSemester ? String(this.selectedSemester) : "",
+          c__academicSessionId: this.academicSessionId || ""
+        }
+      });
+      return;
+    } catch (e) {
+      // Fallback for SPA / non-Experience contexts
+    }
+    const currentPath = window.location.pathname || "";
+    const currentPagePrefix = currentPath.replace(
+      /\/(path-configuration|cbcscourseselection|courseparticulardetails)(?:\/.*)?$/i,
+      ""
+    );
+    const sitePrefix = currentPagePrefix && currentPagePrefix !== "/" ? currentPagePrefix : "/s";
+    window.location.assign(`${sitePrefix}/course-enrolment/course-after-enrolment`);
   }
 
   handleCloseReviewModal() {
