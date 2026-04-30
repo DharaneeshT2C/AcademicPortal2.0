@@ -6,6 +6,7 @@ import enrollInPathways from '@salesforce/apex/KenPortalCourseEnrollmentControll
 
 const SEMESTER_ENROLMENT_PAGE = 'Semester_Details__c';
 const SEMESTER_DETAIL_ROUTE = 'course-enrolment/semester-details';
+const COURSE_ENROLMENT_PAGE = 'CourseEnrolment__c';
 
 const EMPTY_BUCKET = {
     mandatoryCredits: 0,
@@ -200,6 +201,19 @@ export default class CbcsChooseProgram extends NavigationMixin(LightningElement)
 
     get hasPrograms() {
         return this.programs.length > 0;
+    }
+
+    get crumbs() {
+        const semesterLabel = this.selectedSemester ? `Semester ${this.selectedSemester}` : 'Semester';
+        const semesterState = {};
+        if (this.selectedSemester) semesterState.c__semesterId = String(this.selectedSemester);
+        if (this.selectedAcademicSessionId) semesterState.c__academicSessionId = this.selectedAcademicSessionId;
+        return [
+            { label: 'Home',             pageName: 'Home' },
+            { label: 'Course Enrolment', pageName: COURSE_ENROLMENT_PAGE },
+            { label: semesterLabel,      pageName: SEMESTER_ENROLMENT_PAGE, state: semesterState },
+            { label: this.context.title || 'Choose Program' }
+        ];
     }
 
     get isSubmitDisabled() {

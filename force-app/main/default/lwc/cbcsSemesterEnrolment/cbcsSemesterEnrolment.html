@@ -2,11 +2,7 @@
     <div class="page">
         <header class="page-header">
             <h1 class="page-title">{semester.name}</h1>
-            <nav class="breadcrumb">
-                <a href="#" onclick={handleBreadcrumbHome}>Home</a>
-                <span class="sep">&gt;</span>
-                <a href="#" onclick={handleBreadcrumbCourseEnrolment}>Course Enrolment</a>
-            </nav>
+            <c-breadcrumb items={crumbs}></c-breadcrumb>
         </header>
 
         <div class="section-row">
@@ -15,7 +11,10 @@
         </div>
 
         <div class="list-area">
-            <template lwc:if={hasPathways}>
+            <template lwc:if={loading}>
+                <c-skeleton-loader variant="list" rows="3"></c-skeleton-loader>
+            </template>
+            <template lwc:elseif={hasPathways}>
                 <template lwc:if={hasMajor}>
                     <article class="card">
                         <div class="card-row">

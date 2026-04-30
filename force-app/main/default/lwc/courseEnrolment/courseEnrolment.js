@@ -92,6 +92,7 @@ export default class CourseEnrolment extends NavigationMixin(LightningElement) {
 
     @track totals = { ...DEFAULT_TOTALS };
     @track semesters = [...MOCK_SEMESTERS];
+    @track loading = true;
 
     @wire(getAcademicSessionsForUser)
     wiredSessions({ data, error }) {
@@ -103,6 +104,7 @@ export default class CourseEnrolment extends NavigationMixin(LightningElement) {
             const sortedRows = [...sessionRows].sort((a, b) => Number(a.termNumber || 0) - Number(b.termNumber || 0));
             this.semesters = sortedRows.map((row, index) => this.mapSessionToCard(row, index));
             this.totals = this.buildTotals(sortedRows);
+            this.loading = false;
             return;
         }
 
@@ -111,6 +113,10 @@ export default class CourseEnrolment extends NavigationMixin(LightningElement) {
             console.warn('[courseEnrolment] Apex sessions failed, using mock:', error);
             this.semesters = [...MOCK_SEMESTERS];
             this.totals = { ...DEFAULT_TOTALS };
+            this.loading = false;
+        } else if (data) {
+            // Apex returned an empty array — stop spinner and let mock fall through.
+            this.loading = false;
         }
     }
 

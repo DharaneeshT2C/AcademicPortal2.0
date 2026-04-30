@@ -23,6 +23,10 @@
             </div>
         </div>
 
+        <template lwc:if={loading}>
+            <c-skeleton-loader variant="grid" rows="6"></c-skeleton-loader>
+        </template>
+        <template lwc:else>
         <div class="grid">
             <template for:each={semesters} for:item="sem">
                 <article key={sem.id} class="card">
@@ -45,5 +49,6 @@
                 </article>
             </template>
         </div>
+        </template>
     </div>
 </template>

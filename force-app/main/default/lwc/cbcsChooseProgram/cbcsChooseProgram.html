@@ -2,7 +2,7 @@
     <div class="page">
         <header class="page-header">
             <h1 class="page-title">{context.title}</h1>
-            <nav class="breadcrumb">{context.breadcrumb}</nav>
+            <c-breadcrumb items={crumbs}></c-breadcrumb>
         </header>
 
         <div class="toolbar">
@@ -23,7 +23,10 @@
         </div>
 
         <div class="list-area">
-            <template lwc:if={hasPrograms}>
+            <template lwc:if={loading}>
+                <c-skeleton-loader variant="list" rows="4"></c-skeleton-loader>
+            </template>
+            <template lwc:elseif={hasPrograms}>
                 <template for:each={programs} for:item="p">
                     <article
                         key={p.id}

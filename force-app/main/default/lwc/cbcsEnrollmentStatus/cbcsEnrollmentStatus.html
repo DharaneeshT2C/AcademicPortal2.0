@@ -2,14 +2,14 @@
     <div class="page">
         <header class="page-header">
             <h1 class="page-title">{semester.name}</h1>
-            <nav class="breadcrumb">
-                <a href="#" onclick={handleBreadcrumbHome}>Home</a>
-                <span class="sep">&gt;</span>
-                <a href="#" onclick={handleBreadcrumbCourseEnrolment}>Course Enrolment</a>
-            </nav>
+            <c-breadcrumb items={crumbs}></c-breadcrumb>
         </header>
 
         <div class="content">
+            <template lwc:if={loading}>
+                <c-skeleton-loader variant="page" rows="2" with-title="false" with-breadcrumb="false"></c-skeleton-loader>
+            </template>
+            <template lwc:else>
             <!-- Status Banner -->
             <section class={banner.bannerClass}>
                 <div class="banner-left">
@@ -79,6 +79,7 @@
                 <div class="empty-state">
                     <p class="empty-msg">No enrolment data available</p>
                 </div>
+            </template>
             </template>
         </div>
 

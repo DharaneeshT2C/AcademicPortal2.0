@@ -179,6 +179,14 @@ export default class CbcsEnrollmentStatus extends NavigationMixin(LightningEleme
         return this.pathwaySections && this.pathwaySections.length > 0;
     }
 
+    get crumbs() {
+        return [
+            { label: 'Home',             pageName: 'Home' },
+            { label: 'Course Enrolment', pageName: COURSE_ENROLMENT_PAGE },
+            { label: this.semester ? this.semester.name : 'Semester' }
+        ];
+    }
+
     handleBreadcrumbHome(event) {
         event.preventDefault();
         this.dispatchEvent(new CustomEvent('navigate', { detail: { route: 'home' } }));

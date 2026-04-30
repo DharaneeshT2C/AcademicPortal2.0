@@ -20,8 +20,16 @@ export default class CbcsSemesterEnrolment extends NavigationMixin(LightningElem
     @track majorProgram = null;
     @track minorPrograms = [];
     @track footer = { ...DEFAULT_FOOTER };
-    @track loading = false;
+    @track loading = true;
     @track errorMessage = '';
+
+    get crumbs() {
+        return [
+            { label: 'Home',             pageName: 'Home' },
+            { label: 'Course Enrolment', pageName: COURSE_ENROLMENT_PAGE },
+            { label: this.semester ? this.semester.name : 'Semester' }
+        ];
+    }
 
     @track showGetHelp = false;
 

@@ -4,6 +4,8 @@ import { pageNameForRoute } from 'c/navHelper';
 import getDashboard  from '@salesforce/apex/KenHomeDashboardController.getDashboard';
 import recordMoodApex from '@salesforce/apex/KenHomeDashboardController.recordMood';
 
+const SCHEDULE_PAGE = 'Schedule__c';
+
 export default class Dashboard extends NavigationMixin(LightningElement) {
     @track _stage = 'middle';
     @track _careerPath = 'placements';
@@ -318,7 +320,16 @@ export default class Dashboard extends NavigationMixin(LightningElement) {
     }
 
     handleViewAll()      { this.navigateTo('events'); }
-    handleViewCalendar() { this.navigateWithMixin('schedule'); }
+    handleViewCalendar() {
+        try {
+            this[NavigationMixin.Navigate]({
+                type: 'comm__namedPage',
+                attributes: { name: SCHEDULE_PAGE }
+            });
+        } catch (e) {
+            this.navigateTo('schedule');
+        }
+    }
     handleKaiChat()      { this.navigateTo('chat'); }
     handleViewFeedItem() { this.navigateTo('events'); }
 
