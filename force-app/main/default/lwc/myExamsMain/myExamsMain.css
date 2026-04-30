@@ -1,0 +1,331 @@
+:host {
+    display: block;
+    font-family: var(--font-family, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+    --brand-primary: var(--primary-color, var(--primary, #2f66ff));
+    --brand-secondary: var(--secondary-color, #6d8dff);
+    --text-main: var(--text-primary, #1f2937);
+    --text-muted: var(--text-secondary, #667085);
+    --line: var(--border, #dbe3f0);
+}
+
+.page {
+    width: 100%;
+}
+
+.enrolment-banner {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    align-items: center;
+    min-height: 96px;
+    padding: 18px 20px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+    border-radius: 8px;
+}
+
+.banner-copy h2 {
+    margin: 0 0 8px;
+    font-size: 20px;
+    line-height: 1.25;
+    font-weight: 700;
+}
+
+.banner-copy p {
+    max-width: 560px;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.banner-action {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.enrol-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 36px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--text-main);
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.arrow,
+.chevron {
+    font-weight: 700;
+}
+
+.content-panel {
+    margin-top: 14px;
+    padding: 14px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+}
+
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+}
+
+.tabs,
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.tab-btn {
+    min-height: 34px;
+    padding: 0 2px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    color: var(--text-main);
+    font: inherit;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.tab-active {
+    color: var(--brand-primary);
+    border-bottom-color: var(--brand-primary);
+}
+
+.semester-select {
+    position: relative;
+}
+
+.semester-button,
+.download-ticket-btn,
+.help-btn,
+.semester-option {
+    min-height: 34px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--text-main);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.download-ticket-btn {
+    padding: 0 14px;
+    color: #fff;
+    border-color: var(--brand-primary);
+    background: var(--brand-primary);
+    font-weight: 600;
+}
+
+.download-ticket-btn:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+.semester-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 190px;
+    justify-content: space-between;
+    padding: 0 12px;
+}
+
+.help-btn {
+    padding: 0 14px;
+    color: var(--brand-primary);
+    border-color: var(--brand-primary);
+}
+
+.current-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #eef2f7;
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.current-pill::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #e05a5a;
+}
+
+.semester-menu {
+    position: absolute;
+    z-index: 5;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 190px;
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 12px 28px rgba(16, 24, 40, 0.14);
+}
+
+.semester-option {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 8px;
+    border: 0;
+    text-align: left;
+}
+
+.semester-option:hover {
+    background: #f5f7fb;
+}
+
+.table-wrap {
+    overflow-x: auto;
+    margin-top: 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+}
+
+.exam-table {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.exam-table th,
+.exam-table td {
+    padding: 14px 12px;
+    text-align: left;
+    border-bottom: 1px solid #edf1f7;
+    color: var(--text-muted);
+}
+
+.exam-table th {
+    color: var(--brand-primary);
+    font-weight: 500;
+    background: #fff;
+}
+
+.exam-table tr:last-child td {
+    border-bottom: 0;
+}
+
+.status-pill {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 72px;
+    min-height: 24px;
+    padding: 0 12px;
+    border-radius: 999px;
+    font-size: 12px;
+}
+
+.status-approved {
+    color: #4f6b55;
+    background: #e7f1e8;
+    border: 1px solid #c9dfcd;
+}
+
+.status-review {
+    color: #8a5a18;
+    background: #fff3d9;
+    border: 1px solid #f1d69a;
+}
+
+.state-message {
+    margin-top: 14px;
+    padding: 20px;
+    color: var(--text-muted);
+    border: 1px dashed var(--line);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.state-message.error {
+    color: #b42318;
+    background: #fff3f2;
+    border-color: #fecdca;
+}
+
+.request-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+    margin-top: 14px;
+}
+
+.request-card {
+    padding: 16px;
+    text-align: left;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--text-main);
+    font: inherit;
+    cursor: pointer;
+}
+
+.request-card h3 {
+    margin: 12px 0 8px;
+    font-size: 15px;
+    line-height: 1.35;
+}
+
+.request-card p,
+.request-card span {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.request-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    .enrolment-banner,
+    .toolbar,
+    .banner-action {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .actions {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .semester-select,
+    .semester-button,
+    .download-ticket-btn,
+    .help-btn {
+        width: 100%;
+    }
+}

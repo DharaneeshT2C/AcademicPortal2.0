@@ -1,0 +1,125 @@
+<template>
+    <template lwc:if={showToast}>
+        <c-toast message={toastMessage} variant={toastVariant} onclose={handleToastClose}></c-toast>
+    </template>
+
+    <div class="page" onclick={closeDropdown}>
+        <section class="enrolment-banner">
+            <div class="banner-copy">
+                <h2>{bannerTitle}</h2>
+                <p>Please finish the Enrolment before the due date to download your hall ticket and view exam schedule</p>
+            </div>
+            <div class="banner-action">
+                <span>{bannerDeadlineLabel}</span>
+                <button class="enrol-btn" type="button" onclick={handleEnrolNow}>
+                    Enrol Now
+                    <span class="arrow">-></span>
+                </button>
+            </div>
+        </section>
+
+        <section class="content-panel">
+            <div class="toolbar">
+                <div class="tabs" role="tablist">
+                    <button class={scheduleTabClass} type="button" onclick={showScheduleTab}>Schedule</button>
+                    <button class={requestsTabClass} type="button" onclick={showRequestsTab}>Requests</button>
+                </div>
+
+                <div class="actions">
+                    <div class="semester-select">
+                        <button class="semester-button" type="button" onclick={handleDropdownToggle}>
+                            <span>{selectedSemesterLabel}</span>
+                            <template lwc:if={selectedSemesterIsCurrent}>
+                                <span class="current-pill">Current</span>
+                            </template>
+                            <span class="chevron">v</span>
+                        </button>
+                        <template lwc:if={isDropdownOpen}>
+                            <div class="semester-menu">
+                                <template for:each={semesterOptionsForDropdown} for:item="option">
+                                    <button key={option.value} class="semester-option" type="button" data-value={option.value} onclick={handleOptionSelect}>
+                                        <span>{option.label}</span>
+                                        <template lwc:if={option.isCurrent}>
+                                            <span class="current-pill">Current</span>
+                                        </template>
+                                    </button>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                    <button
+                        class="download-ticket-btn"
+                        type="button"
+                        onclick={handleDownloadHallTicket}
+                        disabled={isHallTicketButtonDisabled}
+                    >
+                        {hallTicketButtonLabel}
+                    </button>
+                    <button class="help-btn" type="button">Get Help</button>
+                </div>
+            </div>
+
+            <template lwc:if={isScheduleTab}>
+                <template lwc:if={isScheduleLoading}>
+                    <div class="state-message">Loading exam schedule...</div>
+                </template>
+                <template lwc:elseif={scheduleError}>
+                    <div class="state-message error">{scheduleError}</div>
+                </template>
+                <template lwc:elseif={hasScheduleRows}>
+                    <div class="table-wrap">
+                        <table class="exam-table">
+                            <thead>
+                                <tr>
+                                    <th>Course Name</th>
+                                    <th>Course Code</th>
+                                    <th>Exam</th>
+                                    <th>Credits</th>
+                                    <th>Format</th>
+                                    <th>Type</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={scheduleRows} for:item="row">
+                                    <tr key={row.id}>
+                                        <td>{row.courseName}</td>
+                                        <td>{row.courseCode}</td>
+                                        <td>{row.exam}</td>
+                                        <td>{row.credits}</td>
+                                        <td>{row.format}</td>
+                                        <td>{row.type}</td>
+                                        <td>{row.date}</td>
+                                        <td>{row.time}</td>
+                                        <td><span class={row.statusClass}>{row.status}</span></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </template>
+                <template lwc:else>
+                    <div class="state-message">{scheduleMessage}</div>
+                </template>
+            </template>
+
+            <template lwc:if={isRequestsTab}>
+                <div class="request-grid">
+                    <template for:each={requestRows} for:item="request">
+                        <button key={request.id} class="request-card" type="button" onclick={handleRequestCardClick}>
+                            <div class="request-head">
+                                <span>{request.requestNo}</span>
+                                <span class={request.statusClass}>{request.status}</span>
+                            </div>
+                            <h3>{request.title}</h3>
+                            <p>{request.requestType} - {request.exam}</p>
+                            <span>{request.statusDateLabel} {request.statusDate}</span>
+                        </button>
+                    </template>
+                </div>
+            </template>
+        </section>
+    </div>
+</template>
