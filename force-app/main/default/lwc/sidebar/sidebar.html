@@ -5,7 +5,7 @@
         </button>
 
         <div class="profile-section">
-            <div class="avatar-initials">AR</div>
+            <div class="avatar-initials">{avatarInitials}</div>
             <div class="student-name-row">
                 <h3 class="student-name">{student.FirstName} {student.LastName}</h3>
                 <button class="sidebar-settings-btn" aria-label="Settings" onclick={handleOpenSettings}>
@@ -13,6 +13,12 @@
                 </button>
             </div>
             <p class="student-program">{programLabel}</p>
+            <div class="student-micro">
+                <c-icon name="bolt" size="14" class="streak-bolt"></c-icon>
+                <!-- <span>{streakText}</span>
+                <span class="micro-sep" aria-hidden="true"></span>
+                <span>{attendanceText}</span> -->
+            </div>
         </div>
 
         <nav class="nav-list">

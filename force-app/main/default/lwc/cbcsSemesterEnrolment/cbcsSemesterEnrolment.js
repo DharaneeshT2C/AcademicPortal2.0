@@ -1,6 +1,7 @@
 import { LightningElement, wire, track } from 'lwc';
 import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import getProgramTemplatesForSemester from '@salesforce/apex/KenPortalCourseEnrollmentController.getProgramTemplatesForSemester';
+import OrganizationDefaultsApiController from '@salesforce/apex/OrganizationDefaultsApiController.getOrganizationDefaults';
 
 const COURSE_ENROLMENT_PAGE = 'CourseEnrolment__c';
 const CHOOSE_PROGRAM_PAGE = 'Choose_Program__c';
@@ -32,6 +33,28 @@ export default class CbcsSemesterEnrolment extends NavigationMixin(LightningElem
     }
 
     @track showGetHelp = false;
+    organizationDefaults = {};
+
+    @wire(OrganizationDefaultsApiController)
+    wiredOrganizationDefaults({ data }) {
+        if (data) {
+            this.organizationDefaults = data;
+            this.applyOrganizationTheme();
+        }
+    }
+
+    applyOrganizationTheme() {
+        const primary = this.organizationDefaults?.primary;
+        const secondary = this.organizationDefaults?.secondary;
+        if (primary && typeof primary === 'string') {
+            this.template?.host?.style.setProperty('--primary-color', primary);
+            try { document.documentElement.style.setProperty('--primary-color', primary); } catch (e) {}
+        }
+        if (secondary && typeof secondary === 'string') {
+            this.template?.host?.style.setProperty('--secondary-color', secondary);
+            try { document.documentElement.style.setProperty('--secondary-color', secondary); } catch (e) {}
+        }
+    }
 
     @wire(CurrentPageReference)
     wiredPageRef(ref) {

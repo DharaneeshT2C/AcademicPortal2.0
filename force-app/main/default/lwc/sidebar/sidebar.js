@@ -1,9 +1,36 @@
 import { LightningElement, api, track, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
-import { sidebarNavItems } from 'c/mockData';
 import getStudentHeader from '@salesforce/apex/KenHomeDashboardController.getStudentHeader';
+import OrganizationDefaultsApiController from '@salesforce/apex/OrganizationDefaultsApiController.getOrganizationDefaults';
 
 const THESIS_MANAGEMENT_PAGE = 'Thesis_Management__c';
+const SIDEBAR_NAV_ITEMS = [
+    { id: 'home', label: 'Home', icon: 'home', route: 'home' },
+    {
+        id: 'academics',
+        label: 'Academics',
+        icon: 'school',
+        children: [
+            { id: 'learn', label: 'Learn', route: 'learn' },
+            { id: 'attendance', label: 'Attendance', route: 'attendance' },
+            { id: 'course-enrolment', label: 'Course Enrolment', route: 'course-enrolment' },
+            { id: 'thesis-management', label: 'Thesis Management', route: 'thesis-management' },
+            { id: 'my-exams', label: 'My Exams', route: 'my-exams' },
+            { id: 'results', label: 'Results', route: 'results' }
+        ]
+    },
+    {
+        id: 'campus-life',
+        label: 'Campus Life',
+        icon: 'apartment',
+        children: [
+            { id: 'campus-life-overview', label: 'Overview', route: 'overview' },
+            { id: 'events', label: 'Events', route: 'events' },
+            { id: 'clubs', label: 'Clubs', route: 'clubs' }
+        ]
+    },
+    { id: 'fee-payment', label: 'Fee Payment', icon: 'payment', route: 'fee-payment' }
+];
 
 export default class Sidebar extends NavigationMixin(LightningElement) {
     _currentRoute = 'home';
@@ -21,10 +48,51 @@ export default class Sidebar extends NavigationMixin(LightningElement) {
     @track expandedSections = {};
     @track _header;
     student = { FirstName: '', LastName: '' };
+    organizationDefaults = {};
+
+    @wire(OrganizationDefaultsApiController)
+    wiredOrganizationDefaults({ data }) {
+        if (data) {
+            this.organizationDefaults = data;
+            this.applyOrganizationTheme();
+        }
+    }
+
+    applyOrganizationTheme() {
+        const primary = this.organizationDefaults?.primary;
+        const secondary = this.organizationDefaults?.secondary;
+        if (primary && typeof primary === 'string') {
+            this.template?.host?.style.setProperty('--primary-color', primary);
+            try { document.documentElement.style.setProperty('--primary-color', primary); } catch (e) {}
+        }
+        if (secondary && typeof secondary === 'string') {
+            this.template?.host?.style.setProperty('--secondary-color', secondary);
+            try { document.documentElement.style.setProperty('--secondary-color', secondary); } catch (e) {}
+        }
+    }
 
     get programLabel() {
         if (this._header && this._header.program) return this._header.program;
         return '';
+    }
+
+    get avatarInitials() {
+        const f = (this.student.FirstName || '').trim();
+        const l = (this.student.LastName  || '').trim();
+        const fi = f ? f[0].toUpperCase() : '';
+        const li = l ? l[0].toUpperCase() : '';
+        const combined = (fi + li);
+        return combined || 'AR';
+    }
+
+    get streakText() {
+        if (this._header && this._header.streakLine) return this._header.streakLine;
+        return '12-day streak';
+    }
+
+    get attendanceText() {
+        if (this._header && this._header.attendanceLine) return this._header.attendanceLine;
+        return '82% attendance';
     }
 
     @wire(getStudentHeader)
@@ -108,46 +176,77 @@ export default class Sidebar extends NavigationMixin(LightningElement) {
     }
 
     getSidebarNavItems() {
-        return sidebarNavItems.map((item) => {
-            if (item.id !== 'academics' || !Array.isArray(item.children)) {
-                return item;
-            }
+        const source = SIDEBAR_NAV_ITEMS;
+        const findItem = (id) => source.find((item) => item && item.id === id);
 
-            const hasCourseEnrolment = item.children.some((child) => child.route === 'course-enrolment');
-            const attendanceIndex = item.children.findIndex((child) => child.route === 'attendance');
-            const courseEnrolmentItem = {
-                id: 'course-enrolment',
-                label: 'Course Enrolment',
-                route: 'course-enrolment'
-            };
-            const thesisManagementItem = {
-                id: 'thesis-management',
-                label: 'Thesis Management',
-                route: 'thesis-management'
-            };
+        const homeItem       = findItem('home');
+        const academicsItem  = findItem('academics');
+        const campusLifeItem = findItem('campus-life');
+        const feePaymentItem = findItem('fee-payment');
 
-            let updatedChildren = [...item.children];
+        // ── Academics group: keep core children, ensure course-enrolment + thesis-management,
+        //    remove exam-related children (they move to their own group).
+        const academicsRaw = (academicsItem && Array.isArray(academicsItem.children)) ? academicsItem.children : [];
+        const isExamRoute = (route) => route === 'my-exams' || route === 'results';
+        const examChildrenFromAcademics = academicsRaw.filter((c) => isExamRoute(c.route));
+        let academicsChildren = academicsRaw.filter((c) => !isExamRoute(c.route));
 
-            if (!hasCourseEnrolment) {
-                if (attendanceIndex === -1) {
-                    updatedChildren = [...updatedChildren, courseEnrolmentItem];
-                } else {
-                    updatedChildren.splice(attendanceIndex + 1, 0, courseEnrolmentItem);
-                }
-            }
+        const ensureChild = (children, child, anchorRoute) => {
+            if (children.some((c) => c.route === child.route)) return children;
+            const anchorIndex = anchorRoute ? children.findIndex((c) => c.route === anchorRoute) : -1;
+            if (anchorIndex === -1) return [...children, child];
+            const next = [...children];
+            next.splice(anchorIndex + 1, 0, child);
+            return next;
+        };
+        academicsChildren = ensureChild(
+            academicsChildren,
+            { id: 'course-enrolment', label: 'Course Enrolment', route: 'course-enrolment' },
+            'attendance'
+        );
+        academicsChildren = ensureChild(
+            academicsChildren,
+            { id: 'thesis-management', label: 'Thesis Management', route: 'thesis-management' },
+            'course-enrolment'
+        );
 
-            const hasThesisManagement = updatedChildren.some((child) => child.route === 'thesis-management');
-            if (!hasThesisManagement) {
-                const courseEnrolmentIndex = updatedChildren.findIndex((child) => child.route === 'course-enrolment');
-                if (courseEnrolmentIndex === -1) {
-                    updatedChildren = [...updatedChildren, thesisManagementItem];
-                } else {
-                    updatedChildren.splice(courseEnrolmentIndex + 1, 0, thesisManagementItem);
-                }
-            }
+        // ── Exams group children: derived from whatever the source had,
+        //    fall back to defaults; route names stay identical so redirection is preserved.
+        const examChildren = examChildrenFromAcademics.length
+            ? examChildrenFromAcademics
+            : [
+                { id: 'my-exams', label: 'My Exams', route: 'my-exams' },
+                { id: 'results',  label: 'Results',  route: 'results' }
+            ];
+        const renamedExamChildren = examChildren.map((c) =>
+            c.route === 'my-exams' ? { ...c, label: 'My Exams' } : c
+        );
 
-            return { ...item, children: updatedChildren };
+        // ── Compose the final ordered nav (with section labels).
+        const result = [];
+        if (homeItem) result.push(homeItem);
+
+        if (academicsItem) {
+            result.push({ id: 'sec-academics', isSection: true, label: 'ACADEMICS' });
+            result.push({ ...academicsItem, children: academicsChildren });
+        }
+
+        result.push({ id: 'sec-exams', isSection: true, label: 'EXAMS' });
+        result.push({
+            id: 'exams',
+            label: 'Exams',
+            icon: 'library_books',
+            children: renamedExamChildren
         });
+
+        if (campusLifeItem) {
+            result.push({ id: 'sec-campus-life', isSection: true, label: 'CAMPUS LIFE' });
+            result.push(campusLifeItem);
+        }
+
+        if (feePaymentItem) result.push(feePaymentItem);
+
+        return result;
     }
 
     isItemActive(item) {

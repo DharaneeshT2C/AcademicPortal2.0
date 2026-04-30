@@ -131,7 +131,7 @@
     gap: 6px;
 }
 .btn-primary {
-    background: var(--primary, #4C6EF5);
+    background: var(--primary-color, #4C6EF5);
     color: #fff;
     border: none;
 }
@@ -139,8 +139,8 @@
 
 .btn-outline {
     background: var(--bg-white, #fff);
-    color: var(--primary, #4C6EF5);
-    border: 1px solid var(--primary, #4C6EF5);
+    color: var(--primary-color, #4C6EF5);
+    border: 1px solid var(--primary-color, #4C6EF5);
 }
 .btn-outline:hover { background: var(--primary-light, #EDF2FF); }
 .arrow { display: inline-block; transform: translateY(-1px); }

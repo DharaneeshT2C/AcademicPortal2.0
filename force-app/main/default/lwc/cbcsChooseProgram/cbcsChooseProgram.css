@@ -78,7 +78,7 @@
 }
 .search-input::placeholder { color: var(--text-muted, #94A3B8); }
 .search-input:focus {
-    border-color: var(--primary, #4C6EF5);
+    border-color: var(--primary-color, #4C6EF5);
     box-shadow: 0 0 0 3px rgba(76,110,245,0.12);
 }
 
@@ -125,9 +125,9 @@
 }
 .program-card:hover { border-color: var(--text-muted, #94A3B8); }
 .program-card.selected {
-    border-color: var(--primary, #4C6EF5);
+    border-color: var(--primary-color, #4C6EF5);
     background: var(--primary-light, #EDF2FF);
-    box-shadow: 0 0 0 1px var(--primary, #4C6EF5);
+    box-shadow: 0 0 0 1px var(--primary-color, #4C6EF5);
 }
 
 .program-left {
@@ -150,7 +150,7 @@
     justify-content: center;
     transition: border-color 160ms ease;
 }
-.radio-circle.selected { border-color: var(--primary, #4C6EF5); }
+.radio-circle.selected { border-color: var(--primary-color, #4C6EF5); }
 .radio-dot {
     width: 9px;
     height: 9px;
@@ -158,7 +158,7 @@
     background: transparent;
     transition: background 160ms ease;
 }
-.radio-circle.selected .radio-dot { background: var(--primary, #4C6EF5); }
+.radio-circle.selected .radio-dot { background: var(--primary-color, #4C6EF5); }
 
 .program-info { min-width: 0; }
 .program-name {
@@ -227,7 +227,7 @@
 .btn-secondary:hover { border-color: var(--text-muted, #94A3B8); }
 
 .btn-primary {
-    background: var(--primary, #4C6EF5);
+    background: var(--primary-color, #4C6EF5);
     color: #fff;
 }
 .btn-primary:hover:not(:disabled) { background: var(--primary-dark, #3B5BDB); }

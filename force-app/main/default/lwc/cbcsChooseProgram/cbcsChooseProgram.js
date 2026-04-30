@@ -3,6 +3,7 @@ import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import getProgramTemplatesForSemester from '@salesforce/apex/KenPortalCourseEnrollmentController.getProgramTemplatesForSemester';
 import getCoursesForSemester from '@salesforce/apex/KenPortalCourseEnrollmentController.getCoursesForSemester';
 import enrollInPathways from '@salesforce/apex/KenPortalCourseEnrollmentController.enrollInPathways';
+import OrganizationDefaultsApiController from '@salesforce/apex/OrganizationDefaultsApiController.getOrganizationDefaults';
 
 const SEMESTER_ENROLMENT_PAGE = 'Semester_Details__c';
 const SEMESTER_DETAIL_ROUTE = 'course-enrolment/semester-details';
@@ -34,6 +35,28 @@ export default class CbcsChooseProgram extends NavigationMixin(LightningElement)
     selectedAcademicSessionId = null;
     selectedTemplateId = null;
     selectedPathwayType = '';
+    organizationDefaults = {};
+
+    @wire(OrganizationDefaultsApiController)
+    wiredOrganizationDefaults({ data }) {
+        if (data) {
+            this.organizationDefaults = data;
+            this.applyOrganizationTheme();
+        }
+    }
+
+    applyOrganizationTheme() {
+        const primary = this.organizationDefaults?.primary;
+        const secondary = this.organizationDefaults?.secondary;
+        if (primary && typeof primary === 'string') {
+            this.template?.host?.style.setProperty('--primary-color', primary);
+            try { document.documentElement.style.setProperty('--primary-color', primary); } catch (e) {}
+        }
+        if (secondary && typeof secondary === 'string') {
+            this.template?.host?.style.setProperty('--secondary-color', secondary);
+            try { document.documentElement.style.setProperty('--secondary-color', secondary); } catch (e) {}
+        }
+    }
 
     @wire(CurrentPageReference)
     wiredPageRef(ref) {

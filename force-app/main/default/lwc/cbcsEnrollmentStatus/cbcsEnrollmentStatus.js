@@ -1,6 +1,7 @@
 import { LightningElement, wire, track } from 'lwc';
 import { NavigationMixin, CurrentPageReference } from 'lightning/navigation';
 import getLearnerPathwayItemsForAfterEnrollment from '@salesforce/apex/KenPortalCourseEnrollmentController.getLearnerPathwayItemsForAfterEnrollment';
+import OrganizationDefaultsApiController from '@salesforce/apex/OrganizationDefaultsApiController.getOrganizationDefaults';
 
 const COURSE_ENROLMENT_PAGE = 'CourseEnrolment__c';
 const PATH_CONFIG_PAGE = 'Path_Configuration__c';
@@ -15,6 +16,28 @@ export default class CbcsEnrollmentStatus extends NavigationMixin(LightningEleme
     @track loading = true;
     @track errorMessage = '';
     @track isScheduleModalOpen = false;
+    organizationDefaults = {};
+
+    @wire(OrganizationDefaultsApiController)
+    wiredOrganizationDefaults({ data }) {
+        if (data) {
+            this.organizationDefaults = data;
+            this.applyOrganizationTheme();
+        }
+    }
+
+    applyOrganizationTheme() {
+        const primary = this.organizationDefaults?.primary;
+        const secondary = this.organizationDefaults?.secondary;
+        if (primary && typeof primary === 'string') {
+            this.template?.host?.style.setProperty('--primary-color', primary);
+            try { document.documentElement.style.setProperty('--primary-color', primary); } catch (e) {}
+        }
+        if (secondary && typeof secondary === 'string') {
+            this.template?.host?.style.setProperty('--secondary-color', secondary);
+            try { document.documentElement.style.setProperty('--secondary-color', secondary); } catch (e) {}
+        }
+    }
 
     @wire(CurrentPageReference)
     wiredPageRef(ref) {

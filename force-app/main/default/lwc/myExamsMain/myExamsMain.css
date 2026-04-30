@@ -1,15 +1,33 @@
 :host {
     display: block;
     font-family: var(--font-family, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
-    --brand-primary: var(--primary-color, var(--primary, #2f66ff));
-    --brand-secondary: var(--secondary-color, #6d8dff);
-    --text-main: var(--text-primary, #1f2937);
-    --text-muted: var(--text-secondary, #667085);
-    --line: var(--border, #dbe3f0);
+    --brand-primary: var(--primary-color, var(--primary, #4C6EF5));
+    --brand-secondary: var(--secondary-color, #7C8EF8);
+    --text-main: var(--text-primary, #1A1D26);
+    --text-muted: var(--text-secondary, #64748B);
+    --line: var(--border, #E2E8F0);
+    color: var(--text-main);
+    background: var(--bg-main, #F8FAFC);
+    box-sizing: border-box;
 }
 
 .page {
     width: 100%;
+    box-sizing: border-box;
+    height: calc(100vh - 120px);
+    overflow-y: auto;
+    padding-right: 4px;
+    margin-right: -4px;
+}
+
+/* ── Page header (title + breadcrumb) ─────────────────────────────── */
+.page-header { margin-bottom: 14px; }
+.page-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 4px;
+    letter-spacing: -0.02em;
+    color: var(--text-main);
 }
 
 .enrolment-banner {
@@ -18,10 +36,11 @@
     gap: 24px;
     align-items: center;
     min-height: 96px;
-    padding: 18px 20px;
+    padding: 18px 22px;
     color: #fff;
     background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
-    border-radius: 8px;
+    border-radius: var(--radius-lg, 16px);
+    box-shadow: var(--shadow-md, 0 2px 4px rgba(16,24,40,0.04), 0 4px 8px rgba(16,24,40,0.06));
 }
 
 .banner-copy h2 {
@@ -54,13 +73,15 @@
     min-height: 36px;
     padding: 0 16px;
     border: 0;
-    border-radius: 8px;
+    border-radius: var(--radius-md, 12px);
     background: #fff;
     color: var(--text-main);
     font: inherit;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
+    transition: background 160ms ease;
 }
+.enrol-btn:hover { background: var(--primary-light, #EDF2FF); }
 
 .arrow,
 .chevron {
@@ -69,10 +90,11 @@
 
 .content-panel {
     margin-top: 14px;
-    padding: 14px;
+    padding: 18px 22px;
     background: #fff;
     border: 1px solid var(--line);
-    border-radius: 8px;
+    border-radius: var(--radius-lg, 16px);
+    box-shadow: var(--shadow-sm, 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.06));
 }
 
 .toolbar {
@@ -118,7 +140,7 @@
 .semester-option {
     min-height: 34px;
     border: 1px solid var(--line);
-    border-radius: 8px;
+    border-radius: var(--radius-md, 12px);
     background: #fff;
     color: var(--text-main);
     font: inherit;
@@ -181,7 +203,7 @@
     min-width: 190px;
     padding: 6px;
     border: 1px solid var(--line);
-    border-radius: 8px;
+    border-radius: var(--radius-md, 12px);
     background: #fff;
     box-shadow: 0 12px 28px rgba(16, 24, 40, 0.14);
 }
@@ -205,7 +227,7 @@
     overflow-x: auto;
     margin-top: 14px;
     border: 1px solid var(--line);
-    border-radius: 8px;
+    border-radius: var(--radius-md, 12px);
 }
 
 .exam-table {
@@ -261,7 +283,7 @@
     padding: 20px;
     color: var(--text-muted);
     border: 1px dashed var(--line);
-    border-radius: 8px;
+    border-radius: var(--radius-md, 12px);
     text-align: center;
 }
 
@@ -282,7 +304,7 @@
     padding: 16px;
     text-align: left;
     border: 1px solid var(--line);
-    border-radius: 8px;
+    border-radius: var(--radius-md, 12px);
     background: #fff;
     color: var(--text-main);
     font: inherit;

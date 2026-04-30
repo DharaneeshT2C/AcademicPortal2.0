@@ -22,7 +22,7 @@
 
 /* ── Choose Program Banner ─────────────────────────────────────────── */
 .banner {
-    background: linear-gradient(135deg, rgb(76, 110, 245), rgb(59, 91, 219));
+    background: linear-gradient(135deg, var(--primary-color, #4C6EF5), var(--secondary-color, #3B5BDB));
     color: #fff;
     border-radius: var(--radius-lg, 16px);
     padding: 24px 28px;
@@ -155,7 +155,7 @@
     cursor: not-allowed;
 }
 .action-primary {
-    background: var(--primary, #4C6EF5);
+    background: var(--primary-color, #4C6EF5);
     color: #fff;
 }
 .action-primary:hover { background: var(--primary-dark, #3B5BDB); }

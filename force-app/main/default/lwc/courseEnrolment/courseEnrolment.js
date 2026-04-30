@@ -1,6 +1,7 @@
 import { LightningElement, track, wire } from 'lwc';
 import { NavigationMixin } from 'lightning/navigation';
 import getAcademicSessionsForUser from '@salesforce/apex/KenPortalCourseEnrollmentController.getAcademicSessionsForUser';
+import OrganizationDefaultsApiController from '@salesforce/apex/OrganizationDefaultsApiController.getOrganizationDefaults';
 
 const SEMESTER_DETAIL_PAGE = 'Semester_Details__c';
 const SEMESTER_DETAIL_ROUTE = 'course-enrolment/semester-details';
@@ -93,6 +94,28 @@ export default class CourseEnrolment extends NavigationMixin(LightningElement) {
     @track totals = { ...DEFAULT_TOTALS };
     @track semesters = [...MOCK_SEMESTERS];
     @track loading = true;
+    organizationDefaults = {};
+
+    @wire(OrganizationDefaultsApiController)
+    wiredOrganizationDefaults({ data }) {
+        if (data) {
+            this.organizationDefaults = data;
+            this.applyOrganizationTheme();
+        }
+    }
+
+    applyOrganizationTheme() {
+        const primary = this.organizationDefaults?.primary;
+        const secondary = this.organizationDefaults?.secondary;
+        if (primary && typeof primary === 'string') {
+            this.template?.host?.style.setProperty('--primary-color', primary);
+            try { document.documentElement.style.setProperty('--primary-color', primary); } catch (e) {}
+        }
+        if (secondary && typeof secondary === 'string') {
+            this.template?.host?.style.setProperty('--secondary-color', secondary);
+            try { document.documentElement.style.setProperty('--secondary-color', secondary); } catch (e) {}
+        }
+    }
 
     @wire(getAcademicSessionsForUser)
     wiredSessions({ data, error }) {

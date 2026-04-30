@@ -4,6 +4,11 @@
     </template>
 
     <div class="page" onclick={closeDropdown}>
+        <header class="page-header">
+            <h1 class="page-title">My Exams</h1>
+            <c-breadcrumb items={crumbs}></c-breadcrumb>
+        </header>
+
         <section class="enrolment-banner">
             <div class="banner-copy">
                 <h2>{bannerTitle}</h2>
@@ -61,7 +66,7 @@
 
             <template lwc:if={isScheduleTab}>
                 <template lwc:if={isScheduleLoading}>
-                    <div class="state-message">Loading exam schedule...</div>
+                    <c-skeleton-loader variant="table" rows="5"></c-skeleton-loader>
                 </template>
                 <template lwc:elseif={scheduleError}>
                     <div class="state-message error">{scheduleError}</div>

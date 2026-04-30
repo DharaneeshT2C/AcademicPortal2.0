@@ -1,11 +1,9 @@
 import { LightningElement, wire } from 'lwc';
-import { NavigationMixin } from 'lightning/navigation';
 import communityBasePath from '@salesforce/community/basePath';
 import OrganizationDefaultsApiController from '@salesforce/apex/OrganizationDefaultsApiController.getOrganizationDefaults';
 import fetchEnrolledMyExams from '@salesforce/apex/KenExamEnrollmentController.fetchEnrolledMyExams';
 import getMyHallTicketDownloadUrl from '@salesforce/apex/KenExamEnrollmentController.getMyHallTicketDownloadUrl';
 
-const EXAM_ENROLMENT_PAGE = 'Exam_Enrolment__c';
 const EXAM_ENROLMENT_ROUTE = 'my-exams/exam-enrolment';
 
 const REQUEST_ROWS = [
@@ -36,7 +34,7 @@ const REQUEST_ROWS = [
     }
 ];
 
-export default class MyExams extends NavigationMixin(LightningElement) {
+export default class MyExams extends LightningElement {
     activeTab = 'schedule';
     semesterValue = 'current-semester';
     currentSemesterValue = 'current-semester';
@@ -63,6 +61,13 @@ export default class MyExams extends NavigationMixin(LightningElement) {
     connectedCallback() {
         this.loadScheduleRows();
         this.loadHallTicketUrl();
+    }
+
+    get crumbs() {
+        return [
+            { label: 'Home',     pageName: 'Home' },
+            { label: 'My Exams' }
+        ];
     }
 
     get selectedSemesterLabel() {
@@ -323,15 +328,8 @@ export default class MyExams extends NavigationMixin(LightningElement) {
     }
 
     handleEnrolNow() {
-        try {
-            this[NavigationMixin.Navigate]({
-                type: 'comm__namedPage',
-                attributes: { name: EXAM_ENROLMENT_PAGE }
-            });
-        } catch (e) {
-            const target = this.buildCommunityUrl(EXAM_ENROLMENT_ROUTE);
-            window.open(target, '_self');
-        }
+        const target = this.buildCommunityUrl(EXAM_ENROLMENT_ROUTE);
+        window.open(target, '_self');
     }
 
     handleDownloadHallTicket() {

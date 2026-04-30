@@ -43,6 +43,26 @@ export default class Breadcrumb extends NavigationMixin(LightningElement) {
             detail: { ...item, index }
         }));
 
+        // Prefer URL-based navigation when provided — bulletproof, doesn't depend on
+        // page API names being exactly right in Experience Builder.
+        if (item.url) {
+            const targetUrl = this._buildUrl(item.url);
+            try {
+                this[NavigationMixin.Navigate]({
+                    type: 'standard__webPage',
+                    attributes: { url: targetUrl }
+                });
+                return;
+            } catch (e) {
+                try {
+                    window.location.assign(targetUrl);
+                    return;
+                } catch (e2) {
+                    // Fall through to pageName below
+                }
+            }
+        }
+
         if (item.pageName) {
             try {
                 this[NavigationMixin.Navigate]({
@@ -53,6 +73,19 @@ export default class Breadcrumb extends NavigationMixin(LightningElement) {
             } catch (e) {
                 // Parent's onnavigate handler can take over
             }
+        }
+    }
+
+    _buildUrl(path) {
+        if (!path) return '/';
+        if (/^https?:\/\//i.test(path)) return path;
+        const cleanPath = String(path).replace(/^\/+/, '');
+        try {
+            const parts = window.location.pathname.split('/').filter(Boolean);
+            const sitePrefix = parts.length ? `/${parts[0]}` : '';
+            return `${sitePrefix}/${cleanPath}`;
+        } catch (e) {
+            return `/${cleanPath}`;
         }
     }
 }

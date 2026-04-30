@@ -1,94 +1,182 @@
-import { LightningElement, wire, track } from 'lwc';
-import getMyExams from '@salesforce/apex/KenMyExamsController.getMyExams';
-import confirmExamEnrollment from '@salesforce/apex/KenMyExamsController.confirmExamEnrollment';
+import { LightningElement } from 'lwc';
+import enrollPersonExaminations from '@salesforce/apex/KenExamEnrollmentController.enrollPersonExaminations';
+import fetchCurrentSemesterExaminations from '@salesforce/apex/KenExamEnrollmentController.fetchCurrentSemesterExaminations';
 
 export default class ExamEnrollment extends LightningElement {
-    @track _apex;
-    @track _submitting = false;
-    @track _confirmation;
-    @track _errorMessage;
+    rows = [];
+    tooltipRowId;
+    isConfirmModalOpen = false;
+    isLoading = true;
+    isSubmitting = false;
+    errorMessage;
+    emptyMessage;
+    currentSemesterLabel = 'Current Semester';
 
-    @wire(getMyExams)
-    wiredMyExams({ data, error }) {
-        if (data) this._apex = data;
-        else if (error) {
-            const _msg = (error && error.body && error.body.message) || '';
-            if (_msg && !_msg.includes('not have access') && !_msg.includes('No rows')) {
-                // eslint-disable-next-line no-console
-                console.warn('[examEnrollment] Apex failed, using seed:', error);
+    get crumbs() {
+        return [
+            { label: 'Home',     pageName: 'Home' },
+            { label: 'My Exams', url: '/my-exams' },
+            { label: 'Enrolment' }
+        ];
+    }
+
+    connectedCallback() {
+        this.loadRows();
+    }
+
+    get displayRows() {
+        return this.rows.map((row) => ({
+            ...row,
+            isDisabled: !row.eligible,
+            showInfoIcon: !row.eligible,
+            showTooltip: this.tooltipRowId === row.id,
+            eligibilityLabel: row.eligibilityLabel,
+            eligibilityClass: row.eligible
+                ? 'status-pill status-eligible'
+                : 'status-pill status-not-eligible'
+        }));
+    }
+
+    get hasRows() {
+        return this.rows.length > 0;
+    }
+
+    get isAllEligibleSelected() {
+        const eligibleRows = this.rows.filter((row) => row.eligible);
+        if (!eligibleRows.length) return false;
+        return eligibleRows.every((row) => row.selected);
+    }
+
+    get selectedCount() {
+        return this.rows.filter((row) => row.eligible && row.selected).length;
+    }
+
+    get selectedSummary() {
+        const noun = this.selectedCount === 1 ? 'exam' : 'exams';
+        return `${this.selectedCount} ${noun} selected`;
+    }
+
+    get isProceedDisabled() {
+        return this.selectedCount === 0 || this.isSubmitting;
+    }
+
+    get selectedPersonExaminationIds() {
+        return this.rows
+            .filter((row) => row.eligible && row.selected && row.personExaminationId)
+            .map((row) => row.personExaminationId);
+    }
+
+    async loadRows() {
+        this.isLoading = true;
+        this.errorMessage = undefined;
+        this.emptyMessage = undefined;
+
+        try {
+            const response = await fetchCurrentSemesterExaminations();
+            this.currentSemesterLabel =
+                response?.currentSemesterLabel || 'Current Semester';
+            this.rows = (response?.rows || []).map((row) => ({
+                id: row.rowKey || row.personExaminationId,
+                personExaminationId: row.personExaminationId,
+                courseName: row.courseName || '-',
+                courseCode: row.courseCode || '-',
+                exam: row.exam || '-',
+                credits: row.credits ?? '-',
+                format: row.format || '-',
+                type: row.type || '-',
+                eligible: Boolean(row.eligible),
+                selected: Boolean(row.eligible),
+                eligibilityLabel: row.eligibilityLabel || '-'
+            }));
+
+            if (!this.rows.length) {
+                this.emptyMessage =
+                    response?.message ||
+                    'No person examination records are available for the current semester.';
             }
+        } catch (error) {
+            this.rows = [];
+            this.errorMessage =
+                error?.body?.message ||
+                error?.message ||
+                'Unable to load exam enrollment records.';
+        } finally {
+            this.isLoading = false;
         }
     }
 
-    get data() {
-        return this._apex || {};
+    handleRowToggle(event) {
+        const rowId = event.currentTarget.dataset.id;
+        const isChecked = event.currentTarget.checked;
+        this.rows = this.rows.map((row) => {
+            if (row.id !== rowId || !row.eligible) {
+                return row;
+            }
+            return {
+                ...row,
+                selected: isChecked
+            };
+        });
     }
 
-    get selectedCourses() {
-        const courses = (this.data && this.data.courses) ? this.data.courses : [];
-        return courses.filter(c => c.selected);
+    handleSelectAll(event) {
+        const isChecked = event.currentTarget.checked;
+        this.rows = this.rows.map((row) => {
+            if (!row.eligible) {
+                return row;
+            }
+            return {
+                ...row,
+                selected: isChecked
+            };
+        });
     }
 
-    get totalFee() {
-        return this.data.totalFee;
+    showTooltip(event) {
+        this.tooltipRowId = event.currentTarget.dataset.id;
     }
 
-    get hasSelection() {
-        return this.selectedCourses.length > 0;
+    hideTooltip() {
+        this.tooltipRowId = null;
     }
 
-    get payButtonLabel() {
-        if (this._submitting) return 'Processing…';
-        return `Pay INR ${this.totalFee} & Confirm`;
-    }
-
-    get isPayDisabled() {
-        return this._submitting || !this.hasSelection;
-    }
-
-    get showConfirmation() {
-        return !!this._confirmation;
-    }
-
-    get confirmationCourseList() {
-        if (!this._confirmation || !this._confirmation.enrolledCourseCodes) return '';
-        return this._confirmation.enrolledCourseCodes.join(', ');
-    }
-
-    get hasError() {
-        return !!this._errorMessage;
-    }
-
-    navigateTo(route) { this.dispatchEvent(new CustomEvent('navigate', { detail: { route } })); }
-    handleBack() { this.navigateTo('my-exams'); }
-
-    handlePayAndConfirm() {
-        if (this._submitting) return;
-        const codes = this.selectedCourses.map(c => c.code).filter(Boolean);
-        if (!codes.length) {
-            this._errorMessage = 'Select at least one course before paying.';
+    openConfirmModal() {
+        if (this.isProceedDisabled) {
             return;
         }
-        this._submitting = true;
-        this._errorMessage = null;
-        confirmExamEnrollment({ courseCodes: codes, totalFee: this.totalFee })
-            .then(result => {
-                this._confirmation = result;
-                this._submitting = false;
-            })
-            .catch(err => {
-                // eslint-disable-next-line no-console
-                console.error('[examEnrollment] confirmExamEnrollment failed:', err);
-                const msg = (err && err.body && err.body.message) ? err.body.message
-                          : (err && err.message) ? err.message
-                          : 'Could not complete enrollment. Please try again.';
-                this._errorMessage = msg;
-                this._submitting = false;
-            });
+        this.isConfirmModalOpen = true;
     }
 
-    handleDoneClick() {
-        this._confirmation = null;
-        this.navigateTo('my-exams');
+    closeConfirmModal() {
+        this.isConfirmModalOpen = false;
+    }
+
+    stopModalClose(event) {
+        event.stopPropagation();
+    }
+
+    async handleContinue() {
+        if (this.isSubmitting || !this.selectedPersonExaminationIds.length) {
+            return;
+        }
+
+        this.isSubmitting = true;
+        this.errorMessage = undefined;
+
+        try {
+            await enrollPersonExaminations({
+                personExaminationIds: this.selectedPersonExaminationIds
+            });
+            this.closeConfirmModal();
+            await this.loadRows();
+        } catch (error) {
+            this.errorMessage =
+                error?.body?.message ||
+                error?.message ||
+                'Unable to complete exam enrollment.';
+            this.closeConfirmModal();
+        } finally {
+            this.isSubmitting = false;
+        }
     }
 }

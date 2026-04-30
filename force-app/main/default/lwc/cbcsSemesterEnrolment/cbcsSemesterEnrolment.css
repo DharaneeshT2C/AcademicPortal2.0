@@ -83,7 +83,7 @@
 .btn-secondary:hover { border-color: var(--text-muted, #94A3B8); }
 
 .btn-primary {
-    background: var(--primary, #4C6EF5);
+    background: var(--primary-color, #4C6EF5);
     color: #fff;
     border: none;
     padding: 10px 18px;
@@ -92,8 +92,8 @@
 
 .btn-outline {
     background: var(--bg-white, #fff);
-    color: var(--primary, #4C6EF5);
-    border: 1px solid var(--primary, #4C6EF5);
+    color: var(--primary-color, #4C6EF5);
+    border: 1px solid var(--primary-color, #4C6EF5);
     padding: 10px 18px;
 }
 .btn-outline:hover:not(:disabled) {
